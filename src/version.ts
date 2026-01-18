@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.14';
+export const APP_VERSION = '0.0.15';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.15', 
+    date: '2026-01-18', 
+    changes: 'Melhorias de segurança no RBAC: logs só em DEV, mensagens genéricas e allowlist de rotas.' 
+  },
   { 
     version: '0.0.14', 
     date: '2026-01-18', 

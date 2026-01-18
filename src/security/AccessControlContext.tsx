@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { useUserRoles } from '../hooks/useUserRoles';
 import { NewCodeAppPageAllowedSecurityRoleService } from '../generated/services/NewCodeAppPageAllowedSecurityRoleService';
+import { navigation } from '../config/navigation';
 
 interface AccessControlContextType {
   canAccessPath: (path: string) => boolean;
@@ -17,6 +18,27 @@ export const AccessControlProvider: React.FC<{ children: ReactNode }> = ({ child
   const [hasWildcard, setHasWildcard] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isDev = import.meta.env.DEV;
+
+  const normalizePath = (path: string) => {
+    const trimmed = path.trim();
+    if (!trimmed) return '/';
+    if (trimmed === '/') return '/';
+    const withSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return withSlash.endsWith('/') ? withSlash.slice(0, -1) : withSlash;
+  };
+
+  const normalizeRule = (value?: string) => (value ? value.trim() : '');
+  const validPaths = useMemo(() => {
+    const paths = new Set<string>();
+    navigation.forEach((section) => {
+      section.items.forEach((item) => {
+        paths.add(normalizePath(item.path));
+      });
+    });
+    paths.add('/forbidden');
+    return paths;
+  }, []);
 
   const fetchPermissions = React.useCallback(async () => {
     if (rolesLoading) return;
@@ -52,15 +74,16 @@ export const AccessControlProvider: React.FC<{ children: ReactNode }> = ({ child
 
       if (result.data) {
         result.data.forEach(item => {
-          if (item.new_id === '*') {
+          const rule = normalizeRule(item.new_id);
+          if (rule === '*') {
             wildcard = true;
-          } else if (item.new_id) {
-            // Normalize path: trim and ensure it starts with / (if it's not the wildcard)
-            let path = item.new_id.trim();
-            if (!path.startsWith('/') && path !== '*') {
-              path = '/' + path;
+          } else if (rule) {
+            const normalized = normalizePath(rule);
+            if (validPaths.has(normalized)) {
+              paths.add(normalized);
+            } else if (isDev) {
+              console.warn('[AccessControl] new_id inválido ignorado:', rule);
             }
-            paths.add(path);
           }
         });
       }
@@ -80,23 +103,17 @@ export const AccessControlProvider: React.FC<{ children: ReactNode }> = ({ child
   }, [fetchPermissions]);
 
   const canAccessPath = useMemo(() => (path: string): boolean => {
+    const normalizedPath = normalizePath(path);
+    if (!validPaths.has(normalizedPath)) return false;
     if (hasWildcard) return true;
     
     // Normalize requested path
-    const normalizedPath = path.trim() === '' ? '/' : path.trim();
-    
     // Check direct match
     if (allowedPaths.has(normalizedPath)) return true;
 
     // Optional: handle trailing slashes for flexibility
-    if (normalizedPath !== '/' && normalizedPath.endsWith('/')) {
-      if (allowedPaths.has(normalizedPath.slice(0, -1))) return true;
-    } else if (normalizedPath !== '/' && !normalizedPath.endsWith('/')) {
-      if (allowedPaths.has(normalizedPath + '/')) return true;
-    }
-
     return false;
-  }, [allowedPaths, hasWildcard]);
+  }, [allowedPaths, hasWildcard, validPaths]);
 
   const refresh = async () => {
     await refreshRoles();

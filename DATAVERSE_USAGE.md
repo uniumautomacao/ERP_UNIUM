@@ -215,6 +215,8 @@ Checklist recomendado:
 2. **Field Security** para dados sensíveis: restrinja campos críticos mesmo que o usuário tenha acesso à tabela.
 3. **Team/Business Unit**: use escopo de privilégios adequado para limitar dados por unidade/Time.
 4. **Sem conta técnica**: evite conexões com privilégios elevados no app; use sempre o contexto do usuário.
+5. **Tabela de permissões de página**: o usuário precisa de `Read` em `new_codeapppageallowedsecurityrole`, caso contrário o app não conseguirá carregar as regras de acesso.
+6. **Wildcard `*`**: use com cautela e apenas para roles confiáveis, pois libera acesso a todas as páginas do app.
 
 Se um usuário conseguir abrir uma página via URL mas **não tiver permissão no Dataverse**, as operações deverão falhar — isso é o bloqueio real contra bypass no navegador.
 

@@ -12,6 +12,7 @@ interface ForbiddenState {
 export function ForbiddenPage() {
   const location = useLocation();
   const state = (location.state || {}) as ForbiddenState;
+  const showDetails = import.meta.env.DEV;
 
   return (
     <>
@@ -22,8 +23,9 @@ export function ForbiddenPage() {
       />
       <PageContainer>
         <div className="flex flex-col gap-3">
-          {state.reason && <Text>{state.reason}</Text>}
-          {state.from && (
+          <Text>Entre em contato com o administrador se precisar de acesso.</Text>
+          {showDetails && state.reason && <Text>{state.reason}</Text>}
+          {showDetails && state.from && (
             <Text size={200} style={{ opacity: 0.7 }}>
               Origem: {state.from}
             </Text>
