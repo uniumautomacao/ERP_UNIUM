@@ -25,5 +25,12 @@ export const dataSourcesInfo = {
     "primaryKey": "systemuserid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_codeapppageallowedsecurityroles": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_codeapppageallowedsecurityroleid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.12';
+export const APP_VERSION = '0.0.13';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.13', 
+    date: '2026-01-18', 
+    changes: 'Importada a tabela new_codeapppageallowedsecurityrole do Dataverse com geração de metadados, serviço e modelo.' 
+  },
   { 
     version: '0.0.12', 
     date: '2026-01-18', 

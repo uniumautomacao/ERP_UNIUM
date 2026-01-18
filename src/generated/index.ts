@@ -8,8 +8,10 @@ export * as CommonModels from './models/CommonModels';
 export * as RolesModel from './models/RolesModel';
 export * as SystemuserrolescollectionModel from './models/SystemuserrolescollectionModel';
 export * as SystemusersModel from './models/SystemusersModel';
+export * as NewCodeAppPageAllowedSecurityRoleModel from './models/NewCodeAppPageAllowedSecurityRoleModel';
 
 // Services
 export * from './services/RolesService';
 export * from './services/SystemuserrolescollectionService';
 export * from './services/SystemusersService';
+export * from './services/NewCodeAppPageAllowedSecurityRoleService';

@@ -29,6 +29,11 @@
           "entitySetName": "systemuserrolescollection",
           "logicalName": "systemuserroles",
           "isHidden": false
+        },
+        "new_codeapppageallowedsecurityroles": {
+          "entitySetName": "new_codeapppageallowedsecurityroles",
+          "logicalName": "new_codeapppageallowedsecurityrole",
+          "isHidden": false
         }
       },
       "version": "v9.0",
