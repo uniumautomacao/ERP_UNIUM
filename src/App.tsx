@@ -3,6 +3,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { AppShell } from './components/layout/AppShell';
 import { HomePage } from './pages/HomePage';
+import { TimelinePage } from './pages/section0-installations/TimelinePage';
 import { DashboardPage } from './pages/section1-analytics/DashboardPage';
 import { AnalyticsPage } from './pages/section1-analytics/AnalyticsPage';
 import { ReportsPage } from './pages/section1-analytics/ReportsPage';
@@ -29,6 +30,14 @@ function App() {
                   element={
                     <RequirePageAccess>
                       <HomePage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/timeline"
+                  element={
+                    <RequirePageAccess>
+                      <TimelinePage />
                     </RequirePageAccess>
                   }
                 />

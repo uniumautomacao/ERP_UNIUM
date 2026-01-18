@@ -16,6 +16,13 @@ export function HomePage() {
 
   const sections = [
     {
+      title: 'Instalações',
+      description: 'Gerencie o cronograma e linha do tempo das instalações',
+      items: [
+        { icon: <CalendarLtr24Regular />, label: 'Linha do Tempo', path: '/timeline' },
+      ],
+    },
+    {
       title: 'Analytics',
       description: 'Visualize dados e métricas do seu negócio',
       items: [

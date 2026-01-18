@@ -14,6 +14,18 @@ import { NavSection } from '../types';
 
 export const navigation: NavSection[] = [
   {
+    id: 'installations',
+    label: 'Instalações',
+    items: [
+      {
+        id: 'timeline',
+        label: 'Linha do Tempo',
+        icon: <CalendarLtr24Regular />,
+        path: '/timeline',
+      },
+    ],
+  },
+  {
     id: 'home',
     label: '',
     items: [
