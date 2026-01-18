@@ -84,7 +84,7 @@ export function InventoryPage() {
     },
   ] : [];
 
-  const overflowActions = [];
+  const overflowActions: any[] = [];
 
   const filterOptions = [
     {

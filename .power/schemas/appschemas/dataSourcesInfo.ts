@@ -5,6 +5,20 @@
  */
 
 export const dataSourcesInfo = {
+  "roles": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "roleid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "systemuserrolescollection": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "systemuserroleid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
   "systemusers": {
     "tableId": "",
     "version": "",

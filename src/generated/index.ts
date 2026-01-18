@@ -5,7 +5,11 @@
 
 // Models
 export * as CommonModels from './models/CommonModels';
+export * as RolesModel from './models/RolesModel';
+export * as SystemuserrolescollectionModel from './models/SystemuserrolescollectionModel';
 export * as SystemusersModel from './models/SystemusersModel';
 
 // Services
+export * from './services/RolesService';
+export * from './services/SystemuserrolescollectionService';
 export * from './services/SystemusersService';

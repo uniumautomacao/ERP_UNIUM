@@ -15,9 +15,19 @@
       "instanceUrl": "https://dev-unium.crm2.dynamics.com/",
       "webApiVersion": "v9.0",
       "dataSources": {
-        "users": {
+        "systemusers": {
           "entitySetName": "systemusers",
           "logicalName": "systemuser",
+          "isHidden": false
+        },
+        "roles": {
+          "entitySetName": "roles",
+          "logicalName": "role",
+          "isHidden": false
+        },
+        "systemuserrolescollection": {
+          "entitySetName": "systemuserrolescollection",
+          "logicalName": "systemuserroles",
           "isHidden": false
         }
       },

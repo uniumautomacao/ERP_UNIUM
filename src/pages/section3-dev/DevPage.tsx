@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Text, Card, CardHeader, makeStyles, tokens } from '@fluentui/react-components';
 import { DeveloperBoard24Regular, Person24Regular } from '@fluentui/react-icons';
-import { getContext } from '@microsoft/power-apps/app';
+import { getContext, type IContext } from '@microsoft/power-apps/app';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { UserSecurityRolesCard } from '../../components/dev/UserSecurityRolesCard';
 
 const useStyles = makeStyles({
   container: {
@@ -36,7 +37,7 @@ const useStyles = makeStyles({
 
 export function DevPage() {
   const styles = useStyles();
-  const [userInfo, setUserInfo] = useState<{ objectId: string; fullName: string; userPrincipalName: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<IContext['user'] | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -107,6 +108,8 @@ export function DevPage() {
               )}
             </div>
           </Card>
+
+          <UserSecurityRolesCard />
         </div>
       </PageContainer>
     </>

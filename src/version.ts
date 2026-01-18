@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.9';
+export const APP_VERSION = '0.0.11';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.11', 
+    date: '2026-01-18', 
+    changes: 'Alinhadas chaves de dataSources no power.config para roles e vínculos de usuário.' 
+  },
+  { 
+    version: '0.0.10', 
+    date: '2026-01-18', 
+    changes: 'Adicionada lista de Security Roles do Dataverse na Área do Desenvolvedor.' 
+  },
   { 
     version: '0.0.9', 
     date: '2026-01-18', 
