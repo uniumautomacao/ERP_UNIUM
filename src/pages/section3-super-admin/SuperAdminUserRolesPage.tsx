@@ -20,10 +20,12 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { 
   SystemusersService, 
   SystemuserrolescollectionService, 
-  RolesService 
+  RolesService,
+  NewCodeAppPageAllowedSecurityRoleService
 } from '../../generated';
 import type { Systemusers } from '../../generated/models/SystemusersModel';
 import type { Roles } from '../../generated/models/RolesModel';
+import { sortRoles } from '../../security/roleUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -137,6 +139,7 @@ export function SuperAdminUserRolesPage() {
   const [roles, setRoles] = useState<Roles[]>([]);
   const [users, setUsers] = useState<Systemusers[]>([]);
   const [linkMap, setLinkMap] = useState<Map<string, Map<string, string>>>(new Map());
+  const [pageRulesMap, setPageRulesMap] = useState<Map<string, Set<string>>>(new Map());
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [inFlightCells, setInFlightCells] = useState<Set<string>>(new Set());
@@ -152,6 +155,22 @@ export function SuperAdminUserRolesPage() {
     return result.data || [];
   }, []);
 
+  const fetchPageRules = useCallback(async () => {
+    const result = await NewCodeAppPageAllowedSecurityRoleService.getAll({
+      filter: 'statecode eq 0',
+      select: ['_new_securityrole_value', 'new_id']
+    });
+    
+    const map = new Map<string, Set<string>>();
+    (result.data || []).forEach(rule => {
+      const roleId = rule._new_securityrole_value;
+      if (!roleId) return;
+      if (!map.has(roleId)) map.set(roleId, new Set());
+      map.get(roleId)!.add(rule.new_id || '');
+    });
+    return map;
+  }, []);
+
   const fetchUsers = useCallback(async (term: string) => {
     const normalized = term.trim();
     const safeTerm = escapeOData(normalized);
@@ -163,7 +182,7 @@ export function SuperAdminUserRolesPage() {
 
     // Função auxiliar para tentar buscar com um filtro de habilitado específico
     const tryFetch = async (enabledBase: string) => {
-      const exclusionFilter = "not startswith(fullname, '#') and not endswith(internalemailaddress, '@onmicrosoft.com') and not endswith(internalemailaddress, '@microsoft.com')";
+      const exclusionFilter = "not startswith(fullname, '#') and contains(internalemailaddress, '@unium')";
       const baseWithExclusion = `${enabledBase} and ${exclusionFilter}`;
       const filter = searchFilter ? `${baseWithExclusion} and ${searchFilter}` : baseWithExclusion;
       
@@ -210,21 +229,23 @@ export function SuperAdminUserRolesPage() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const [rolesResult, usersResult] = await Promise.all([
+      const [rolesResult, usersResult, pageRulesResult] = await Promise.all([
         fetchRoles(),
         fetchUsers(term),
+        fetchPageRules(),
       ]);
       const linksResult = await fetchLinksForUsers(usersResult);
       setRoles(rolesResult);
       setUsers(usersResult);
       setLinkMap(linksResult);
+      setPageRulesMap(pageRulesResult);
     } catch (error: any) {
       console.error('Erro ao carregar matriz de usuários:', error);
       setErrorMessage(error?.message || 'Erro ao carregar dados.');
     } finally {
       setLoading(false);
     }
-  }, [fetchRoles, fetchUsers, fetchLinksForUsers]);
+  }, [fetchRoles, fetchUsers, fetchLinksForUsers, fetchPageRules]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -242,6 +263,10 @@ export function SuperAdminUserRolesPage() {
       return (a.fullname || '').localeCompare(b.fullname || '');
     });
   }, [users, linkMap]);
+
+  const sortedRoles = useMemo(() => {
+    return sortRoles(roles, { pageRulesMap });
+  }, [roles, pageRulesMap]);
 
   const getCellKey = (userId: string, roleId: string) => `${userId}|${roleId}`;
 
@@ -364,7 +389,7 @@ export function SuperAdminUserRolesPage() {
                     >
                       Usuário
                     </th>
-                    {roles.map(role => (
+                    {sortedRoles.map(role => (
                       <th key={role.roleid} className={styles.th}>
                         <Tooltip content={role.roleid} relationship="label">
                           <Text size={200}>{role.name}</Text>
@@ -390,7 +415,7 @@ export function SuperAdminUserRolesPage() {
                           {user.internalemailaddress}
                         </Text>
                       </td>
-                      {roles.map(role => {
+                      {sortedRoles.map(role => {
                         const key = getCellKey(user.systemuserid, role.roleid);
                         const checked = isChecked(user.systemuserid, role.roleid);
                         const disabled = inFlightCells.has(key);

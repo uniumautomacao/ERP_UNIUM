@@ -28,6 +28,7 @@ import {
 import type { Roles } from '../../generated/models/RolesModel';
 import type { NewCodeAppPageAllowedSecurityRole } from '../../generated/models/NewCodeAppPageAllowedSecurityRoleModel';
 import { useAccessControl } from '../../security/AccessControlContext';
+import { sortRoles } from '../../security/roleUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -251,31 +252,15 @@ export function SuperAdminPageAccessPage() {
     return () => clearTimeout(handler);
   }, [searchTerm, fetchData]);
 
-  // Ordenação das roles conforme especificação
+  // Ordenação das roles conforme especificação centralizada
   const sortedRoles = useMemo(() => {
-    const getRank = (role: Roles) => {
-      const name = role.name.toLowerCase();
-      if (name === 'system administrator') return 0;
-      if (name === 'basic user') return 1;
-      if (name.includes('unium')) return 2;
-      
-      // Tem alguma página habilitada (incluindo *)
-      const userRules = rulesMap.get(role.roleid);
-      if (userRules && userRules.size > 0) {
-        // Ignorar se a única página habilitada for a Home ('/')
-        const hasRelevantAccess = Array.from(userRules.keys()).some(key => key !== '/');
-        if (hasRelevantAccess) return 3;
-      }
-      
-      return 4;
-    };
-
-    return [...allRoles].sort((a, b) => {
-      const rankA = getRank(a);
-      const rankB = getRank(b);
-      if (rankA !== rankB) return rankA - rankB;
-      return a.name.localeCompare(b.name);
+    // Converter rulesMap (Map<string, Map<string, string>>) para Map<string, Set<string>> para o utilitário
+    const pageRulesMap = new Map<string, Set<string>>();
+    rulesMap.forEach((innerMap, roleId) => {
+      pageRulesMap.set(roleId, new Set(innerMap.keys()));
     });
+
+    return sortRoles(allRoles, { pageRulesMap });
   }, [allRoles, rulesMap]);
 
   const getCellKey = (roleId: string, pageKey: string) => `${roleId}|${pageKey}`;

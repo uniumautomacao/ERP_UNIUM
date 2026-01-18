@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.25';
+export const APP_VERSION = '0.0.26';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.26', 
+    date: '2026-01-18', 
+    changes: 'Centralizada a lógica de ordenação de security roles em utilitário compartilhado e aplicada às colunas da matriz de usuários.' 
+  },
   { 
     version: '0.0.25', 
     date: '2026-01-18', 
