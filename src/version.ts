@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.20';
+export const APP_VERSION = '0.0.21';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.21', 
+    date: '2026-01-18', 
+    changes: 'Ajustada ordenação da Matriz de Acesso para não considerar a página Home (/) como página habilitada para fins de ranking das roles.' 
+  },
   { 
     version: '0.0.20', 
     date: '2026-01-18', 

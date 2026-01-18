@@ -261,7 +261,11 @@ export function SuperAdminPageAccessPage() {
       
       // Tem alguma página habilitada (incluindo *)
       const userRules = rulesMap.get(role.roleid);
-      if (userRules && userRules.size > 0) return 3;
+      if (userRules && userRules.size > 0) {
+        // Ignorar se a única página habilitada for a Home ('/')
+        const hasRelevantAccess = Array.from(userRules.keys()).some(key => key !== '/');
+        if (hasRelevantAccess) return 3;
+      }
       
       return 4;
     };
