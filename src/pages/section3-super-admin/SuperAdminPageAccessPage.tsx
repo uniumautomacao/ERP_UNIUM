@@ -1,0 +1,423 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  Text,
+  Card,
+  makeStyles,
+  tokens,
+  Spinner,
+  Button,
+  Checkbox,
+  Tooltip,
+} from '@fluentui/react-components';
+import { 
+  Save24Regular, 
+  ArrowSync24Regular,
+  Dismiss24Regular,
+  Info20Regular,
+} from '@fluentui/react-icons';
+import { CommandBar } from '../../components/layout/CommandBar';
+import { PageContainer } from '../../components/layout/PageContainer';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { navigation } from '../../config/navigation';
+import { 
+  RolesService, 
+  NewCodeAppPageAllowedSecurityRoleService 
+} from '../../generated';
+import type { Roles } from '../../generated/models/RolesModel';
+import type { NewCodeAppPageAllowedSecurityRole } from '../../generated/models/NewCodeAppPageAllowedSecurityRoleModel';
+import { useAccessControl } from '../../security/AccessControlContext';
+
+const useStyles = makeStyles({
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalL,
+    height: '100%',
+  },
+  card: {
+    padding: '0',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  tableWrapper: {
+    overflow: 'auto',
+    flexGrow: 1,
+    position: 'relative',
+  },
+  table: {
+    borderCollapse: 'separate',
+    borderSpacing: 0,
+    width: 'max-content',
+    minWidth: '100%',
+  },
+  th: {
+    backgroundColor: tokens.colorNeutralBackground1,
+    padding: '8px 12px',
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    textAlign: 'center',
+    fontSize: '12px',
+  },
+  thSection: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    fontSize: '10px',
+  },
+  thRole: {
+    position: 'sticky',
+    left: 0,
+    zIndex: 20,
+    textAlign: 'left',
+    minWidth: '250px',
+    backgroundColor: tokens.colorNeutralBackground1,
+  },
+  thAll: {
+    position: 'sticky',
+    left: '250px',
+    zIndex: 20,
+    backgroundColor: tokens.colorNeutralBackground1,
+  },
+  td: {
+    padding: '4px 8px',
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    textAlign: 'center',
+  },
+  tdRole: {
+    position: 'sticky',
+    left: 0,
+    zIndex: 5,
+    backgroundColor: tokens.colorNeutralBackground1,
+    textAlign: 'left',
+    fontWeight: 'medium',
+    whiteSpace: 'nowrap',
+  },
+  tdAll: {
+    position: 'sticky',
+    left: '250px',
+    zIndex: 5,
+    backgroundColor: tokens.colorNeutralBackground1,
+  },
+  tdOverride: {
+    backgroundColor: tokens.colorNeutralBackground1Selected,
+  },
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '100px',
+  },
+  actions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: tokens.spacingHorizontalS,
+    padding: tokens.spacingHorizontalM,
+    paddingBottom: tokens.spacingVerticalM,
+    borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground1,
+  },
+  stickyHeaderRole: {
+    zIndex: 30,
+  },
+  stickyHeaderAll: {
+    zIndex: 30,
+  }
+});
+
+interface MatrixRule {
+  ruleId?: string;
+  hasAccess: boolean;
+}
+
+export function SuperAdminPageAccessPage() {
+  const styles = useStyles();
+  const { refresh: refreshAccess } = useAccessControl();
+  
+  const [allRoles, setAllRoles] = useState<Roles[]>([]);
+  const [rules, setRules] = useState<NewCodeAppPageAllowedSecurityRole[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<Map<string, boolean>>(new Map());
+
+  // Estrutura das colunas: Seções -> Páginas
+  const columns = useMemo(() => {
+    const pages: Array<{ key: string, label: string, section: string }> = [];
+    navigation.forEach(section => {
+      section.items.forEach(item => {
+        pages.push({
+          key: item.path,
+          label: item.label,
+          section: section.label || 'Principal'
+        });
+      });
+    });
+
+    const grouped = new Map<string, typeof pages>();
+    pages.forEach(p => {
+      if (!grouped.has(p.section)) grouped.set(p.section, []);
+      grouped.get(p.section)!.push(p);
+    });
+
+    return {
+      allPages: pages,
+      bySection: Array.from(grouped.entries())
+    };
+  }, []);
+
+  // Mapeamento O(1) para regras existentes: roleId -> pageKey -> ruleId
+  const rulesMap = useMemo(() => {
+    const map = new Map<string, Map<string, string>>();
+    rules.forEach(rule => {
+      const roleId = rule._new_securityrole_value;
+      if (!roleId) return;
+      if (!map.has(roleId)) map.set(roleId, new Map());
+      map.get(roleId)!.set(rule.new_id || '', rule.new_codeapppageallowedsecurityroleid);
+    });
+    return map;
+  }, [rules]);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [rolesResult, rulesResult] = await Promise.all([
+        RolesService.getAll({
+          select: ['roleid', 'name'],
+          orderBy: ['name asc']
+        }),
+        NewCodeAppPageAllowedSecurityRoleService.getAll({
+          filter: 'statecode eq 0',
+          select: ['new_codeapppageallowedsecurityroleid', 'new_id', '_new_securityrole_value']
+        })
+      ]);
+      
+      setAllRoles(rolesResult.data || []);
+      setRules(rulesResult.data || []);
+      setPendingChanges(new Map());
+    } catch (error) {
+      console.error('Erro ao buscar dados da matriz:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Ordenação das roles conforme especificação
+  const sortedRoles = useMemo(() => {
+    const getRank = (role: Roles) => {
+      const name = role.name.toLowerCase();
+      if (name === 'system administrator') return 0;
+      if (name === 'basic user') return 1;
+      if (name.includes('unium')) return 2;
+      
+      // Tem alguma página habilitada (incluindo *)
+      const userRules = rulesMap.get(role.roleid);
+      if (userRules && userRules.size > 0) return 3;
+      
+      return 4;
+    };
+
+    return [...allRoles].sort((a, b) => {
+      const rankA = getRank(a);
+      const rankB = getRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+      return a.name.localeCompare(b.name);
+    });
+  }, [allRoles, rulesMap]);
+
+  const getCellKey = (roleId: string, pageKey: string) => `${roleId}|${pageKey}`;
+
+  const getAccessStatus = (roleId: string, pageKey: string) => {
+    const key = getCellKey(roleId, pageKey);
+    if (pendingChanges.has(key)) return pendingChanges.get(key)!;
+    
+    const userRules = rulesMap.get(roleId);
+    return !!(userRules && userRules.has(pageKey));
+  };
+
+  const toggleAccess = (roleId: string, pageKey: string) => {
+    const current = getAccessStatus(roleId, pageKey);
+    const original = !!rulesMap.get(roleId)?.has(pageKey);
+    const next = !current;
+    
+    const newChanges = new Map(pendingChanges);
+    const key = getCellKey(roleId, pageKey);
+    
+    if (next === original) {
+      newChanges.delete(key);
+    } else {
+      newChanges.set(key, next);
+    }
+    setPendingChanges(newChanges);
+  };
+
+  const handleSave = async () => {
+    if (pendingChanges.size === 0) return;
+    setSaving(true);
+    try {
+      for (const [key, desiredValue] of pendingChanges.entries()) {
+        const [roleId, pageKey] = key.split('|');
+        const existingRuleId = rulesMap.get(roleId)?.get(pageKey);
+
+        if (desiredValue && !existingRuleId) {
+          // Criar
+          await NewCodeAppPageAllowedSecurityRoleService.create({
+            new_id: pageKey,
+            'new_SecurityRole@odata.bind': `/roles(${roleId})`
+          });
+        } else if (!desiredValue && existingRuleId) {
+          // Deletar
+          await NewCodeAppPageAllowedSecurityRoleService.delete(existingRuleId);
+        }
+      }
+      
+      await fetchData();
+      await refreshAccess();
+      alert('Matriz de permissões atualizada!');
+    } catch (error) {
+      console.error('Erro ao salvar matriz:', error);
+      alert('Erro ao salvar. Verifique o console.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <Spinner label="Carregando matriz de permissões..." />
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      <CommandBar 
+        primaryActions={[
+          {
+            id: 'save',
+            label: 'Salvar',
+            icon: <Save24Regular />,
+            onClick: handleSave,
+            disabled: saving || pendingChanges.size === 0,
+          },
+          {
+            id: 'discard',
+            label: 'Descartar',
+            icon: <Dismiss24Regular />,
+            onClick: () => setPendingChanges(new Map()),
+            disabled: saving || pendingChanges.size === 0,
+          },
+          {
+            id: 'refresh',
+            label: 'Atualizar',
+            icon: <ArrowSync24Regular />,
+            onClick: fetchData,
+            disabled: loading || saving,
+          }
+        ]} 
+      />
+      <PageHeader
+        title="Matriz de Acesso"
+        subtitle="Controle centralizado de permissões por Security Role"
+      />
+      
+      <PageContainer>
+        <Card className={styles.card}>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                {/* Linha 1: Seções */}
+                <tr>
+                  <th className={`${styles.th} ${styles.thRole} ${styles.stickyHeaderRole}`} rowSpan={2}>
+                    Security Role
+                  </th>
+                  <th className={`${styles.th} ${styles.thAll} ${styles.stickyHeaderAll}`} rowSpan={2}>
+                    All (*)
+                  </th>
+                  {columns.bySection.map(([section, pages]) => (
+                    <th key={section} className={`${styles.th} ${styles.thSection}`} colSpan={pages.length}>
+                      {section}
+                    </th>
+                  ))}
+                </tr>
+                {/* Linha 2: Páginas */}
+                <tr>
+                  {columns.allPages.map(page => (
+                    <th key={page.key} className={styles.th}>
+                      <Tooltip content={page.key} relationship="label">
+                        <Text size={200}>{page.label}</Text>
+                      </Tooltip>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sortedRoles.map(role => {
+                  const isAllChecked = getAccessStatus(role.roleid, '*');
+                  
+                  return (
+                    <tr key={role.roleid}>
+                      <td className={styles.tdRole}>
+                        <div className="flex items-center gap-1">
+                          <Text size={200} weight="semibold">{role.name}</Text>
+                          <Tooltip content={role.roleid} relationship="description">
+                            <Info20Regular fontSize={14} style={{ opacity: 0.5 }} />
+                          </Tooltip>
+                        </div>
+                      </td>
+                      <td className={styles.tdAll}>
+                        <Checkbox 
+                          checked={isAllChecked} 
+                          onChange={() => toggleAccess(role.roleid, '*')} 
+                        />
+                      </td>
+                      {columns.allPages.map(page => {
+                        const isChecked = isAllChecked || getAccessStatus(role.roleid, page.key);
+                        const isDisabled = isAllChecked;
+                        
+                        return (
+                          <td 
+                            key={page.key} 
+                            className={`${styles.td} ${isDisabled ? styles.tdOverride : ''}`}
+                          >
+                            <Checkbox 
+                              checked={isChecked}
+                              disabled={isDisabled}
+                              onChange={() => toggleAccess(role.roleid, page.key)}
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {pendingChanges.size > 0 && (
+            <div className={styles.actions}>
+              <Text size={200} italic color={tokens.colorPaletteDarkOrangeForeground1}>
+                {pendingChanges.size} alterações pendentes
+              </Text>
+              <Button appearance="subtle" onClick={() => setPendingChanges(new Map())} disabled={saving}>Descartar</Button>
+              <Button appearance="primary" icon={<Save24Regular />} onClick={handleSave} disabled={saving}>
+                {saving ? 'Salvando...' : 'Salvar Matriz'}
+              </Button>
+            </div>
+          )}
+        </Card>
+      </PageContainer>
+    </div>
+  );
+}

@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.15';
+export const APP_VERSION = '0.0.17';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.17', 
+    date: '2026-01-18', 
+    changes: 'Reformulada página de Acesso por Role para formato de matriz, com agrupamento por seção, ordenação customizada de roles e comportamento visual de override para o wildcard (*).' 
+  },
+  { 
+    version: '0.0.16', 
+    date: '2026-01-18', 
+    changes: 'Criada seção Super Admin com páginas de gerenciamento de acesso por roles e visualização de roles por usuário. Implementado bypass para System Administrator.' 
+  },
   { 
     version: '0.0.15', 
     date: '2026-01-18', 

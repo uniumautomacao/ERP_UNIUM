@@ -216,9 +216,22 @@ Checklist recomendado:
 3. **Team/Business Unit**: use escopo de privilégios adequado para limitar dados por unidade/Time.
 4. **Sem conta técnica**: evite conexões com privilégios elevados no app; use sempre o contexto do usuário.
 5. **Tabela de permissões de página**: o usuário precisa de `Read` em `new_codeapppageallowedsecurityrole`, caso contrário o app não conseguirá carregar as regras de acesso.
-6. **Wildcard `*`**: use com cautela e apenas para roles confiáveis, pois libera acesso a todas as páginas do app.
+6. **Wildcard `*`**: use com cautela e apenas para roles confiáveis, pois libera acesso a todas as páginas do app. Cadastro em `new_codeapppageallowedsecurityrole` com `new_id = '*'`.
+7. **Bypass de Super Admin**: Usuários com a role **"System Administrator"** no Dataverse possuem acesso automático a todas as rotas de `/super-admin/*`, independentemente das regras cadastradas na tabela de permissões.
 
 Se um usuário conseguir abrir uma página via URL mas **não tiver permissão no Dataverse**, as operações deverão falhar — isso é o bloqueio real contra bypass no navegador.
+
+### Gerenciamento de Acesso (Super Admin)
+
+As novas páginas de Super Admin permitem:
+- **Acesso por Role**: Gerenciar quais caminhos (ex: `/inventory`, `/team`) estão liberados para quais Security Roles do Dataverse.
+- **Roles por Usuário**: Visualizar (read-only) todas as roles atribuídas a um usuário específico, facilitando a auditoria de acesso.
+
+Caminhos protegidos:
+- `/super-admin/page-access`
+- `/super-admin/user-roles`
+
+Para garantir o acesso inicial a estas páginas, certifique-se de que o usuário administrador possua a role "System Administrator" no ambiente do Dataverse.
 
 ## Limitações Atuais
 

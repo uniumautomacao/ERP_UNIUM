@@ -9,7 +9,7 @@ interface RequirePageAccessProps {
 
 export function RequirePageAccess({ children }: RequirePageAccessProps) {
   const location = useLocation();
-  const { canAccessPath, loading, error } = useAccessControl();
+  const { canAccessPath, loading, error, isSystemAdmin } = useAccessControl();
 
   if (loading) {
     return <LoadingState label="Verificando permissões de acesso..." />;
@@ -17,6 +17,12 @@ export function RequirePageAccess({ children }: RequirePageAccessProps) {
 
   // Permite sempre a página de "Acesso Negado" para evitar loops de redirecionamento
   if (location.pathname === '/forbidden') {
+    return children;
+  }
+
+  // Se for System Admin acessando área de super admin, permite mesmo com erro na tabela de permissões
+  const isSuperAdminPath = location.pathname.startsWith('/super-admin');
+  if (isSystemAdmin && isSuperAdminPath) {
     return children;
   }
 

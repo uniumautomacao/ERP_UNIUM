@@ -8,6 +8,7 @@ interface AccessControlContextType {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  isSystemAdmin: boolean;
 }
 
 const AccessControlContext = createContext<AccessControlContextType | undefined>(undefined);
@@ -19,6 +20,10 @@ export const AccessControlProvider: React.FC<{ children: ReactNode }> = ({ child
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isDev = import.meta.env.DEV;
+
+  const isSystemAdmin = useMemo(() => {
+    return roles.some(r => r.name.toLowerCase() === 'system administrator');
+  }, [roles]);
 
   const normalizePath = (path: string) => {
     const trimmed = path.trim();
@@ -104,6 +109,12 @@ export const AccessControlProvider: React.FC<{ children: ReactNode }> = ({ child
 
   const canAccessPath = useMemo(() => (path: string): boolean => {
     const normalizedPath = normalizePath(path);
+
+    // Bypass for Super Admin paths if user is System Administrator
+    if (isSystemAdmin && normalizedPath.startsWith('/super-admin')) {
+      return true;
+    }
+
     if (!validPaths.has(normalizedPath)) return false;
     if (hasWildcard) return true;
     
@@ -113,7 +124,7 @@ export const AccessControlProvider: React.FC<{ children: ReactNode }> = ({ child
 
     // Optional: handle trailing slashes for flexibility
     return false;
-  }, [allowedPaths, hasWildcard, validPaths]);
+  }, [allowedPaths, hasWildcard, validPaths, isSystemAdmin]);
 
   const refresh = async () => {
     await refreshRoles();
@@ -124,8 +135,9 @@ export const AccessControlProvider: React.FC<{ children: ReactNode }> = ({ child
     canAccessPath,
     loading: loading || rolesLoading,
     error: error || rolesError,
-    refresh
-  }), [canAccessPath, loading, rolesLoading, error, rolesError]);
+    refresh,
+    isSystemAdmin
+  }), [canAccessPath, loading, rolesLoading, error, rolesError, isSystemAdmin]);
 
   return (
     <AccessControlContext.Provider value={value}>

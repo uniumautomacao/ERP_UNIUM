@@ -6,6 +6,8 @@ import {
   Box24Regular,
   CalendarLtr24Regular,
   People24Regular,
+  ShieldLock24Regular,
+  PeopleCheckmark24Regular,
   DeveloperBoard24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
@@ -68,6 +70,24 @@ export const navigation: NavSection[] = [
         label: 'Team Management',
         icon: <People24Regular />,
         path: '/team',
+      },
+    ],
+  },
+  {
+    id: 'super-admin',
+    label: 'Super Admin',
+    items: [
+      {
+        id: 'page-access',
+        label: 'Acesso por Role',
+        icon: <ShieldLock24Regular />,
+        path: '/super-admin/page-access',
+      },
+      {
+        id: 'user-roles',
+        label: 'Roles por Usuário',
+        icon: <PeopleCheckmark24Regular />,
+        path: '/super-admin/user-roles',
       },
     ],
   },
