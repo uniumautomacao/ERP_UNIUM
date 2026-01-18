@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.26';
+export const APP_VERSION = '0.0.27';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.27', 
+    date: '2026-01-18', 
+    changes: 'Importadas tabelas do Dataverse: cr22f_projetos, new_apppreferences, new_atividadefieldcontrols, new_corcolaboradorlinhadotempos, new_ordemdeservicofieldcontrols e new_produtoservicos.' 
+  },
   { 
     version: '0.0.26', 
     date: '2026-01-18', 

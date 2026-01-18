@@ -34,6 +34,36 @@
           "entitySetName": "new_codeapppageallowedsecurityroles",
           "logicalName": "new_codeapppageallowedsecurityrole",
           "isHidden": false
+        },
+        "cr22f_projetos": {
+          "entitySetName": "cr22f_projetos",
+          "logicalName": "cr22f_projeto",
+          "isHidden": false
+        },
+        "new_apppreferences": {
+          "entitySetName": "new_apppreferences",
+          "logicalName": "new_apppreference",
+          "isHidden": false
+        },
+        "new_atividadefieldcontrols": {
+          "entitySetName": "new_atividadefieldcontrols",
+          "logicalName": "new_atividadefieldcontrol",
+          "isHidden": false
+        },
+        "new_corcolaboradorlinhadotempos": {
+          "entitySetName": "new_corcolaboradorlinhadotempos",
+          "logicalName": "new_corcolaboradorlinhadotempo",
+          "isHidden": false
+        },
+        "new_ordemdeservicofieldcontrols": {
+          "entitySetName": "new_ordemdeservicofieldcontrols",
+          "logicalName": "new_ordemdeservicofieldcontrol",
+          "isHidden": false
+        },
+        "new_produtoservicos": {
+          "entitySetName": "new_produtoservicos",
+          "logicalName": "new_produtoservico",
+          "isHidden": false
         }
       },
       "version": "v9.0",

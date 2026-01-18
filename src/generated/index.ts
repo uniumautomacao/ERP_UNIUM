@@ -9,9 +9,21 @@ export * as RolesModel from './models/RolesModel';
 export * as SystemuserrolescollectionModel from './models/SystemuserrolescollectionModel';
 export * as SystemusersModel from './models/SystemusersModel';
 export * as NewCodeAppPageAllowedSecurityRoleModel from './models/NewCodeAppPageAllowedSecurityRoleModel';
+export * as Cr22fProjetoModel from './models/Cr22fProjetoModel';
+export * as NewAppPreferenceModel from './models/NewAppPreferenceModel';
+export * as NewAtividadeFieldControlModel from './models/NewAtividadeFieldControlModel';
+export * as NewCorColaboradorLinhadoTempoModel from './models/NewCorColaboradorLinhadoTempoModel';
+export * as NewOrdemdeServicoFieldControlModel from './models/NewOrdemdeServicoFieldControlModel';
+export * as NewProdutoServicoModel from './models/NewProdutoServicoModel';
 
 // Services
 export * from './services/RolesService';
 export * from './services/SystemuserrolescollectionService';
 export * from './services/SystemusersService';
 export * from './services/NewCodeAppPageAllowedSecurityRoleService';
+export * from './services/Cr22fProjetoService';
+export * from './services/NewAppPreferenceService';
+export * from './services/NewAtividadeFieldControlService';
+export * from './services/NewCorColaboradorLinhadoTempoService';
+export * from './services/NewOrdemdeServicoFieldControlService';
+export * from './services/NewProdutoServicoService';
