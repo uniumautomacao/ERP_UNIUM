@@ -1,10 +1,11 @@
 import { ReactNode } from 'react';
-import { FluentProvider } from '@fluentui/react-components';
+import { FluentProvider, Text, tokens } from '@fluentui/react-components';
 import { useTheme } from '../../hooks/useTheme';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobile } from '../../hooks/useMediaQuery';
 import { Sidebar } from './Sidebar';
 import { LAYOUT } from '../../config/theme';
+import { APP_VERSION } from '../../version';
 
 interface AppShellProps {
   children: ReactNode;
@@ -25,12 +26,27 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Main Content */}
         <div
-          className="flex flex-col flex-grow"
+          className="flex flex-col flex-grow relative"
           style={{
             marginLeft: `${sidebarWidth}px`,
             transition: 'margin-left 250ms cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
+          {/* App Version - Global */}
+          <div 
+            style={{ 
+              position: 'absolute', 
+              top: '8px', 
+              right: '16px', 
+              zIndex: 1000, 
+              pointerEvents: 'none',
+              opacity: 0.6
+            }}
+          >
+            <Text size={100} style={{ color: tokens.colorNeutralForeground4 }}>
+              v{APP_VERSION}
+            </Text>
+          </div>
           {children}
         </div>
       </div>

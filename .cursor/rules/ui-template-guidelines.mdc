@@ -86,6 +86,17 @@ export function NomeDaPagina() {
 | `PageHeader` | SIM | Cabeçalho com título da página |
 | `PageContainer` | SIM | Container do conteúdo com padding correto |
 
+### 2.2.1 Versão do App (Exibição Automática)
+
+**IMPORTANTE**: A versão do aplicativo (`v0.0.X`) é exibida **automaticamente** no canto superior direito de **TODAS as páginas**.
+
+- **Localização**: Canto superior direito da tela, em todas as páginas
+- **Implementação**: Já configurada no `AppShell.tsx` - não é necessário adicionar em páginas individuais
+- **Arquivo de versão**: `src/version.ts` contém `APP_VERSION`, `APP_BUILD_DATE` e `VERSION_HISTORY`
+- **Atualização obrigatória**: TODA alteração de código DEVE incrementar a versão (ver seção 14 deste guia)
+
+**Não é necessário nenhuma ação em páginas individuais** - o sistema de versão é global e automático.
+
 ### 2.3 Arquivos de Referência
 
 Consulte estes arquivos como exemplo:
@@ -833,6 +844,7 @@ Se precisar de novos tipos:
 - Use Tailwind apenas para layout: grid, flex, gap, margin
 - Consulte componentes existentes antes de criar novos
 - Registre rotas e itens de navegação
+- Atualize `src/version.ts` em TODA mudança de código (mesmo pequenas)
 
 ### NUNCA FAÇA:
 - Cores com Tailwind: `bg-blue-500`, `text-white`
@@ -841,12 +853,14 @@ Se precisar de novos tipos:
 - Modificar AppShell ou Sidebar
 - Criar página sem CommandBar/PageHeader
 - Esquecer de registrar rota/navegação
+- Adicionar versão manualmente em páginas (já é automática via AppShell)
 
 ---
 
 **Última atualização:** Janeiro 2026
-**Versão do Template:** 1.1.0
+**Versão do Template:** 1.2.0
 **Principais mudanças:**
+- Sistema de versão global automático em todas as páginas (seção 2.2.1)
 - Documentação completa do CommandBar (seção 2.5)
 - Padrões de organização de ações (primaryActions, secondaryActions, overflowActions)
 - Comportamento de overflow responsivo

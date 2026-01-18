@@ -103,6 +103,11 @@ npm run build
 #### AppShell
 Container principal que envolve toda a aplicação com FluentProvider e gerencia o layout responsivo.
 
+**Recursos incluídos:**
+- **Versão do App**: Exibe automaticamente o número da versão (`v0.0.X`) no canto superior direito de todas as páginas
+- Layout responsivo com transições suaves
+- Integração com tema claro/escuro
+
 #### Sidebar
 Navegação lateral com:
 - Expansível/colapsável (desktop)
@@ -319,6 +324,7 @@ Nunca use cores hardcoded como `#fff` ou `blue`.
 - ✅ Gráficos interativos
 - ✅ Navegação fluida
 - ✅ Acessibilidade (ARIA)
+- ✅ Versão do app exibida automaticamente em todas as páginas
 
 ## 📝 Licença
 
