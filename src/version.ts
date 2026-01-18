@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.13';
+export const APP_VERSION = '0.0.14';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.14', 
+    date: '2026-01-18', 
+    changes: 'Implementado RBAC dinâmico via tabela new_codeapppageallowedsecurityrole, com suporte a wildcard (*) e política deny-by-default.' 
+  },
   { 
     version: '0.0.13', 
     date: '2026-01-18', 

@@ -109,7 +109,6 @@ export interface NavItem {
   label: string;
   icon: ReactNode;
   path: string;
-  requiredRoles?: string[];
 }
 
 export interface NavSection {

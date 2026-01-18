@@ -11,84 +11,86 @@ import { ProjectPlannerPage } from './pages/section2-operations/ProjectPlannerPa
 import { TeamManagementPage } from './pages/section2-operations/TeamManagementPage';
 import { DevPage } from './pages/section3-dev/DevPage';
 import { ForbiddenPage } from './pages/ForbiddenPage';
-import { RequireRoles } from './security/RequireRoles';
-import { getRequiredRoles } from './security/pageAccess';
+import { AccessControlProvider } from './security/AccessControlContext';
+import { RequirePageAccess } from './security/RequirePageAccess';
 
 function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
         <SidebarProvider>
-          <AppShell>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/')}>
-                    <HomePage />
-                  </RequireRoles>
-                }
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/dashboard')}>
-                    <DashboardPage />
-                  </RequireRoles>
-                }
-              />
-              <Route
-                path="/analytics"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/analytics')}>
-                    <AnalyticsPage />
-                  </RequireRoles>
-                }
-              />
-              <Route
-                path="/reports"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/reports')}>
-                    <ReportsPage />
-                  </RequireRoles>
-                }
-              />
-              <Route
-                path="/inventory"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/inventory')}>
-                    <InventoryPage />
-                  </RequireRoles>
-                }
-              />
-              <Route
-                path="/projects"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/projects')}>
-                    <ProjectPlannerPage />
-                  </RequireRoles>
-                }
-              />
-              <Route
-                path="/team"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/team')}>
-                    <TeamManagementPage />
-                  </RequireRoles>
-                }
-              />
-              <Route
-                path="/dev"
-                element={
-                  <RequireRoles requiredRoles={getRequiredRoles('/dev')}>
-                    <DevPage />
-                  </RequireRoles>
-                }
-              />
-              <Route path="/forbidden" element={<ForbiddenPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </AppShell>
+          <AccessControlProvider>
+            <AppShell>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <RequirePageAccess>
+                      <HomePage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <RequirePageAccess>
+                      <DashboardPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <RequirePageAccess>
+                      <AnalyticsPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/reports"
+                  element={
+                    <RequirePageAccess>
+                      <ReportsPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/inventory"
+                  element={
+                    <RequirePageAccess>
+                      <InventoryPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/projects"
+                  element={
+                    <RequirePageAccess>
+                      <ProjectPlannerPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/team"
+                  element={
+                    <RequirePageAccess>
+                      <TeamManagementPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/dev"
+                  element={
+                    <RequirePageAccess>
+                      <DevPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route path="/forbidden" element={<ForbiddenPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </AppShell>
+          </AccessControlProvider>
         </SidebarProvider>
       </ThemeProvider>
     </BrowserRouter>

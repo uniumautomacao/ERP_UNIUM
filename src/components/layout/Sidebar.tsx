@@ -3,30 +3,26 @@ import { Button, Avatar, Text, tokens, Drawer, DrawerBody, DrawerHeader, DrawerH
 import { Navigation24Regular, Settings24Regular, Dismiss24Regular } from '@fluentui/react-icons';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobile } from '../../hooks/useMediaQuery';
-import { useUserRoles } from '../../hooks/useUserRoles';
+import { useAccessControl } from '../../security/AccessControlContext';
 import { SidebarSection } from './SidebarSection';
 import { ThemeToggle } from './ThemeToggle';
 import { navigation } from '../../config/navigation';
 import { LAYOUT } from '../../config/theme';
-import { hasRequiredRoles } from '../../security/pageAccess';
 
 export function Sidebar() {
   const { isExpanded, isMobileOpen, toggleExpanded, closeMobile } = useSidebar();
   const isMobile = useIsMobile();
-  const { roles } = useUserRoles();
+  const { canAccessPath } = useAccessControl();
 
-  const roleNames = useMemo(() => roles.map((role) => role.name), [roles]);
   const filteredNavigation = useMemo(
     () =>
       navigation
         .map((section) => {
-          const items = section.items.filter((item) =>
-            hasRequiredRoles(roleNames, item.requiredRoles)
-          );
+          const items = section.items.filter((item) => canAccessPath(item.path));
           return items.length > 0 ? { ...section, items } : null;
         })
         .filter((section): section is typeof navigation[number] => section !== null),
-    [roleNames]
+    [canAccessPath]
   );
 
   const sidebarWidth = isExpanded ? LAYOUT.sidebar.expandedWidth : LAYOUT.sidebar.collapsedWidth;
