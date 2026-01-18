@@ -64,6 +64,26 @@
           "entitySetName": "new_produtoservicos",
           "logicalName": "new_produtoservico",
           "isHidden": false
+        },
+        "cr22f_fabricantesfromsharpointlists": {
+          "entitySetName": "cr22f_fabricantesfromsharpointlists",
+          "logicalName": "cr22f_fabricantesfromsharpointlist",
+          "isHidden": false
+        },
+        "cr22f_modelosdeprodutofromsharepointlists": {
+          "entitySetName": "cr22f_modelosdeprodutofromsharepointlists",
+          "logicalName": "cr22f_modelosdeprodutofromsharepointlist",
+          "isHidden": false
+        },
+        "new_deviceios": {
+          "entitySetName": "new_deviceios",
+          "logicalName": "new_deviceio",
+          "isHidden": false
+        },
+        "new_deviceioconnections": {
+          "entitySetName": "new_deviceioconnections",
+          "logicalName": "new_deviceioconnection",
+          "isHidden": false
         }
       },
       "version": "v9.0",

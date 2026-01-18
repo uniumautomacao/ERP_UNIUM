@@ -74,5 +74,33 @@ export const dataSourcesInfo = {
     "primaryKey": "new_produtoservicoid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "cr22f_fabricantesfromsharpointlists": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "cr22f_fabricantesfromsharpointlistid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "cr22f_modelosdeprodutofromsharepointlists": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "cr22f_modelosdeprodutofromsharepointlistid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_deviceios": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_deviceioid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_deviceioconnections": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_deviceioconnectionid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

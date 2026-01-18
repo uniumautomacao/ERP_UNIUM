@@ -13,6 +13,82 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Cor Colaborador Linha do Tempo | `new_corcolaboradorlinhadotempo` | `new_corcolaboradorlinhadotempos` | `new_corcolaboradorlinhadotempoid` |
 | Ordem de Serviço Field Control | `new_ordemdeservicofieldcontrol` | `new_ordemdeservicofieldcontrols` | `new_ordemdeservicofieldcontrolid` |
 | Produto-Serviço | `new_produtoservico` | `new_produtoservicos` | `new_produtoservicoid` |
+| Fabricantes From Sharepoint List | `cr22f_fabricantesfromsharpointlist` | `cr22f_fabricantesfromsharpointlists` | `cr22f_fabricantesfromsharpointlistid` |
+| Modelos de Produto From Sharepoint List | `cr22f_modelosdeprodutofromsharepointlist` | `cr22f_modelosdeprodutofromsharepointlists` | `cr22f_modelosdeprodutofromsharepointlistid` |
+| Device IO | `new_deviceio` | `new_deviceios` | `new_deviceioid` |
+| Device IO Connection | `new_deviceioconnection` | `new_deviceioconnections` | `new_deviceioconnectionid` |
+
+---
+
+## 🔵 cr22f_fabricantesfromsharpointlist (Fabricantes From Sharepoint List)
+
+### Informações Básicas
+```
+EntityLogicalName:                cr22f_fabricantesfromsharpointlist
+EntityLogicalCollectionName:      cr22f_fabricantesfromsharpointlists
+EntitySetName:                    cr22f_fabricantesfromsharpointlists
+PrimaryKey:                       cr22f_fabricantesfromsharpointlistid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_fornecedorprincipal | new_FornecedorPrincipal | accounts |
+
+---
+
+## 🔵 cr22f_modelosdeprodutofromsharepointlist (Modelos de Produto From Sharepoint List)
+
+### Informações Básicas
+```
+EntityLogicalName:                cr22f_modelosdeprodutofromsharepointlist
+EntityLogicalCollectionName:      cr22f_modelosdeprodutofromsharepointlists
+EntitySetName:                    cr22f_modelosdeprodutofromsharepointlists
+PrimaryKey:                       cr22f_modelosdeprodutofromsharepointlistid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_fabricante | new_Fabricante | cr22f_fabricantesfromsharpointlists |
+| new_modelodocabopormetrocaixadecabo | new_ModelodoCaboporMetroCaixadeCabo | cr22f_modelosdeprodutofromsharepointlists |
+
+---
+
+## 🔵 new_deviceio (Device IO)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_deviceio
+EntityLogicalCollectionName:      new_deviceios
+EntitySetName:                    new_deviceios
+PrimaryKey:                       new_deviceioid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_modelodeproduto | new_ModelodeProduto | cr22f_modelosdeprodutofromsharepointlists |
+| new_projeto | new_Projeto | cr22f_projetos |
+
+---
+
+## 🔵 new_deviceioconnection (Device IO Connection)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_deviceioconnection
+EntityLogicalCollectionName:      new_deviceioconnections
+EntitySetName:                    new_deviceioconnections
+PrimaryKey:                       new_deviceioconnectionid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_device | new_Device | new_deviceios |
+| new_connectedto | new_ConnectedTo | new_deviceioconnections |
+| new_projeto | new_Projeto | cr22f_projetos |
 
 ---
 
