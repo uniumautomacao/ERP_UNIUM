@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.17';
+export const APP_VERSION = '0.0.18';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.18', 
+    date: '2026-01-18', 
+    changes: 'Adicionada barra de pesquisa delegável por nome de security role na Matriz de Acesso.' 
+  },
   { 
     version: '0.0.17', 
     date: '2026-01-18', 

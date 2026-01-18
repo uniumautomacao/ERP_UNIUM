@@ -8,12 +8,14 @@ import {
   Button,
   Checkbox,
   Tooltip,
+  Input,
 } from '@fluentui/react-components';
 import { 
   Save24Regular, 
   ArrowSync24Regular,
   Dismiss24Regular,
   Info20Regular,
+  Search24Regular,
 } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -128,6 +130,17 @@ const useStyles = makeStyles({
   },
   stickyHeaderAll: {
     zIndex: 30,
+  },
+  searchBar: {
+    padding: tokens.spacingHorizontalM,
+    paddingBottom: tokens.spacingVerticalM,
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+  },
+  searchInput: {
+    flexGrow: 1,
+    maxWidth: '400px',
   }
 });
 
@@ -145,6 +158,7 @@ export function SuperAdminPageAccessPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Map<string, boolean>>(new Map());
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Estrutura das colunas: Seções -> Páginas
   const columns = useMemo(() => {
@@ -183,13 +197,16 @@ export function SuperAdminPageAccessPage() {
     return map;
   }, [rules]);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (search?: string) => {
     setLoading(true);
     try {
+      const rolesFilter = search ? `contains(name, '${search}')` : undefined;
+      
       const [rolesResult, rulesResult] = await Promise.all([
         RolesService.getAll({
           select: ['roleid', 'name'],
-          orderBy: ['name asc']
+          orderBy: ['name asc'],
+          filter: rolesFilter
         }),
         NewCodeAppPageAllowedSecurityRoleService.getAll({
           filter: 'statecode eq 0',
@@ -208,8 +225,12 @@ export function SuperAdminPageAccessPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    const handler = setTimeout(() => {
+      fetchData(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm, fetchData]);
 
   // Ordenação das roles conforme especificação
   const sortedRoles = useMemo(() => {
@@ -321,7 +342,7 @@ export function SuperAdminPageAccessPage() {
             id: 'refresh',
             label: 'Atualizar',
             icon: <ArrowSync24Regular />,
-            onClick: fetchData,
+            onClick: () => fetchData(searchTerm),
             disabled: loading || saving,
           }
         ]} 
@@ -333,6 +354,18 @@ export function SuperAdminPageAccessPage() {
       
       <PageContainer>
         <Card className={styles.card}>
+          <div className={styles.searchBar}>
+            <Input
+              className={styles.searchInput}
+              contentBefore={<Search24Regular />}
+              placeholder="Pesquisar security role..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Pesquisar security role"
+            />
+            {loading && <Spinner size="tiny" />}
+          </div>
+
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
