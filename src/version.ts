@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.8';
+export const APP_VERSION = '0.0.9';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.9', 
+    date: '2026-01-18', 
+    changes: 'Adicionada a exibição do AAD Object Id do usuário na Área do Desenvolvedor.' 
+  },
   { 
     version: '0.0.8', 
     date: '2026-01-18', 
