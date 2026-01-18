@@ -543,6 +543,7 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
     <Drawer
       open={shouldRender}
       position="end"
+      size="medium"
       onOpenChange={(_, data) => {
         if (!data.open) {
           onClose();
