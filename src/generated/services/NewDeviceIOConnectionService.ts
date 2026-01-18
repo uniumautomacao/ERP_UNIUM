@@ -34,7 +34,7 @@ export class NewDeviceIOConnectionService {
     return await NewDeviceIOConnectionService.client.retrieveMultipleRecordsAsync(NewDeviceIOConnectionService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<NewDeviceIOConnection> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return NewDeviceIOConnectionService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

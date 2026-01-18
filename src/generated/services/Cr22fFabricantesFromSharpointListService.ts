@@ -34,7 +34,7 @@ export class Cr22fFabricantesFromSharpointListService {
     return await Cr22fFabricantesFromSharpointListService.client.retrieveMultipleRecordsAsync(Cr22fFabricantesFromSharpointListService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<Cr22fFabricantesFromSharpointList> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return Cr22fFabricantesFromSharpointListService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

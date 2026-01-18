@@ -34,7 +34,7 @@ export class NewAppPreferenceService {
     return await NewAppPreferenceService.client.retrieveMultipleRecordsAsync(NewAppPreferenceService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<NewAppPreference> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return NewAppPreferenceService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

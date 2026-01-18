@@ -34,7 +34,7 @@ export class Cr22fModelosdeProdutoFromSharepointListService {
     return await Cr22fModelosdeProdutoFromSharepointListService.client.retrieveMultipleRecordsAsync(Cr22fModelosdeProdutoFromSharepointListService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<Cr22fModelosdeProdutoFromSharepointList> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return Cr22fModelosdeProdutoFromSharepointListService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

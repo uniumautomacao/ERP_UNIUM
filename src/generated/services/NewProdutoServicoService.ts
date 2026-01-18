@@ -34,7 +34,7 @@ export class NewProdutoServicoService {
     return await NewProdutoServicoService.client.retrieveMultipleRecordsAsync(NewProdutoServicoService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<NewProdutoServico> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return NewProdutoServicoService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

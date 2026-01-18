@@ -34,7 +34,7 @@ export class Cr22fProjetoService {
     return await Cr22fProjetoService.client.retrieveMultipleRecordsAsync(Cr22fProjetoService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<Cr22fProjeto> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return Cr22fProjetoService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

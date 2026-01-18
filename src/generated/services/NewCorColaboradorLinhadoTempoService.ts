@@ -34,7 +34,7 @@ export class NewCorColaboradorLinhadoTempoService {
     return await NewCorColaboradorLinhadoTempoService.client.retrieveMultipleRecordsAsync(NewCorColaboradorLinhadoTempoService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<NewCorColaboradorLinhadoTempo> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return NewCorColaboradorLinhadoTempoService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

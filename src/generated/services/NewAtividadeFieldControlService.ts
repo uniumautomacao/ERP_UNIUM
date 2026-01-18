@@ -34,7 +34,7 @@ export class NewAtividadeFieldControlService {
     return await NewAtividadeFieldControlService.client.retrieveMultipleRecordsAsync(NewAtividadeFieldControlService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<NewAtividadeFieldControl> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return NewAtividadeFieldControlService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',

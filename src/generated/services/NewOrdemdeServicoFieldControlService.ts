@@ -34,7 +34,7 @@ export class NewOrdemdeServicoFieldControlService {
     return await NewOrdemdeServicoFieldControlService.client.retrieveMultipleRecordsAsync(NewOrdemdeServicoFieldControlService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<NewOrdemdeServicoFieldControl> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return NewOrdemdeServicoFieldControlService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',
