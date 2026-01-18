@@ -1,52 +1,10 @@
 {
   "QualifiedValues": [
     {
-      "Kind": "default.cds_cr22f_projeto_forms",
-      "Namespace": "Projetos (Forms)",
+      "Kind": "default.cds_new_estoquerma_forms",
+      "Namespace": "Estoque-RMAS (Forms)",
       "Values": {
-        "Aprovações": "9b6262ba-58d5-ed11-a7c7-000d3ac190e8",
-        "Information": "b770d392-db0a-472d-a08b-a2dfe5b1ea08",
-        "Principal": "875943a1-e8ff-42c1-919b-9594ca3fd513"
-      }
-    },
-    {
-      "Kind": "default.cds_new_deviceio_forms",
-      "Namespace": "Device IO (Forms)",
-      "Values": {
-        "Information": "bb0f5858-fec2-4f87-af63-ce80f64bf0f4"
-      }
-    },
-    {
-      "Kind": "default.cds_new_deviceioconnection_forms",
-      "Namespace": "Device IO Connections (Forms)",
-      "Values": {
-        "Information": "3b13e1a0-5cea-4a7a-9660-d07d934ab9aa"
-      }
-    },
-    {
-      "Kind": "default.cds_cr22f_modelosdeprodutofromsharepointlist_forms",
-      "Namespace": "Modelos de Produto From Sharepoint Lists (Forms)",
-      "Values": {
-        "Information": "34109535-6081-464d-b81e-1099ca95a5dc",
-        "Principal": "71e03a6a-6fb1-4b0f-92f0-0e446615af18",
-        "Visualização Rápida Estoque Disponível": "5e6ff134-1de1-47e6-ac4a-6501c6973d1a"
-      }
-    },
-    {
-      "Kind": "default.cds_new_produtoservico_forms",
-      "Namespace": "Produtos-Serviço (Forms)",
-      "Values": {
-        "Information": "7486430d-1195-454a-b126-7e0f63107e84",
-        "Principal": "444ac72b-1876-4c29-a146-d4f9ef93d3dd"
-      }
-    },
-    {
-      "Kind": "default.cds_new_ordemdeservicofieldcontrol_forms",
-      "Namespace": "Ordens de Serviço Field Control (Forms)",
-      "Values": {
-        "Information": "99240d71-13c9-4603-a2d8-bc2900e0653c",
-        "OS Desenho de PTI": "ce41e99b-4dd5-ed11-a7c7-000d3ac190e8",
-        "Principal": "0be058de-a37e-48ee-b349-790957f8b7f0"
+        "Information": "323cc3ea-ca2c-4887-a15e-ee5996d41c40"
       }
     },
     {
@@ -76,16 +34,75 @@
       }
     },
     {
-      "Kind": "default.cds_new_impressaodeetiqueta_forms",
-      "Namespace": "Impressão de Etiquetas (Forms)",
+      "Kind": "default.cds_systemuser_forms",
+      "Namespace": "Users (Forms)",
       "Values": {
-        "Information": "372c214f-db87-489e-a079-efd42b54d95f"
+        "Application User": "d26924ef-4d80-46f7-ab1d-e6ae80a54ce8",
+        "Information": "094fb08a-77bb-49e0-b7ea-8dbddfd01294",
+        "User": "c2cd9e55-d4b4-4b55-9951-16ead79643e5",
+        "User form – Business": "c2413504-7eb2-4c59-a087-95d819866114",
+        "User Hierarchy Tile Form": "c68d6c09-d7a7-4959-8d0f-44b8cff9b452"
       }
     },
     {
-      "Kind": "default.cds_bulkdeletefailure_forms",
-      "Namespace": "Bulk Delete Failures (Forms)",
-      "Values": {}
+      "Kind": "default.cds_new_apppreference_forms",
+      "Namespace": "AppPreferences (Forms)",
+      "Values": {
+        "Information": "c673bd53-1f0b-47e6-97eb-59b74bca8a5e"
+      }
+    },
+    {
+      "Kind": "default.cds_new_rma_forms",
+      "Namespace": "RMAS (Forms)",
+      "Values": {
+        "Information": "69be2cda-a6c4-4c79-9265-d97ed67d5309"
+      }
+    },
+    {
+      "Kind": "default.cds_cr22f_estoquefromsharepointlist_forms",
+      "Namespace": "Estoque From SharepointLists (Forms)",
+      "Values": {
+        "Information": "6c4c9d07-2841-4d34-9973-d99f826f8587",
+        "Principal": "4bffe419-d4a2-4f68-9f8d-7a4b2db855cd"
+      }
+    },
+    {
+      "Kind": "default.cds_new_wazzupchat_forms",
+      "Namespace": "Wazzup Chats (Forms)",
+      "Values": {
+        "Information": "0c6cd61e-4e07-414b-8374-e79e4ef0f48b"
+      }
+    },
+    {
+      "Kind": "default.cds_new_wazzupmessages_forms",
+      "Namespace": "Wazzup Messages (Forms)",
+      "Values": {
+        "Information": "ae486d32-6247-4b54-8791-e2a2824617f5"
+      }
+    },
+    {
+      "Kind": "default.cds_new_ordemdeservicofieldcontrol_forms",
+      "Namespace": "Ordens de Serviço Field Control (Forms)",
+      "Values": {
+        "Information": "99240d71-13c9-4603-a2d8-bc2900e0653c",
+        "OS Desenho de PTI": "ce41e99b-4dd5-ed11-a7c7-000d3ac190e8",
+        "Principal": "0be058de-a37e-48ee-b349-790957f8b7f0"
+      }
+    },
+    {
+      "Kind": "default.cds_new_lead_forms",
+      "Namespace": "Leads (Forms)",
+      "Values": {
+        "Information": "7f2ccaee-3c76-4f3c-9d2c-b6629af46fac"
+      }
+    },
+    {
+      "Kind": "default.cds_new_produtoservico_forms",
+      "Namespace": "Produtos-Serviço (Forms)",
+      "Values": {
+        "Information": "7486430d-1195-454a-b126-7e0f63107e84",
+        "Principal": "444ac72b-1876-4c29-a146-d4f9ef93d3dd"
+      }
     },
     {
       "Kind": "default.cds_new_cotacao_forms",

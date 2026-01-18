@@ -1,0 +1,447 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "cr22f_estoquefromsharepointlists",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "cr22f_estoquefromsharepointlist",
+    "MaxGetRowsCount": 500,
+    "Name": "Estoque From SharepointLists",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "cr22f_color": "Cor",
+      "cr22f_conditionnotes": "ConditionNotes",
+      "cr22f_contatofaturamentoid": "ContatoFaturamentoId",
+      "cr22f_estoquefromsharepointlist_AsyncOperations": "System Jobs",
+      "cr22f_estoquefromsharepointlist_BulkDeleteFailures": "Bulk Delete Failures",
+      "cr22f_estoquefromsharepointlist_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "cr22f_estoquefromsharepointlist_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "cr22f_estoquefromsharepointlist_ProcessSession": "Process Sessions",
+      "cr22f_estoquefromsharepointlist_SyncErrors": "Sync Errors",
+      "cr22f_estoquefromsharepointlistid": "Estoque From SharepointList",
+      "cr22f_fornecedorid": "FornecedorId",
+      "cr22f_id": "ID",
+      "cr22f_localizao": "Localização",
+      "cr22f_modelodoprodutoid": "Modelo do produtoId",
+      "cr22f_multinsert": "MultInsert",
+      "cr22f_nf": "NF",
+      "cr22f_numberofbackups": "NumberOfBackups",
+      "cr22f_obraid": "ObraId",
+      "cr22f_ordernumber": "OrderNumber",
+      "cr22f_purchaseprice": "PurchasePrice",
+      "cr22f_purchaseprice_base": "PurchasePrice (Base)",
+      "cr22f_querycontatofaturamentofornecedo": "QueryContatoFaturamentoFornecedo",
+      "cr22f_queryfabricante": "Fabricante",
+      "cr22f_queryfornecedor": "Fornecedor",
+      "cr22f_querymodeloproduto": "QueryModeloProduto",
+      "cr22f_queryobra": "QueryObra",
+      "cr22f_querystatus": "QueryStatus",
+      "cr22f_querytag": "Etiqueta",
+      "cr22f_querytipoproduto": "QueryTipoProduto",
+      "cr22f_serialnumber": "Número de Série",
+      "cr22f_status": "Situação",
+      "cr22f_tagconfirmada": "TagConfirmada",
+      "cr22f_tagimage": "Imagem Etiqueta",
+      "cr22f_title": "Nome",
+      "createdby": "Created By",
+      "createdon": "Criado Em",
+      "createdonbehalfby": "Created By (Delegate)",
+      "exchangerate": "Exchange Rate",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_centrodedistribuicao": "Centro de Distribuição",
+      "new_centrodedistribuicaotexto": "Centro de Distribuição (Texto)",
+      "new_clientefx": "Cliente (Fx)",
+      "new_confirmacaodeetiqueta": "Confirmação de Etiqueta",
+      "new_confirmacaodetag": "Confirmação de Tag",
+      "new_contemrma": "Contém RMA",
+      "new_contemrmaespelho": "Contém RMA (Espelho)",
+      "new_cr22f_estoquefromsharepointlist_GrupodeOrigem_cr22f_estoquefromsharepointlist": "Estoque From SharepointLists (new_cr22f_estoquefromsharepointlist_GrupodeOrigem_cr22f_estoquefromsharepointlist)",
+      "new_cr22f_estoquefromsharepointlist_MercadoriaAnteriordoRMA_cr22f_estoquefromsharepointlist": "Estoque From SharepointLists (new_cr22f_estoquefromsharepointlist_MercadoriaAnteriordoRMA_cr22f_estoquefromsharepointlist)",
+      "new_datadaultimaleitura": "Data da Última Leitura",
+      "new_deposito": "Depósito",
+      "new_depositotexto": "Depósito (Texto)",
+      "new_endereco": "Endereço",
+      "new_estante": "Estante",
+      "new_estantetexto": "Estante (Texto)",
+      "new_estoquerma_Produto_cr22f_estoquefromshare": "Estoque-RMAS (new_estoquerma_Produto_cr22f_estoquefromshare)",
+      "new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist": "Estoque-RMAS (new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist)",
+      "new_etiquetaemtextocalculated": "Etiqueta Em Texto (Calculated)",
+      "new_fabricantecalculado": "Fabricante (Calculado)",
+      "new_fabricantefx": "Fabricante (Fx)",
+      "new_fotodoproduto": "Foto do Produto",
+      "new_fotodoprodutoid": "new_FotodoProdutoId",
+      "new_fotodoprodutourl": "Foto do Produto URL",
+      "new_GrupodeOrigem": "Grupo de Origem",
+      "new_idtext": "Id (Text)",
+      "new_imagemetiquetapng": "Imagem Etiqueta PNG",
+      "new_imagemetiquetapngid": "new_ImagemEtiquetaPNGId",
+      "new_Insercao": "Inserção",
+      "new_insercaodeestoque_GrupodeOrigem_cr22f_estoquefromsharepointlist": "Inserções de Estoque",
+      "new_MercadoriaAnteriordoRMA": "Mercadoria Anterior do RMA",
+      "new_mercadoriatravada": "Mercadoria Travada",
+      "new_ModelodeProduto": "Modelo de Produto",
+      "new_new_estoquerollupfieldupdatejob_ItemdeEst": "Estoque RollupField Update Jobs",
+      "new_new_solicitacaodevinculodeproduto_Produto": "Solicitação de Vínculo de Produtos",
+      "new_numerodermas": "Número de RMAs",
+      "new_numerodermas_date": "Número de RMAs (Last Updated On)",
+      "new_numerodermas_state": "Número de RMAs (State)",
+      "new_numerodermasnovoproduto": "Número de RMAs (Novo Produto)",
+      "new_numerodermasnovoproduto_date": "Número de RMAs (Novo Produto) (Last Updated On)",
+      "new_numerodermasnovoproduto_state": "Número de RMAs (Novo Produto) (State)",
+      "new_numerodorecibo": "Numero do Recibo",
+      "new_OrdemdeServico": "Ordem de Serviço",
+      "new_osfx": "OS# (Fx)",
+      "new_prateleira": "Prateleira",
+      "new_prateleiratexto": "Prateleira (Texto)",
+      "new_ProdutoServico": "Produto-Serviço",
+      "new_quantidade": "Quantidade",
+      "new_quantidadedevolvidos": "Quantidade Devolvidos",
+      "new_quantidadedisponiveldevolucao": "Quantidade Disponível Devolução",
+      "new_referenciadoproduto": "Referência do Produto",
+      "new_registrodeleiturademercadoriaemestoque_Mercadoria_cr22f_estoquefromsharepointlist": "Registro de Leitura de Mercadoria em Estoques",
+      "new_Remessa": "Remessa",
+      "new_rmaaprovadoparavenda": "RMA Aprovado Para Venda",
+      "new_rmaaprovadoparavendanovoproduto": "RMA Aprovado Para Venda (Novo Produto)",
+      "new_rmaaprovadoparavendanovoproduto_date": "RMA Aprovado Para Venda (Novo Produto) (Last Updated On)",
+      "new_rmaaprovadoparavendanovoproduto_state": "RMA Aprovado Para Venda (Novo Produto) (State)",
+      "new_rmaaprovadoparavendaprodutoantigo": "RMA Aprovado Para Venda (Produto Antigo)",
+      "new_rmaaprovadoparavendaprodutoantigo_date": "RMA Aprovado Para Venda (Produto Antigo) (Last Updated On)",
+      "new_rmaaprovadoparavendaprodutoantigo_state": "RMA Aprovado Para Venda (Produto Antigo) (State)",
+      "new_rua": "Rua",
+      "new_ruatexto": "Rua (Texto)",
+      "new_separado": "Separado",
+      "new_tagconfirmadabool": "TagConfirmadaBool",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "transactioncurrencyid": "Currency",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Estoque From SharepointLists",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Estoque From SharepointLists (Views)",
+    "Name": "_cr22f_estoquefromsharepointlist_views",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "0d8cbd9b-c48b-ed11-81ad-000d3ac190e8": "Estoque-OS",
+      "2e689a94-ca8b-ed11-81ad-000d3ac190e8": "Estoque Reservado",
+      "393769b7-7305-48b7-976a-91c1902d672d": "Estoque From SharepointList Lookup View",
+      "3aa67c52-f44b-ed11-bba2-000d3ac190e8": "Itens para ativação",
+      "67ccc435-e3bb-4fd8-9647-c0dbd848432c": "Estoque From SharepointList Advanced Find View",
+      "6fae6b78-82e6-44cb-85b9-5afb700b3265": "Estoque Ativo",
+      "7de40226-e49b-ec11-b401-002248d30cee": "Estoque Disponível",
+      "88345f84-ffc9-46fb-a2cf-6dbddbfd4bdb": "Inactive Estoque From SharepointLists",
+      "9c5fd774-3090-ed11-aad1-000d3ac190e8": "Estoque Disponível ou Reservado",
+      "a60fef9e-7dc6-445e-b51a-e40400c55224": "Estoque From SharepointList Associated View",
+      "b07279eb-c79c-ec11-b400-002248de7ebe": "Estoque Desativado",
+      "b17ca183-e49b-ec11-b401-002248d30cee": "Estoque Disponível Por Modelo De Produto",
+      "cf90ea05-0a78-ef11-ac20-000d3a88be97": "Estoque RMA",
+      "f169ecaa-7987-ed11-81ad-000d3ac190e8": "Itens Indisponíveis"
+    }
+  },
+  {
+    "DisplayName": "Status (Estoque From SharepointLists)",
+    "Name": "cr22f_estoquefromsharepointlist_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Estoque From SharepointLists)",
+    "Name": "cr22f_estoquefromsharepointlist_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Centro de Distribuição",
+    "Name": "new_centrodedistribuicao",
+    "OptionSetInfoNameMapping": {
+      "100000000": "U1"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_centrodedistribuicao",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_centrodedistribuicao",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Contém RMA (Estoque From SharepointLists)",
+    "Name": "new_cr22f_estoquefromsharepointlist_new_contemrma",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_contemrma",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_contemrma",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Contém RMA (Espelho) (Estoque From SharepointLists)",
+    "Name": "new_cr22f_estoquefromsharepointlist_new_contemrmaespelho",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_contemrmaespelho",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_contemrmaespelho",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Mercadoria Travada (Estoque From SharepointLists)",
+    "Name": "new_cr22f_estoquefromsharepointlist_new_mercadoriatravada",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_mercadoriatravada",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_mercadoriatravada",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "RMA Aprovado Para Venda (Estoque From SharepointLists)",
+    "Name": "new_cr22f_estoquefromsharepointlist_new_rmaaprovadoparavenda",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_rmaaprovadoparavenda",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_rmaaprovadoparavenda",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Separado (Estoque From SharepointLists)",
+    "Name": "new_cr22f_estoquefromsharepointlist_new_separado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_separado",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_separado",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "TagConfirmadaBool (Estoque From SharepointLists)",
+    "Name": "new_cr22f_estoquefromsharepointlist_tagconfirmadabool",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_tagconfirmadabool",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_tagconfirmadabool",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Depósito",
+    "Name": "new_deposito",
+    "OptionSetInfoNameMapping": {
+      "100000000": "A",
+      "100000001": "B",
+      "100000002": "C",
+      "100000003": "D",
+      "100000004": "E",
+      "100000005": "F",
+      "100000006": "G",
+      "100000007": "H",
+      "100000008": "I"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_deposito",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_deposito",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Estante (Depósito)",
+    "Name": "new_estantedeposito",
+    "OptionSetInfoNameMapping": {
+      "100000000": "E0",
+      "100000001": "E1",
+      "100000002": "E2",
+      "100000003": "E3",
+      "100000004": "E4",
+      "100000005": "E5",
+      "100000006": "E6",
+      "100000007": "E7",
+      "100000008": "E8",
+      "100000009": "E9",
+      "100000010": "E10"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_estante",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_estante",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Prateleira (Depósito)",
+    "Name": "new_prateleiradeposito",
+    "OptionSetInfoNameMapping": {
+      "100000000": "P0",
+      "100000001": "P1",
+      "100000002": "P2",
+      "100000003": "P3",
+      "100000004": "P4",
+      "100000005": "P5",
+      "100000006": "P6",
+      "100000007": "P7",
+      "100000008": "P8",
+      "100000009": "P9",
+      "100000010": "P10"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_prateleira",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_prateleira",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Rua (Depósito)",
+    "Name": "new_ruadeposito",
+    "OptionSetInfoNameMapping": {
+      "100000000": "01",
+      "100000001": "02",
+      "100000002": "03",
+      "100000003": "04",
+      "100000004": "05",
+      "100000005": "06",
+      "100000006": "07",
+      "100000007": "08",
+      "100000008": "09",
+      "100000009": "10"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_rua",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_rua",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  }
+]

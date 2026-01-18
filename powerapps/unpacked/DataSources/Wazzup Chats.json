@@ -1,0 +1,155 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_wazzupchats",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_wazzupchat",
+    "MaxGetRowsCount": 500,
+    "Name": "Wazzup Chats",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_agendamentodemensagem_Chat_new_wazzupchat": "Agendamento de Mensagems",
+      "new_Agente": "Agente",
+      "new_channelid": "Channel Id",
+      "new_chatclosedon": "Chat Closed On",
+      "new_chatid": "Chat Id",
+      "new_chattype": "Chat Type",
+      "new_contactname": "Contact Name",
+      "new_cr22f_projeto_ChatPrincipal_new_wazzupcha": "Projetos",
+      "new_draft": "Draft",
+      "new_exportedtosupabaseon": "Exported to Supabase On",
+      "new_hasnewmessage": "Has New Message",
+      "new_isactive": "IsActive",
+      "new_lastmessagedate": "Last Message Date",
+      "new_lastmessageon": "Last Message On",
+      "new_lastmessagereceivedon": "Last Message Received On",
+      "new_lastmessagesenton": "Last Message Sent On",
+      "new_relatoriodeatendimentowhatsapp_WazzupChat_new_wazzupchat": "Relatório de Atendimento Whatsapps",
+      "new_wazzupchat_AsyncOperations": "System Jobs",
+      "new_wazzupchat_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_wazzupchat_DuplicateBaseRecord": "Duplicate Records (new_wazzupchat_DuplicateBaseRecord)",
+      "new_wazzupchat_DuplicateMatchingRecord": "Duplicate Records (new_wazzupchat_DuplicateMatchingRecord)",
+      "new_wazzupchat_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_wazzupchat_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_wazzupchat_ProcessSession": "Process Sessions",
+      "new_wazzupchat_SyncErrors": "Sync Errors",
+      "new_wazzupchatid": "Wazzup Chat",
+      "new_wazzupmessages_Chat_new_wazzupchat": "Wazzup Messages",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Wazzup Chats",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Wazzup Chats (Views)",
+    "Name": "_new_wazzupchat_views",
+    "RelatedEntityName": "Wazzup Chats",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "0ed94b4f-41c2-492c-957b-2b3d8581c1da": "Inactive Wazzup Chats",
+      "15808eff-e401-427b-909c-4fc828927563": "Wazzup Chat Lookup View",
+      "2fd7bbe9-315b-4f38-9ee3-4a9f915f3ece": "Wazzup Chat Associated View",
+      "52626319-1be6-4ada-b67f-95acb15fde10": "Active Wazzup Chats",
+      "a6761f49-eed5-44bb-ad19-821fa4e79638": "Wazzup Chat Advanced Find View",
+      "d513822e-d14f-ee11-be6f-6045bd397997": "Active SAC Chats"
+    }
+  },
+  {
+    "DisplayName": "Has New Message (Wazzup Chats)",
+    "Name": "new_wazzupchat_new_hasnewmessage",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_hasnewmessage",
+        "OptionSetReferenceEntityName": "Wazzup Chats"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_hasnewmessage",
+    "RelatedEntityName": "Wazzup Chats",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "IsActive (Wazzup Chats)",
+    "Name": "new_wazzupchat_new_isactive",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_isactive",
+        "OptionSetReferenceEntityName": "Wazzup Chats"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_isactive",
+    "RelatedEntityName": "Wazzup Chats",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (Wazzup Chats)",
+    "Name": "new_wazzupchat_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Wazzup Chats"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Wazzup Chats",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Wazzup Chats)",
+    "Name": "new_wazzupchat_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Wazzup Chats"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Wazzup Chats",
+    "Type": "OptionSetInfo"
+  }
+]

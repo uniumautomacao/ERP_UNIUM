@@ -6,7 +6,7 @@
     "IsSampleData": false,
     "IsWritable": true,
     "LogicalName": "new_ordemdeservicofieldcontrol",
-    "MaxGetRowsCount": 2000,
+    "MaxGetRowsCount": 500,
     "Name": "Ordens de Serviço Field Control",
     "NativeCDSDataSourceInfoNameMapping": {
       "_ownerid_value": "Owner",
@@ -253,6 +253,36 @@
     },
     "OptionSetTypeKey": "PicklistType",
     "RelatedColumnInvariantName": "new_aprovacaofinalizacaostatus",
+    "RelatedEntityName": "Ordens de Serviço Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Estado do Estoque",
+    "Name": "new_estadodoestoque",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Disponível",
+      "100000001": "Reservado",
+      "100000002": "Em showroom",
+      "100000003": "Em conserto",
+      "100000004": "Perda",
+      "100000005": "Entregue",
+      "100000006": "Não Reservado",
+      "100000007": "Parcialmente Reservado",
+      "100000008": "Separado",
+      "100000009": "Granular",
+      "100000010": "Faturamento Direto",
+      "100000011": "Empréstimo Devolvido"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_situacaodeprodutos",
+        "OptionSetReferenceEntityName": "Ordens de Serviço Field Control"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_situacaodeprodutos",
     "RelatedEntityName": "Ordens de Serviço Field Control",
     "Type": "OptionSetInfo"
   },
@@ -593,6 +623,37 @@
     },
     "OptionSetTypeKey": "StatusType",
     "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Ordens de Serviço Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Tipo de Serviço de OS",
+    "Name": "new_tipodeservicodeos",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Cabeamento",
+      "100000001": "Instalação",
+      "100000002": "Manutenção",
+      "100000003": "Conferência de infraestrutura",
+      "100000004": "Entrega",
+      "100000005": "Desenho de PTI",
+      "100000006": "Ajuste de PTI",
+      "100000007": "Instalação placa de obra",
+      "100000008": "Remoção de placa de obra",
+      "100000009": "Montagem de Quadro",
+      "100000010": "Serviço Interno",
+      "100000011": "Lista de Conferência",
+      "100000012": "Configuração"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_tipodeservico",
+        "OptionSetReferenceEntityName": "Ordens de Serviço Field Control"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_tipodeservico",
     "RelatedEntityName": "Ordens de Serviço Field Control",
     "Type": "OptionSetInfo"
   }

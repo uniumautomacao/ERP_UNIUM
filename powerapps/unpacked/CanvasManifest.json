@@ -15,7 +15,7 @@
     "AppPreviewFlagsMap": {
       "adaptivepaging": false,
       "aibuilderserviceenrollment": true,
-      "allowmultiplescreensincanvaspages": true,
+      "allowmultiplescreensincanvaspages": false,
       "appinsightserrortracing": false,
       "appinstrumentationcorrelationtracing": false,
       "autocreateenvironmentvariables": false,
@@ -49,7 +49,7 @@
       "enableonstart": true,
       "enableonstartnavigate": false,
       "enablepcfmoderndatasets": true,
-      "enablerowscopeonetonexpand": true,
+      "enablerowscopeonetonexpand": false,
       "enablerpawarecomponentdependency": true,
       "enablesaveloadcleardataonweb": false,
       "enableupdateifdelegation": false,
@@ -74,7 +74,7 @@
       "optimizedforteamsmeeting": false,
       "optimizestartscreenpublishedappload": true,
       "packagemodernruntime": false,
-      "pdffunction": true,
+      "pdffunction": false,
       "powerfxdecimal": false,
       "powerfxv1": false,
       "preferpayamlv2inux": false,
@@ -103,26 +103,26 @@
     "BindingErrorCount": 0,
     "ConnectionString": "",
     "ContainsThirdPartyPcfControls": true,
-    "DefaultConnectedDataSourceMaxGetRowsCount": 2000,
+    "DefaultConnectedDataSourceMaxGetRowsCount": 500,
     "DocumentAppType": "DesktopOrTablet",
-    "DocumentLayoutHeight": 896,
+    "DocumentLayoutHeight": 768,
     "DocumentLayoutLockOrientation": false,
     "DocumentLayoutMaintainAspectRatio": false,
-    "DocumentLayoutOrientation": "portrait",
+    "DocumentLayoutOrientation": "landscape",
     "DocumentLayoutScaleToFit": false,
-    "DocumentLayoutWidth": 414,
+    "DocumentLayoutWidth": 1366,
     "DocumentType": "Page",
     "EnableInstrumentation": false,
     "FileID": "042705d4-2c4e-4f6a-935b-0045f3665fc4",
-    "Id": "ff05f06d-91a7-4956-800e-8c3ab10ea23d",
+    "Id": "3a0bf39e-2b0e-49fc-a765-869dcf8c2b4c",
     "ManualOfflineProfileId": "",
-    "Name": "R3VpYSBkZSBDb25leMO1ZXMgUGFnZQ.msapp",
+    "Name": "UXVhZHJvIGRlIFJNQXM.msapp",
     "OriginatingVersion": "1.321",
     "ParserErrorCount": 1,
     "ShowStatusBar": false
   },
   "PublishInfo": {
-    "AppName": "ERP UNIUM",
+    "AppName": "Quadro de RMAs",
     "BackgroundColor": "RGBA(0,176,240,1)",
     "IconColor": "RGBA(255,255,255,1)",
     "IconName": "Edit",
@@ -133,8 +133,6 @@
     "UserLocale": "en-US"
   },
   "ScreenOrder": [
-    "Home Screen",
-    "DeviceScreen",
-    "ReportScreen"
+    "Home Screen"
   ]
 }

@@ -1,0 +1,224 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_rmas",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_rma",
+    "MaxGetRowsCount": 500,
+    "Name": "RMAS",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "exchangerate": "Exchange Rate",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_assistenciatecnica": "Assistência Técnica",
+      "new_Cliente": "Cliente",
+      "new_clienteinformadosobreestagioatual": "Cliente Informado Sobre Estágio Atual",
+      "new_codigoderastreiodatransportadora": "Código de Rastreio da Transportadora",
+      "new_datadolembrete": "Data do Lembrete",
+      "new_descricao": "Descrição",
+      "new_estoquerma_RMA_new_rma": "Estoque-RMAS",
+      "new_id": "Id",
+      "new_lembreteexpirado": "Lembrete Expirado",
+      "new_nomedoclientefx": "Nome do Cliente (Fx)",
+      "new_observacoes": "Observações",
+      "new_OrdemdeServico": "Ordem de Serviço",
+      "new_posicao": "Posição",
+      "new_previsaodechegadanaassistencia": "Previsão de Chegada na Assistência",
+      "new_previsaoderetornodaassistencia": "Previsão de Retorno da Assistência",
+      "new_Projeto": "Projeto",
+      "new_projetoapelidofx": "Projeto (Apelido) (Fx)",
+      "new_quantidade": "Quantidade",
+      "new_rma_AsyncOperations": "System Jobs",
+      "new_rma_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_rma_DuplicateBaseRecord": "Duplicate Records (new_rma_DuplicateBaseRecord)",
+      "new_rma_DuplicateMatchingRecord": "Duplicate Records (new_rma_DuplicateMatchingRecord)",
+      "new_rma_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_rma_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_rma_ProcessSession": "Process Sessions",
+      "new_rma_SyncErrors": "Sync Errors",
+      "new_rmaid": "RMA",
+      "new_s3objects_RMA_new_rma": "S3 Objects",
+      "new_sinalizar": "Sinalizar",
+      "new_situacao": "Situação",
+      "new_situacaonumerico": "Situação (Numérico)",
+      "new_tipoderma": "Tipo de RMA",
+      "new_Transportadora": "Transportadora",
+      "new_ultimoestagioinformadoaocliente": "Último Estágio Informado ao Cliente",
+      "new_valordofretedeida": "Valor do Frete de Ida",
+      "new_valordofretedeida_base": "Valor do Frete de Ida (Base)",
+      "new_valordofretedevolta": "Valor do Frete de Volta",
+      "new_valordofretedevolta_base": "Valor do Frete de Volta (Base)",
+      "new_valordoreparo": "Valor do Reparo",
+      "new_valordoreparo_base": "Valor do Reparo (Base)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "transactioncurrencyid": "Currency",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "RMAS",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "RMAS (Views)",
+    "Name": "_new_rma_views",
+    "RelatedEntityName": "RMAS",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "217a1721-d722-4c3c-a2cd-fd4dbffd3f53": "RMA Advanced Find View",
+      "4d5ff191-2bf5-4e71-97b6-201acbf13537": "RMA Lookup View",
+      "5361f0eb-794e-4516-b8d8-f2afae197056": "Inactive RMAS",
+      "639d6bfb-2c7c-ef11-ac20-6045bd3c1133": "RMAs de Devolução Ativos",
+      "64bf9cec-2c7c-ef11-ac20-6045bd3c1133": "RMAs de Manutenção Ativos",
+      "9b989795-a083-470e-ba0a-eade70070272": "RMAs Ativos",
+      "ddd6f2a8-ab51-4658-be26-25725e729df8": "RMA Associated View"
+    }
+  },
+  {
+    "DisplayName": "Cliente Informado Sobre Estágio Atual (RMAS)",
+    "Name": "new_rma_new_clienteinformadosobreestagioatual",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_clienteinformadosobreestagioatual",
+        "OptionSetReferenceEntityName": "RMAS"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_clienteinformadosobreestagioatual",
+    "RelatedEntityName": "RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Lembrete Expirado (RMAS)",
+    "Name": "new_rma_new_lembreteexpirado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_lembreteexpirado",
+        "OptionSetReferenceEntityName": "RMAS"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_lembreteexpirado",
+    "RelatedEntityName": "RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Sinalizar (RMAS)",
+    "Name": "new_rma_new_sinalizar",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_sinalizar",
+        "OptionSetReferenceEntityName": "RMAS"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_sinalizar",
+    "RelatedEntityName": "RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (RMAS)",
+    "Name": "new_rma_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "RMAS"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (RMAS)",
+    "Name": "new_rma_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "RMAS"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "RMA Stage",
+    "Name": "new_rmastage",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Novos",
+      "101000000": "Em avaliação interna",
+      "101100000": "Enviar para assistência",
+      "102000000": "Em trânsito para assistência",
+      "103000000": "Em análise",
+      "104000000": "Aguardando aprovação",
+      "105000000": "Em reparo",
+      "106000000": "Em trânsito de retorno",
+      "107000000": "Recebido da assistência",
+      "108000000": "Testado",
+      "109000000": "Devolvido"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_situacao",
+        "OptionSetReferenceEntityName": "RMAS"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_ultimoestagioinformadoaocliente",
+        "OptionSetReferenceEntityName": "RMAS"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_situacao",
+    "RelatedEntityName": "RMAS",
+    "Type": "OptionSetInfo"
+  }
+]

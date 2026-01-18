@@ -1,0 +1,223 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_estoquermas",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_estoquerma",
+    "MaxGetRowsCount": 500,
+    "Name": "Estoque-RMAS",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_aprovadoparavenda": "Aprovado Para Venda",
+      "new_contemduplicidadedeprodutos": "Contém Duplicidade de Produtos",
+      "new_edevolucaodeemprestimo": "É Devolução de Empréstimo",
+      "new_estoquerma_AsyncOperations": "System Jobs",
+      "new_estoquerma_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_estoquerma_DuplicateBaseRecord": "Duplicate Records (new_estoquerma_DuplicateBaseRecord)",
+      "new_estoquerma_DuplicateMatchingRecord": "Duplicate Records (new_estoquerma_DuplicateMatchingRecord)",
+      "new_estoquerma_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_estoquerma_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_estoquerma_ProcessSession": "Process Sessions",
+      "new_estoquerma_SyncErrors": "Sync Errors",
+      "new_estoquermaid": "Estoque-RMA",
+      "new_etiquetadoestoque": "Etiqueta do Estoque",
+      "new_etiquetaprodutoantigo": "Etiqueta Produto Antigo",
+      "new_etiquetaprodutonovo": "Etiqueta Produto Novo",
+      "new_id": "Id",
+      "new_ItemDevolucao": "Item Devolução",
+      "new_opcaodedevolucao": "Opção de Devolução",
+      "new_OrcamentoDevolucao": "Orçamento Devolução",
+      "new_Produto": "Produto",
+      "new_produtoantigostatus": "Produto Antigo Status",
+      "new_ProdutoNovo": "Produto Novo",
+      "new_produtonovostatus": "Produto Novo Status",
+      "new_referenciadoproduto": "Referência do Produto",
+      "new_RMA": "RMA",
+      "new_tipoderma": "Tipo de RMA",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Estoque-RMAS",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Estoque-RMAS (Views)",
+    "Name": "_new_estoquerma_views",
+    "RelatedEntityName": "Estoque-RMAS",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "3859af15-58aa-4c04-99f3-c87723000ed3": "Estoque-RMAS Ativos",
+      "475e303a-4d9f-4ad4-a460-efe8ed2bb621": "Estoque-RMA Lookup View",
+      "a7b4ecdc-0bb2-4c84-80d0-f6c8e3a4e71f": "Estoque-RMA Advanced Find View",
+      "b244e7c5-fbde-4eda-952d-63e89f414dfa": "Inactive Estoque-RMAS",
+      "f676bab5-3d78-4b56-936c-e7601aebc2ab": "Estoque-RMA Associated View"
+    }
+  },
+  {
+    "DisplayName": "Aprovado Para Venda (Estoque-RMAS)",
+    "Name": "new_estoquerma_new_aprovadoparavenda",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_aprovadoparavenda",
+        "OptionSetReferenceEntityName": "Estoque-RMAS"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_aprovadoparavenda",
+    "RelatedEntityName": "Estoque-RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Contém Duplicidade de Produtos (Estoque-RMAS)",
+    "Name": "new_estoquerma_new_contemduplicidadedeprodutos",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_contemduplicidadedeprodutos",
+        "OptionSetReferenceEntityName": "Estoque-RMAS"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_contemduplicidadedeprodutos",
+    "RelatedEntityName": "Estoque-RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "É Devolução de Empréstimo (Estoque-RMAS)",
+    "Name": "new_estoquerma_new_edevolucaodeemprestimo",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_edevolucaodeemprestimo",
+        "OptionSetReferenceEntityName": "Estoque-RMAS"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_edevolucaodeemprestimo",
+    "RelatedEntityName": "Estoque-RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (Estoque-RMAS)",
+    "Name": "new_estoquerma_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Estoque-RMAS"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Estoque-RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Estoque-RMAS)",
+    "Name": "new_estoquerma_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Estoque-RMAS"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Estoque-RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Opção de Devolução",
+    "Name": "new_opcaodedevolucao",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Não Solicitado",
+      "100000001": "Solicitado",
+      "100000002": "Devolvido e Creditado",
+      "100000003": "Rejeitado",
+      "100000004": "Não Disponível"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_opcaodedevolucao",
+        "OptionSetReferenceEntityName": "Estoque-RMAS"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_opcaodedevolucao",
+    "RelatedEntityName": "Estoque-RMAS",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Tipo de RMA",
+    "Name": "new_tipoderma",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Retorno Temporário ao Estoque",
+      "100000001": "Manutenção",
+      "100000002": "Devolução Definitiva do Produto",
+      "100000003": "Devolução de Empréstimo",
+      "100000004": "Retorno Para Troca de Produto"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_tipoderma",
+        "OptionSetReferenceEntityName": "Estoque-RMAS"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_tipoderma",
+        "OptionSetReferenceEntityName": "RMAS"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_tipoderma",
+    "RelatedEntityName": "Estoque-RMAS",
+    "Type": "OptionSetInfo"
+  }
+]

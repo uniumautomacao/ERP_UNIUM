@@ -332,43 +332,13 @@
     },
     {
       "Kind": "Page",
-      "Name": "ERP UNIUM",
+      "Name": "Guia de Conexões Page",
       "Value": "custompage:new_guiadeconexespage_6e45d"
     },
     {
       "Kind": "Page",
       "Name": "Quadro de Oportunidades",
       "Value": "custompage:new_quadrodeoportunidades_b10b7"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Recibos Page",
-      "Value": "custompage:new_recibospage_d528f"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Atendimento Page V2",
-      "Value": "custompage:new_atendimentopagev2_9426e"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Planejador de Serviços",
-      "Value": "custompage:new_planejadordeservios_f8492"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Tarefas Coordenador",
-      "Value": "custompage:new_tarefascoordenador_9345e"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Relatório de Localizações",
-      "Value": "custompage:new_relatriodelocalizaes_a0d3c"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Ativação de Etiquetas de Estoque Page",
-      "Value": "custompage:new_ativaodeetiquetasdeestoquepage_d8f47"
     },
     {
       "Kind": "Page",
@@ -402,13 +372,33 @@
     },
     {
       "Kind": "Page",
-      "Name": "Quadro de RMAs",
-      "Value": "custompage:new_quadrodermas_00b05"
+      "Name": "Atendimento Page V2",
+      "Value": "custompage:new_atendimentopagev2_9426e"
     },
     {
       "Kind": "Page",
-      "Name": "Feedbacks Colaborador",
-      "Value": "custompage:new_feedbackscolaborador_9c42b"
+      "Name": "Planejador de Serviços",
+      "Value": "custompage:new_planejadordeservios_f8492"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Relatório de Localizações",
+      "Value": "custompage:new_relatriodelocalizaes_a0d3c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Ativação de Etiquetas de Estoque Page",
+      "Value": "custompage:new_ativaodeetiquetasdeestoquepage_d8f47"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Recibos Page",
+      "Value": "custompage:new_recibospage_d528f"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tarefas Coordenador",
+      "Value": "custompage:new_tarefascoordenador_9345e"
     },
     {
       "Kind": "Page",
@@ -422,18 +412,63 @@
     },
     {
       "Kind": "Page",
-      "Name": "Compras e Cotações V2 Page",
-      "Value": "custompage:new_comprasecotaesv2page_9fec1"
+      "Name": "Quadro de RMAs",
+      "Value": "custompage:new_quadrodermas_00b05"
     },
     {
       "Kind": "Page",
-      "Name": "Lista de Inspeção Page",
-      "Value": "custompage:new_listadeinspeopage_0bbcf"
+      "Name": "Feedbacks Colaborador",
+      "Value": "custompage:new_feedbackscolaborador_9c42b"
     },
     {
       "Kind": "Page",
       "Name": "Aprovações de Compra Clara Card",
       "Value": "custompage:new_aprovaesdecompraclaracard_379cb"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Linha do Tempo V3",
+      "Value": "custompage:new_linhadotempov3_67b27"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Clara Card Page",
+      "Value": "custompage:new_claracardpage_b2443"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Compras e Cotações V2 Page",
+      "Value": "custompage:new_comprasecotaesv2page_9fec1"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Conferências de Instalação Pendentes Page",
+      "Value": "custompage:new_confernciasdeinstalaopendentespage_fa954"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Dashboard de Instalações Page",
+      "Value": "custompage:new_dashboarddeinstalaespage_939b5"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Resultado do Instalador Page",
+      "Value": "custompage:new_resultadodoinstaladorpage_dae5c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerador de Etiquetas de Endereço de Armazém",
+      "Value": "custompage:new_geradordeetiquetasdeendereodearmazm_5799a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Enviar PDF Comprovante de Pagamento",
+      "Value": "custompage:new_enviarpdfcomprovantedepagamento_04eb4"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Lista de Inspeção Page",
+      "Value": "custompage:new_listadeinspeopage_0bbcf"
     },
     {
       "Kind": "Page",
@@ -457,8 +492,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Linha do Tempo V3",
-      "Value": "custompage:new_linhadotempov3_67b27"
+      "Name": "Cadastro Rápido de Produto Page",
+      "Value": "custompage:new_cadastrorpidodeprodutopage_25f69"
     },
     {
       "Kind": "Page",
@@ -467,23 +502,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Clara Card Page",
-      "Value": "custompage:new_claracardpage_b2443"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Aplicativo",
-      "Value": "custompage:new_aplicativo_38686"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Conferências de Instalação Pendentes Page",
-      "Value": "custompage:new_confernciasdeinstalaopendentespage_fa954"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Resultado do Instalador Page",
-      "Value": "custompage:new_resultadodoinstaladorpage_dae5c"
+      "Name": "Cadastro de Retorno de Mercadoria Page",
+      "Value": "custompage:new_cadastroderetornodemercadoriapage_754dc"
     },
     {
       "Kind": "Page",
@@ -492,53 +512,18 @@
     },
     {
       "Kind": "Page",
-      "Name": "Mapa de Instalação Page",
-      "Value": "custompage:new_mapadeinstalaopage_ff2aa"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Dashboard de Instalações Page",
-      "Value": "custompage:new_dashboarddeinstalaespage_939b5"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Enviar PDF Comprovante de Pagamento",
-      "Value": "custompage:new_enviarpdfcomprovantedepagamento_04eb4"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Cadastro Rápido de Produto Page",
-      "Value": "custompage:new_cadastrorpidodeprodutopage_25f69"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Gerador de Etiquetas de Endereço de Armazém",
-      "Value": "custompage:new_geradordeetiquetasdeendereodearmazm_5799a"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Inserção Manual de Créditos do Cliente",
-      "Value": "custompage:new_inseromanualdecrditosdocliente_3e8f8"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Operador 3_2",
-      "Value": "custompage:new_operador32_4fde3"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Operador 3_1 Page",
-      "Value": "custompage:new_operador31page_78b2e"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Cadastro de Retorno de Mercadoria Page",
-      "Value": "custompage:new_cadastroderetornodemercadoriapage_754dc"
+      "Name": "Aplicativo",
+      "Value": "custompage:new_aplicativo_38686"
     },
     {
       "Kind": "Page",
       "Name": "Gerar Créditos de Devolução Page",
       "Value": "custompage:new_gerarcrditosdedevoluopage_7eb88"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Mapa de Instalação Page",
+      "Value": "custompage:new_mapadeinstalaopage_ff2aa"
     },
     {
       "Kind": "Page",
@@ -552,8 +537,23 @@
     },
     {
       "Kind": "Page",
+      "Name": "Inserção Manual de Créditos do Cliente",
+      "Value": "custompage:new_inseromanualdecrditosdocliente_3e8f8"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Operador 3_2",
+      "Value": "custompage:new_operador32_4fde3"
+    },
+    {
+      "Kind": "Page",
       "Name": "Gerador de Etiquetas de Endereço V2",
       "Value": "custompage:new_geradordeetiquetasdeendereov2_e540e"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Operador 3_1 Page",
+      "Value": "custompage:new_operador31page_78b2e"
     }
   ]
 }
