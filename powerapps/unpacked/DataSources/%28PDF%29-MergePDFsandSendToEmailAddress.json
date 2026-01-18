@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "5d191843-39a2-47dc-bf43-3e1f0933eb50",
+    "Name": "(PDF)-MergePDFsandSendToEmailAddress",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "23e820f1-6252-ef11-bfe2-002248deeb48"
+  }
+]

@@ -1,0 +1,890 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  ReportScreen:
+    Properties:
+      Fill: =RGBA(255, 255, 255, 1)
+      Height: =1123
+      LoadingSpinnerColor: =RGBA(0, 120, 212, 1)
+      OnVisible: |-
+        =UpdateContext(
+            {//LoadTimer: true,
+        SpinCounter2: SpinCounter2 + 1}
+        );
+        ClearCollect(
+            SummaryItems,
+            With(
+                {
+                    Value: SortByColumns(
+                        AddColumns(
+                            InputDevices As Cur,
+                            TemplateHeight,
+                            29 + 40 + CountRows(Cur.Connections) * 35/*
+                            CountIf(
+                                Cur.Connections As C,
+                                true//Not(Len(C.new_localizacao) > 0)
+                            ) * 33 + CountIf(
+                                Cur.Connections As I,
+                                false//Len(I.new_localizacao) > 0
+                            ) * 46 + 80 + 5*/,
+                            Position,
+                            0,
+                            DeviceName,
+                            First(Cur.Connections).new_Device.Name,
+                            TipoDeSistema,
+                            With(
+                                {Value: GUID(Cur.new_deviceid)} As Id,
+                                LookUp(
+                                    DeviceIOs As D,
+                                    D.DeviceIO = Id.Value,
+                                    D.'Modelo de Produto'.'Tipo de Sistema Padrão'
+                                )
+                            )
+                        ),
+                        "new_localizacao",
+                        SortOrder.Ascending,
+                        "TipoDeSistema",
+                        SortOrder.Ascending
+                    )
+                } As Sections,
+                ForAll(
+                    Sequence(CountRows(Sections.Value)) As I,
+                    Patch(
+                        Index(
+                            Sections.Value,
+                            I.Value
+                        ),
+                        {
+                            IndexValue: I.Value,
+                            Page: -1
+                        }
+                    )
+                )
+            )
+        );
+        //Definir páginas
+        UpdateIf(
+            SummaryItems As S,
+            S.new_deviceid = Index(
+                SummaryItems,
+                1
+            ).new_deviceid,
+            {Page: 1}
+        );
+        With(
+            {
+                Value: Filter(
+                    SummaryItems As I,
+                    I.Page < 1
+                )
+            } As Items,
+            ForAll(
+                Items.Value As Item,
+                With(
+                    {
+                        MaxPage: Max(
+                            SummaryItems,
+                            Page
+                        )
+                    } As Para,
+                    If(
+                        (Sum(
+                            Filter(
+                                SummaryItems As I,
+                                I.Page = Para.MaxPage
+                            ),
+                            TemplateHeight
+                        ) + Item.TemplateHeight) > 890,
+                        UpdateIf(
+                            SummaryItems As I,
+                            I.new_deviceid = Item.new_deviceid,
+                            {Page: Para.MaxPage + 1}
+                        ),
+                        UpdateIf(
+                            SummaryItems As I,
+                            I.new_deviceid = Item.new_deviceid,
+                            {Page: Para.MaxPage}
+                        )
+                    )
+                )
+            )
+        );
+        UpdateContext(
+            {
+                CurrentPage: 1,
+                SpinCounter2: Max(
+                    SpinCounter2 - 1,
+                    0
+                )//,LoadTimer: false
+            }
+        )
+      Width: =794
+    Children:
+      - SummaryNovoPageContainer:
+          Control: GroupContainer@1.4.0
+          Variant: AutoLayout
+          Properties:
+            Height: |
+              =Parent.Height-65
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width
+            Y: =40
+          Children:
+            - SummaryHeaderContainer:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =40
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  PaddingRight: =40
+                Children:
+                  - SummaryHeaderLogo:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledFill: =RGBA(0, 0, 0, 0)
+                        Height: =Parent.Height
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        Image: =logo_fundobranco_slogan_medium
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        OnSelect: =Navigate('Home Screen')
+                        PaddingLeft: =20
+                        PressedBorderColor: =RGBA(0, 0, 0, 0)
+                        PressedFill: =RGBA(0, 0, 0, 0)
+                        Width: |
+                          =200
+            - SummaryClienteContainer:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =20
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  PaddingLeft: =10
+                Children:
+                  - SummaryClienteNameLabel:
+                      Control: FluentV8/Button@1.5.13
+                      Properties:
+                        Alignment: =Align.Left
+                        BorderColor: =RGBA(179, 179, 179, 1)
+                        BorderStyle: =BorderStyle.Solid
+                        ButtonType: ='Button.ButtonType'.Standard
+                        DisabledBorderColor: =RGBA(204, 204, 204, 1)
+                        DisabledFillColor: =RGBA(255, 255, 255, 1)
+                        DisabledTextColor: =RGBA(0, 0, 0, 1)
+                        DisplayMode: =DisplayMode.View
+                        FillPortions: =1
+                        Font: =Font.'Lato Black'
+                        FontSize: =11
+                        FontWeight: =FontWeight.Normal
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Text: ="Guia de Conexões "&CurrentProjeto.Apelido
+            - SummaryGallery:
+                Control: Gallery@2.15.0
+                Variant: BrowseLayout_Flexible_SocialFeed_pcfCore
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =RGBA(166, 166, 166, 1)
+                  FocusedBorderColor: =RGBA(0, 120, 212, 1)
+                  FocusedBorderThickness: =2
+                  Items: =Filter(SummaryItems As I, I.Page = CurrentPage)
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  TemplatePadding: =5
+                  TemplateSize: =317
+                  X: =60
+                  Y: =60
+                Children:
+                  - Image6:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledFill: =RGBA(0, 0, 0, 0)
+                        Height: =SummaryGalleryTemplateContainer.Height
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        ImagePosition: =ImagePosition.Fill
+                        OnSelect: =Select(Parent)
+                        PressedBorderColor: =RGBA(0, 0, 0, 0)
+                        PressedFill: =RGBA(0, 0, 0, 0)
+                        Visible: =false
+                        Width: =Parent.TemplateWidth
+                        X: =SummaryGalleryTemplateContainer.X
+                        Y: =SummaryGalleryTemplateContainer.Y
+                  - SummaryGalleryTemplateContainer:
+                      Control: GroupContainer@1.4.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =ThisItem.TemplateHeight
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        PaddingBottom: =5
+                        PaddingLeft: =5
+                        PaddingRight: =5
+                        PaddingTop: =5
+                        Width: =Parent.TemplateWidth
+                      Children:
+                        - SummaryGallerySectionTitleContainer:
+                            Control: GroupContainer@1.4.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorValue(AppTheme.palette.neutralLight)
+                              FillPortions: =0
+                              Height: =29
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              PaddingLeft: =5
+                              PaddingRight: =5
+                            Children:
+                              - SummaryGallerySectionTitle:
+                                  Control: FluentV8/Label@1.8.6
+                                  Properties:
+                                    FillPortions: =1
+                                    Font: =Font.'Lato Black'
+                                    FontWeight: =FontWeight.Normal
+                                    Height: =20
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =
+                                    TabIndex: =-1
+                                    Text: =ThisItem.DeviceName
+                                    VerticalAlignment: =VerticalAlign.Top
+                                    Width: =
+                                    X: =
+                                    Y: =
+                              - SummaryGallerySectionAmbienteSubtitle:
+                                  Control: FluentV8/Label@1.8.6
+                                  Properties:
+                                    Alignment: =Align.Right
+                                    FillPortions: =1
+                                    Font: =Font.'Lato Black'
+                                    FontWeight: =FontWeight.Normal
+                                    Height: =20
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =
+                                    TabIndex: =-1
+                                    Text: |-
+                                      ="Localização: "&ThisItem.new_localizacao
+                                    VerticalAlignment: =VerticalAlign.Top
+                                    Visible: =Len(TrimEnds(ThisItem.new_localizacao))>0
+                                    Width: =
+                                    X: =
+                                    Y: =
+                        - SummaryGalleryTemplateDListContainer:
+                            Control: GroupContainer@1.4.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =RGBA(153, 153, 153, 1)
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Height: =//SummaryGalleryTemplateDList.Height
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinHeight: =0
+                            Children:
+                              - SummaryGalleryTemplateDList:
+                                  Control: CodeComponent
+                                  ComponentName: cat_PowerCAT.FluentDetailsList
+                                  Properties:
+                                    AlternateRowColor: =AppTheme.palette.neutralLighter
+                                    CurrentSortDirection: ='PowerCAT.FluentDetailsList.CurrentSortDirection'.Ascending
+                                    Height: =Parent.Height
+                                    Items: =ThisItem.Connections
+                                    SelectionType: ='PowerCAT.FluentDetailsList.SelectionType'.None
+                                    Theme: =AppThemeJson
+                                    Visible: =false
+                                    Width: =Parent.Width
+                                    columns_Items: |-
+                                      =Table(
+                                          {
+                                              ColName: "new_name",
+                                              ColDisplayName: "Porta de Origem",
+                                              ColWidth: 130,
+                                              ColIsBold: true,
+                                              ColVerticalAlign: "Center",
+                                              ColHorizontalAlign: "Left"
+                                              //,ColShowAsSubTextOf: "Descrição"
+                                          },
+                                          {
+                                              ColName: "new_tipodeconexao",
+                                              ColDisplayName: "Porta",
+                                              ColSortable: true,
+                                              ColWidth: 90,
+                                              ColRowHeader: true,
+                                              ColResizable: true,
+                                              ColHorizontalAlign: "Left",
+                                              ColVerticalAlign: "Center",
+                                              ColIsBold: false
+                                          },
+                                          {
+                                              ColName: "new_direcao",
+                                              ColDisplayName: "Direção",
+                                              ColSortable: true,
+                                              ColWidth: 50,
+                                              ColRowHeader: true,
+                                              ColResizable: true,
+                                              ColHorizontalAlign: "Left",
+                                              ColVerticalAlign: "Center",
+                                              ColIsBold: false//,ColShowAsSubTextOf: "new_tipodeconexao"
+                                          },
+                                          {
+                                              ColName: "ConnectedToLocation",
+                                              ColDisplayName: "Local Destino",
+                                              ColWidth: 100,
+                                              ColIsBold: false,
+                                              ColVerticalAlign: "Center",
+                                              ColHorizontalAlign: "Left"//, ColShowAsSubTextOf: "ConnectedToDeviceName"
+                                          },
+                                          {
+                                              ColName: "ConnectedToDeviceName",
+                                              ColDisplayName: "Dispositivo Destino",
+                                              ColSortable: true,
+                                              ColWidth: Self.Width - 45 - 45 - 130 - 130 - 65 - 50 - 140,
+                                              ColResizable: true,
+                                              ColHorizontalAlign: "Left",
+                                              ColVerticalAlign: "Center",
+                                              ColLabelAbove: false,
+                                              ColIsBold: true
+                                          },
+                                          {
+                                              ColName: "ConnectedToName",
+                                              ColDisplayName: "Porta de Destino",
+                                              ColSortable: true,
+                                              ColWidth: 130,
+                                              ColResizable: true,
+                                              ColMultiLine: true,
+                                              ColHorizontalAlign: "Left",
+                                              ColVerticalAlign: "Center",
+                                              ColIsBold: true
+                                          }
+                                      )
+                                  Children:
+                                    - new_deviceioconnectionid1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="new_deviceioconnectionid"
+                                          FieldName: ="new_deviceioconnectionid"
+                                          FieldType: ="g"
+                                          Order: =2
+                                    - new_name1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="new_name"
+                                          FieldName: ="new_name"
+                                          FieldType: ="s"
+                                          Order: =3
+                                    - new_tipodeconexao1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="new_tipodeconexao"
+                                          FieldName: ="new_tipodeconexao"
+                                          FieldType: ="l"
+                                          Order: =4
+                                    - new_direcao1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="new_direcao"
+                                          FieldName: ="new_direcao"
+                                          FieldType: ="l"
+                                          Order: =5
+                                    - ConnectedToName1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="ConnectedToName"
+                                          FieldName: ="ConnectedToName"
+                                          FieldType: ="s"
+                                          Order: =6
+                                    - ConnectedToDeviceName1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="ConnectedToDeviceName"
+                                          FieldName: ="ConnectedToDeviceName"
+                                          FieldType: ="s"
+                                          Order: =7
+                                    - new_tipodeconexaorawtext1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="new_tipodeconexaorawtext"
+                                          FieldName: ="new_tipodeconexaorawtext"
+                                          FieldType: ="s"
+                                          Order: =8
+                                    - ConnectedToLocation1:
+                                        Control: DataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="ConnectedToLocation"
+                                          FieldName: ="ConnectedToLocation"
+                                          FieldType: ="s"
+                                          Order: =9
+                              - SummaryGalleryTemplateTable:
+                                  Control: Table@1.0.278
+                                  Properties:
+                                    EnableRangeSelection: ='PowerAppsOneGrid.EnableRangeSelection'.Disable
+                                    EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Disable
+                                    Font: ="Lato"
+                                    FontSize: =11
+                                    Height: =Parent.Height
+                                    Items: |-
+                                      =ForAll(
+                                          RenameColumns(
+                                              ThisItem.Connections,
+                                              new_name,
+                                              'Porta de Origem',
+                                              ConnectedToLocation,
+                                              'Local Destino',
+                                              ConnectedToDeviceName,
+                                              'Dispositivo Destino',
+                                              ConnectedToName,
+                                              'Porta de Destino'
+                                          ) As Item,
+                                          Patch(
+                                              Item,
+                                              {
+                                                  'Tipo de Conexão': Text(Item.new_tipodeconexao),
+                                                  Direção: Text(Item.new_direcao)
+                                              }
+                                          )
+                                      )
+                                    NoDataText: ="Nenhum dado encontrado"
+                                    ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.GridOnly
+                                    ShowAvatar: ="no"
+                                    ShowFooter: ="no"
+                                    Width: =Parent.Width-Self.X+50
+                                    X: =-50
+                                  Children:
+                                    - Porta de Origem1:
+                                        Control: TableDataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          CanGrow: =false
+                                          FieldDisplayName: ="Porta de Origem"
+                                          FieldName: ="Porta de Origem"
+                                          FieldType: ="s"
+                                          Order: =1
+                                          Width: =150
+                                    - Tipo de Conexão2:
+                                        Control: TableDataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          CanGrow: =false
+                                          FieldDisplayName: ="Tipo de Conexão"
+                                          FieldName: ="Tipo de Conexão"
+                                          FieldType: ="s"
+                                          Order: =2
+                                          Width: =100
+                                    - Direção1:
+                                        Control: TableDataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          CanGrow: =false
+                                          FieldDisplayName: ="Direção"
+                                          FieldName: ="Direção"
+                                          FieldType: ="s"
+                                          Order: =3
+                                          Width: =80
+                                    - Local Destino1:
+                                        Control: TableDataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          CanGrow: =false
+                                          FieldDisplayName: ="Local Destino"
+                                          FieldName: ="Local Destino"
+                                          FieldType: ="s"
+                                          Order: =4
+                                          Width: =110
+                                    - Dispositivo Destino1:
+                                        Control: TableDataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          CanGrow: =false
+                                          FieldDisplayName: ="Dispositivo Destino"
+                                          FieldName: ="Dispositivo Destino"
+                                          FieldType: ="s"
+                                          Order: =5
+                                          Width: =180
+                                    - Porta de Destino1:
+                                        Control: TableDataField@1.5.0
+                                        Variant: textualColumn
+                                        IsLocked: true
+                                        Properties:
+                                          FieldDisplayName: ="Porta de Destino"
+                                          FieldName: ="Porta de Destino"
+                                          FieldType: ="s"
+                                          Order: =6
+                                          Width: =220
+            - FooterContainer_1:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =29
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                Children:
+                  - Container1_1:
+                      Control: GroupContainer@1.4.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: |
+                          =29
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =0
+                      Children:
+                        - SpacerContainer:
+                            Control: GroupContainer@1.4.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =0
+                        - FooterPageLabel:
+                            Control: FluentV8/Label@1.8.6
+                            Properties:
+                              Alignment: =Align.Right
+                              AutoHeight: =true
+                              FillPortions: =1
+                              Font: =Font.Lato
+                              FontWeight: =FontWeight.Semibold
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =0
+                              Text: =CurrentPage&" de "&Max(SummaryItems,Page)
+                              Width: =100
+                              X: =Parent.Width-Self.Width-10
+                              Y: =SummaryNovoPageContainer.Y+SummaryNovoPageContainer.Height-Self.Height-10
+      - Button8_1:
+          Control: FluentV8/Button@1.5.13
+          Properties:
+            OnSelect: |-
+              =UpdateContext({CurrentPage: Max(CurrentPage-1,1)})
+            Text: ="Page -"
+            Visible: =!Parent.Printing
+            X: =548
+            Y: =1002
+      - Button8:
+          Control: FluentV8/Button@1.5.13
+          Properties:
+            OnSelect: |
+              =UpdateContext(
+                  {
+                      CurrentPage: Min(
+                          CurrentPage + 1,
+                          Max(
+                              SummaryItems,
+                              Page
+                          )
+                      )
+                  }
+              );
+            Text: ="Page +"
+            Visible: =!Parent.Printing
+            X: =663
+            Y: =1002
+      - PDFIcon:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(0, 120, 212, 1)
+            DisabledColor: =RGBA(220, 220, 220, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Height: =32
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            HoverFill: =RGBA(0, 0, 0, 0)
+            Icon: =Icon.DocumentPDF
+            OnSelect: |-
+              =UpdateContext({PrintDestination: Blank()});
+              Select(PrintingTimer)
+              /*With(
+                  {Value: PDF(SummaryNovoPageContainer)}As File,
+                  Download(
+                      '(PDF)-UploadPDFFile'.Run(
+                          {
+                              file: {
+                                  name: "proposta" & RandBetween(
+                                      1,
+                                      1000
+                                  ) & "_" & Now() & ".pdf",
+                                  contentBytes: File.Value
+                              }
+                          }
+                      ).url
+                  )
+              )*/
+            PaddingBottom: =3
+            PaddingLeft: =3
+            PaddingRight: =3
+            PaddingTop: =3
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            Visible: =!Parent.Printing
+            Width: =32
+            X: =67
+            Y: =1066
+      - PrintingTimer:
+          Control: Timer@2.1.0
+          Properties:
+            BorderColor: =RGBA(0, 120, 212, 1)
+            BorderStyle: =BorderStyle.None
+            Color: =RGBA(255, 255, 255, 1)
+            Duration: =20000
+            Fill: =RGBA(0, 120, 212, 1)
+            FocusedBorderThickness: =2
+            Font: =Font.'Segoe UI'
+            HoverBorderColor: =ColorFade(RGBA(0, 120, 212, 1), -10%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(0, 120, 212, 1), -10%)
+            OnSelect: |-
+              =UpdateContext(
+                  {
+                      CurrentPage: 1,
+                      SpinCounter2: SpinCounter2 + 1
+                  }
+              );
+              Clear(FilePathCollection);
+              Set(
+                  StartTimerFlag,
+                  true
+              );
+            OnTimerEnd: |-
+              =If(
+                  StartTimerFlag,
+                  With(
+                      {Value: PDF(SummaryNovoPageContainer)}As File,
+                      With(
+                          '(PDF)-UploadPDFFile'.Run(
+                              {
+                                  file: {
+                                      name: "proposta" & RandBetween(
+                                          1,
+                                          1000
+                                      ) & "_" & Now() & ".pdf",
+                                      contentBytes: File.Value
+                                  }
+                              }
+                          ) As Result,
+                          Collect(
+                              FilePathCollection,
+                              Result
+                          );
+                          //Download(Result.url)
+                      )
+                  );
+                  If(
+                      CurrentPage < Max(
+                          SummaryItems,
+                          Page
+                      ),
+                      UpdateContext({CurrentPage: CurrentPage + 1}),
+                      Set(
+                          StartTimerFlag,
+                          false
+                      );
+                      If(
+                          IsBlank(PrintDestination),
+                          Download(
+                              '(PDF)-MergePDFs'.Run(
+                                  Concat(
+                                      FilePathCollection As File,
+                                      File.filepath,
+                                      "; "
+                                  )
+                              ).filepath
+                          ),
+                          '(PDF)-MergePDFsandSendToEmailAddress'.Run(
+                              Concat(
+                                  FilePathCollection As File,
+                                  File.filepath,
+                                  "; "
+                              ),
+                              PrintDestination
+                          )
+                      );
+                      UpdateContext({SpinCounter2: SpinCounter2 - 1})
+                  )
+              )
+            OnTimerStart: =
+            PressedBorderColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            Repeat: =StartTimerFlag
+            Size: =10.5
+            Start: =StartTimerFlag
+            Visible: =SpinCounter2 > 0
+            X: =99
+            Y: =891
+      - CtnSpinner_1:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            ContentLanguage: =
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(0, 0, 0, 0.15)
+            Height: =Parent.Height
+            Visible: =SpinCounter2 > 0
+            Width: =Parent.Width
+          Children:
+            - Container6_1:
+                Control: GroupContainer@1.4.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height*.4
+                  RadiusBottomLeft: =Self.RadiusTopLeft
+                  RadiusBottomRight: =Self.RadiusTopLeft
+                  RadiusTopLeft: =Min(Self.Width,Self.Height)*.05
+                  RadiusTopRight: =Self.RadiusTopLeft
+                  Width: =Parent.Width*.4
+                  X: =(Parent.Width-Self.Width)/2
+                  Y: =(Parent.Height-Self.Height)/2
+                Children:
+                  - Spinner2_1:
+                      Control: CodeComponent
+                      ComponentName: cat_PowerCAT.Spinner
+                      Properties:
+                        BackgroundColor: ="#ffffff00"
+                        Height: =Parent.Height
+                        Label: ="Carregando"
+                        LabelPosition: ='PowerCAT.Spinner.LabelPosition'.Bottom
+                        SpinnerAlignment: ='PowerCAT.Spinner.SpinnerAlignment'.Center
+                        SpinnerSize: ='PowerCAT.Spinner.SpinnerSize'.Large
+                        Theme: =AppThemeJson
+                        Width: =Parent.Width
+                        X: =(Parent.Width-Self.Width)/2
+                        Y: =(Parent.Height-Self.Height)/2
+      - CloseIcon:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(0, 120, 212, 1)
+            DisabledColor: =RGBA(220, 220, 220, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Height: =32
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            HoverFill: =RGBA(0, 0, 0, 0)
+            Icon: =Icon.Cancel
+            OnSelect: =Select(SummaryHeaderLogo)
+            PaddingBottom: =3
+            PaddingLeft: =3
+            PaddingRight: =3
+            PaddingTop: =3
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            Visible: =!Parent.Printing
+            Width: =32
+            X: =20
+            Y: =1066
+      - MailIcon:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(0, 120, 212, 1)
+            DisabledColor: =RGBA(220, 220, 220, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Height: =32
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            HoverFill: =RGBA(0, 0, 0, 0)
+            Icon: =Icon.Mail
+            OnSelect: |-
+              =UpdateContext({PrintDestination: User().Email});
+              Select(PrintingTimer)
+              /*With(
+                  {Value: PDF(SummaryNovoPageContainer)}As File,
+                  Download(
+                      '(PDF)-UploadPDFFile'.Run(
+                          {
+                              file: {
+                                  name: "proposta" & RandBetween(
+                                      1,
+                                      1000
+                                  ) & "_" & Now() & ".pdf",
+                                  contentBytes: File.Value
+                              }
+                          }
+                      ).url
+                  )
+              )*/
+            PaddingBottom: =3
+            PaddingLeft: =3
+            PaddingRight: =3
+            PaddingTop: =3
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            Visible: =!Parent.Printing
+            Width: =32
+            X: =115
+            Y: =1066

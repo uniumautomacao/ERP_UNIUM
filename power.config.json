@@ -1,0 +1,28 @@
+{
+  "appId": "",
+  "appDisplayName": "ERP UNIUM",
+  "description": null,
+  "environmentId": "b52cf2e9-4b61-e3d6-8fae-c290205ed8e5",
+  "buildPath": "./dist",
+  "buildEntryPoint": "index.html",
+  "logoPath": "Default",
+  "localAppUrl": "http://localhost:3000/",
+  "region": "prod",
+  "connectionReferences": {},
+  "databaseReferences": {
+    "default.cds": {
+      "state": "Configured",
+      "instanceUrl": "https://dev-unium.crm2.dynamics.com/",
+      "webApiVersion": "v9.0",
+      "dataSources": {
+        "users": {
+          "entitySetName": "systemusers",
+          "logicalName": "systemuser",
+          "isHidden": false
+        }
+      },
+      "version": "v9.0",
+      "environmentVariableName": ""
+    }
+  }
+}

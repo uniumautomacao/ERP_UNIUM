@@ -1,0 +1,559 @@
+{
+  "NamedValues": [
+    {
+      "Kind": "Page",
+      "Name": "Custom Page Template",
+      "Value": "custompage:cat_custompagetemplate_231d0"
+    },
+    {
+      "Kind": "Page",
+      "Name": "SpinButton Page",
+      "Value": "custompage:cat_spinbuttonpage_4c2cb"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Persona Page",
+      "Value": "custompage:cr7a3_personapage_404d9"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Field Main Page",
+      "Value": "custompage:new_fieldmainpagetestefotos_5e6fe"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tag List",
+      "Value": "custompage:cat_taglist_6a134"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Planner de Projetos",
+      "Value": "custompage:new_dashboarddeprojetos_27fe9"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Solicitações de Agendamento",
+      "Value": "custompage:new_solicitaesdeagendamento_014f7"
+    },
+    {
+      "Kind": "Page",
+      "Name": "People Picker",
+      "Value": "custompage:cat_peoplepicker_80157"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Auto Width Label Page",
+      "Value": "custompage:cat_autowidthlabel_53db5"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Command Bar Page",
+      "Value": "custompage:cat_creatorkitreferencepage_60a17"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Breadcrumb Page",
+      "Value": "custompage:cat_breadcrumbpage_8963e"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Painel de Compras V0",
+      "Value": "custompage:new_paineldecomprasv0_d5163"
+    },
+    {
+      "Kind": "Page",
+      "Name": "ContextMenu Page",
+      "Value": "custompage:cat_contextmenupage_7df18"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Ticket Page",
+      "Value": "custompage:new_ticketpage_59767"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Orçamento Canvas",
+      "Value": "custompage:new_oramentocanvas_a908c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Icon Page",
+      "Value": "custompage:cat_iconpage_e2422"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Pivot Page",
+      "Value": "custompage:cat_pivotpage_f0b2a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerador de Rack",
+      "Value": "custompage:new_geradorderack_dd8fc"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tag Picker",
+      "Value": "custompage:cat_tagpicker_ca530"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Nav Page",
+      "Value": "custompage:cat_navpage_18ad8"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Revisao de Campanha",
+      "Value": "custompage:new_revisaodecampanha_68548"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tickets Page",
+      "Value": "custompage:new_ticketspage_66a4d"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Facepile",
+      "Value": "custompage:cat_facepile_10ba0"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Facepile Page",
+      "Value": "custompage:cat_facepilepage_13c32"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Overview",
+      "Value": "custompage:cat_overview_3dbf5"
+    },
+    {
+      "Kind": "Page",
+      "Name": "DetailsList Page",
+      "Value": "custompage:cat_detailslistbasicpage_07690"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerador de Painel de Automação",
+      "Value": "custompage:new_geradordepaineldeautomao_baf88"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Spinner Page",
+      "Value": "custompage:cat_spinnerpage_39ec0"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Atendimento Page",
+      "Value": "custompage:new_atendimentopage_d88a3"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Shimmer Page",
+      "Value": "custompage:cat_shimmerpage_9b5cd"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Panel Page",
+      "Value": "custompage:cat_detailslistbasicpage_46cc7"
+    },
+    {
+      "Kind": "Page",
+      "Name": "SearchBox Page",
+      "Value": "custompage:cat_searchboxpage_2dd0f"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Acompanhamento Page",
+      "Value": "custompage:new_acompanhamentopage_85ddc"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Expand Menu",
+      "Value": "custompage:cat_expandmenu_e71c4"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Arquivos de Instalação",
+      "Value": "custompage:new_arquivosdeinstalao_316b8"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Fotos de Ordem de Seriço",
+      "Value": "custompage:new_fotosdeordemdeserio_30768"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Dialog Page",
+      "Value": "custompage:cat_dialogpanel_15d96"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Home Page",
+      "Value": "custompage:cat_homepage_8d348"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Field Operator",
+      "Value": "custompage:new_fieldoperator_ea16a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "ProgressIndicator Page",
+      "Value": "custompage:cat_progressindicatorpage_9ea28"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Conversations Review Page",
+      "Value": "custompage:new_conversationsreviewpage_b215f"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Painel de Tarefas",
+      "Value": "custompage:new_paineldetarefas_ea63f"
+    },
+    {
+      "Kind": "Page",
+      "Name": "SubwayNav Page",
+      "Value": "custompage:cat_subwaynavpage_b2b78"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Dataverse Actions Page",
+      "Value": "custompage:cat_dataverseactiondetailspage_eec36"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Página Dashboard CS (V4)",
+      "Value": "custompage:new_pginadashboardcsv4_67acc"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Keyboard shortcuts",
+      "Value": "custompage:cat_keyboardshortcuts_5ca22"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Resizable Text Area",
+      "Value": "custompage:cat_resizabletextarea_eb7d1"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Elevation Page",
+      "Value": "custompage:cat_elevationpage_28669"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Calendar Page",
+      "Value": "custompage:cat_calendarpage_cb349"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Conferência Pontos de Projeto Page",
+      "Value": "custompage:new_confernciapontosdeprojetopage_d1b07"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Pontos de Projeto Report Page",
+      "Value": "custompage:new_pontosdeprojetoreportpage_231b7"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Compras e Cotações Page",
+      "Value": "custompage:new_comprasecotaespage_ddd04"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Pedidos e Remessas Page",
+      "Value": "custompage:new_pedidoseremessaspage_2428f"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Orçamento Page",
+      "Value": "custompage:new_oramentopage_dd97b"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Calendário de Serviços Page",
+      "Value": "custompage:new_calendriodeserviospage_911ef"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Publicar Fotos de Ordem de Serviço Page",
+      "Value": "custompage:new_publicarfotosdeordemdeserviopage_7d6ba"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Campanha Instaladores Page",
+      "Value": "custompage:new_campanhainstaladorespage_3fec9"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Enviar PDF de Recibo Page",
+      "Value": "custompage:new_enviarpdfderecibopage_daf6c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Moderação do Feed Page",
+      "Value": "custompage:new_moderaodofeedpage_6213a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Novas Fotos Page",
+      "Value": "custompage:new_novasfotospage_f60b6"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Operador 2 Page",
+      "Value": "custompage:new_operador2page_b40b0"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Criar OS Temporario Page",
+      "Value": "custompage:new_criarostemporariopage_c9a31"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Speed Test Servers Page",
+      "Value": "custompage:new_speedtestserverspage_02431"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Import DrawIO File Page",
+      "Value": "custompage:new_importdrawiofilepage_390f4"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Campanha Instaladores 2024_2 Page",
+      "Value": "custompage:new_campanhainstaladores20242page_18564"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Linha do Tempo V2",
+      "Value": "custompage:new_linhadotempov2_ff14a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "ERP UNIUM",
+      "Value": "custompage:new_guiadeconexespage_6e45d"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Quadro de Oportunidades",
+      "Value": "custompage:new_quadrodeoportunidades_b10b7"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Recibos Page",
+      "Value": "custompage:new_recibospage_d528f"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Atendimento Page V2",
+      "Value": "custompage:new_atendimentopagev2_9426e"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Planejador de Serviços",
+      "Value": "custompage:new_planejadordeservios_f8492"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tarefas Coordenador",
+      "Value": "custompage:new_tarefascoordenador_9345e"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Relatório de Localizações",
+      "Value": "custompage:new_relatriodelocalizaes_a0d3c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Ativação de Etiquetas de Estoque Page",
+      "Value": "custompage:new_ativaodeetiquetasdeestoquepage_d8f47"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Speec To Text Playground",
+      "Value": "custompage:new_speectotextplayground_fba64"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Ajustes de Localização Page",
+      "Value": "custompage:new_ajustesdelocalizaopage_71983"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Campanha Operacional 2025_1 Page",
+      "Value": "custompage:new_campanhaoperacional20251page_0d054"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Liberação de ip em firewall Page",
+      "Value": "custompage:new_liberaodeipemfirewallpage_7df28"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Campanha do CS",
+      "Value": "custompage:new_campanhadocs_cc217"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Recibos e Emissão de NF Page",
+      "Value": "custompage:new_reciboseemissodenfpage_c16a8"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Quadro de RMAs",
+      "Value": "custompage:new_quadrodermas_00b05"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Feedbacks Colaborador",
+      "Value": "custompage:new_feedbackscolaborador_9c42b"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Operador 3 Page",
+      "Value": "custompage:new_operador3page_27443"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Playground",
+      "Value": "custompage:new_playground_a1347"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Compras e Cotações V2 Page",
+      "Value": "custompage:new_comprasecotaesv2page_9fec1"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Lista de Inspeção Page",
+      "Value": "custompage:new_listadeinspeopage_0bbcf"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Aprovações de Compra Clara Card",
+      "Value": "custompage:new_aprovaesdecompraclaracard_379cb"
+    },
+    {
+      "Kind": "Page",
+      "Name": "CriarClientesAPP",
+      "Value": "custompage:new_criarclientesapp_4eef6"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Cadastro Catalogo Page",
+      "Value": "custompage:new_cadastrocatalogopage_a7ac6"
+    },
+    {
+      "Kind": "Page",
+      "Name": "CF_Produtos",
+      "Value": "custompage:new_cfprodutos_80d6a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Compras Page",
+      "Value": "custompage:new_compraspage_cd238"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Linha do Tempo V3",
+      "Value": "custompage:new_linhadotempov3_67b27"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Cotações Page",
+      "Value": "custompage:new_cotaespage_bfa2b"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Clara Card Page",
+      "Value": "custompage:new_claracardpage_b2443"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Aplicativo",
+      "Value": "custompage:new_aplicativo_38686"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Conferências de Instalação Pendentes Page",
+      "Value": "custompage:new_confernciasdeinstalaopendentespage_fa954"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Resultado do Instalador Page",
+      "Value": "custompage:new_resultadodoinstaladorpage_dae5c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Movimentações de Mercadoria Page",
+      "Value": "custompage:new_movimentaesdemercadoriapage_0b1a6"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Mapa de Instalação Page",
+      "Value": "custompage:new_mapadeinstalaopage_ff2aa"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Dashboard de Instalações Page",
+      "Value": "custompage:new_dashboarddeinstalaespage_939b5"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Enviar PDF Comprovante de Pagamento",
+      "Value": "custompage:new_enviarpdfcomprovantedepagamento_04eb4"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Cadastro Rápido de Produto Page",
+      "Value": "custompage:new_cadastrorpidodeprodutopage_25f69"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerador de Etiquetas de Endereço de Armazém",
+      "Value": "custompage:new_geradordeetiquetasdeendereodearmazm_5799a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Inserção Manual de Créditos do Cliente",
+      "Value": "custompage:new_inseromanualdecrditosdocliente_3e8f8"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Operador 3_2",
+      "Value": "custompage:new_operador32_4fde3"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Operador 3_1 Page",
+      "Value": "custompage:new_operador31page_78b2e"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Cadastro de Retorno de Mercadoria Page",
+      "Value": "custompage:new_cadastroderetornodemercadoriapage_754dc"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerar Créditos de Devolução Page",
+      "Value": "custompage:new_gerarcrditosdedevoluopage_7eb88"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Desagrupar Itens de Estoque",
+      "Value": "custompage:new_desagruparitensdeestoque_8b90d"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tarefas de Desagrupamento Page",
+      "Value": "custompage:new_tarefasdedesagrupamentopage_b831c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerador de Etiquetas de Endereço V2",
+      "Value": "custompage:new_geradordeetiquetasdeendereov2_e540e"
+    }
+  ]
+}

@@ -1,0 +1,853 @@
+# Guia de Desenvolvimento UI - Template Model-Driven App
+
+Este documento contém instruções detalhadas para agentes de IA sobre como criar e editar páginas neste template. **LEIA COMPLETAMENTE ANTES DE FAZER QUALQUER ALTERAÇÃO.**
+
+---
+
+## 1. VISÃO GERAL DO TEMPLATE
+
+### 1.1 Design System
+
+Este template replica o visual dos **Microsoft Power Apps Model-Driven Apps modernos**. Todas as decisões de design devem seguir este padrão visual.
+
+### 1.2 Stack Tecnológica
+
+```
+- React 18.3.1 com TypeScript
+- @fluentui/react-components (Fluent UI v9) - componentes de interface
+- @fluentui/react-icons - ícones oficiais Microsoft
+- Tailwind CSS 3.4 - APENAS para layout (grid, flex, spacing)
+- React Router DOM v6 - navegação
+- Recharts - gráficos customizados
+```
+
+### 1.3 Filosofia Principal
+
+**REGRA DE OURO:** Use Fluent UI para TODOS os componentes de interface. Use Tailwind APENAS para layout e espaçamento.
+
+---
+
+## 2. ESTRUTURA OBRIGATÓRIA DE PÁGINAS
+
+### 2.1 Template Padrão
+
+**TODA página DEVE seguir exatamente esta estrutura:**
+
+```tsx
+import { CommandBar } from '../../components/layout/CommandBar';
+import { PageContainer } from '../../components/layout/PageContainer';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { Add24Regular, ArrowSync24Regular } from '@fluentui/react-icons';
+
+export function NomeDaPagina() {
+  // Primary Actions: ações principais sempre visíveis
+  const primaryActions = [
+    {
+      id: 'add',
+      label: 'Add Item',
+      icon: <Add24Regular />,
+      onClick: () => console.log('Add'),
+      appearance: 'primary' as const,  // Destaque na primeira ação
+    },
+    {
+      id: 'refresh',
+      label: 'Refresh',
+      icon: <ArrowSync24Regular />,
+      onClick: () => console.log('Refresh'),
+    },
+  ];
+
+  // Secondary Actions: ações contextuais (opcional)
+  const secondaryActions = [];
+
+  return (
+    <>
+      <CommandBar 
+        primaryActions={primaryActions}
+        secondaryActions={secondaryActions}
+      />
+      <PageHeader 
+        title="Título da Página"
+        subtitle="Descrição opcional"
+      />
+      <PageContainer>
+        {/* Conteúdo da página aqui */}
+      </PageContainer>
+    </>
+  );
+}
+```
+
+### 2.2 Componentes de Layout Obrigatórios
+
+| Componente | Obrigatório | Descrição |
+|------------|-------------|-----------|
+| `CommandBar` | SIM | Barra de comandos no topo (mesmo vazia) |
+| `PageHeader` | SIM | Cabeçalho com título da página |
+| `PageContainer` | SIM | Container do conteúdo com padding correto |
+
+### 2.3 Arquivos de Referência
+
+Consulte estes arquivos como exemplo:
+- `src/pages/section1-analytics/DashboardPage.tsx` - Dashboard completo
+- `src/pages/section2-operations/InventoryPage.tsx` - Página com DataGrid
+- `src/pages/section2-operations/TeamManagementPage.tsx` - Página com cards
+
+---
+
+## 2.5 COMMANDBAR - USO CORRETO
+
+### 2.5.1 Organização de Ações
+
+O `CommandBar` suporta três categorias de ações que aparecem em sequência da esquerda para direita:
+
+```
+[Primary Actions] | [Secondary Actions] | [... Overflow]
+```
+
+**Regras de Layout:**
+- Todos os botões alinhados da esquerda para a direita em sequência
+- Dividers verticais aparecem **apenas entre categorias**, não entre cada botão
+- Overflow responsivo: comandos só movem para o menu `...` quando realmente não cabem na tela
+
+### 2.5.2 Tipos de Ações
+
+| Tipo | Prop | Quando Usar | Visibilidade |
+|------|------|-------------|--------------|
+| **Primary Actions** | `primaryActions` | Ações principais da página (Add, Import, Export, Refresh) | Sempre visíveis (vão para overflow apenas se não couberem) |
+| **Secondary Actions** | `secondaryActions` | Ações contextuais condicionais (Edit, Delete quando há seleção) | Aparecem/desaparecem dinamicamente |
+| **Overflow Actions** | `overflowActions` | Ações raramente usadas ou menos importantes | Sempre no menu overflow |
+
+### 2.5.3 Organização Recomendada
+
+**Ordem das Ações:**
+1. Ação principal com destaque: `appearance: 'primary'`
+2. Ações de criação (Add, New)
+3. Ações utilitárias (Import, Export, Refresh)
+
+**❌ NÃO FAÇA:**
+- Colocar ações comuns (Refresh, Export) apenas em `overflowActions`
+- Deixar `overflowActions` lotado - a maioria das páginas deve ter esse array vazio
+- Usar dividers entre cada botão da mesma categoria
+
+### 2.5.4 Exemplos de Uso
+
+#### Exemplo 1: Página Simples (Apenas Primary Actions)
+
+```tsx
+export function DashboardPage() {
+  const commandBarActions = [
+    {
+      id: 'refresh',
+      label: 'Refresh',
+      icon: <ArrowSync24Regular />,
+      onClick: () => console.log('Refresh'),
+    },
+    {
+      id: 'export',
+      label: 'Export',
+      icon: <ArrowExport24Regular />,
+      onClick: () => console.log('Export'),
+    },
+    {
+      id: 'customize',
+      label: 'Customize',
+      icon: <Settings24Regular />,
+      onClick: () => console.log('Customize'),
+    },
+  ];
+
+  return (
+    <>
+      <CommandBar primaryActions={commandBarActions} />
+      <PageHeader title="Dashboard" />
+      <PageContainer>
+        {/* Conteúdo */}
+      </PageContainer>
+    </>
+  );
+}
+```
+
+#### Exemplo 2: Página com Ações Contextuais (Primary + Secondary)
+
+```tsx
+export function InventoryPage() {
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const primaryActions = [
+    {
+      id: 'add',
+      label: 'Add Item',
+      icon: <Add24Regular />,
+      onClick: () => console.log('Add'),
+      appearance: 'primary' as const,  // Destaque visual
+    },
+    {
+      id: 'import',
+      label: 'Import',
+      icon: <ArrowDownload24Regular />,
+      onClick: () => console.log('Import'),
+    },
+    {
+      id: 'export',
+      label: 'Export',
+      icon: <ArrowExport24Regular />,
+      onClick: () => console.log('Export'),
+    },
+    {
+      id: 'refresh',
+      label: 'Refresh',
+      icon: <ArrowSync24Regular />,
+      onClick: () => console.log('Refresh'),
+    },
+  ];
+
+  // Ações que aparecem apenas quando há itens selecionados
+  const secondaryActions = selectedItems.length > 0 ? [
+    {
+      id: 'edit',
+      label: 'Edit',
+      icon: <Edit24Regular />,
+      onClick: () => console.log('Edit', selectedItems),
+    },
+    {
+      id: 'delete',
+      label: 'Delete',
+      icon: <Delete24Regular />,
+      onClick: () => console.log('Delete', selectedItems),
+    },
+  ] : [];
+
+  return (
+    <>
+      <CommandBar 
+        primaryActions={primaryActions}
+        secondaryActions={secondaryActions}
+      />
+      <PageHeader title="Inventory Management" />
+      <PageContainer>
+        {/* Conteúdo */}
+      </PageContainer>
+    </>
+  );
+}
+```
+
+#### Exemplo 3: Página com Overflow (Raro)
+
+```tsx
+export function ReportsPage() {
+  const primaryActions = [
+    {
+      id: 'new',
+      label: 'New Report',
+      icon: <Add24Regular />,
+      onClick: () => console.log('New'),
+      appearance: 'primary' as const,
+    },
+  ];
+
+  const secondaryActions = [
+    {
+      id: 'import',
+      label: 'Import Template',
+      icon: <FolderOpen24Regular />,
+      onClick: () => console.log('Import'),
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: <Settings24Regular />,
+      onClick: () => console.log('Settings'),
+    },
+  ];
+
+  return (
+    <>
+      <CommandBar 
+        primaryActions={primaryActions}
+        secondaryActions={secondaryActions}
+      />
+      <PageHeader title="Reports" />
+      <PageContainer>
+        {/* Conteúdo */}
+      </PageContainer>
+    </>
+  );
+}
+```
+
+### 2.5.5 Comportamento Mobile
+
+Em telas mobile, o botão hamburger aparece à esquerda e **todas as ações** (primary, secondary, overflow) vão automaticamente para o menu overflow. O CommandBar gerencia isso automaticamente - não é necessário código adicional.
+
+### 2.5.6 Estrutura da Interface CommandAction
+
+```typescript
+interface CommandAction {
+  id: string;                              // ID único da ação
+  label: string;                           // Texto do botão
+  icon?: React.ReactElement;               // Ícone (opcional)
+  onClick: () => void;                     // Handler do click
+  appearance?: 'primary' | 'subtle';       // Aparência (opcional)
+  disabled?: boolean;                      // Desabilitado (opcional)
+}
+```
+
+---
+
+## 3. REGRAS DE ESTILIZAÇÃO - CRÍTICO
+
+### 3.1 Divisão Clara: Fluent UI vs Tailwind
+
+**USE FLUENT UI PARA:**
+- Todos os componentes de interface (Button, Card, Text, Input, etc.)
+- Todas as cores (via tokens)
+- Tipografia (Text, tamanhos, pesos)
+- Componentes interativos (Menu, Dialog, Dropdown)
+
+**USE TAILWIND APENAS PARA:**
+- Grid layout: `grid`, `grid-cols-*`
+- Flexbox: `flex`, `items-center`, `justify-between`
+- Espaçamento: `gap-*`, `mb-*`, `mt-*`, `p-*`
+- Responsividade: `tablet:`, `desktop:`, `wide:`
+
+### 3.2 PROIBIDO - NÃO FAÇA ISSO
+
+```tsx
+// ❌ ERRADO - Cores Tailwind
+<div className="bg-blue-500 text-white">
+
+// ❌ ERRADO - Bordas Tailwind
+<div className="border border-gray-300 rounded-lg">
+
+// ❌ ERRADO - Sombras Tailwind
+<div className="shadow-lg">
+
+// ❌ ERRADO - HTML puro para botões
+<button className="px-4 py-2 bg-blue-500">Click</button>
+
+// ❌ ERRADO - Cores hardcoded
+<div style={{ backgroundColor: '#0078D4' }}>
+
+// ❌ ERRADO - div ao invés de Card
+<div className="border rounded p-4">
+```
+
+### 3.3 CORRETO - FAÇA ASSIM
+
+```tsx
+// ✅ CORRETO - Componente Fluent UI
+<Button appearance="primary">Click</Button>
+
+// ✅ CORRETO - Card do Fluent UI
+<Card style={{ padding: 16 }}>
+
+// ✅ CORRETO - Cores via tokens
+<div style={{ backgroundColor: tokens.colorNeutralBackground2 }}>
+
+// ✅ CORRETO - Tailwind apenas para layout
+<div className="grid grid-cols-2 gap-4">
+
+// ✅ CORRETO - Bordas via tokens
+<div style={{ border: `1px solid ${tokens.colorNeutralStroke2}` }}>
+```
+
+---
+
+## 4. TOKENS DE CORES - REFERÊNCIA COMPLETA
+
+### 4.1 Importação Obrigatória
+
+```tsx
+import { tokens } from '@fluentui/react-components';
+```
+
+### 4.2 Backgrounds (Fundos)
+
+```typescript
+tokens.colorNeutralBackground1   // Fundo principal (branco/escuro)
+tokens.colorNeutralBackground2   // Fundo secundário (sidebar, areas)
+tokens.colorNeutralBackground3   // Fundo terciário (headers de tabela)
+tokens.colorNeutralBackground1Hover  // Hover em itens
+tokens.colorBrandBackground      // Fundo azul primário (#0078D4)
+tokens.colorBrandBackground2     // Fundo azul claro (item selecionado)
+```
+
+### 4.3 Foregrounds (Textos)
+
+```typescript
+tokens.colorNeutralForeground1   // Texto principal
+tokens.colorNeutralForeground2   // Texto secundário
+tokens.colorNeutralForeground3   // Texto terciário (labels, hints)
+tokens.colorBrandForeground1     // Texto azul primário
+tokens.colorBrandForeground2     // Texto azul secundário
+```
+
+### 4.4 Strokes (Bordas)
+
+```typescript
+tokens.colorNeutralStroke1       // Borda forte
+tokens.colorNeutralStroke2       // Borda sutil (mais usada)
+tokens.colorBrandStroke1         // Borda azul
+```
+
+### 4.5 Status/Semânticos
+
+```typescript
+// Sucesso (verde)
+tokens.colorPaletteGreenForeground1
+tokens.colorPaletteGreenBackground2
+
+// Erro (vermelho)
+tokens.colorPaletteRedForeground1
+tokens.colorPaletteRedBackground2
+
+// Aviso (amarelo)
+tokens.colorPaletteYellowForeground1
+tokens.colorPaletteYellowBackground2
+
+// Info (azul)
+tokens.colorPaletteBlueForeground2
+tokens.colorPaletteBlueBackground2
+```
+
+---
+
+## 5. DIMENSÕES E ESPAÇAMENTO
+
+### 5.1 Constantes de Layout
+
+Definidas em `src/config/theme.ts`:
+
+```typescript
+LAYOUT.sidebar.expandedWidth = 280   // Sidebar expandida
+LAYOUT.sidebar.collapsedWidth = 48   // Sidebar colapsada
+LAYOUT.header.height = 48            // Header do app
+LAYOUT.commandBar.height = 44        // Barra de comandos
+LAYOUT.pageHeader.height = 100       // Cabeçalho de página
+```
+
+### 5.2 Breakpoints Responsivos
+
+```typescript
+mobile:  0-767px      // Sem prefixo ou 'mobile:'
+tablet:  768-1023px   // Prefixo 'tablet:'
+desktop: 1024-1279px  // Prefixo 'desktop:'
+wide:    1280px+      // Prefixo 'wide:'
+```
+
+### 5.3 Espaçamentos Padrão
+
+```tsx
+// Entre seções de conteúdo
+className="mb-6"  // margin-bottom: 24px
+
+// Entre cards/componentes
+className="gap-4"  // gap: 16px
+
+// Padding interno de cards
+style={{ padding: 16 }}  // ou padding: '16px'
+
+// Padding do PageContainer
+padding: '24px'  // Já aplicado automaticamente
+```
+
+---
+
+## 6. COMPONENTES DISPONÍVEIS
+
+### 6.1 Componentes de Layout (NÃO MODIFICAR)
+
+| Componente | Arquivo | Descrição |
+|------------|---------|-----------|
+| `AppShell` | `components/layout/AppShell.tsx` | Container principal |
+| `Sidebar` | `components/layout/Sidebar.tsx` | Navegação lateral |
+| `CommandBar` | `components/layout/CommandBar.tsx` | Barra de comandos |
+| `PageHeader` | `components/layout/PageHeader.tsx` | Cabeçalho de página |
+| `PageContainer` | `components/layout/PageContainer.tsx` | Container de conteúdo |
+| `ThemeToggle` | `components/layout/ThemeToggle.tsx` | Toggle claro/escuro |
+
+### 6.2 Componentes Compartilhados (USE ESTES)
+
+| Componente | Arquivo | Uso |
+|------------|---------|-----|
+| `KPICard` | `components/shared/KPICard.tsx` | Cards de métricas |
+| `StatusBadge` | `components/shared/StatusBadge.tsx` | Badges de status |
+| `Timeline` | `components/shared/Timeline.tsx` | Lista de atividades |
+| `DataGrid` | `components/shared/DataGrid.tsx` | Tabela de dados |
+| `FilterBar` | `components/shared/FilterBar.tsx` | Barra de filtros |
+| `EmptyState` | `components/shared/EmptyState.tsx` | Estado vazio |
+| `LoadingState` | `components/shared/LoadingState.tsx` | Estado de carregamento |
+
+### 6.3 Componentes de Gráficos
+
+| Componente | Arquivo | Tipo |
+|------------|---------|------|
+| `AreaChart` | `components/charts/AreaChart.tsx` | Gráfico de área |
+| `BarChart` | `components/charts/BarChart.tsx` | Gráfico de barras |
+| `DonutChart` | `components/charts/DonutChart.tsx` | Gráfico de rosca |
+| `LineChart` | `components/charts/LineChart.tsx` | Gráfico de linhas |
+| `GanttChart` | `components/charts/GanttChart.tsx` | Diagrama de Gantt |
+
+### 6.4 Componentes de Domínio
+
+| Componente | Arquivo | Uso |
+|------------|---------|-----|
+| `InventoryTable` | `components/domain/inventory/InventoryTable.tsx` | Tabela de inventário |
+| `TeamMemberCard` | `components/domain/team/TeamMemberCard.tsx` | Card de membro |
+| `CapacityBar` | `components/domain/team/CapacityBar.tsx` | Barra de capacidade |
+| `ProjectCard` | `components/domain/projects/ProjectCard.tsx` | Card de projeto |
+| `TaskRow` | `components/domain/projects/TaskRow.tsx` | Linha de tarefa |
+
+---
+
+## 7. PADRÕES DE GRID RESPONSIVO
+
+### 7.1 KPI Cards (4 colunas progressivas)
+
+```tsx
+<div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-4 gap-4 mb-6">
+  <KPICard label="Revenue" value="$1.2M" trend={12} />
+  <KPICard label="Orders" value="3,847" trend={5} />
+  <KPICard label="Customers" value="892" trend={8} />
+  <KPICard label="Conversion" value="4.2%" trend={-2} />
+</div>
+```
+
+### 7.2 Duas Colunas Desktop
+
+```tsx
+<div className="grid grid-cols-1 desktop:grid-cols-2 gap-4">
+  <Card>Coluna 1</Card>
+  <Card>Coluna 2</Card>
+</div>
+```
+
+### 7.3 Proporção 2:1 (Chart grande + pequeno)
+
+```tsx
+<div className="grid grid-cols-1 desktop:grid-cols-3 gap-4">
+  <Card style={{ gridColumn: 'span 2' }}>
+    {/* Chart grande - ocupa 2 colunas */}
+  </Card>
+  <Card>
+    {/* Chart pequeno - ocupa 1 coluna */}
+  </Card>
+</div>
+```
+
+### 7.4 Cards Progressivos (Team/Gallery)
+
+```tsx
+<div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 wide:grid-cols-4 gap-4">
+  {items.map(item => <Card key={item.id}>...</Card>)}
+</div>
+```
+
+---
+
+## 8. CHECKLIST: CRIAR NOVA PÁGINA
+
+### 8.1 Passos Obrigatórios
+
+1. **Criar arquivo da página**
+   - Local: `src/pages/section[X]-[categoria]/[Nome]Page.tsx`
+   - Exemplo: `src/pages/section1-analytics/SalesPage.tsx`
+
+2. **Implementar estrutura obrigatória**
+   ```tsx
+   export function SalesPage() {
+     return (
+       <>
+         <CommandBar primaryActions={[]} />
+         <PageHeader title="Sales" />
+         <PageContainer>
+           {/* Conteúdo */}
+         </PageContainer>
+       </>
+     );
+   }
+   ```
+
+3. **Adicionar rota em `src/App.tsx`**
+   ```tsx
+   import { SalesPage } from './pages/section1-analytics/SalesPage';
+   
+   <Route path="/sales" element={<SalesPage />} />
+   ```
+
+4. **Adicionar item no menu em `src/config/navigation.tsx`**
+   ```tsx
+   {
+     id: 'sales',
+     label: 'Sales',
+     icon: <MoneyRegular />,
+     path: '/sales',
+   },
+   ```
+
+5. **Criar dados mockados (se necessário)**
+   - Arquivo: `src/data/mockData.ts`
+   - Adicionar tipos em `src/types/index.ts`
+
+6. **Usar componentes existentes**
+   - Verificar `src/components/shared/` antes de criar novos
+
+### 8.2 NÃO FAÇA
+
+- NÃO crie componentes novos sem necessidade real
+- NÃO modifique `AppShell`, `Sidebar` ou outros componentes de layout
+- NÃO esqueça de registrar a rota
+- NÃO esqueça de adicionar ao menu de navegação
+
+---
+
+## 9. CHECKLIST: EDITAR PÁGINA EXISTENTE
+
+### 9.1 Antes de Editar
+
+1. Ler o arquivo completo para entender a estrutura
+2. Identificar quais componentes já estão sendo usados
+3. Verificar se existem componentes prontos que atendem a necessidade
+
+### 9.2 Durante a Edição
+
+1. Manter a estrutura `CommandBar + PageHeader + PageContainer`
+2. Usar componentes existentes de `src/components/shared/`
+3. Manter consistência de espaçamento (`gap-4`, `mb-6`)
+4. Usar tokens para todas as cores
+5. Testar responsividade mentalmente (mobile, tablet, desktop)
+
+### 9.3 NÃO FAÇA
+
+- NÃO remova CommandBar ou PageHeader
+- NÃO modifique componentes de layout globais
+- NÃO adicione CSS/Tailwind para cores
+- NÃO crie componentes HTML puros
+
+---
+
+## 10. ÍCONES - CONVENÇÃO DE NOMENCLATURA
+
+### 10.1 Importação
+
+```tsx
+import { 
+  IconName24Regular,  // Ícone outline
+  IconName24Filled,   // Ícone preenchido
+} from '@fluentui/react-icons';
+```
+
+### 10.2 Padrão de Nomes
+
+- Use sempre sufixo `24` (tamanho 24px)
+- Use `Regular` para ícones normais
+- Use `Filled` apenas para estados selecionados
+
+### 10.3 Ícones Comuns
+
+```tsx
+// Ações
+Add24Regular         // Adicionar
+Edit24Regular        // Editar
+Delete24Regular      // Deletar
+Save24Regular        // Salvar
+ArrowSync24Regular   // Atualizar
+ArrowExport24Regular // Exportar
+ArrowDownload24Regular // Download
+
+// Navegação
+Home24Regular
+ChartMultiple24Regular
+DocumentBulletList24Regular
+Box24Regular
+CalendarLtr24Regular
+People24Regular
+Settings24Regular
+
+// Status
+Checkmark24Regular   // Sucesso
+Dismiss24Regular     // Fechar/Erro
+Warning24Regular     // Aviso
+Info24Regular        // Informação
+```
+
+---
+
+## 11. TIPOS TYPESCRIPT
+
+### 11.1 Localização
+
+Todos os tipos compartilhados estão em `src/types/index.ts`
+
+### 11.2 Tipos Principais
+
+```typescript
+// Dados
+interface KPIData { label, value, trend?, trendLabel? }
+interface ChartDataPoint { date, value, category? }
+interface InventoryItem { id, sku, name, category, quantity, status, ... }
+interface Project { id, name, progress, status, phases[] }
+interface TeamMember { id, name, role, department, status, capacity, ... }
+interface Activity { id, type, title, description, timestamp, user }
+
+// Navegação
+interface NavItem { id, label, icon, path }
+interface NavSection { id, label, items[] }
+
+// Status
+type StatusType = 'active' | 'inactive' | 'pending' | 'error' | 'warning'
+```
+
+### 11.3 Criar Novos Tipos
+
+Se precisar de novos tipos:
+1. Adicione em `src/types/index.ts`
+2. Exporte-os corretamente
+3. Use em toda a aplicação de forma consistente
+
+---
+
+## 12. ERROS COMUNS A EVITAR
+
+### 12.1 Estilização
+
+| Errado | Correto |
+|--------|---------|
+| `className="bg-blue-500"` | `style={{ backgroundColor: tokens.colorBrandBackground }}` |
+| `className="text-gray-500"` | `<Text style={{ color: tokens.colorNeutralForeground3 }}>` |
+| `className="border rounded"` | `<Card>` ou `style={{ border: \`1px solid ${tokens.colorNeutralStroke2}\` }}` |
+| `<button>` | `<Button>` do Fluent UI |
+| `<input>` | `<Input>` do Fluent UI |
+| `<select>` | `<Dropdown>` do Fluent UI |
+
+### 12.2 Estrutura
+
+| Errado | Correto |
+|--------|---------|
+| Página sem CommandBar | Sempre incluir `<CommandBar primaryActions={[]} />` |
+| Página sem PageHeader | Sempre incluir `<PageHeader title="..." />` |
+| Conteúdo fora de PageContainer | Sempre usar `<PageContainer>` |
+| Modificar AppShell | NUNCA modificar - é o container global |
+
+### 12.3 Componentes
+
+| Errado | Correto |
+|--------|---------|
+| Criar novo Card component | Usar `<Card>` do Fluent UI |
+| Criar novo Badge component | Usar `<StatusBadge>` existente |
+| Criar nova Table component | Usar `<DataGrid>` existente |
+| Criar novo Loading component | Usar `<LoadingState>` existente |
+
+### 12.4 CommandBar
+
+| Errado | Correto |
+|--------|---------|
+| Colocar todas ações em `overflowActions` | Usar `primaryActions` para ações principais |
+| Colocar Refresh/Export apenas no overflow | Incluir em `primaryActions` para fácil acesso |
+| Usar dividers entre cada botão | Dividers apenas entre categorias (primary ❙ secondary ❙ overflow) |
+| `<CommandBar primaryActions={[...20 ações...]} />` | Máximo 4-6 ações em `primaryActions`, resto em `secondaryActions` |
+| Não usar `appearance: 'primary'` | Sempre destacar primeira ação com `appearance: 'primary'` |
+| Layout com `justify-content: space-between` | Botões em sequência da esquerda para direita |
+
+---
+
+## 13. EXEMPLOS PRÁTICOS
+
+### 13.1 Card com Título e Conteúdo
+
+```tsx
+<Card style={{ padding: '16px' }}>
+  <Text size={500} weight="semibold" block style={{ marginBottom: '12px' }}>
+    Título do Card
+  </Text>
+  {/* Conteúdo */}
+</Card>
+```
+
+### 13.2 Lista de Botões de Ação
+
+```tsx
+<div className="flex flex-col gap-2">
+  <Button
+    appearance="primary"
+    icon={<Add24Regular />}
+    style={{ width: '100%', justifyContent: 'flex-start' }}
+  >
+    Ação Primária
+  </Button>
+  <Button
+    appearance="secondary"
+    icon={<Edit24Regular />}
+    style={{ width: '100%', justifyContent: 'flex-start' }}
+  >
+    Ação Secundária
+  </Button>
+</div>
+```
+
+### 13.3 Seção com Filtros
+
+```tsx
+<div className="mb-4">
+  <FilterBar
+    searchValue={searchValue}
+    onSearchChange={setSearchValue}
+    filters={filterOptions}
+    activeFilters={activeFilters}
+    onClearFilter={handleClearFilter}
+    onClearAll={handleClearAll}
+  />
+</div>
+```
+
+### 13.4 Grid de KPIs + Charts
+
+```tsx
+{/* KPIs */}
+<div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-4 gap-4 mb-6">
+  {kpis.map(kpi => <KPICard key={kpi.label} {...kpi} />)}
+</div>
+
+{/* Charts */}
+<div className="grid grid-cols-1 desktop:grid-cols-3 gap-4 mb-6">
+  <Card style={{ padding: '16px', gridColumn: 'span 2' }}>
+    <AreaChart data={data} dataKey="value" />
+  </Card>
+  <Card style={{ padding: '16px' }}>
+    <DonutChart data={pieData} />
+  </Card>
+</div>
+```
+
+---
+
+## 14. RESUMO RÁPIDO
+
+### SEMPRE FAÇA:
+- Use estrutura: CommandBar + PageHeader + PageContainer
+- Use componentes Fluent UI para interface
+- Use tokens para cores: `tokens.colorXxx`
+- Use Tailwind apenas para layout: grid, flex, gap, margin
+- Consulte componentes existentes antes de criar novos
+- Registre rotas e itens de navegação
+
+### NUNCA FAÇA:
+- Cores com Tailwind: `bg-blue-500`, `text-white`
+- Componentes HTML puros: `<button>`, `<input>`, `<select>`
+- Cores hardcoded: `#0078D4`, `blue`, `white`
+- Modificar AppShell ou Sidebar
+- Criar página sem CommandBar/PageHeader
+- Esquecer de registrar rota/navegação
+
+---
+
+**Última atualização:** Janeiro 2026
+**Versão do Template:** 1.1.0
+**Principais mudanças:**
+- Documentação completa do CommandBar (seção 2.5)
+- Padrões de organização de ações (primaryActions, secondaryActions, overflowActions)
+- Comportamento de overflow responsivo
+- Exemplos práticos de uso do CommandBar

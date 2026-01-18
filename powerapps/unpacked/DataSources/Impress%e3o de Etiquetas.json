@@ -1,0 +1,100 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_impressaodeetiquetas",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_impressaodeetiqueta",
+    "MaxGetRowsCount": 2000,
+    "Name": "Impressão de Etiquetas",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_id": "Id",
+      "new_impressaodeetiqueta_AsyncOperations": "System Jobs",
+      "new_impressaodeetiqueta_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_impressaodeetiqueta_DuplicateBaseRecord": "Duplicate Records (new_impressaodeetiqueta_DuplicateBaseRecord)",
+      "new_impressaodeetiqueta_DuplicateMatchingRecord": "Duplicate Records (new_impressaodeetiqueta_DuplicateMatchingRecord)",
+      "new_impressaodeetiqueta_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_impressaodeetiqueta_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_impressaodeetiqueta_ProcessSession": "Process Sessions",
+      "new_impressaodeetiqueta_SyncErrors": "Sync Errors",
+      "new_impressaodeetiquetaid": "Impressão de Etiqueta",
+      "new_nomedoprojeto": "Nome do Projeto",
+      "new_texto": "Texto",
+      "new_textob": "Texto B",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Impressão de Etiquetas",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Impressão de Etiquetas (Views)",
+    "Name": "_new_impressaodeetiqueta_views",
+    "RelatedEntityName": "Impressão de Etiquetas",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "06ea2c98-4679-4e30-a31f-25673ea09dfc": "Inactive Impressão de Etiquetas",
+      "0b8e2d21-e9dd-4588-a939-78c6ccc9b55a": "Impressão de Etiqueta Lookup View",
+      "7d8e410a-af6d-49ad-9d41-aa7cfc2e9252": "Impressão de Etiqueta Associated View",
+      "98e5ca69-e25d-46d3-86a5-499b8a87bea7": "Active Impressão de Etiquetas",
+      "e095d6c9-4eec-4421-8929-aef8cbf5efe7": "Impressão de Etiqueta Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "Status (Impressão de Etiquetas)",
+    "Name": "new_impressaodeetiqueta_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Impressão de Etiquetas"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Impressão de Etiquetas",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Impressão de Etiquetas)",
+    "Name": "new_impressaodeetiqueta_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Impressão de Etiquetas"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Impressão de Etiquetas",
+    "Type": "OptionSetInfo"
+  }
+]

@@ -1,0 +1,46 @@
+/* Imports do Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset mínimo */
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Transição de tema suave */
+[data-theme-transition] * {
+  transition: background-color 200ms ease, 
+              color 200ms ease,
+              border-color 200ms ease;
+}
+
+/* Sidebar expand/collapse */
+.sidebar-transition {
+  transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card hover interativo */
+.card-interactive {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+}
+
+/* Reduced motion para acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

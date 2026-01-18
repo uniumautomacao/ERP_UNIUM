@@ -1,0 +1,34 @@
+export const APP_VERSION = '0.0.6';
+export const APP_BUILD_DATE = '2026-01-18';
+export const VERSION_HISTORY = [
+  { 
+    version: '0.0.6', 
+    date: '2026-01-18', 
+    changes: 'Removidos os divisores entre comandos da CommandBar, mantendo espaçamento por gap. Divisores agora aparecem apenas entre categorias (primary/secondary e overflow).' 
+  },
+  { 
+    version: '0.0.5', 
+    date: '2026-01-18', 
+    changes: 'Ajustado o comportamento de overflow da CommandBar para mover comandos ao menu apenas quando não couberem, com cálculo responsivo de largura.' 
+  },
+  { 
+    version: '0.0.4', 
+    date: '2026-01-18', 
+    changes: 'Movido o comando Refresh do overflow para a barra principal na tela Inventory, garantindo visibilidade imediata.' 
+  },
+  { 
+    version: '0.0.3', 
+    date: '2026-01-18', 
+    changes: 'Corrigido desalinhamento vertical na CommandBar removendo wrappers e ajustando os dividers para altura consistente. Botão de overflow padronizado com appearance subtle.' 
+  },
+  { 
+    version: '0.0.2', 
+    date: '2026-01-18', 
+    changes: 'Corrigido layout do CommandBar para seguir o padrão PowerApps. Todos os botões agora são renderizados em sequência da esquerda para a direita, sem espaçamento artificial. Removido justify-content: space-between e consolidado em uma única Toolbar.' 
+  },
+  { 
+    version: '0.0.1', 
+    date: '2026-01-18', 
+    changes: 'Melhorado o posicionamento dos botões no CommandBar em toda a aplicação. Botões de ação primária agora ficam à esquerda, botões utilitários (Refresh, Export, Customize, Settings, Import) à direita. Atualizado CommandBar para usar layout flexbox com justify-content: space-between. Páginas atualizadas: Dashboard, Analytics, Reports e Project Planner.' 
+  },
+];

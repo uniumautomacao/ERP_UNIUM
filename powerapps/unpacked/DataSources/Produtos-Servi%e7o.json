@@ -1,0 +1,819 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_produtoservicos",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_produtoservico",
+    "MaxGetRowsCount": 2000,
+    "Name": "Produtos-Serviço",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_antecedenciadepedidosdias": "Antecedência de Pedidos (Dias)",
+      "new_apelidodoprojetofx": "Apelido do Projeto (Fx)",
+      "new_AtividadeCriacaoOS": "Atividade Criação OS",
+      "new_Cliente": "Cliente",
+      "new_clienteatualizado": "Cliente Atualizado",
+      "new_clientefieldcontrolid": "Cliente (Field Control Id)",
+      "new_contemcotacao": "Contém Cotação",
+      "new_Cotacao": "Cotação",
+      "new_cotacaofornecedorfx": "Cotação Fornecedor (Fx)",
+      "new_cotacaonamefx": "Cotação Name (Fx)",
+      "new_cr22f_estoquefromsharepointlist_ProdutoSe": "Estoque From SharepointLists",
+      "new_dataconclusaoengraving": "Data Conclusão Engraving",
+      "new_dataconfirmacaoagendamentoentrega": "Data Confirmação Agendamento Entrega",
+      "new_datadaentrega": "Data da Entrega",
+      "new_datadaultimasolicitacaodevinculo": "Data da Última Solicitação de Vínculo",
+      "new_descricao": "Descrição",
+      "new_deviceio_Produto_new_produtoservico": "Device IO",
+      "new_disponivelparavinculo": "Disponível para Vínculo",
+      "new_eemprestimo": "É Empréstimo",
+      "new_efetuarpedido": "Efetuar Pedido",
+      "new_elegivelatrocaporcaixa": "Elegível a Troca Por Caixa",
+      "new_emprestimodevolvido": "Empréstimo Devolvido",
+      "new_entregaproxima": "Entrega Próxima",
+      "new_entregue": "Entregue",
+      "new_entregueespelho": "Entregue Espelho",
+      "new_entregueoverride": "Entregue Override",
+      "new_fabricante": "Fabricante",
+      "new_fornecedorprincipalid": "Fornecedor Principal Id",
+      "new_habilitartarefaconfirmarentregaf1fx": "Habilitar Tarefa Confirmar Entrega F1 (Fx)",
+      "new_habilitartarefaconfirmarentregaf2fx": "Habilitar Tarefa Confirmar Entrega F2 (Fx)",
+      "new_habilitartarefaconfirmarentregaf3fx": "Habilitar Tarefa Confirmar Entrega F3 (Fx)",
+      "new_horasagregadas": "Horas Agregadas",
+      "new_id": "Id",
+      "new_identificadorordemdeservico": "Identificador Ordem de Serviço",
+      "new_ImpressaodeRecibo": "Impressão de Recibo",
+      "new_ItemAutoOrigem": "Item Auto Origem",
+      "new_ItemdeDevolucao": "Item de Devolução",
+      "new_localizacao": "Localização",
+      "new_ModelodeProdutoOriginal": "Modelo de Produto Original",
+      "new_name": "Name",
+      "new_new_cotacaoprodserv_ProdServ_new_produtos": "Cotação-ProdServs",
+      "new_new_solicitacaodevinculodeproduto_ProdOS": "Solicitação de Vínculo de Produtos",
+      "new_nomedoclientefx": "Nome do Cliente (Fx)",
+      "new_nomedofabricante": "Nome do Fabricante",
+      "new_nomedofabricantev2": "Nome do Fabricante V2",
+      "new_nomedofornecedorprincipal": "Nome do Fornecedor Principal",
+      "new_numerodeentregaspendentes": "Número de Entregas Pendentes",
+      "new_numerodeprodutosentregues": "Número de Produtos Entregues",
+      "new_numerodeprodutosentregues_date": "Número de Produtos Entregues (Last Updated On)",
+      "new_numerodeprodutosentregues_state": "Número de Produtos Entregues (State)",
+      "new_numerodeprodutosreservados": "Número de Produtos Reservados",
+      "new_numerodeprodutosreservados_date": "Número de Produtos Reservados (Last Updated On)",
+      "new_numerodeprodutosreservados_state": "Número de Produtos Reservados (State)",
+      "new_observacoesdopedido": "Observações do Pedido",
+      "new_opcaodedevolucao": "Opção de Devolução",
+      "new_opcaodeentrega": "Opção de Entrega",
+      "new_opcaodefornecimento": "Opção de Fornecimento",
+      "new_OrcamentoDevolucao": "Orçamento Devolução",
+      "new_OrdemdeServico": "Ordem de Serviço",
+      "new_ordemdeservicocontemprojeto": "Ordem de Serviço Contém Projeto",
+      "new_pedidoefetuado": "Pedido Efetuado",
+      "new_pedidopendente": "Pedido Pendente",
+      "new_prazoconfirmentregaantespedido": "Prazo Confirm Entrega Antes Pedido",
+      "new_prazoconfirmentregasemanaseguinte": "Prazo Confirm Entrega Semana Seguinte",
+      "new_prazodeenvio": "Prazo de Envio",
+      "new_previsaodeentrega": "Previsão de Entrega",
+      "new_previsaodeentregadiadasemana": "Previsão de Entrega (Dia da Semana)",
+      "new_previsaodeentregav2fx": "Previsão de Entrega V2 (Fx)",
+      "new_previsaodeenvio": "Previsão de Envio",
+      "new_Produto": "Produto",
+      "new_produtoservico_AsyncOperations": "System Jobs",
+      "new_produtoservico_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_produtoservico_DuplicateBaseRecord": "Duplicate Records (new_produtoservico_DuplicateBaseRecord)",
+      "new_produtoservico_DuplicateMatchingRecord": "Duplicate Records (new_produtoservico_DuplicateMatchingRecord)",
+      "new_produtoservico_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_produtoservico_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_produtoservico_ProcessSession": "Process Sessions",
+      "new_produtoservico_SyncErrors": "Sync Errors",
+      "new_produtoservicoid": "Produto-Serviço",
+      "new_produtotrocadodiferentedooriginal": "Produto Trocado Diferente do Original",
+      "new_Projeto": "Projeto",
+      "new_projetoatualizado": "Projeto Atualizado",
+      "new_quantidade": "Quantidade",
+      "new_quantidadeparapedir": "Quantidade Para Pedir",
+      "new_referenciadoproduto": "Referência do Produto",
+      "new_Remessa": "Remessa",
+      "new_reservaefetuada": "Reserva Efetuada",
+      "new_reservaefetuadaespelho": "Reserva Efetuada (Espelho)",
+      "new_reservagranular": "Reserva Granular",
+      "new_separado": "Separado",
+      "new_situacaoreserva": "Situação Reserva",
+      "new_situacaoreservatagcolorfx": "Situação Reserva Tag Color (Fx)",
+      "new_situacaoreservatextofx": "Situação Reserva Texto (Fx)",
+      "new_solicitacaodedesmembramentodeprodutoemos_Produto_new_produtoservico": "Solicitação de Desmembramento de Produto em OS",
+      "new_SolicitacaodeImpressao3D": "Solicitação de Impressão 3D",
+      "new_solicitacaodetrocadeproduto_ProdutoServico_new_produtoservico": "Solicitação de Troca de Produtos",
+      "new_tempodeservico": "Tempo de Serviço",
+      "new_temporestanteparavinculominutos": "Tempo Restante para Vínculo (minutos)",
+      "new_tipodesistemacontabilizadoos": "Tipo de Sistema Contabilizado (OS)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Produtos-Serviço",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Produtos-Serviço (Views)",
+    "Name": "_new_produtoservico_views",
+    "RelatedEntityName": "Produtos-Serviço",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "00efb103-8963-ed11-9562-000d3ac190e8": "Entregas (Próximos 30 Dias)",
+      "012a5ee3-1215-ee11-9cbe-000d3ac190e8": "Produtos Em Falta Para Agendamentos Efetuados",
+      "11314d45-f9b9-ee11-9078-002248dfda06": "Produtos-Serviço Em Remessa",
+      "327cfd31-dece-f011-8544-000d3ac17330": "Relatório de Produtos Retornados Para Manutenção",
+      "3317a86f-ad90-4bb0-aabe-828d8e5463a7": "Produto-Serviço Lookup View",
+      "340f1bc5-9b62-ed11-9562-000d3ac190e8": "Entregas (Próximos 7 Dias)",
+      "3df57d50-c66c-ed11-81ac-000d3ac190e8": "Entregas do dia",
+      "50affa18-8963-ed11-9562-000d3ac190e8": "Entregas (Próximos 60 Dias)",
+      "52da8827-5f96-ed11-aad1-000d3ac190e8": "Separação Pendente",
+      "561327ec-8963-ed11-9562-000d3ac190e8": "Entregas Atrasadas",
+      "622d28d5-61e6-4939-8830-f6ab28237f6b": "Produtos-Serviço Ativos",
+      "6b621986-2086-ed11-81ad-000d3ac190e8": "Disponível Para Vínculo Lookup View",
+      "6d8bce0c-cd86-ed11-81ad-000d3ac190e8": "Relatório de Situação de Reserva, Separação e Entrega da Produtos",
+      "757a502a-8963-ed11-9562-000d3ac190e8": "Entregas (Próximos 90 Dias)",
+      "7b69efd0-f434-f011-8c4e-002248e045cb": "Produtos-Serviço Ativos (View de Cotação)",
+      "88972e25-cf86-ed11-81ad-000d3ac190e8": "Relatório de Produtos não fornecidos pela UNIUM",
+      "8afcd972-f285-ed11-81ad-000d3ac190e8": "Disponíveis para Vínculo",
+      "913f1fe2-32be-f011-bbd3-000d3ac17330": "Relatório de Produtos Devolvidos",
+      "ad0aa794-ca03-ee11-8f6e-000d3ac190e8": "Relação de Produtos",
+      "af8eea7b-2486-ed11-81ad-000d3ac190e8": "Reservas Pendentes (90 Dias)",
+      "b7949d18-db89-4859-bd84-0e8abf0ae729": "Produto-Serviço Advanced Find View",
+      "c2273f48-2786-ed11-81ad-000d3ac190e8": "Produtos Reservados",
+      "ca5872b5-5290-ed11-aad1-000d3ac190e8": "Pedidos Pendentes (60 Dias)",
+      "d9bdd184-958b-ed11-81ad-000d3ac190e8": "Produtos Reservados e Não Separados",
+      "e547e826-8e8f-41ed-bbd7-b5d53de7689f": "Produto-Serviço Associated View",
+      "f76b78a2-6838-4ded-9f5d-6c53d6f72863": "Inactive Produtos-Serviço",
+      "f94f81e4-325e-ee11-8df0-6045bd397997": "Não Disponíveis"
+    }
+  },
+  {
+    "DisplayName": "Estado do Estoque",
+    "Name": "new_estadodoestoque",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Disponível",
+      "100000001": "Reservado",
+      "100000002": "Em showroom",
+      "100000003": "Em conserto",
+      "100000004": "Perda",
+      "100000005": "Entregue",
+      "100000006": "Não Reservado",
+      "100000007": "Parcialmente Reservado",
+      "100000008": "Separado",
+      "100000009": "Granular",
+      "100000010": "Faturamento Direto",
+      "100000011": "Empréstimo Devolvido"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_situacaoreserva",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_situacaodeprodutos",
+        "OptionSetReferenceEntityName": "Ordens de Serviço Field Control"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_situacaoreserva",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Opção de Devolução",
+    "Name": "new_opcaodedevolucao",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Não Solicitado",
+      "100000001": "Solicitado",
+      "100000002": "Devolvido e Creditado",
+      "100000003": "Rejeitado",
+      "100000004": "Não Disponível"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_opcaodedevolucao",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_opcaodedevolucao",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Opção de Entrega",
+    "Name": "new_opcaodeentrega",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Estoque UNIUM",
+      "100000001": "Endereço da obra",
+      "100000002": "Endereço de residência do cliente",
+      "100000003": "Outro"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_opcaodeentrega",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_opcaodeentrega",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Opção de Fornecimento",
+    "Name": "new_opcaodefornecimento",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Padrão",
+      "100000001": "Fornecido pelo Cliente",
+      "100000002": "Removido para Compra Futura",
+      "100000003": "Retorno para Manutenção",
+      "100000004": "Devolução de Produto",
+      "100000005": "Devolução de Empréstimo"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_opcaodefornecimento",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_opcaodefornecimento",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Prazo de Envio de Mercadoria",
+    "Name": "new_prazodeenviodemercadoria",
+    "OptionSetInfoNameMapping": {
+      "100000001": "Imediato",
+      "100000007": "7 dias",
+      "100000015": "15 dias",
+      "100000030": "30 dias",
+      "100000045": "45 dias",
+      "100000060": "60 dias",
+      "100000090": "90 dias",
+      "100000120": "120 dias",
+      "100000180": "180 dias",
+      "900000000": "Indefinido"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_prazodeenvio",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_prazodeenvio",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Cliente Atualizado (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_clienteatualizado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_clienteatualizado",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_clienteatualizado",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Contém Cotação (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_contemcotacao",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_contemcotacao",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_contemcotacao",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Disponível para Vínculo (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_disponivelparavinculo",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_disponivelparavinculo",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_disponivelparavinculo",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "É Empréstimo (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_eemprestimo",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_eemprestimo",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_eemprestimo",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Efetuar Pedido (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_efetuarpedido",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_efetuarpedido",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_efetuarpedido",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Elegível a Troca Por Caixa (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_elegivelatrocaporcaixa",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_elegivelatrocaporcaixa",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_elegivelatrocaporcaixa",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Empréstimo Devolvido (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_emprestimodevolvido",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_emprestimodevolvido",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_emprestimodevolvido",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Entrega Próxima (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_entregaproxima",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_entregaproxima",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_entregaproxima",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Entregue (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_entregue",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_entregue",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_entregue",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Entregue Espelho (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_entregueespelho",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_entregueespelho",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_entregueespelho",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Entregue Override (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_entregueoverride",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_entregueoverride",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_entregueoverride",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Habilitar Tarefa Confirmar Entrega F1 (Fx) (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_habilitartarefaconfirmarentregaf1fx",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_habilitartarefaconfirmarentregaf1fx",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_habilitartarefaconfirmarentregaf1fx",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Habilitar Tarefa Confirmar Entrega F2 (Fx) (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_habilitartarefaconfirmarentregaf2fx",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_habilitartarefaconfirmarentregaf2fx",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_habilitartarefaconfirmarentregaf2fx",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Habilitar Tarefa Confirmar Entrega F3 (Fx) (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_habilitartarefaconfirmarentregaf3fx",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_habilitartarefaconfirmarentregaf3fx",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_habilitartarefaconfirmarentregaf3fx",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Ordem de Serviço Contém Projeto (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_ordemdeservicocontemprojeto",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_ordemdeservicocontemprojeto",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_ordemdeservicocontemprojeto",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Pedido Efetuado (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_pedidoefetuado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_pedidoefetuado",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_pedidoefetuado",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Pedido Pendente (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_pedidopendente",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_pedidopendente",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_pedidopendente",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Produto Trocado Diferente do Original (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_produtotrocadodiferentedooriginal",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_produtotrocadodiferentedooriginal",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_produtotrocadodiferentedooriginal",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Projeto Atualizado (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_projetoatualizado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_projetoatualizado",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_projetoatualizado",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Reserva Efetuada (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_reservaefetuada",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_reservaefetuada",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_reservaefetuada",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Reserva Efetuada (Espelho) (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_reservaefetuadaespelho",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_reservaefetuadaespelho",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_reservaefetuadaespelho",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Reserva Granular (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_reservagranular",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_reservagranular",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_reservagranular",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Separado (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_separado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_separado",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_separado",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Tipo de Sistema Contabilizado (OS) (Produtos-Serviço)",
+    "Name": "new_produtoservico_new_tipodesistemacontabilizadoos",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_tipodesistemacontabilizadoos",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_tipodesistemacontabilizadoos",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (Produtos-Serviço)",
+    "Name": "new_produtoservico_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Produtos-Serviço)",
+    "Name": "new_produtoservico_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Produtos-Serviço",
+    "Type": "OptionSetInfo"
+  }
+]

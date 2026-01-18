@@ -1,0 +1,98 @@
+{
+  "QualifiedValues": [
+    {
+      "Kind": "default.cds_cr22f_projeto_forms",
+      "Namespace": "Projetos (Forms)",
+      "Values": {
+        "Aprovações": "9b6262ba-58d5-ed11-a7c7-000d3ac190e8",
+        "Information": "b770d392-db0a-472d-a08b-a2dfe5b1ea08",
+        "Principal": "875943a1-e8ff-42c1-919b-9594ca3fd513"
+      }
+    },
+    {
+      "Kind": "default.cds_new_deviceio_forms",
+      "Namespace": "Device IO (Forms)",
+      "Values": {
+        "Information": "bb0f5858-fec2-4f87-af63-ce80f64bf0f4"
+      }
+    },
+    {
+      "Kind": "default.cds_new_deviceioconnection_forms",
+      "Namespace": "Device IO Connections (Forms)",
+      "Values": {
+        "Information": "3b13e1a0-5cea-4a7a-9660-d07d934ab9aa"
+      }
+    },
+    {
+      "Kind": "default.cds_cr22f_modelosdeprodutofromsharepointlist_forms",
+      "Namespace": "Modelos de Produto From Sharepoint Lists (Forms)",
+      "Values": {
+        "Information": "34109535-6081-464d-b81e-1099ca95a5dc",
+        "Principal": "71e03a6a-6fb1-4b0f-92f0-0e446615af18",
+        "Visualização Rápida Estoque Disponível": "5e6ff134-1de1-47e6-ac4a-6501c6973d1a"
+      }
+    },
+    {
+      "Kind": "default.cds_new_produtoservico_forms",
+      "Namespace": "Produtos-Serviço (Forms)",
+      "Values": {
+        "Information": "7486430d-1195-454a-b126-7e0f63107e84",
+        "Principal": "444ac72b-1876-4c29-a146-d4f9ef93d3dd"
+      }
+    },
+    {
+      "Kind": "default.cds_new_ordemdeservicofieldcontrol_forms",
+      "Namespace": "Ordens de Serviço Field Control (Forms)",
+      "Values": {
+        "Information": "99240d71-13c9-4603-a2d8-bc2900e0653c",
+        "OS Desenho de PTI": "ce41e99b-4dd5-ed11-a7c7-000d3ac190e8",
+        "Principal": "0be058de-a37e-48ee-b349-790957f8b7f0"
+      }
+    },
+    {
+      "Kind": "default.cds_contact_forms",
+      "Namespace": "Contacts (Forms)",
+      "Values": {
+        "account contact card": "29de27bc-a257-4f29-99cf-bab4a84e688f",
+        "Arquiteto Resumido": "ba5844fb-d192-ed11-aad1-000d3ac190e8",
+        "Cliente": "d00813ba-54b0-ec11-9840-00224837407a",
+        "Cliente Resumido": "ade1a28c-d192-ed11-aad1-000d3ac190e8",
+        "Contact": "1fed44d1-ae68-4a41-bd2b-f13acac4acfa",
+        "contact card": "707fc57b-c5e6-471b-a180-e37ed28a38e2",
+        "Contact Card form": "bc0f68dd-a4b1-4a8f-bed3-c8f5db2f89cf",
+        "Contact Quick Create": "661157fe-2fc9-4eaa-835f-5bfa2f7b64f7",
+        "Contact Quick Form": "bdb0ae1c-32fa-4374-b637-8dafe107bc44",
+        "Contact Reference Panel": "d880c3cf-80e2-42f3-82f9-24d040d09f17",
+        "Information": "894cc46a-b0cb-4ab0-8bf6-200544e46a2d",
+        "Invite Web Form": "d6190b35-9474-4098-9698-33f6627eb3bf",
+        "Live Persona Card Form": "449faa0e-f471-48ec-87d0-4719909546d2",
+        "Portal Contact (Enhanced)": "c1c97961-2d42-4103-abf8-2fe2bdf38224",
+        "Profile Web Form (Enhanced)": "bddc0100-0dbe-4562-aafe-31d08c8ab506",
+        "Profile Web Form (Enhanced) - Japanese": "01124dd8-9bff-4cc0-bb33-ea9d943c3f9f",
+        "Recent Cases and Entitlements": "f3b707fb-3b5f-45f9-9c6b-5e573bb5d19e",
+        "Social Profiles": "7bb87dfd-ec3e-4ed9-8e3e-5725d3067295",
+        "Timeline quick view form": "b0521b3e-4e5c-ed11-9562-000d3ac190e8",
+        "Update Contact": "26843818-6508-4afe-9342-5fae2ebf15ca"
+      }
+    },
+    {
+      "Kind": "default.cds_new_impressaodeetiqueta_forms",
+      "Namespace": "Impressão de Etiquetas (Forms)",
+      "Values": {
+        "Information": "372c214f-db87-489e-a079-efd42b54d95f"
+      }
+    },
+    {
+      "Kind": "default.cds_bulkdeletefailure_forms",
+      "Namespace": "Bulk Delete Failures (Forms)",
+      "Values": {}
+    },
+    {
+      "Kind": "default.cds_new_cotacao_forms",
+      "Namespace": "Cotações (Forms)",
+      "Values": {
+        "Information": "91756891-b7d2-42a1-b1bc-c7d431509b2f"
+      }
+    }
+  ]
+}

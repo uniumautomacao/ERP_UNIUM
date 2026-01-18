@@ -1,0 +1,73 @@
+import {
+  Home24Regular,
+  DataBarVertical24Regular,
+  ChartMultiple24Regular,
+  DocumentBulletList24Regular,
+  Box24Regular,
+  CalendarLtr24Regular,
+  People24Regular,
+} from '@fluentui/react-icons';
+import { NavSection } from '../types';
+
+export const navigation: NavSection[] = [
+  {
+    id: 'home',
+    label: '',
+    items: [
+      {
+        id: 'home',
+        label: 'Home',
+        icon: <Home24Regular />,
+        path: '/',
+      },
+    ],
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        icon: <DataBarVertical24Regular />,
+        path: '/dashboard',
+      },
+      {
+        id: 'analytics',
+        label: 'Analytics',
+        icon: <ChartMultiple24Regular />,
+        path: '/analytics',
+      },
+      {
+        id: 'reports',
+        label: 'Reports',
+        icon: <DocumentBulletList24Regular />,
+        path: '/reports',
+      },
+    ],
+  },
+  {
+    id: 'operations',
+    label: 'Operations',
+    items: [
+      {
+        id: 'inventory',
+        label: 'Inventory',
+        icon: <Box24Regular />,
+        path: '/inventory',
+      },
+      {
+        id: 'projects',
+        label: 'Project Planner',
+        icon: <CalendarLtr24Regular />,
+        path: '/projects',
+      },
+      {
+        id: 'team',
+        label: 'Team Management',
+        icon: <People24Regular />,
+        path: '/team',
+      },
+    ],
+  },
+];
