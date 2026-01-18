@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.33';
+export const APP_VERSION = '0.0.34';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.34',
+    date: '2026-01-18',
+    changes: 'Importado o app Editor IO Dispositivos para a página Dispositivos IO, mantendo a funcionalidade original de gerenciamento de templates de dispositivos.',
+  },
   {
     version: '0.0.33',
     date: '2026-01-18',
