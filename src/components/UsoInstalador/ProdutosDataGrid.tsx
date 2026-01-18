@@ -17,15 +17,21 @@ type SortKey = 'quantidade' | 'referenciaProduto' | 'descricao' | 'situacaoReser
 const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerSort, loading = false, compact = false }) => {
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>({ quantidade: 80, referenciaProduto: 160, descricao: 200, situacaoReserva: 100 });
+  const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(() => (
+    compact
+      ? { quantidade: 64, referenciaProduto: 130, descricao: 220, situacaoReserva: 90 }
+      : { quantidade: 80, referenciaProduto: 160, descricao: 200, situacaoReserva: 100 }
+  ));
   const [resizing, setResizing] = useState<{ key: string | null; startX: number; startWidth: number } | null>(null);
 
   // Column resizing handlers
   const onMouseDownResize = (key: string, e: React.MouseEvent) => {
+    if (compact) return;
     setResizing({ key, startX: e.clientX, startWidth: columnWidths[key] || 100 });
   };
   
   useEffect(() => {
+    if (compact) return;
     const onMouseMove = (ev: MouseEvent) => {
       if (!resizing) return;
       const diff = ev.clientX - resizing.startX;
@@ -38,7 +44,7 @@ const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerS
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
-  }, [resizing, setColumnWidths]);
+  }, [compact, resizing, setColumnWidths]);
 
   const sorted = useMemo(() => {
     if (!sortKey) return produtos;
@@ -110,7 +116,15 @@ const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerS
                 >
                   Quantidade {renderSortIndicator('quantidade')}
                 </Button>
-                <div className="uso-instalador__column-resizer" onMouseDown={(e) => { e.stopPropagation(); onMouseDownResize('quantidade', e as any); }} />
+                {!compact && (
+                  <div
+                    className="uso-instalador__column-resizer"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      onMouseDownResize('quantidade', e as any);
+                    }}
+                  />
+                )}
               </div>
             </th>
             <th style={{ width: columnWidths.referenciaProduto }}>
@@ -124,7 +138,15 @@ const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerS
                 >
                   Referência {renderSortIndicator('referenciaProduto')}
                 </Button>
-                <div className="uso-instalador__column-resizer" onMouseDown={(e) => { e.stopPropagation(); onMouseDownResize('referenciaProduto', e as any); }} />
+                {!compact && (
+                  <div
+                    className="uso-instalador__column-resizer"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      onMouseDownResize('referenciaProduto', e as any);
+                    }}
+                  />
+                )}
               </div>
             </th>
             <th style={{ width: columnWidths.descricao }}>
@@ -138,7 +160,15 @@ const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerS
                 >
                   Descrição {renderSortIndicator('descricao')}
                 </Button>
-                <div className="uso-instalador__column-resizer" onMouseDown={(e) => { e.stopPropagation(); onMouseDownResize('descricao', e as any); }} />
+                {!compact && (
+                  <div
+                    className="uso-instalador__column-resizer"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      onMouseDownResize('descricao', e as any);
+                    }}
+                  />
+                )}
               </div>
             </th>
             <th style={{ width: columnWidths.situacaoReserva }}>
@@ -152,7 +182,15 @@ const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerS
                 >
                   Situação {renderSortIndicator('situacaoReserva')}
                 </Button>
-                <div className="uso-instalador__column-resizer" onMouseDown={(e) => { e.stopPropagation(); onMouseDownResize('situacaoReserva', e as any); }} />
+                {!compact && (
+                  <div
+                    className="uso-instalador__column-resizer"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      onMouseDownResize('situacaoReserva', e as any);
+                    }}
+                  />
+                )}
               </div>
             </th>
           </tr>

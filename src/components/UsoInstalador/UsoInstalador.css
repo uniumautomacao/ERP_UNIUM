@@ -1303,9 +1303,9 @@
   padding: 0 24px 24px 24px;
 }
 
-.uso-instalador__modal--large {
-  width: 900px;
-  max-width: calc(100vw - 48px);
+.uso-instalador__modal.uso-instalador__modal--large {
+  width: 1000px !important;
+  max-width: calc(100vw - 48px) !important;
   max-height: 90vh;
 }
 
@@ -1442,8 +1442,8 @@
 }
 
 .uso-instalador__os-produtos-table-wrapper--compact {
-  border-color: var(--ui-border-subtle);
-  background: var(--ui-background);
+  border-color: transparent;
+  background: transparent;
 }
 
 .uso-instalador__os-produtos-table {
@@ -1480,6 +1480,10 @@
   box-shadow: inset 0 -1px 0 var(--ui-border-subtle);
 }
 
+.uso-instalador__os-produto-row:nth-child(even) {
+  background: var(--ui-surface-alt);
+}
+
 .uso-instalador__os-produto-row:hover {
   background: var(--ui-surface);
 }
@@ -1488,6 +1492,7 @@
   width: 72px;
   font-weight: 600;
   white-space: nowrap;
+  text-align: right;
 }
 
 .uso-instalador__os-produto-referencia {
@@ -1498,6 +1503,10 @@
 .uso-instalador__os-produto-descricao {
   max-width: 220px;
   color: var(--ui-text-muted);
+}
+
+.uso-instalador__os-produto-situacao {
+  text-align: center;
 }
 
 .uso-instalador__status-badge {
