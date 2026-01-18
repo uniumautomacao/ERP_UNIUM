@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.27';
+export const APP_VERSION = '0.0.29';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.29', 
+    date: '2026-01-18', 
+    changes: 'Reordenada a seção Instalações para aparecer após a Home no menu lateral.' 
+  },
+  { 
+    version: '0.0.28', 
+    date: '2026-01-18', 
+    changes: 'Importada a tela Uso do Instalador (Linha do Tempo) para a seção Instalações, com componentes, estilos e serviços gerados.' 
+  },
   { 
     version: '0.0.27', 
     date: '2026-01-18', 

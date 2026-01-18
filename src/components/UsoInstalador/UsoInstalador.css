@@ -1,0 +1,1817 @@
+/* ================================================
+   USO DO INSTALADOR (SEMANA) - Styles
+   Fluent Design 2 inspired - Resource Usage Layout
+   ================================================ */
+
+/* ============================================
+   CSS VARIABLES / DESIGN TOKENS
+   ============================================ */
+.uso-instalador {
+  --ui-font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  --ui-background: #ffffff;
+  --ui-surface: #fafafa;
+  --ui-border: #e0e0e0;
+  --ui-border-strong: #c0c0c0;
+  --ui-text-primary: #1a1a1a;
+  --ui-text-secondary: #5f5f5f;
+  --ui-text-muted: #8a8a8a;
+  
+  /* Status colors */
+  --ui-overload-bg: #ffe5e5;
+  --ui-overload-text: #d32f2f;
+  --ui-critical-bg: #ffcccc;
+  --ui-conflict-border: #d32f2f;
+  --ui-travel-bg: #e3f2fd;
+  --ui-travel-text: #1976d2;
+  --ui-success-bg: #e8f5e9;
+  --ui-success-text: #2e7d32;
+  --ui-warning-bg: #fff8e1;
+  --ui-warning-text: #f57c00;
+  
+  /* Capacity colors */
+  --capacity-idle: #2196f3;
+  --capacity-normal: #4caf50;
+  --capacity-warning: #ff9800;
+  --capacity-overload: #f44336;
+  
+  /* Spacing */
+  --row-height-parent: 42px;
+  --row-height-child: 34px;
+  --column-width-name: 120px;
+  --column-width-day: 72px;
+  --color-bar-width: 4px;
+  --indent-width: 24px;
+  
+  /* Shadows & Effects */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 250ms ease-out;
+}
+
+/* ============================================
+   LOADING & ERROR STATES
+   ============================================ */
+.uso-instalador__loading {
+  font-size: 14px;
+  color: #1976d2;
+  margin-left: 16px;
+  font-weight: 500;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.uso-instalador__error {
+  font-size: 14px;
+  color: #d32f2f;
+  margin-left: 16px;
+  font-weight: 500;
+}
+
+.uso-instalador__version {
+  font-size: 11px;
+  color: #999;
+  margin-left: 16px;
+  padding: 2px 8px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  font-weight: 400;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ============================================
+   CONTAINER PRINCIPAL
+   ============================================ */
+.uso-instalador {
+  font-family: var(--ui-font-family);
+  background: var(--ui-background);
+  color: var(--ui-text-primary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100vh;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.uso-instalador__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--ui-surface);
+  border-bottom: 1px solid var(--ui-border);
+  flex-shrink: 0;
+}
+
+.uso-instalador__title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.uso-instalador__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uso-instalador__week-range {
+  font-size: 14px;
+  color: var(--ui-text-secondary);
+  font-weight: 400;
+}
+
+/* Navigation Controls */
+.uso-instalador__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uso-instalador__date-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uso-instalador__date-input {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  color: var(--ui-text-primary);
+  -webkit-text-fill-color: var(--ui-text-primary);
+}
+
+.uso-instalador__date-input:focus {
+  outline: none;
+  border-color: var(--ui-border-strong);
+}
+
+/* Tornar o ícone do calendário visível em fundos claros */
+.uso-instalador__date-input::-webkit-calendar-picker-indicator {
+  filter: invert(20%);
+  opacity: 0.8;
+}
+
+.uso-instalador__date-today-link {
+  background: transparent;
+  border: none;
+  padding: 0 4px;
+  height: 32px;
+  color: var(--ui-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.uso-instalador__date-today-link:hover {
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 16px;
+  color: var(--ui-text-secondary);
+}
+
+.uso-instalador__nav-btn:hover {
+  background: var(--ui-surface);
+  border-color: var(--ui-border-strong);
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__nav-btn--today {
+  width: auto;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Actions */
+.uso-instalador__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uso-instalador__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ui-text-primary);
+  transition: all var(--transition-fast);
+}
+
+.uso-instalador__btn:hover {
+  background: var(--ui-surface);
+  border-color: var(--ui-border-strong);
+}
+
+.uso-instalador__btn--primary {
+  background: #0078d4;
+  border-color: #0078d4;
+  color: white;
+}
+
+.uso-instalador__btn--primary:hover {
+  background: #106ebe;
+  border-color: #106ebe;
+}
+
+/* ============================================
+   GRID CONTAINER
+   ============================================ */
+.uso-instalador__grid-container {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.uso-instalador__grid {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* ============================================
+   GRID HEADER (Days)
+   ============================================ */
+.uso-instalador__grid-header {
+  display: table-header-group;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--ui-surface);
+}
+
+.uso-instalador__grid-header-row {
+  display: table-row;
+}
+
+.uso-instalador__grid-header-cell {
+  display: table-cell;
+  padding: 10px 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
+  background: #e8e8e8;
+  vertical-align: middle;
+}
+
+.uso-instalador__grid-header-cell:last-child {
+  border-right: none;
+}
+
+.uso-instalador__grid-header-cell--name {
+  text-align: left;
+  padding-left: 16px;
+  width: var(--column-width-name);
+  min-width: var(--column-width-name);
+}
+
+.uso-instalador__grid-header-cell--day {
+  width: var(--column-width-day);
+  min-width: var(--column-width-day);
+}
+
+.uso-instalador__grid-header-cell--today {
+  background: #e3f2fd;
+}
+
+.uso-instalador__header-day-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.uso-instalador__header-day-date {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ui-text-muted);
+  margin-top: 2px;
+}
+
+/* ============================================
+   GRID BODY
+   ============================================ */
+.uso-instalador__grid-body {
+  display: table-row-group;
+}
+
+/* ============================================
+   INSTALLER ROW (PARENT / PAI)
+   ============================================ */
+.uso-instalador__installer-row {
+  display: table-row;
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+}
+
+.uso-instalador__installer-row:hover {
+  filter: brightness(0.95);
+}
+
+.uso-instalador__installer-cell {
+  display: table-cell;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  background: transparent;
+}
+
+.uso-instalador__installer-cell:last-child {
+  border-right: none;
+}
+
+.uso-instalador__installer-name-cell {
+  position: relative;
+  padding: 0;
+  height: var(--row-height-parent);
+  overflow: visible;
+}
+
+.uso-instalador__installer-name-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: calc(var(--color-bar-width) + 8px);
+}
+
+/* Color bar on the left */
+.uso-instalador__color-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--color-bar-width);
+}
+
+.uso-instalador__color-bar--clickable {
+  cursor: pointer;
+  transition: width var(--transition-fast), opacity var(--transition-fast);
+}
+
+.uso-instalador__color-bar--clickable:hover {
+  width: calc(var(--color-bar-width) + 4px);
+  opacity: 0.8;
+}
+
+/* Color Picker Popup */
+.uso-instalador__color-picker {
+  position: absolute;
+  left: calc(var(--color-bar-width) + 8px);
+  top: 0;
+  z-index: 10000;
+  background: #ffffff !important; /* garantir fundo branco */
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  padding: 12px;
+  min-width: 200px;
+}
+
+/* Overlay para isolar o color picker do stacking context da tabela */
+.uso-instalador__color-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: transparent;
+  /* Definições locais de variáveis para o portal (fora de .uso-instalador) */
+  --ui-text-primary: #1a1a1a;
+  --ui-text-secondary: #5f5f5f;
+  --ui-text-muted: #8a8a8a;
+  --ui-border: #e0e0e0;
+  --ui-surface: #fafafa;
+}
+
+.uso-instalador__color-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+}
+
+.uso-instalador__color-picker-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.uso-instalador__color-picker-close:hover {
+  background: var(--ui-surface);
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.uso-instalador__color-picker-item {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.uso-instalador__color-picker-item:hover {
+  transform: scale(1.15);
+}
+
+.uso-instalador__color-picker-item--selected {
+  border-color: var(--ui-text-primary);
+  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--ui-text-primary);
+}
+
+.uso-instalador__color-picker-item:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.uso-instalador__color-picker-loading {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ui-text-muted);
+}
+
+.uso-instalador__expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--ui-text-muted);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.uso-instalador__expand-btn:hover {
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__expand-btn--expanded {
+  transform: rotate(90deg);
+}
+
+.uso-instalador__installer-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.uso-instalador__installer-color-emoji {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.uso-instalador__installer-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uso-instalador__installer-capacity {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.uso-instalador__installer-capacity--idle {
+  background: #e3f2fd;
+  color: var(--capacity-idle);
+}
+
+.uso-instalador__installer-capacity--normal {
+  background: #e8f5e9;
+  color: var(--capacity-normal);
+}
+
+.uso-instalador__installer-capacity--warning {
+  background: #fff8e1;
+  color: var(--capacity-warning);
+}
+
+.uso-instalador__installer-capacity--overload {
+  background: #ffebee;
+  color: var(--capacity-overload);
+}
+
+/* Parent Hours Cell */
+.uso-instalador__hours-cell {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  padding: 3px 2px;
+  border-left: 1px solid var(--ui-border);
+  line-height: 1.2;
+  min-height: var(--row-height-parent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* When a parent row is collapsed, left-align content and allow truncation */
+.uso-instalador__hours-cell--collapsed {
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  padding-left: 8px;
+}
+
+.uso-instalador__project-summary {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.uso-instalador__project-summary-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  display: block;
+  line-height: 1.15;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+/* When the parent row is collapsed, make the project name more prominent */
+.uso-instalador__hours-cell--collapsed .uso-instalador__project-summary-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* Project chip styling (transparent background, black text) */
+.uso-instalador__project-chip {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  padding: 4px 8px;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  background: transparent !important;
+  color: #1a1a1a !important;
+  text-transform: uppercase;
+}
+
+/* Larger chip when parent row is collapsed */
+.uso-instalador__hours-cell--collapsed .uso-instalador__project-chip {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Spanning chip - positioned absolutely to cover multiple rows */
+.uso-instalador__project-chip--spanning {
+  position: absolute;
+  box-shadow: none;
+  background: transparent !important;
+  color: #1a1a1a !important;
+}
+
+/* Merged cells need relative positioning for absolute children */
+.uso-instalador__installer-cell--merged-top,
+.uso-instalador__installer-cell--merged-middle,
+.uso-instalador__installer-cell--merged-bottom {
+  padding: 0;
+  position: relative;
+}
+
+/* Remove borders between merged cells for seamless appearance */
+.uso-instalador__installer-cell--merged-top {
+  border-bottom: none;
+}
+.uso-instalador__installer-cell--merged-middle {
+  border-top: none;
+  border-bottom: none;
+}
+.uso-instalador__installer-cell--merged-bottom {
+  border-top: none;
+}
+
+/* Hours cell inside merged cells need relative positioning */
+.uso-instalador__installer-cell--merged-top .uso-instalador__hours-cell,
+.uso-instalador__installer-cell--merged-middle .uso-instalador__hours-cell,
+.uso-instalador__installer-cell--merged-bottom .uso-instalador__hours-cell {
+  position: relative;
+  overflow: visible;
+}
+
+.uso-instalador__hours-meta {
+  font-size: 8px;
+  color: #999;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.uso-instalador__hours-meta-icon {
+  font-size: 8px;
+}
+
+.uso-instalador__hours-cell--parent {
+  background: transparent;
+}
+
+.uso-instalador__hours-cell--empty {
+  color: var(--ui-text-muted);
+  font-weight: 400;
+}
+
+.uso-instalador__hours-cell--overload {
+  background: var(--ui-overload-bg);
+  color: var(--ui-overload-text);
+}
+
+.uso-instalador__hours-cell--critical {
+  background: var(--ui-critical-bg);
+  color: var(--ui-overload-text);
+  animation: pulse-critical 2s infinite;
+}
+
+.uso-instalador__hours-cell--conflict {
+  border: 2px solid var(--ui-conflict-border) !important;
+}
+
+.uso-instalador__hours-cell--today {
+  background: transparent;
+}
+
+.uso-instalador__hours-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.uso-instalador__hours-alert {
+  font-size: 12px;
+}
+
+@keyframes pulse-critical {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ============================================
+   PROJECT ROW (CHILD / FILHA)
+   ============================================ */
+.uso-instalador__project-row {
+  display: table-row;
+  transition: filter var(--transition-fast);
+}
+
+.uso-instalador__project-row:hover {
+  filter: brightness(0.97);
+}
+
+.uso-instalador__project-cell {
+  display: table-cell;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  background: transparent;
+}
+
+.uso-instalador__project-cell:last-child {
+  border-right: none;
+}
+
+.uso-instalador__project-name-cell {
+  height: var(--row-height-child);
+  padding: 0;
+}
+
+.uso-instalador__project-name-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: calc(var(--color-bar-width) + var(--indent-width) + 8px);
+}
+
+/* Indent connector lines */
+.uso-instalador__project-indent {
+  display: flex;
+  align-items: center;
+  color: var(--ui-text-muted);
+  font-size: 11px;
+  margin-right: 6px;
+  font-family: monospace;
+  flex-shrink: 0;
+}
+
+.uso-instalador__project-icon {
+  font-size: 12px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.uso-instalador__project-name {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ui-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.uso-instalador__project-name:hover {
+  color: var(--ui-text-primary);
+  text-decoration: underline;
+}
+
+/* Project Hours Cell */
+.uso-instalador__project-hours-cell {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ui-text-secondary);
+  padding: 4px 2px;
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  line-height: 1.2;
+}
+
+.uso-instalador__project-hours-cell:hover:not(.uso-instalador__project-hours-cell--empty) {
+  background: rgba(0, 120, 212, 0.08);
+}
+
+.uso-instalador__project-hours-cell--empty {
+  color: var(--ui-text-muted);
+}
+
+.uso-instalador__project-hours-cell--travel {
+  background: transparent;
+  color: #1a1a1a;
+  font-style: italic;
+}
+
+/* ============================================
+   TEAM SEPARATOR
+   ============================================ */
+.uso-instalador__team-separator {
+  display: table-row;
+}
+
+.uso-instalador__team-separator-cell {
+  display: table-cell;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   DETAIL PANEL (Sidebar/Modal)
+   ============================================ */
+.uso-instalador__detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn var(--transition-fast);
+}
+
+.uso-instalador__detail-panel {
+  width: 380px;
+  max-width: 100%;
+  background: white;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight var(--transition-normal);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.uso-instalador__detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+}
+
+.uso-instalador__detail-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uso-instalador__detail-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--ui-text-muted);
+  border-radius: 6px;
+  transition: all var(--transition-fast);
+}
+
+.uso-instalador__detail-close:hover {
+  background: var(--ui-surface);
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.uso-instalador__detail-section {
+  margin-bottom: 20px;
+}
+
+.uso-instalador__detail-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.uso-instalador__detail-field {
+  margin-bottom: 12px;
+}
+
+.uso-instalador__detail-label {
+  font-size: 12px;
+  color: var(--ui-text-muted);
+  margin-bottom: 2px;
+}
+
+.uso-instalador__detail-value {
+  font-size: 14px;
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__detail-value--empty {
+  color: var(--ui-text-muted);
+  font-style: italic;
+}
+
+/* Estilos para edição */
+.uso-instalador__detail-input,
+.uso-instalador__detail-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: var(--ui-font-family);
+  color: var(--ui-text-primary);
+  background: var(--ui-background);
+  transition: border-color var(--transition-fast);
+}
+
+.uso-instalador__detail-input:focus,
+.uso-instalador__detail-textarea:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 1px #0078d4;
+}
+
+.uso-instalador__detail-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.uso-instalador__detail-edit-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uso-instalador__detail-edit-group .uso-instalador__detail-input {
+  flex: 1;
+}
+
+.uso-instalador__detail-readonly-hint {
+  display: block;
+  font-size: 12px;
+  color: var(--ui-text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.uso-instalador__detail-error {
+  padding: 12px;
+  margin: 0 16px 16px 16px;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 4px;
+  color: #c62828;
+  font-size: 13px;
+}
+
+.uso-instalador__btn--primary {
+  background: #0078d4;
+  color: white;
+}
+
+.uso-instalador__btn--primary:hover:not(:disabled) {
+  background: #106ebe;
+}
+
+.uso-instalador__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.uso-instalador__detail-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.uso-instalador__detail-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__detail-checklist-item--completed {
+  color: var(--ui-text-muted);
+  text-decoration: line-through;
+}
+
+.uso-instalador__detail-materials {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.uso-instalador__detail-materials li {
+  font-size: 13px;
+  color: var(--ui-text-primary);
+  padding: 4px 0;
+}
+
+.uso-instalador__detail-footer {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  border-top: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+}
+
+.uso-instalador__detail-footer .uso-instalador__btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ============================================
+   TOOLTIP
+   ============================================ */
+.uso-instalador__tooltip {
+  position: fixed;
+  background: #1a1a1a;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  max-width: 280px;
+  z-index: 200;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+  animation: tooltipFadeIn var(--transition-fast);
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.uso-instalador__tooltip-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.uso-instalador__tooltip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ============================================
+   LEGEND
+   ============================================ */
+.uso-instalador__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--ui-surface);
+  border-top: 1px solid var(--ui-border);
+  font-size: 11px;
+  color: var(--ui-text-muted);
+}
+
+.uso-instalador__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.uso-instalador__legend-icon {
+  font-size: 12px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.uso-instalador__empty-row {
+  display: table-row;
+}
+
+.uso-instalador__empty-cell {
+  display: table-cell;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ui-text-muted);
+  font-size: 14px;
+}
+
+.uso-instalador__loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: #1976d2;
+}
+
+.uso-instalador__loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e3e3e3;
+  border-top: 3px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ============================================
+   RESPONSIVE / MOBILE
+   ============================================ */
+@media (max-width: 768px) {
+  .uso-instalador {
+    --column-width-name: 180px;
+    --column-width-day: 56px;
+    --row-height-parent: 38px;
+    --row-height-child: 30px;
+  }
+
+  .uso-instalador__header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .uso-instalador__title {
+    font-size: 16px;
+  }
+
+  .uso-instalador__week-range {
+    font-size: 13px;
+  }
+
+  .uso-instalador__nav {
+    order: 2;
+  }
+
+  .uso-instalador__actions {
+    order: 3;
+  }
+
+  .uso-instalador__installer-name {
+    font-size: 12px;
+  }
+
+  .uso-instalador__installer-capacity {
+    display: none;
+  }
+
+  .uso-instalador__project-name {
+    font-size: 11px;
+  }
+
+  .uso-instalador__hours-cell,
+  .uso-instalador__project-hours-cell {
+    font-size: 11px;
+  }
+
+  .uso-instalador__detail-panel {
+    width: 100%;
+  }
+
+  .uso-instalador__legend {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .uso-instalador {
+    --column-width-name: 140px;
+    --column-width-day: 44px;
+  }
+
+  .uso-instalador__installer-color-emoji {
+    display: none;
+  }
+
+  .uso-instalador__project-indent {
+    display: none;
+  }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  .uso-instalador {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .uso-instalador__header {
+    background: white;
+  }
+
+  .uso-instalador__actions,
+  .uso-instalador__nav-btn {
+    display: none;
+  }
+
+  .uso-instalador__detail-overlay {
+    display: none;
+  }
+}
+
+/* ============================================
+   USER SELECTOR MODAL
+   ============================================ */
+.uso-instalador__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.uso-instalador__modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--ui-text-primary); /* garante contraste do texto em fundo branco */
+  position: relative; /* cria contexto para z-index internos */
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.uso-instalador__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ui-border);
+  background: #fff;           /* fundo sólido para não "sumir" em scroll */
+  position: sticky;           /* fixa no topo do conteúdo do modal */
+  top: 0;
+  z-index: 2;                 /* acima do conteúdo rolável */
+}
+
+.uso-instalador__modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--ui-text-secondary);  /* ícone "X" com contraste visível */
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: var(--transition-fast);
+  line-height: 1;                 /* evita recorte do glifo */
+  background-color: transparent;  /* sobrepõe estilos globais de botão */
+}
+
+.uso-instalador__modal-close:hover {
+  background: var(--ui-surface);
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__modal-subheader {
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--ui-text-secondary);
+  background: var(--ui-surface);
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.uso-instalador__modal-search {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.uso-instalador__modal-search-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--ui-font-family);
+  transition: var(--transition-fast);
+}
+
+.uso-instalador__modal-search-input:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+.uso-instalador__modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.uso-instalador__modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--ui-text-secondary);
+}
+
+.uso-instalador__modal-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ui-text-muted);
+}
+
+.uso-instalador__user-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.uso-instalador__user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.uso-instalador__user-item:hover {
+  background: var(--ui-surface);
+}
+
+.uso-instalador__user-item--selected {
+  background: rgba(0, 120, 212, 0.08);
+  border-left-color: #0078d4;
+}
+
+.uso-instalador__user-item--selected:hover {
+  background: rgba(0, 120, 212, 0.12);
+}
+
+.uso-instalador__user-checkbox {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  color: var(--ui-text-secondary);
+}
+
+.uso-instalador__user-item--selected .uso-instalador__user-checkbox {
+  color: #0078d4;
+}
+
+.uso-instalador__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.uso-instalador__user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ui-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uso-instalador__user-email {
+  font-size: 12px;
+  color: var(--ui-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uso-instalador__modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  border-top: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+  gap: 8px;
+}
+
+.uso-instalador__loading-spinner--small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+/* ============================================
+   MODAL DE CRIAÇÃO DE ATIVIDADE
+   ============================================ */
+
+.uso-instalador__modal--large {
+  width: 900px; /* aumentada para comportar a DataGrid */
+  max-width: calc(100vw - 40px); /* manter margem de 20px nas laterais em telas pequenas */
+  max-height: 90vh;
+}
+
+/* Step Indicator */
+.uso-instalador__modal-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  gap: 12px;
+  border-bottom: 1px solid var(--ui-border);
+  background: #fafafa;
+}
+
+.uso-instalador__modal-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.uso-instalador__modal-step--active,
+.uso-instalador__modal-step--completed {
+  opacity: 1;
+}
+
+.uso-instalador__modal-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ui-border);
+  color: var(--ui-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.uso-instalador__modal-step--active .uso-instalador__modal-step-number {
+  background: #0078d4;
+  color: white;
+}
+
+.uso-instalador__modal-step--completed .uso-instalador__modal-step-number {
+  background: #4caf50;
+  color: white;
+}
+
+.uso-instalador__modal-step-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+}
+
+.uso-instalador__modal-step--active .uso-instalador__modal-step-label {
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__modal-step-divider {
+  width: 40px;
+  height: 2px;
+  background: var(--ui-border);
+}
+
+/* OS List */
+.uso-instalador__os-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uso-instalador__os-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.uso-instalador__os-item:hover {
+  background: #f5f5f5;
+  border-color: #0078d4;
+}
+
+.uso-instalador__os-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uso-instalador__os-id {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__os-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ui-text-secondary);
+}
+
+.uso-instalador__os-cliente,
+.uso-instalador__os-projeto {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Produtos table styles */
+.uso-instalador__os-produtos-table-wrapper {
+  margin-top: 6px;
+  overflow-x: auto; /* horizontal scroll if needed */
+  overflow-y: hidden;
+  border-radius: 6px;
+  border: 1px solid var(--ui-border);
+  background: white;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 6px; /* small padding to avoid edge clipping */
+}
+
+.uso-instalador__os-produtos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed; /* keep layout predictable and allow wrapping inside cells */
+  min-width: 0; /* allow the table to shrink to container width */
+}
+
+.uso-instalador__os-produtos-table th,
+.uso-instalador__os-produtos-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--ui-border);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal; /* allow wrapping when content exceeds column width */
+}
+
+.uso-instalador__os-produtos-table th {
+  background: transparent; /* lighter header */
+  color: var(--ui-text-muted);
+  font-weight: 500; /* lighter than before */
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.uso-instalador__os-produto-quantidade {
+  width: 80px;
+  font-weight: 600;
+  white-space: nowrap; /* keep numbers on single line */
+}
+
+.uso-instalador__os-produto-referencia {
+  width: 160px;
+  color: var(--ui-text-primary);
+  white-space: normal; /* allow wrap */
+}
+
+.uso-instalador__os-produto-descricao {
+  color: var(--ui-text-muted);
+  max-width: 200px;
+  white-space: normal; /* allow wrap */
+}
+
+.uso-instalador__status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 999px;
+  min-width: 72px;
+  text-align: center;
+}
+
+.uso-instalador__status-badge.ativo {
+  background: var(--ui-success-bg);
+  color: var(--ui-success-text);
+  border: 1px solid rgba(46, 125, 50, 0.08);
+}
+
+.uso-instalador__status-badge.inativo {
+  background: #f5f5f5;
+  color: var(--ui-text-muted);
+  border: 1px solid var(--ui-border);
+}
+
+@media (max-width: 720px) {
+  /* hide description to keep table compact on small screens */
+  .uso-instalador__os-produtos-table th:nth-child(3),
+  .uso-instalador__os-produtos-table td:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  /* further hide situacao on very small screens */
+  .uso-instalador__os-produtos-table th:nth-child(4),
+  .uso-instalador__os-produtos-table td:nth-child(4) {
+    display: none;
+  }
+}
+
+/* Sortable headers - light styling to match model-driven apps */
+.uso-instalador__sortable-header {
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--ui-text-muted);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.uso-instalador__sortable-header:hover,
+.uso-instalador__sortable-header.sorted {
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__sort-indicator {
+  font-size: 11px;
+  color: var(--ui-text-muted);
+  opacity: 0.9;
+}
+
+/* Column resizer - subtle */
+.uso-instalador__column-resizer {
+  width: 6px;
+  height: 20px;
+  cursor: col-resize;
+  border-left: 1px solid rgba(0,0,0,0.03);
+  margin-left: 6px;
+  opacity: 0.65;
+}
+
+/* Loading state for produtos - small spinner */
+.uso-instalador__produtos-loading {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ui-text-muted);
+  font-size: 13px;
+}
+
+
+/* Form Fields */
+.uso-instalador__modal-content--form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.uso-instalador__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.uso-instalador__form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ui-text-primary);
+}
+
+.uso-instalador__form-required {
+  color: #d32f2f;
+}
+
+.uso-instalador__form-input,
+.uso-instalador__form-select,
+.uso-instalador__form-textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ui-text-primary);
+  background: white;
+  transition: border-color 0.15s;
+}
+
+.uso-instalador__form-input:focus,
+.uso-instalador__form-select:focus,
+.uso-instalador__form-textarea:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+}
+
+.uso-instalador__form-input:disabled,
+.uso-instalador__form-select:disabled,
+.uso-instalador__form-textarea:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.uso-instalador__form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.uso-instalador__form-hint {
+  font-size: 12px;
+  color: var(--ui-text-muted);
+}
+
+/* Modal Error */
+.uso-instalador__modal-error {
+  margin: 0 20px;
+  padding: 12px 16px;
+  background: #ffebee;
+  border: 1px solid #f44336;
+  border-radius: 6px;
+  color: #d32f2f;
+  font-size: 14px;
+}

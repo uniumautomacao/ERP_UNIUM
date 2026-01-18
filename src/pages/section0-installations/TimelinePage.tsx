@@ -1,18 +1,10 @@
-import { PageContainer } from '../../components/layout/PageContainer';
-import { PageHeader } from '../../components/layout/PageHeader';
+import { UsoInstalador } from '../../components/UsoInstalador';
+import './LinhaDoTempoApp.css';
 
 export function TimelinePage() {
   return (
-    <>
-      <PageHeader
-        title="Linha do Tempo"
-        subtitle="Gerenciamento de instalações e cronogramas"
-      />
-      <PageContainer>
-        <div>
-          {/* Conteúdo da página em branco por enquanto */}
-        </div>
-      </PageContainer>
-    </>
+    <div className="app-container">
+      <UsoInstalador />
+    </div>
   );
 }
