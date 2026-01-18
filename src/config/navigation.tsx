@@ -38,6 +38,18 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    id: 'cadastros',
+    label: 'Cadastros',
+    items: [
+      {
+        id: 'dispositivos-io',
+        label: 'Dispositivos IO',
+        icon: <DeveloperBoard24Regular />,
+        path: '/dispositivos-io',
+      },
+    ],
+  },
+  {
     id: 'analytics',
     label: 'Analytics',
     items: [

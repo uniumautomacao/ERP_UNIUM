@@ -4,6 +4,7 @@ import { SidebarProvider } from './context/SidebarContext';
 import { AppShell } from './components/layout/AppShell';
 import { HomePage } from './pages/HomePage';
 import { TimelinePage } from './pages/section0-installations/TimelinePage';
+import { DispositivosIOPage } from './pages/section-cadastros/DispositivosIOPage';
 import { DashboardPage } from './pages/section1-analytics/DashboardPage';
 import { AnalyticsPage } from './pages/section1-analytics/AnalyticsPage';
 import { ReportsPage } from './pages/section1-analytics/ReportsPage';
@@ -38,6 +39,14 @@ function App() {
                   element={
                     <RequirePageAccess>
                       <TimelinePage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/dispositivos-io"
+                  element={
+                    <RequirePageAccess>
+                      <DispositivosIOPage />
                     </RequirePageAccess>
                   }
                 />
