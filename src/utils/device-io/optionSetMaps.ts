@@ -1,6 +1,9 @@
-import type { ConnectionDirectionOption, ConnectionTypeOption } from '../types';
+import type {
+  DeviceIOConnectionDirectionOption,
+  DeviceIOConnectionTypeOption,
+} from '../../types';
 
-export const connectionTypeOptions: ConnectionTypeOption[] = [
+export const connectionTypeOptions: DeviceIOConnectionTypeOption[] = [
   { value: 100000000, label: 'HDMI' },
   { value: 100000001, label: 'Audio Analogico' },
   { value: 100000002, label: 'Toslink' },
@@ -24,7 +27,7 @@ export const connectionTypeOptions: ConnectionTypeOption[] = [
   { value: 100000020, label: 'Controle de Acesso' },
 ];
 
-export const connectionDirectionOptions: ConnectionDirectionOption[] = [
+export const connectionDirectionOptions: DeviceIOConnectionDirectionOption[] = [
   { value: 100000000, label: 'Input' },
   { value: 100000001, label: 'Output' },
   { value: 100000002, label: 'Bidirectional' },

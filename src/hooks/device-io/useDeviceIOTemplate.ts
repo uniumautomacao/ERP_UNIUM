@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Cr22fModelosdeprodutofromsharepointlistService } from '../generated/services/Cr22fModelosdeprodutofromsharepointlistService';
-import type { DeviceIOTemplate, Product } from '../types';
-import { parseTemplate, serializeTemplate } from '../utils/jsonTemplate';
+import { Cr22fModelosdeProdutoFromSharepointListService } from '../../generated/services/Cr22fModelosdeProdutoFromSharepointListService';
+import type { DeviceIOTemplate, DeviceIOProduct } from '../../types';
+import { parseTemplate, serializeTemplate } from '../../utils/device-io/jsonTemplate';
 
-export const useDeviceTemplate = (product: Product | null) => {
+export const useDeviceIOTemplate = (product: DeviceIOProduct | null) => {
   const [template, setTemplate] = useState<DeviceIOTemplate | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,11 +26,11 @@ export const useDeviceTemplate = (product: Product | null) => {
       setLoading(true);
       setError('');
       try {
-        await Cr22fModelosdeprodutofromsharepointlistService.update(
+        await Cr22fModelosdeProdutoFromSharepointListService.update(
           product.cr22f_modelosdeprodutofromsharepointlistid,
           {
             new_deviceiotemplatejson: serializeTemplate(nextTemplate),
-          }
+          } as Record<string, unknown>
         );
       } catch (err) {
         setError('Falha ao salvar o template.');

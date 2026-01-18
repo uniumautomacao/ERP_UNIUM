@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
-import { connectionDirectionOptions, connectionTypeOptions } from '../utils/optionSetMaps';
+import {
+  connectionDirectionOptions,
+  connectionTypeOptions,
+} from '../../utils/device-io/optionSetMaps';
 
-export const useConnectionTypes = () => {
+export const useDeviceIOConnectionTypes = () => {
   const typeOptions = useMemo(() => connectionTypeOptions, []);
   const directionOptions = useMemo(() => connectionDirectionOptions, []);
 

@@ -103,6 +103,48 @@ export interface RecentExport {
   generatedAt: string;
 }
 
+// Device IO
+export interface DeviceIODimensions {
+  Width: number;
+  H: number;
+  Depth: number;
+}
+
+export interface DeviceIOConnection {
+  Name: string;
+  Type: string;
+  Direction: string;
+}
+
+export interface DeviceIOTemplate {
+  Dimensions: DeviceIODimensions;
+  RackCategory: string;
+  Connections: DeviceIOConnection[];
+}
+
+export interface DeviceIOConnectionTypeOption {
+  value: number;
+  label: string;
+}
+
+export interface DeviceIOConnectionDirectionOption {
+  value: number;
+  label: string;
+}
+
+export interface DeviceIOProduct {
+  cr22f_modelosdeprodutofromsharepointlistid: string;
+  cr22f_title: string;
+  cr22f_queryfabricante?: string;
+  new_deviceiotemplatejson: string | null;
+  new_nomedofabricante?: string;
+}
+
+export interface DeviceIOManufacturer {
+  cr22f_fabricantesfromsharpointlistid: string;
+  cr22f_title: string;
+}
+
 // Navigation
 export interface NavItem {
   id: string;

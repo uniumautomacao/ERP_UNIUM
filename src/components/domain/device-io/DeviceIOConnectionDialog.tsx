@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogSurface,
@@ -15,8 +15,11 @@ import {
   shorthands,
   tokens,
 } from '@fluentui/react-components';
-import type { Connection } from '../../types';
-import { useEditorContext } from '../../context/EditorContext';
+import type {
+  DeviceIOConnection,
+  DeviceIOConnectionDirectionOption,
+  DeviceIOConnectionTypeOption,
+} from '../../../types';
 
 const useStyles = makeStyles({
   content: {
@@ -31,24 +34,37 @@ const useStyles = makeStyles({
   },
 });
 
-interface ConnectionFormProps {
-  initialConnection?: Connection;
+interface DeviceIOConnectionDialogProps {
+  open: boolean;
+  initialConnection?: DeviceIOConnection;
   index?: number;
+  connectionTypes: DeviceIOConnectionTypeOption[];
+  connectionDirections: DeviceIOConnectionDirectionOption[];
   onClose: () => void;
+  onSave: (connection: DeviceIOConnection, index?: number) => void;
 }
 
-const ConnectionForm: React.FC<ConnectionFormProps> = ({
+export function DeviceIOConnectionDialog({
+  open,
   initialConnection,
   index,
+  connectionTypes,
+  connectionDirections,
   onClose,
-}) => {
+  onSave,
+}: DeviceIOConnectionDialogProps) {
   const styles = useStyles();
-  const { connectionTypes, connectionDirections, addConnection, updateConnection } =
-    useEditorContext();
   const [name, setName] = useState(initialConnection?.Name ?? '');
   const [type, setType] = useState(initialConnection?.Type ?? '');
   const [direction, setDirection] = useState(initialConnection?.Direction ?? '');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setName(initialConnection?.Name ?? '');
+    setType(initialConnection?.Type ?? '');
+    setDirection(initialConnection?.Direction ?? '');
+    setError('');
+  }, [initialConnection]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -65,23 +81,17 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
       return;
     }
 
-    const next: Connection = {
+    const next: DeviceIOConnection = {
       Name: name.trim(),
       Type: type,
       Direction: direction,
     };
 
-    if (typeof index === 'number') {
-      updateConnection(index, next);
-    } else {
-      addConnection(next);
-    }
-
-    onClose();
+    onSave(next, typeof index === 'number' ? index : undefined);
   };
 
   return (
-    <Dialog open onOpenChange={(_, data) => !data.open && onClose()}>
+    <Dialog open={open} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface>
         <form onSubmit={handleSubmit}>
           <DialogBody>
@@ -90,7 +100,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
             </DialogTitle>
             <DialogContent className={styles.content}>
               {error && <div className={styles.error}>{error}</div>}
-              
+
               <Field label="Nome" required>
                 <Input
                   value={name}
@@ -102,7 +112,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
               <Field label="Tipo" required>
                 <Dropdown
                   placeholder="Selecione o tipo"
-                  value={connectionTypes.find((t) => t.value.toString() === type)?.label ?? ''}
+                  value={connectionTypes.find((item) => item.value.toString() === type)?.label ?? ''}
                   selectedOptions={type ? [type] : []}
                   onOptionSelect={(_, data) => setType(data.optionValue ?? '')}
                 >
@@ -118,7 +128,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
                 <Dropdown
                   placeholder="Selecione a direção"
                   value={
-                    connectionDirections.find((d) => d.value.toString() === direction)?.label ?? ''
+                    connectionDirections.find((item) => item.value.toString() === direction)?.label ?? ''
                   }
                   selectedOptions={direction ? [direction] : []}
                   onOptionSelect={(_, data) => setDirection(data.optionValue ?? '')}
@@ -144,6 +154,4 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
       </DialogSurface>
     </Dialog>
   );
-};
-
-export default ConnectionForm;
+}

@@ -1,25 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Connection, DeviceIOTemplate, Dimensions, Product } from '../types';
-import { useConnectionTypes } from '../hooks/useConnectionTypes';
-import { useDeviceTemplate } from '../hooks/useDeviceTemplate';
-import { EditorContext } from './EditorContext';
-import type { EditorContextValue } from './EditorContext';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { DeviceIOConnection, DeviceIODimensions, DeviceIOProduct, DeviceIOTemplate } from '../../types';
+import { useDeviceIOConnectionTypes } from './useDeviceIOConnectionTypes';
+import { useDeviceIOTemplate } from './useDeviceIOTemplate';
 
-interface EditorProviderProps {
-  product: Product | null;
-  children: React.ReactNode;
-}
-
-export const EditorProvider: React.FC<EditorProviderProps> = ({ product, children }) => {
-  const { template: baseTemplate, save, loading: saving, error } = useDeviceTemplate(product);
-  const { typeOptions, directionOptions } = useConnectionTypes();
+export const useDeviceIOEditor = (product: DeviceIOProduct | null) => {
+  const { template: baseTemplate, save, loading: saving, error } = useDeviceIOTemplate(product);
+  const { typeOptions, directionOptions } = useDeviceIOConnectionTypes();
   const [template, setTemplate] = useState<DeviceIOTemplate | null>(baseTemplate);
   const [isDirty, setIsDirty] = useState(false);
   const productId = product?.cr22f_modelosdeprodutofromsharepointlistid;
   const saveTimeoutRef = useRef<number | null>(null);
   const pendingSaveRef = useRef<DeviceIOTemplate | null>(null);
 
-  // Reset template when switching products or when baseTemplate changes
   useEffect(() => {
     setTemplate(baseTemplate);
     setIsDirty(false);
@@ -30,7 +22,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
     pendingSaveRef.current = null;
   }, [productId, baseTemplate]);
 
-  // Auto-save function with debounce
   const autoSave = useCallback(
     async (templateToSave: DeviceIOTemplate, immediate = false) => {
       if (!product) {
@@ -59,14 +50,14 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
       if (immediate) {
         await performSave();
       } else {
-        saveTimeoutRef.current = setTimeout(performSave, 500);
+        saveTimeoutRef.current = window.setTimeout(performSave, 500);
       }
     },
     [save, product]
   );
 
   const setDimensions = useCallback(
-    (dims: Dimensions) => {
+    (dims: DeviceIODimensions) => {
       setTemplate((prev) => {
         if (!prev) {
           return prev;
@@ -96,14 +87,14 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
   );
 
   const addConnection = useCallback(
-    (connection: Connection) => {
+    (connection: DeviceIOConnection) => {
       setTemplate((prev) => {
         if (!prev) {
           return prev;
         }
         const updated = { ...prev, Connections: [...prev.Connections, connection] };
         setIsDirty(true);
-        autoSave(updated, true); // Save immediately when adding connection
+        autoSave(updated, true);
         return updated;
       });
     },
@@ -111,7 +102,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
   );
 
   const updateConnection = useCallback(
-    (index: number, connection: Connection) => {
+    (index: number, connection: DeviceIOConnection) => {
       setTemplate((prev) => {
         if (!prev) {
           return prev;
@@ -121,7 +112,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
         );
         const updated = { ...prev, Connections: nextConnections };
         setIsDirty(true);
-        autoSave(updated, true); // Save immediately when updating connection
+        autoSave(updated, true);
         return updated;
       });
     },
@@ -137,7 +128,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
         const nextConnections = prev.Connections.filter((_, idx) => idx !== index);
         const updated = { ...prev, Connections: nextConnections };
         setIsDirty(true);
-        autoSave(updated, true); // Save immediately when removing connection
+        autoSave(updated, true);
         return updated;
       });
     },
@@ -167,7 +158,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
     pendingSaveRef.current = null;
   }, [baseTemplate]);
 
-  const value = useMemo<EditorContextValue>(
+  const value = useMemo(
     () => ({
       template,
       isDirty,
@@ -200,5 +191,5 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ product, childre
     ]
   );
 
-  return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;
+  return value;
 };

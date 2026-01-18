@@ -1,6 +1,6 @@
-import type { Connection, DeviceIOTemplate, Dimensions } from '../types';
+import type { DeviceIOConnection, DeviceIODimensions, DeviceIOTemplate } from '../../types';
 
-const defaultDimensions: Dimensions = {
+const defaultDimensions: DeviceIODimensions = {
   Width: 0,
   H: 0,
   Depth: 0,
@@ -12,8 +12,10 @@ export const getDefaultTemplate = (): DeviceIOTemplate => ({
   Connections: [],
 });
 
-const normalizeDimensions = (input: Partial<Dimensions> | { Height?: number } | undefined): Dimensions => {
-  const partialDims = input as Partial<Dimensions> | undefined;
+const normalizeDimensions = (
+  input: Partial<DeviceIODimensions> | { Height?: number } | undefined
+): DeviceIODimensions => {
+  const partialDims = input as Partial<DeviceIODimensions> | undefined;
   const heightValue = (input as { Height?: number } | undefined)?.Height;
   return {
     Width: Number.isFinite(partialDims?.Width) ? Number(partialDims?.Width) : 0,
@@ -26,7 +28,7 @@ const normalizeDimensions = (input: Partial<Dimensions> | { Height?: number } | 
   };
 };
 
-const normalizeConnections = (input: unknown): Connection[] => {
+const normalizeConnections = (input: unknown): DeviceIOConnection[] => {
   if (!Array.isArray(input)) {
     return [];
   }
@@ -34,7 +36,7 @@ const normalizeConnections = (input: unknown): Connection[] => {
   return input
     .filter((item) => item && typeof item === 'object')
     .map((item) => {
-      const connection = item as Partial<Connection>;
+      const connection = item as Partial<DeviceIOConnection>;
       return {
         Name: connection.Name?.toString() ?? '',
         Type: connection.Type?.toString() ?? '',

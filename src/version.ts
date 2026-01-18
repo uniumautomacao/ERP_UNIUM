@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.34';
+export const APP_VERSION = '0.0.35';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.35',
+    date: '2026-01-18',
+    changes: 'Reescrita a UI da página Dispositivos IO para o padrão do template, mantendo o fluxo e o autosave.',
+  },
   {
     version: '0.0.34',
     date: '2026-01-18',

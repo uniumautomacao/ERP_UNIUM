@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Cr22fModelosdeprodutofromsharepointlistService } from '../generated/services/Cr22fModelosdeprodutofromsharepointlistService';
-import type { Product } from '../types';
+import { Cr22fModelosdeProdutoFromSharepointListService } from '../../generated/services/Cr22fModelosdeProdutoFromSharepointListService';
+import type { DeviceIOProduct } from '../../types';
 
 const escapeODataValue = (value: string) => value.replace(/'/g, "''");
 
-export const useProducts = (manufacturerId: string | null, search: string) => {
-  const [products, setProducts] = useState<Product[]>([]);
+export const useDeviceIOProducts = (manufacturerId: string | null, search: string) => {
+  const [products, setProducts] = useState<DeviceIOProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -28,7 +28,8 @@ export const useProducts = (manufacturerId: string | null, search: string) => {
       if (searchTerm) {
         filterParts.push(`contains(cr22f_title, '${escapeODataValue(searchTerm)}')`);
       }
-      const result = await Cr22fModelosdeprodutofromsharepointlistService.getAll({
+
+      const result = await Cr22fModelosdeProdutoFromSharepointListService.getAll({
         select: [
           'cr22f_modelosdeprodutofromsharepointlistid',
           'cr22f_title',
@@ -41,7 +42,7 @@ export const useProducts = (manufacturerId: string | null, search: string) => {
         top: 500,
       });
 
-      setProducts((result.data ?? []) as Product[]);
+      setProducts((result.data ?? []) as DeviceIOProduct[]);
     } catch (err) {
       setError('Falha ao carregar produtos.');
       console.error('Falha ao carregar produtos:', err);
