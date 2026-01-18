@@ -29,6 +29,9 @@
 - Adicionar entrada em `VERSION_HISTORY` descrevendo a mudança
 - Use PATCH (0.0.X) para qualquer alteração pequena
 
+**NOTA**: A versão é exibida automaticamente no canto superior direito de TODAS 
+as páginas via `AppShell.tsx`. Não adicione a versão manualmente em páginas individuais.
+
 ### 2. NUNCA Publicar Automaticamente
 **O agente NÃO deve executar `pac code push` sem solicitação explícita:**
 - Sempre testar localmente primeiro usando `npm run dev`
