@@ -9,6 +9,7 @@ import {
   DeveloperBoard24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
+import { getRequiredRoles } from '../security/pageAccess';
 
 export const navigation: NavSection[] = [
   {
@@ -20,6 +21,7 @@ export const navigation: NavSection[] = [
         label: 'Home',
         icon: <Home24Regular />,
         path: '/',
+        requiredRoles: getRequiredRoles('/'),
       },
     ],
   },
@@ -32,18 +34,21 @@ export const navigation: NavSection[] = [
         label: 'Dashboard',
         icon: <DataBarVertical24Regular />,
         path: '/dashboard',
+        requiredRoles: getRequiredRoles('/dashboard'),
       },
       {
         id: 'analytics',
         label: 'Analytics',
         icon: <ChartMultiple24Regular />,
         path: '/analytics',
+        requiredRoles: getRequiredRoles('/analytics'),
       },
       {
         id: 'reports',
         label: 'Reports',
         icon: <DocumentBulletList24Regular />,
         path: '/reports',
+        requiredRoles: getRequiredRoles('/reports'),
       },
     ],
   },
@@ -56,18 +61,21 @@ export const navigation: NavSection[] = [
         label: 'Inventory',
         icon: <Box24Regular />,
         path: '/inventory',
+        requiredRoles: getRequiredRoles('/inventory'),
       },
       {
         id: 'projects',
         label: 'Project Planner',
         icon: <CalendarLtr24Regular />,
         path: '/projects',
+        requiredRoles: getRequiredRoles('/projects'),
       },
       {
         id: 'team',
         label: 'Team Management',
         icon: <People24Regular />,
         path: '/team',
+        requiredRoles: getRequiredRoles('/team'),
       },
     ],
   },
@@ -80,6 +88,7 @@ export const navigation: NavSection[] = [
         label: 'Dev Page',
         icon: <DeveloperBoard24Regular />,
         path: '/dev',
+        requiredRoles: getRequiredRoles('/dev'),
       },
     ],
   },

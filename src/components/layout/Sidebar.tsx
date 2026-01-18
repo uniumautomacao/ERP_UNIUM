@@ -1,15 +1,33 @@
+import { useMemo } from 'react';
 import { Button, Avatar, Text, tokens, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Navigation24Regular, Settings24Regular, Dismiss24Regular } from '@fluentui/react-icons';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobile } from '../../hooks/useMediaQuery';
+import { useUserRoles } from '../../hooks/useUserRoles';
 import { SidebarSection } from './SidebarSection';
 import { ThemeToggle } from './ThemeToggle';
 import { navigation } from '../../config/navigation';
 import { LAYOUT } from '../../config/theme';
+import { hasRequiredRoles } from '../../security/pageAccess';
 
 export function Sidebar() {
   const { isExpanded, isMobileOpen, toggleExpanded, closeMobile } = useSidebar();
   const isMobile = useIsMobile();
+  const { roles } = useUserRoles();
+
+  const roleNames = useMemo(() => roles.map((role) => role.name), [roles]);
+  const filteredNavigation = useMemo(
+    () =>
+      navigation
+        .map((section) => {
+          const items = section.items.filter((item) =>
+            hasRequiredRoles(roleNames, item.requiredRoles)
+          );
+          return items.length > 0 ? { ...section, items } : null;
+        })
+        .filter((section): section is typeof navigation[number] => section !== null),
+    [roleNames]
+  );
 
   const sidebarWidth = isExpanded ? LAYOUT.sidebar.expandedWidth : LAYOUT.sidebar.collapsedWidth;
 
@@ -45,7 +63,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <div className="flex-grow overflow-y-auto" style={{ padding: isExpanded ? '16px 8px' : '16px 4px' }}>
-        {navigation.map((section) => (
+        {filteredNavigation.map((section) => (
           <SidebarSection
             key={section.id}
             label={section.label}

@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.11';
+export const APP_VERSION = '0.0.12';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.12', 
+    date: '2026-01-18', 
+    changes: 'Adicionado controle de acesso por roles nas rotas e no menu, com página de acesso negado e notas de segurança no Dataverse.' 
+  },
   { 
     version: '0.0.11', 
     date: '2026-01-18', 

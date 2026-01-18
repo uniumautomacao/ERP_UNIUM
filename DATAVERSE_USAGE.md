@@ -205,6 +205,19 @@ filter: "createdon gt 2024-01-01"
 
 5. **Aguarde a inicialização** do SDK antes de fazer chamadas de dados
 
+## Segurança e Permissões (Dataverse)
+
+O controle de acesso no frontend melhora a experiência, mas a segurança real deve estar no Dataverse.
+
+Checklist recomendado:
+
+1. **Roles corretas por tabela**: conceda somente `Read/Write/Create/Delete` necessários nas tabelas usadas em cada página.
+2. **Field Security** para dados sensíveis: restrinja campos críticos mesmo que o usuário tenha acesso à tabela.
+3. **Team/Business Unit**: use escopo de privilégios adequado para limitar dados por unidade/Time.
+4. **Sem conta técnica**: evite conexões com privilégios elevados no app; use sempre o contexto do usuário.
+
+Se um usuário conseguir abrir uma página via URL mas **não tiver permissão no Dataverse**, as operações deverão falhar — isso é o bloqueio real contra bypass no navegador.
+
 ## Limitações Atuais
 
 Segundo a documentação oficial, as seguintes funcionalidades ainda não são suportadas:
