@@ -7,33 +7,6 @@
    CSS VARIABLES / DESIGN TOKENS
    ============================================ */
 .uso-instalador {
-  --ui-font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-  --ui-background: #ffffff;
-  --ui-surface: #fafafa;
-  --ui-border: #e0e0e0;
-  --ui-border-strong: #c0c0c0;
-  --ui-text-primary: #1a1a1a;
-  --ui-text-secondary: #5f5f5f;
-  --ui-text-muted: #8a8a8a;
-  
-  /* Status colors */
-  --ui-overload-bg: #ffe5e5;
-  --ui-overload-text: #d32f2f;
-  --ui-critical-bg: #ffcccc;
-  --ui-conflict-border: #d32f2f;
-  --ui-travel-bg: #e3f2fd;
-  --ui-travel-text: #1976d2;
-  --ui-success-bg: #e8f5e9;
-  --ui-success-text: #2e7d32;
-  --ui-warning-bg: #fff8e1;
-  --ui-warning-text: #f57c00;
-  
-  /* Capacity colors */
-  --capacity-idle: #2196f3;
-  --capacity-normal: #4caf50;
-  --capacity-warning: #ff9800;
-  --capacity-overload: #f44336;
-  
   /* Spacing */
   --row-height-parent: 42px;
   --row-height-child: 34px;
@@ -41,12 +14,7 @@
   --column-width-day: 72px;
   --color-bar-width: 4px;
   --indent-width: 24px;
-  
-  /* Shadows & Effects */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
-  
+
   /* Transitions */
   --transition-fast: 150ms ease-out;
   --transition-normal: 250ms ease-out;
@@ -57,26 +25,25 @@
    ============================================ */
 .uso-instalador__loading {
   font-size: 14px;
-  color: #1976d2;
+  color: var(--ui-info-foreground);
   margin-left: 16px;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .uso-instalador__error {
   font-size: 14px;
-  color: #d32f2f;
+  color: var(--ui-danger-foreground);
   margin-left: 16px;
   font-weight: 500;
 }
 
 .uso-instalador__version {
   font-size: 11px;
-  color: #999;
   margin-left: 16px;
-  padding: 2px 8px;
-  background: #f5f5f5;
-  border-radius: 10px;
   font-weight: 400;
 }
 
@@ -93,12 +60,12 @@
   background: var(--ui-background);
   color: var(--ui-text-primary);
   border-radius: 8px;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--ui-shadow-md);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: 100vh;
+  min-height: 0;
 }
 
 /* ============================================
@@ -154,7 +121,7 @@
   padding: 0 8px;
   border: 1px solid var(--ui-border);
   border-radius: 6px;
-  background: white;
+  background: var(--ui-background);
   font-size: 13px;
   color: var(--ui-text-primary);
   -webkit-text-fill-color: var(--ui-text-primary);
@@ -192,18 +159,10 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid var(--ui-border);
   border-radius: 6px;
-  background: white;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 16px;
-  color: var(--ui-text-secondary);
 }
 
 .uso-instalador__nav-btn:hover {
-  background: var(--ui-surface);
-  border-color: var(--ui-border-strong);
   color: var(--ui-text-primary);
 }
 
@@ -221,37 +180,6 @@
   gap: 8px;
 }
 
-.uso-instalador__btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ui-text-primary);
-  transition: all var(--transition-fast);
-}
-
-.uso-instalador__btn:hover {
-  background: var(--ui-surface);
-  border-color: var(--ui-border-strong);
-}
-
-.uso-instalador__btn--primary {
-  background: #0078d4;
-  border-color: #0078d4;
-  color: white;
-}
-
-.uso-instalador__btn--primary:hover {
-  background: #106ebe;
-  border-color: #106ebe;
-}
-
 /* ============================================
    GRID CONTAINER
    ============================================ */
@@ -259,6 +187,7 @@
   flex: 1;
   overflow: auto;
   position: relative;
+  min-height: 0;
 }
 
 .uso-instalador__grid {
@@ -289,10 +218,10 @@
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
-  border-right: 1px solid rgba(0, 0, 0, 0.15);
-  background: #e8e8e8;
+  color: var(--ui-table-header-foreground);
+  border-bottom: 2px solid var(--ui-table-header-border);
+  border-right: 1px solid var(--ui-border);
+  background: var(--ui-table-header-bg);
   vertical-align: middle;
 }
 
@@ -313,7 +242,7 @@
 }
 
 .uso-instalador__grid-header-cell--today {
-  background: #e3f2fd;
+  background: var(--ui-info-bg);
 }
 
 .uso-instalador__header-day-label {
@@ -355,8 +284,8 @@
 .uso-instalador__installer-cell {
   display: table-cell;
   vertical-align: middle;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--ui-border-subtle);
+  border-right: 1px solid var(--ui-border);
   background: transparent;
 }
 
@@ -403,10 +332,10 @@
   left: calc(var(--color-bar-width) + 8px);
   top: 0;
   z-index: 10000;
-  background: #ffffff !important; /* garantir fundo branco */
+  background: var(--ui-background);
   border: 1px solid var(--ui-border);
   border-radius: 8px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--ui-shadow-lg);
   padding: 12px;
   min-width: 200px;
 }
@@ -417,12 +346,6 @@
   inset: 0;
   z-index: 99999;
   background: transparent;
-  /* Definições locais de variáveis para o portal (fora de .uso-instalador) */
-  --ui-text-primary: #1a1a1a;
-  --ui-text-secondary: #5f5f5f;
-  --ui-text-muted: #8a8a8a;
-  --ui-border: #e0e0e0;
-  --ui-surface: #fafafa;
 }
 
 .uso-instalador__color-picker-header {
@@ -436,18 +359,9 @@
 }
 
 .uso-instalador__color-picker-close {
-  background: transparent;
-  border: none;
-  font-size: 18px;
-  color: var(--ui-text-muted);
-  cursor: pointer;
-  padding: 0;
+  min-width: 24px;
   width: 24px;
   height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
 }
 
 .uso-instalador__color-picker-close:hover {
@@ -464,10 +378,18 @@
 .uso-instalador__color-picker-item {
   width: 28px;
   height: 28px;
+  min-width: 28px;
+  padding: 0;
   border-radius: 6px;
   border: 2px solid transparent;
   cursor: pointer;
   transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.uso-instalador__color-picker-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
 }
 
 .uso-instalador__color-picker-item:hover {
@@ -476,7 +398,7 @@
 
 .uso-instalador__color-picker-item--selected {
   border-color: var(--ui-text-primary);
-  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--ui-text-primary);
+  box-shadow: 0 0 0 2px var(--ui-background), 0 0 0 4px var(--ui-text-primary);
 }
 
 .uso-instalador__color-picker-item:disabled {
@@ -497,11 +419,7 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 10px;
-  color: var(--ui-text-muted);
+  min-width: 20px;
   transition: transform var(--transition-fast);
   flex-shrink: 0;
 }
@@ -547,22 +465,22 @@
 }
 
 .uso-instalador__installer-capacity--idle {
-  background: #e3f2fd;
+  background: var(--ui-info-bg);
   color: var(--capacity-idle);
 }
 
 .uso-instalador__installer-capacity--normal {
-  background: #e8f5e9;
+  background: var(--ui-success-bg);
   color: var(--capacity-normal);
 }
 
 .uso-instalador__installer-capacity--warning {
-  background: #fff8e1;
+  background: var(--ui-warning-bg);
   color: var(--capacity-warning);
 }
 
 .uso-instalador__installer-capacity--overload {
-  background: #ffebee;
+  background: var(--ui-overload-bg);
   color: var(--capacity-overload);
 }
 
@@ -600,7 +518,7 @@
 .uso-instalador__project-summary-name {
   font-size: 12px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--ui-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -634,7 +552,7 @@
   line-height: 1.15;
   margin: 0;
   background: transparent !important;
-  color: #1a1a1a !important;
+  color: var(--ui-text-primary) !important;
   text-transform: uppercase;
 }
 
@@ -649,7 +567,7 @@
   position: absolute;
   box-shadow: none;
   background: transparent !important;
-  color: #1a1a1a !important;
+  color: var(--ui-text-primary) !important;
 }
 
 /* Merged cells need relative positioning for absolute children */
@@ -682,7 +600,7 @@
 
 .uso-instalador__hours-meta {
   font-size: 8px;
-  color: #999;
+  color: var(--ui-text-muted);
   line-height: 1;
   display: flex;
   align-items: center;
@@ -728,6 +646,26 @@
   gap: 2px;
 }
 
+.uso-instalador__inline-editor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.uso-instalador__inline-input {
+  min-width: 60px;
+}
+
+.uso-instalador__inline-input--error {
+  border-color: var(--ui-danger-foreground);
+  box-shadow: 0 0 0 1px var(--ui-danger-foreground);
+}
+
+.uso-instalador__inline-button {
+  font-size: 10px;
+  line-height: 1;
+}
+
 .uso-instalador__hours-alert {
   font-size: 12px;
 }
@@ -752,8 +690,8 @@
 .uso-instalador__project-cell {
   display: table-cell;
   vertical-align: middle;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--ui-border-subtle);
+  border-right: 1px solid var(--ui-border);
   background: transparent;
 }
 
@@ -812,14 +750,14 @@
   font-weight: 400;
   color: var(--ui-text-secondary);
   padding: 4px 2px;
-  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  border-left: 1px solid var(--ui-border-subtle);
   cursor: pointer;
   transition: background var(--transition-fast);
   line-height: 1.2;
 }
 
 .uso-instalador__project-hours-cell:hover:not(.uso-instalador__project-hours-cell--empty) {
-  background: rgba(0, 120, 212, 0.08);
+  background: var(--ui-info-bg);
 }
 
 .uso-instalador__project-hours-cell--empty {
@@ -828,7 +766,7 @@
 
 .uso-instalador__project-hours-cell--travel {
   background: transparent;
-  color: #1a1a1a;
+  color: var(--ui-text-primary);
   font-style: italic;
 }
 
@@ -842,81 +780,7 @@
 .uso-instalador__team-separator-cell {
   display: table-cell;
   height: 3px;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-/* ============================================
-   DETAIL PANEL (Sidebar/Modal)
-   ============================================ */
-.uso-instalador__detail-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 100;
-  display: flex;
-  justify-content: flex-end;
-  animation: fadeIn var(--transition-fast);
-}
-
-.uso-instalador__detail-panel {
-  width: 380px;
-  max-width: 100%;
-  background: white;
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  animation: slideInRight var(--transition-normal);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
-
-.uso-instalador__detail-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid var(--ui-border);
-  background: var(--ui-surface);
-}
-
-.uso-instalador__detail-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.uso-instalador__detail-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-  color: var(--ui-text-muted);
-  border-radius: 6px;
-  transition: all var(--transition-fast);
-}
-
-.uso-instalador__detail-close:hover {
-  background: var(--ui-surface);
-  color: var(--ui-text-primary);
+  background: var(--ui-border-strong);
 }
 
 .uso-instalador__detail-content {
@@ -975,8 +839,8 @@
 .uso-instalador__detail-input:focus,
 .uso-instalador__detail-textarea:focus {
   outline: none;
-  border-color: #0078d4;
-  box-shadow: 0 0 0 1px #0078d4;
+  border-color: var(--ui-brand-bg);
+  box-shadow: 0 0 0 1px var(--ui-brand-bg);
 }
 
 .uso-instalador__detail-textarea {
@@ -1005,25 +869,11 @@
 .uso-instalador__detail-error {
   padding: 12px;
   margin: 0 16px 16px 16px;
-  background: #ffebee;
-  border: 1px solid #ef5350;
+  background: var(--ui-danger-bg);
+  border: 1px solid var(--ui-danger-foreground);
   border-radius: 4px;
-  color: #c62828;
+  color: var(--ui-danger-foreground);
   font-size: 13px;
-}
-
-.uso-instalador__btn--primary {
-  background: #0078d4;
-  color: white;
-}
-
-.uso-instalador__btn--primary:hover:not(:disabled) {
-  background: #106ebe;
-}
-
-.uso-instalador__btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .uso-instalador__detail-checklist {
@@ -1074,23 +924,14 @@
 /* ============================================
    TOOLTIP
    ============================================ */
-.uso-instalador__tooltip {
-  position: fixed;
-  background: #1a1a1a;
-  color: white;
+.uso-instalador__tooltip-content {
+  background: var(--ui-text-primary);
+  color: var(--ui-background);
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 12px;
   max-width: 280px;
-  z-index: 200;
-  pointer-events: none;
-  box-shadow: var(--shadow-lg);
-  animation: tooltipFadeIn var(--transition-fast);
-}
-
-@keyframes tooltipFadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  box-shadow: var(--ui-shadow-lg);
 }
 
 .uso-instalador__tooltip-title {
@@ -1102,7 +943,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--ui-background);
+  opacity: 0.8;
 }
 
 /* ============================================
@@ -1125,8 +967,39 @@
   gap: 4px;
 }
 
-.uso-instalador__legend-icon {
-  font-size: 12px;
+.uso-instalador__legend-badge {
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  border-radius: 6px;
+}
+
+.uso-instalador__legend-badge--overload {
+  background: var(--ui-warning-bg);
+  color: var(--ui-warning-foreground);
+}
+
+.uso-instalador__legend-badge--critical {
+  background: var(--ui-overload-bg);
+  color: var(--ui-overload-text);
+}
+
+.uso-instalador__legend-badge--conflict {
+  background: var(--ui-danger-bg);
+  color: var(--ui-danger-foreground);
+}
+
+.uso-instalador__legend-badge--travel {
+  background: var(--ui-travel-bg);
+  color: var(--ui-travel-text);
+}
+
+.uso-instalador__legend-badge--empty {
+  background: var(--ui-neutral-bg);
+  color: var(--ui-text-muted);
 }
 
 /* ============================================
@@ -1151,14 +1024,14 @@
   justify-content: center;
   gap: 12px;
   padding: 60px 20px;
-  color: #1976d2;
+  color: var(--ui-info-foreground);
 }
 
 .uso-instalador__loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e3e3e3;
-  border-top: 3px solid #1976d2;
+  border: 3px solid var(--ui-border);
+  border-top: 3px solid var(--ui-info-foreground);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -1248,11 +1121,11 @@
 @media print {
   .uso-instalador {
     box-shadow: none;
-    border: 1px solid #ccc;
+    border: 1px solid var(--ui-border);
   }
 
   .uso-instalador__header {
-    background: white;
+    background: var(--ui-background);
   }
 
   .uso-instalador__actions,
@@ -1268,29 +1141,10 @@
 /* ============================================
    USER SELECTOR MODAL
    ============================================ */
-.uso-instalador__modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 .uso-instalador__modal {
-  background: white;
+  background: var(--ui-background);
   border-radius: 8px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--ui-shadow-lg);
   width: 90%;
   max-width: 500px;
   max-height: 80vh;
@@ -1310,43 +1164,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.uso-instalador__modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--ui-border);
-  background: #fff;           /* fundo sólido para não "sumir" em scroll */
-  position: sticky;           /* fixa no topo do conteúdo do modal */
-  top: 0;
-  z-index: 2;                 /* acima do conteúdo rolável */
-}
-
-.uso-instalador__modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ui-text-primary);
-}
-
-.uso-instalador__modal-close {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: var(--ui-text-secondary);  /* ícone "X" com contraste visível */
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: var(--transition-fast);
-  line-height: 1;                 /* evita recorte do glifo */
-  background-color: transparent;  /* sobrepõe estilos globais de botão */
-}
-
-.uso-instalador__modal-close:hover {
-  background: var(--ui-surface);
-  color: var(--ui-text-primary);
 }
 
 .uso-instalador__modal-subheader {
@@ -1374,8 +1191,8 @@
 
 .uso-instalador__modal-search-input:focus {
   outline: none;
-  border-color: #0078d4;
-  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+  border-color: var(--ui-brand-bg);
+  box-shadow: 0 0 0 2px var(--ui-brand-bg);
 }
 
 .uso-instalador__modal-content {
@@ -1420,12 +1237,12 @@
 }
 
 .uso-instalador__user-item--selected {
-  background: rgba(0, 120, 212, 0.08);
-  border-left-color: #0078d4;
+  background: var(--ui-info-bg);
+  border-left-color: var(--ui-brand-bg);
 }
 
 .uso-instalador__user-item--selected:hover {
-  background: rgba(0, 120, 212, 0.12);
+  background: var(--ui-info-bg);
 }
 
 .uso-instalador__user-checkbox {
@@ -1436,7 +1253,7 @@
 }
 
 .uso-instalador__user-item--selected .uso-instalador__user-checkbox {
-  color: #0078d4;
+  color: var(--ui-brand-foreground);
 }
 
 .uso-instalador__user-info {
@@ -1497,7 +1314,7 @@
   padding: 16px 20px;
   gap: 12px;
   border-bottom: 1px solid var(--ui-border);
-  background: #fafafa;
+  background: var(--ui-surface);
 }
 
 .uso-instalador__modal-step {
@@ -1527,13 +1344,13 @@
 }
 
 .uso-instalador__modal-step--active .uso-instalador__modal-step-number {
-  background: #0078d4;
-  color: white;
+  background: var(--ui-brand-bg);
+  color: var(--ui-background);
 }
 
 .uso-instalador__modal-step--completed .uso-instalador__modal-step-number {
-  background: #4caf50;
-  color: white;
+  background: var(--ui-success-foreground);
+  color: var(--ui-background);
 }
 
 .uso-instalador__modal-step-label {
@@ -1571,8 +1388,8 @@
 }
 
 .uso-instalador__os-item:hover {
-  background: #f5f5f5;
-  border-color: #0078d4;
+  background: var(--ui-surface);
+  border-color: var(--ui-brand-bg);
 }
 
 .uso-instalador__os-main {
@@ -1668,14 +1485,14 @@
   text-align: center;
 }
 
-.uso-instalador__status-badge.ativo {
+.uso-instalador__status-badge--active {
   background: var(--ui-success-bg);
-  color: var(--ui-success-text);
-  border: 1px solid rgba(46, 125, 50, 0.08);
+  color: var(--ui-success-foreground);
+  border: 1px solid var(--ui-success-foreground);
 }
 
-.uso-instalador__status-badge.inativo {
-  background: #f5f5f5;
+.uso-instalador__status-badge--inactive {
+  background: var(--ui-surface);
   color: var(--ui-text-muted);
   border: 1px solid var(--ui-border);
 }
@@ -1727,7 +1544,7 @@
   width: 6px;
   height: 20px;
   cursor: col-resize;
-  border-left: 1px solid rgba(0,0,0,0.03);
+  border-left: 1px solid var(--ui-border-subtle);
   margin-left: 6px;
   opacity: 0.65;
 }
@@ -1764,7 +1581,7 @@
 }
 
 .uso-instalador__form-required {
-  color: #d32f2f;
+  color: var(--ui-danger-foreground);
 }
 
 .uso-instalador__form-input,
@@ -1784,14 +1601,14 @@
 .uso-instalador__form-select:focus,
 .uso-instalador__form-textarea:focus {
   outline: none;
-  border-color: #0078d4;
-  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+  border-color: var(--ui-brand-bg);
+  box-shadow: 0 0 0 2px var(--ui-brand-bg);
 }
 
 .uso-instalador__form-input:disabled,
 .uso-instalador__form-select:disabled,
 .uso-instalador__form-textarea:disabled {
-  background: #f5f5f5;
+  background: var(--ui-surface);
   cursor: not-allowed;
 }
 
@@ -1809,9 +1626,9 @@
 .uso-instalador__modal-error {
   margin: 0 20px;
   padding: 12px 16px;
-  background: #ffebee;
-  border: 1px solid #f44336;
+  background: var(--ui-danger-bg);
+  border: 1px solid var(--ui-danger-foreground);
   border-radius: 6px;
-  color: #d32f2f;
+  color: var(--ui-danger-foreground);
   font-size: 14px;
 }

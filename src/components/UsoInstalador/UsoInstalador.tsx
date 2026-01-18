@@ -9,6 +9,50 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerHeaderTitle,
+  Dropdown,
+  Field,
+  Input,
+  Option,
+  Spinner,
+  Text,
+  Textarea,
+  Toaster,
+  Toast,
+  ToastBody,
+  ToastTitle,
+  Tooltip as FluentTooltip,
+  useId,
+  useToastController,
+  tokens,
+} from '@fluentui/react-components';
+import {
+  Add24Regular,
+  ArrowSync24Regular,
+  ChevronDown24Regular,
+  ChevronLeft24Regular,
+  ChevronRight24Regular,
+  ChevronUp24Regular,
+  Checkmark24Regular,
+  Dismiss24Regular,
+  Edit24Regular,
+  Link24Regular,
+  People24Regular,
+} from '@fluentui/react-icons';
 import type {
   UsoInstaladorProps,
   Installer,
@@ -253,36 +297,6 @@ function processInstallerData(
 // SUB-COMPONENTS
 // ============================================
 
-interface TooltipProps {
-  activity?: Activity;
-  position: { x: number; y: number };
-}
-
-function Tooltip({ activity, position }: TooltipProps) {
-  if (!activity) return null;
-  
-  return (
-    <div 
-      className="uso-instalador__tooltip"
-      style={{ 
-        left: position.x + 10, 
-        top: position.y + 10,
-      }}
-    >
-      <div className="uso-instalador__tooltip-title">
-        {ActivityTypeIcons[activity.type]} {activity.projectName}
-      </div>
-      <div className="uso-instalador__tooltip-info">
-        <span>🕐 {activity.startTime} - {activity.endTime} ({activity.hours}h)</span>
-        {activity.address && <span>📍 {activity.address}</span>}
-        <span>📊 Status: {activity.status === 'completed' ? 'Concluído' : 
-                         activity.status === 'inProgress' ? 'Em andamento' : 
-                         activity.status === 'cancelled' ? 'Cancelado' : 'Agendado'}</span>
-      </div>
-    </div>
-  );
-}
-
 interface DetailPanelProps {
   state: DetailPanelState;
   onClose: () => void;
@@ -526,26 +540,40 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
   if (!shouldRender) return null;
   
   return (
-    <div className="uso-instalador__detail-overlay" onClick={onClose}>
-      <div className="uso-instalador__detail-panel" onClick={e => e.stopPropagation()}>
-        <div className="uso-instalador__detail-header">
-          <h3 className="uso-instalador__detail-title">
-            {ActivityTypeIcons[activity.type]} {isEditing ? 'Editar Atividade' : 'Detalhes da Atividade'}
-          </h3>
-          <button className="uso-instalador__detail-close" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+    <Drawer
+      open={shouldRender}
+      position="end"
+      onOpenChange={(_, data) => {
+        if (!data.open) {
+          onClose();
+        }
+      }}
+    >
+      <DrawerHeader>
+        <DrawerHeaderTitle
+          action={
+            <Button
+              appearance="subtle"
+              icon={<Dismiss24Regular />}
+              onClick={onClose}
+              aria-label="Fechar"
+            />
+          }
+        >
+          {isEditing ? 'Editar Atividade' : 'Detalhes da Atividade'}
+        </DrawerHeaderTitle>
+      </DrawerHeader>
+      <DrawerBody>
         
         {editError && (
           <div className="uso-instalador__detail-error">
-            ⚠️ {editError}
+            <Text size={300}>{editError}</Text>
           </div>
         )}
 
         {copyError && (
           <div className="uso-instalador__detail-error">
-            ⚠️ {copyError}
+            <Text size={300}>{copyError}</Text>
           </div>
         )}
         
@@ -553,7 +581,7 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
           <div className="uso-instalador__detail-section">
             {/* Colaborador */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">👤 Colaborador</div>
+              <div className="uso-instalador__detail-label">Colaborador</div>
               <div className={`uso-instalador__detail-value ${!activity.installerName ? 'uso-instalador__detail-value--empty' : ''}`}>
                 {activity.installerName || 'Não definido'}
               </div>
@@ -561,7 +589,7 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             
             {/* Ordem de Serviço */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">📋 Ordem de Serviço</div>
+              <div className="uso-instalador__detail-label">Ordem de Serviço</div>
               <div className={`uso-instalador__detail-value ${!activity.ordemDeServico ? 'uso-instalador__detail-value--empty' : ''}`}>
                 {activity.ordemDeServico || 'Não definido'}
               </div>
@@ -569,7 +597,7 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             
             {/* Projeto */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">🏗️ Projeto</div>
+              <div className="uso-instalador__detail-label">Projeto</div>
               <div className={`uso-instalador__detail-value ${!activity.projectName ? 'uso-instalador__detail-value--empty' : ''}`}>
                 {activity.projectName || 'Não definido'}
               </div>
@@ -577,10 +605,10 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             
             {/* Agendamento - editável com restrições */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">📅 Agendamento</div>
+              <div className="uso-instalador__detail-label">Agendamento</div>
               {isEditing && canEditSchedule() ? (
                 <div className="uso-instalador__detail-edit-group">
-                  <input
+                  <Input
                     type="date"
                     className="uso-instalador__detail-input"
                     value={`${editAgendamento.getFullYear()}-${String(editAgendamento.getMonth() + 1).padStart(2, '0')}-${String(editAgendamento.getDate()).padStart(2, '0')}`}
@@ -588,9 +616,9 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
                       const today = new Date();
                       return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                     })()}
-                    onChange={e => {
+                    onChange={(_, data) => {
                       // Criar data no fuso horário local (não UTC)
-                      const [year, month, day] = e.target.value.split('-').map(Number);
+                      const [year, month, day] = data.value.split('-').map(Number);
                       const newDate = new Date(editAgendamento);
                       newDate.setFullYear(year, month - 1, day);
                       setEditAgendamento(newDate);
@@ -598,12 +626,12 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
                       if (editError) setEditError(null);
                     }}
                   />
-                  <input
+                  <Input
                     type="time"
                     className="uso-instalador__detail-input"
                     value={editStartTime}
-                    onChange={e => {
-                      setEditStartTime(e.target.value);
+                    onChange={(_, data) => {
+                      setEditStartTime(data.value);
                       // Limpar erro ao editar
                       if (editError) setEditError(null);
                     }}
@@ -626,12 +654,12 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             
             {/* Descrição - editável com restrições */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">📝 Descrição</div>
+              <div className="uso-instalador__detail-label">Descrição</div>
               {isEditing && canEditDescriptionAndDuration() ? (
-                <textarea
+                <Textarea
                   className="uso-instalador__detail-textarea"
                   value={editDescricao}
-                  onChange={e => setEditDescricao(e.target.value)}
+                  onChange={(_, data) => setEditDescricao(data.value)}
                   placeholder="Descrição da atividade"
                   rows={3}
                 />
@@ -651,19 +679,19 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             
             {/* Duração - editável com restrições */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">⏱️ Duração</div>
+              <div className="uso-instalador__detail-label">Duração</div>
               {isEditing && canEditDescriptionAndDuration() ? (
                 <div className="uso-instalador__detail-edit-group">
-                  <input
+                  <Input
                     type="number"
                     className="uso-instalador__detail-input"
-                    value={editHours}
-                    onChange={e => setEditHours(parseFloat(e.target.value) || 0)}
+                    value={String(editHours)}
+                    onChange={(_, data) => setEditHours(parseFloat(data.value) || 0)}
                     min={0.5}
                     max={24}
                     step={0.5}
                   />
-                  <span style={{ marginLeft: '8px' }}>horas</span>
+                  <Text size={200}>horas</Text>
                 </div>
               ) : (
                 <>
@@ -680,52 +708,52 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             {/* Copiar atividade */}
             {isCopying && (
               <div className="uso-instalador__detail-field">
-                <div className="uso-instalador__detail-label">📄 Criar cópia</div>
+                <div className="uso-instalador__detail-label">Criar cópia</div>
                 <div className="uso-instalador__detail-edit-group" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                  <label style={{ fontSize: '12px', color: 'var(--ui-text-secondary)' }}>
-                    Colaborador de destino
-                  </label>
-                  <select
-                    className="uso-instalador__detail-input"
-                    value={copyTargetEmployeeId}
-                    onChange={e => setCopyTargetEmployeeId(e.target.value)}
-                    disabled={isLoadingCopyUsers || isCreatingCopy}
-                  >
-                    <option value="">{isLoadingCopyUsers ? 'Carregando...' : 'Selecione...'}</option>
-                    {copyUsers.map(u => (
-                      <option key={u.id} value={u.id}>
-                        {u.fullname}
-                      </option>
-                    ))}
-                  </select>
+                  <Field label="Colaborador de destino">
+                    <Dropdown
+                      placeholder={isLoadingCopyUsers ? 'Carregando...' : 'Selecione...'}
+                      value={copyTargetEmployeeId
+                        ? copyUsers.find(u => u.id === copyTargetEmployeeId)?.fullname ?? ''
+                        : ''}
+                      onOptionSelect={(_, data) => setCopyTargetEmployeeId(data.optionValue as string)}
+                      disabled={isLoadingCopyUsers || isCreatingCopy}
+                      className="uso-instalador__detail-input"
+                    >
+                      {copyUsers.map(u => (
+                        <Option key={u.id} value={u.id}>
+                          {u.fullname}
+                        </Option>
+                      ))}
+                    </Dropdown>
+                  </Field>
 
-                  <label style={{ fontSize: '12px', color: 'var(--ui-text-secondary)', marginTop: '10px' }}>
-                    Data de destino (horário será mantido: {activity.startTime})
-                  </label>
-                  <input
-                    type="date"
-                    className="uso-instalador__detail-input"
-                    value={`${copyTargetDate.getFullYear()}-${String(copyTargetDate.getMonth() + 1).padStart(2, '0')}-${String(copyTargetDate.getDate()).padStart(2, '0')}`}
-                    min={(() => {
-                      const today = new Date();
-                      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                    })()}
-                    onChange={e => {
-                      const [year, month, day] = e.target.value.split('-').map(Number);
-                      const newDate = new Date(copyTargetDate);
-                      newDate.setFullYear(year, month - 1, day);
-                      setCopyTargetDate(newDate);
-                      if (copyError) setCopyError(null);
-                    }}
-                    disabled={isCreatingCopy}
-                  />
+                  <Field label={`Data de destino (horário será mantido: ${activity.startTime})`}>
+                    <Input
+                      type="date"
+                      className="uso-instalador__detail-input"
+                      value={`${copyTargetDate.getFullYear()}-${String(copyTargetDate.getMonth() + 1).padStart(2, '0')}-${String(copyTargetDate.getDate()).padStart(2, '0')}`}
+                      min={(() => {
+                        const today = new Date();
+                        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                      })()}
+                      onChange={(_, data) => {
+                        const [year, month, day] = data.value.split('-').map(Number);
+                        const newDate = new Date(copyTargetDate);
+                        newDate.setFullYear(year, month - 1, day);
+                        setCopyTargetDate(newDate);
+                        if (copyError) setCopyError(null);
+                      }}
+                      disabled={isCreatingCopy}
+                    />
+                  </Field>
                 </div>
               </div>
             )}
             
             {/* Descrição do Colaborador */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">💬 Descrição do Colaborador</div>
+              <div className="uso-instalador__detail-label">Descrição do Colaborador</div>
               <div className={`uso-instalador__detail-value ${!activity.descricaoColaborador ? 'uso-instalador__detail-value--empty' : ''}`}>
                 {activity.descricaoColaborador || 'Não definido'}
               </div>
@@ -733,19 +761,19 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             
             {/* Situação */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">📊 Situação</div>
+              <div className="uso-instalador__detail-label">Situação</div>
               <div className="uso-instalador__detail-value">
                 {activity.situacao || (
-                  activity.status === 'completed' ? '✅ Concluído' : 
-                  activity.status === 'inProgress' ? '🔄 Em andamento' : 
-                  activity.status === 'cancelled' ? '❌ Cancelado' : '📅 Agendado'
+                  activity.status === 'completed' ? 'Concluído' :
+                  activity.status === 'inProgress' ? 'Em andamento' :
+                  activity.status === 'cancelled' ? 'Cancelado' : 'Agendado'
                 )}
               </div>
             </div>
             
             {/* Iniciada em */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">▶️ Iniciada em</div>
+              <div className="uso-instalador__detail-label">Iniciada em</div>
               <div className={`uso-instalador__detail-value ${!activity.iniciadaEm ? 'uso-instalador__detail-value--empty' : ''}`}>
                 {activity.iniciadaEm ? formatDateTime(activity.iniciadaEm) : 'Não definido'}
               </div>
@@ -753,7 +781,7 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             
             {/* Completada em */}
             <div className="uso-instalador__detail-field">
-              <div className="uso-instalador__detail-label">✅ Completada em</div>
+              <div className="uso-instalador__detail-label">Completada em</div>
               <div className={`uso-instalador__detail-value ${!activity.completadaEm ? 'uso-instalador__detail-value--empty' : ''}`}>
                 {activity.completadaEm ? formatDateTime(activity.completadaEm) : 'Não definido'}
               </div>
@@ -762,14 +790,14 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
           
           {activity.notes && (
             <div className="uso-instalador__detail-section">
-              <div className="uso-instalador__detail-section-title">📝 Observações</div>
+              <div className="uso-instalador__detail-section-title">Observações</div>
               <div className="uso-instalador__detail-value">{activity.notes}</div>
             </div>
           )}
           
           {activity.checklist && activity.checklist.length > 0 && (
             <div className="uso-instalador__detail-section">
-              <div className="uso-instalador__detail-section-title">✅ Checklist</div>
+              <div className="uso-instalador__detail-section-title">Checklist</div>
               <ul className="uso-instalador__detail-checklist">
                 {activity.checklist.map(item => (
                   <li 
@@ -787,7 +815,7 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
           
           {activity.materials && activity.materials.length > 0 && (
             <div className="uso-instalador__detail-section">
-              <div className="uso-instalador__detail-section-title">📦 Materiais</div>
+              <div className="uso-instalador__detail-section-title">Materiais</div>
               <ul className="uso-instalador__detail-materials">
                 {activity.materials.map((material, idx) => (
                   <li key={idx}>{material}</li>
@@ -796,49 +824,45 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
             </div>
           )}
         </div>
-        
+      </DrawerBody>
+      <DrawerFooter>
         <div className="uso-instalador__detail-footer">
           {isEditing ? (
             <>
-              <button 
-                className="uso-instalador__btn uso-instalador__btn--primary" 
+              <Button
+                appearance="primary"
                 onClick={handleSave}
                 disabled={isSaving}
+                icon={isSaving ? <Spinner size="tiny" /> : undefined}
               >
-                {isSaving ? '💾 Salvando...' : '💾 Salvar'}
-              </button>
-              <button 
-                className="uso-instalador__btn" 
-                onClick={handleCancel}
-                disabled={isSaving}
-              >
+                {isSaving ? 'Salvando...' : 'Salvar'}
+              </Button>
+              <Button appearance="secondary" onClick={handleCancel} disabled={isSaving}>
                 Cancelar
-              </button>
+              </Button>
             </>
           ) : isCopying ? (
             <>
-              <button
-                className="uso-instalador__btn uso-instalador__btn--primary"
+              <Button
+                appearance="primary"
                 onClick={handleCreateCopy}
                 disabled={isCreatingCopy || isLoadingCopyUsers}
+                icon={isCreatingCopy ? <Spinner size="tiny" /> : undefined}
               >
-                {isCreatingCopy ? '📄 Criando...' : '📄 Criar Cópia'}
-              </button>
-              <button
-                className="uso-instalador__btn"
-                onClick={handleCancelCopy}
-                disabled={isCreatingCopy}
-              >
+                {isCreatingCopy ? 'Criando...' : 'Criar Cópia'}
+              </Button>
+              <Button appearance="secondary" onClick={handleCancelCopy} disabled={isCreatingCopy}>
                 Cancelar
-              </button>
-              <button className="uso-instalador__btn" onClick={onClose} disabled={isCreatingCopy}>
+              </Button>
+              <Button appearance="secondary" onClick={onClose} disabled={isCreatingCopy}>
                 Fechar
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <button
-                className="uso-instalador__btn"
+              <Button
+                appearance="secondary"
+                icon={<Link24Regular />}
                 onClick={() => {
                   const baseUrl = 'https://unium.crm2.dynamics.com/main.aspx?forceUCI=1&pagetype=entityrecord&etn=new_atividadefieldcontrol&id=';
                   const url = baseUrl + (activity.id || '');
@@ -847,40 +871,38 @@ function DetailPanel({ state, onClose, onSave, onCopy }: DetailPanelProps) {
                 disabled={!activity.id}
                 title="Abrir registro no Power Apps"
               >
-                🔗 Power Apps
-              </button>
+                Power Apps
+              </Button>
               {canEdit && (
-                <button 
-                  className="uso-instalador__btn uso-instalador__btn--primary" 
-                  onClick={handleEdit}
-                >
-                  ✏️ Editar
-                </button>
+                <Button appearance="primary" icon={<Edit24Regular />} onClick={handleEdit}>
+                  Editar
+                </Button>
               )}
               {canCopy() && onCopy && (
-                <button
-                  className="uso-instalador__btn"
-                  onClick={handleStartCopy}
-                >
-                  📄 Copiar
-                </button>
+                <Button appearance="secondary" onClick={handleStartCopy}>
+                  Copiar
+                </Button>
               )}
-              <button className="uso-instalador__btn" onClick={onClose}>
+              <Button appearance="secondary" onClick={onClose}>
                 Fechar
-              </button>
+              </Button>
             </>
           )}
         </div>
-      </div>
-    </div>
+      </DrawerFooter>
+    </Drawer>
   );
 }
 
 // ============================================
-// MAIN COMPONENT
+// CONTROLLER HOOK
 // ============================================
 
-export default function UsoInstalador({
+interface UsoInstaladorControllerOptions {
+  showHeader?: boolean;
+}
+
+export function useUsoInstaladorController({
   installers: propInstallers,
   activities: propActivities,
   projects: propProjects,
@@ -890,7 +912,8 @@ export default function UsoInstalador({
   onActivityClick,
   onActivityCreate: _onActivityCreate, // Mantido para compatibilidade, mas usamos modal interno
   onWeekChange,
-}: UsoInstaladorProps) {
+}: UsoInstaladorProps = {}, options: UsoInstaladorControllerOptions = {}) {
+  const showHeader = options.showHeader ?? true;
   // State
   const [weekStart, setWeekStart] = useState(() => 
     initialWeekStart || getMondayOfWeek()
@@ -901,10 +924,6 @@ export default function UsoInstalador({
     isOpen: false,
     mode: 'view',
   });
-  const [tooltip, setTooltip] = useState<{
-    activity?: Activity;
-    position: { x: number; y: number };
-  } | null>(null);
   const [dataverseActivities, setDataverseActivities] = useState<Activity[]>([]);
   const [dataverseInstallers, setDataverseInstallers] = useState<Installer[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -934,6 +953,31 @@ export default function UsoInstalador({
   const [editingCellDurationId, setEditingCellDurationId] = useState<string | null>(null);
   const [editingCellDuration, setEditingCellDuration] = useState('');
   const [editingCellDurationError, setEditingCellDurationError] = useState<string | null>(null);
+
+  const toasterId = useId('uso-instalador-toasts');
+  const { dispatchToast } = useToastController(toasterId);
+
+  useEffect(() => {
+    if (!editingCellError) return;
+    dispatchToast(
+      <Toast>
+        <ToastTitle>Erro ao editar horário</ToastTitle>
+        <ToastBody>{editingCellError}</ToastBody>
+      </Toast>,
+      { intent: 'error' }
+    );
+  }, [editingCellError, dispatchToast]);
+
+  useEffect(() => {
+    if (!editingCellDurationError) return;
+    dispatchToast(
+      <Toast>
+        <ToastTitle>Erro ao editar duração</ToastTitle>
+        <ToastBody>{editingCellDurationError}</ToastBody>
+      </Toast>,
+      { intent: 'error' }
+    );
+  }, [editingCellDurationError, dispatchToast]);
   
   // Estado para modal de criação de nova atividade
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -1643,20 +1687,6 @@ export default function UsoInstalador({
     onActivityClick?.(activity);
   }, [onActivityClick]);
   
-  const handleCellHover = useCallback((
-    activity: Activity | undefined,
-    event: React.MouseEvent
-  ) => {
-    if (activity) {
-      setTooltip({
-        activity,
-        position: { x: event.clientX, y: event.clientY },
-      });
-    } else {
-      setTooltip(null);
-    }
-  }, []);
-  
   const handleCloseDetail = useCallback(() => {
     setDetailPanel({ isOpen: false, mode: 'view' });
   }, []);
@@ -1919,12 +1949,30 @@ export default function UsoInstalador({
       width: '100%',
     };
 
-    return (
-      <div 
+    const tooltipContent = activity ? (
+      <div className="uso-instalador__tooltip-content">
+        <Text weight="semibold" size={300}>
+          {ActivityTypeIcons[activity.type]} {activity.projectName}
+        </Text>
+        <div className="uso-instalador__tooltip-info">
+          <Text size={200}>
+            Horário: {activity.startTime} - {activity.endTime} ({activity.hours}h)
+          </Text>
+          {activity.address && <Text size={200}>Endereço: {activity.address}</Text>}
+          <Text size={200}>
+            Status:{' '}
+            {activity.status === 'completed' ? 'Concluído' :
+              activity.status === 'inProgress' ? 'Em andamento' :
+                activity.status === 'cancelled' ? 'Cancelado' : 'Agendado'}
+          </Text>
+        </div>
+      </div>
+    ) : null;
+
+    const cellContent = (
+      <div
         className={cellClasses}
         onClick={() => activity && handleCellClick(activity)}
-        onMouseEnter={(e) => activity && handleCellHover(activity, e)}
-        onMouseLeave={() => handleCellHover(undefined, {} as React.MouseEvent)}
         title={projectSummary ? projectSummary.projects.map(p => p.name).join(', ') : undefined}
       >
         {isEmpty ? '—' : (
@@ -2017,20 +2065,15 @@ export default function UsoInstalador({
               <>
                 {activity && editingCellDurationId === activity.id ? (
                   // Modo de edição de duração
-                  <div 
-                    style={{
-                      display: 'flex',
-                      gap: '4px',
-                      fontSize: '10px',
-                      alignItems: 'center',
-                    }}
+                  <div
+                    className="uso-instalador__inline-editor"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <input
+                    <Input
                       type="number"
                       value={editingCellDuration}
-                      onChange={(e) => {
-                        setEditingCellDuration(e.target.value);
+                      onChange={(_, data) => {
+                        setEditingCellDuration(data.value);
                         setEditingCellDurationError(null);
                       }}
                       onKeyDown={(e) => {
@@ -2040,71 +2083,37 @@ export default function UsoInstalador({
                           handleCancelEditCellDuration(e as unknown as React.MouseEvent);
                         }
                       }}
-                      step="0.5"
-                      min="0.5"
-                      max="24"
-                      style={{
-                        padding: '2px 4px',
-                        fontSize: '10px',
-                        border: editingCellDurationError ? '1px solid #f44336' : '1px solid #ccc',
-                        borderRadius: '3px',
-                        width: '50px',
-                      }}
+                      step={0.5}
+                      min={0.5}
+                      max={24}
+                      className={`uso-instalador__inline-input ${editingCellDurationError ? 'uso-instalador__inline-input--error' : ''}`}
+                      size="small"
                       autoFocus
                     />
-                    <span style={{ fontSize: '10px' }}>h</span>
-                    <button
+                    <Text size={200}>h</Text>
+                    <Button
+                      appearance="primary"
+                      size="small"
+                      icon={<Checkmark24Regular />}
                       onClick={(e) => handleSaveEditCellDuration(activity, e)}
-                      style={{
-                        padding: '2px 6px',
-                        fontSize: '10px',
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        minWidth: '28px',
-                      }}
-                      title="Salvar (Enter)"
-                    >
-                      ✓
-                    </button>
-                    <button
+                      aria-label="Salvar"
+                    />
+                    <Button
+                      appearance="secondary"
+                      size="small"
+                      icon={<Dismiss24Regular />}
                       onClick={(e) => handleCancelEditCellDuration(e)}
-                      style={{
-                        padding: '2px 6px',
-                        fontSize: '10px',
-                        backgroundColor: '#ff9800',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        minWidth: '28px',
-                      }}
-                      title="Cancelar (Esc)"
-                    >
-                      ✕
-                    </button>
+                      aria-label="Cancelar"
+                    />
                   </div>
                 ) : (
                   // Modo de visualização
-                  <span 
+                  <Button
+                    appearance="subtle"
+                    size="small"
                     className="uso-instalador__hours-value"
                     onClick={(e) => activity && canEditActivityTime(activity) && handleStartEditCellDuration(activity, e)}
-                    style={{
-                      cursor: activity && canEditActivityTime(activity) ? 'pointer' : 'default',
-                      padding: '2px 4px',
-                      borderRadius: '3px',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (activity && canEditActivityTime(activity)) {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = '#f5f5f5';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                    }}
+                    disabled={!(activity && canEditActivityTime(activity))}
                     title={activity && canEditActivityTime(activity) ? 'Clique para editar duração' : 'Apenas atividades futuras podem ter duração alterada'}
                   >
                     {hours}h
@@ -2116,25 +2125,20 @@ export default function UsoInstalador({
                     {isParent && hasConflict && (
                       <span className="uso-instalador__hours-alert">🟥</span>
                     )}
-                  </span>
+                  </Button>
                 )}
                 {activityTime && activity && (
                   editingCellId === activity.id ? (
                     // Modo de edição inline
-                    <div 
-                      style={{
-                        display: 'flex',
-                        gap: '4px',
-                        fontSize: '10px',
-                        alignItems: 'center',
-                      }}
+                    <div
+                      className="uso-instalador__inline-editor"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <input
+                      <Input
                         type="time"
                         value={editingCellTime}
-                        onChange={(e) => {
-                          setEditingCellTime(e.target.value);
+                        onChange={(_, data) => {
+                          setEditingCellTime(data.value);
                           setEditingCellError(null);
                         }}
                         onKeyDown={(e) => {
@@ -2144,73 +2148,37 @@ export default function UsoInstalador({
                             handleCancelEditCellTime(e as unknown as React.MouseEvent);
                           }
                         }}
-                        style={{
-                          padding: '2px 4px',
-                          fontSize: '10px',
-                          border: editingCellError ? '1px solid #f44336' : '1px solid #ccc',
-                          borderRadius: '3px',
-                          width: '60px',
-                        }}
+                        className={`uso-instalador__inline-input ${editingCellError ? 'uso-instalador__inline-input--error' : ''}`}
+                        size="small"
                         autoFocus
                       />
-                      <button
+                      <Button
+                        appearance="primary"
+                        size="small"
+                        icon={<Checkmark24Regular />}
                         onClick={(e) => handleSaveEditCellTime(activity, e)}
-                        style={{
-                          padding: '2px 6px',
-                          fontSize: '10px',
-                          backgroundColor: '#4CAF50',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          minWidth: '28px',
-                        }}
-                        title="Salvar (Enter)"
-                      >
-                        ✓
-                      </button>
-                      <button
+                        aria-label="Salvar"
+                      />
+                      <Button
+                        appearance="secondary"
+                        size="small"
+                        icon={<Dismiss24Regular />}
                         onClick={(e) => handleCancelEditCellTime(e)}
-                        style={{
-                          padding: '2px 6px',
-                          fontSize: '10px',
-                          backgroundColor: '#ff9800',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          minWidth: '28px',
-                        }}
-                        title="Cancelar (Esc)"
-                      >
-                        ✕
-                      </button>
+                        aria-label="Cancelar"
+                      />
                     </div>
                   ) : (
                     // Modo de visualização
-                    <span
+                    <Button
+                      appearance="subtle"
+                      size="small"
                       onClick={(e) => activity && handleStartEditCellTime(activity, e)}
-                      style={{ 
-                        fontSize: '9px', 
-                        color: '#888',
-                        lineHeight: 1,
-                        cursor: canEditActivityTime(activity) ? 'pointer' : 'default',
-                        padding: '2px 4px',
-                        borderRadius: '3px',
-                        transition: 'background-color 0.2s',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (canEditActivityTime(activity)) {
-                          (e.currentTarget as HTMLElement).style.backgroundColor = '#f5f5f5';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                      }}
+                      disabled={!canEditActivityTime(activity)}
                       title={canEditActivityTime(activity) ? 'Clique para editar horário' : 'Apenas atividades futuras podem ter horário alterado'}
+                      className="uso-instalador__inline-button"
                     >
                       {activityTime}
-                    </span>
+                    </Button>
                   )
                 )}
               </>
@@ -2219,6 +2187,16 @@ export default function UsoInstalador({
         )}
       </div>
     );
+
+    if (activity) {
+      return (
+        <FluentTooltip content={tooltipContent} relationship="label">
+          {cellContent}
+        </FluentTooltip>
+      );
+    }
+
+    return cellContent;
   };
   
   // Determine if we should show team separator
@@ -2229,228 +2207,263 @@ export default function UsoInstalador({
     return currentTeam !== prevTeam;
   };
   
-  return (
-    <div className="uso-instalador">
+  const themeStyles = {
+    '--ui-font-family': tokens.fontFamilyBase,
+    '--ui-background': tokens.colorNeutralBackground1,
+    '--ui-surface': tokens.colorNeutralBackground2,
+    '--ui-surface-alt': tokens.colorNeutralBackground3,
+    '--ui-border': tokens.colorNeutralStroke2,
+    '--ui-border-strong': tokens.colorNeutralStroke1,
+    '--ui-border-subtle': tokens.colorNeutralStroke3,
+    '--ui-text-primary': tokens.colorNeutralForeground1,
+    '--ui-text-secondary': tokens.colorNeutralForeground2,
+    '--ui-text-muted': tokens.colorNeutralForeground3,
+    '--ui-brand-bg': tokens.colorBrandBackground,
+    '--ui-brand-bg-hover': tokens.colorBrandBackgroundHover,
+    '--ui-brand-foreground': tokens.colorBrandForeground1,
+    '--ui-danger-bg': tokens.colorPaletteRedBackground2,
+    '--ui-danger-foreground': tokens.colorPaletteRedForeground2,
+    '--ui-overload-bg': tokens.colorPaletteRedBackground2,
+    '--ui-overload-text': tokens.colorPaletteRedForeground2,
+    '--ui-critical-bg': tokens.colorPaletteRedBackground3,
+    '--ui-conflict-border': tokens.colorPaletteRedBorder2,
+    '--ui-warning-bg': tokens.colorPaletteYellowBackground2,
+    '--ui-warning-foreground': tokens.colorPaletteYellowForeground2,
+    '--ui-success-bg': tokens.colorPaletteGreenBackground2,
+    '--ui-success-foreground': tokens.colorPaletteGreenForeground2,
+    '--ui-info-bg': tokens.colorPaletteBlueBackground2,
+    '--ui-info-foreground': tokens.colorPaletteBlueForeground2,
+    '--ui-travel-bg': tokens.colorPaletteBlueBackground2,
+    '--ui-travel-text': tokens.colorPaletteBlueForeground2,
+    '--ui-neutral-bg': tokens.colorNeutralBackground3,
+    '--ui-neutral-foreground': tokens.colorNeutralForeground2,
+    '--ui-overlay': tokens.colorBackgroundOverlay,
+    '--capacity-idle': tokens.colorPaletteBlueForeground2,
+    '--capacity-normal': tokens.colorPaletteGreenForeground2,
+    '--capacity-warning': tokens.colorPaletteYellowForeground2,
+    '--capacity-overload': tokens.colorPaletteRedForeground2,
+    '--ui-table-header-bg': tokens.colorNeutralBackground3,
+    '--ui-table-header-foreground': tokens.colorNeutralForeground2,
+    '--ui-table-header-border': tokens.colorNeutralStroke2,
+    '--ui-shadow-sm': tokens.shadow4,
+    '--ui-shadow-md': tokens.shadow8,
+    '--ui-shadow-lg': tokens.shadow16,
+  } as React.CSSProperties;
+
+  const view = (
+    <div className="uso-instalador" style={themeStyles}>
       {/* Header */}
-      <div className="uso-instalador__header">
+      {showHeader && (
+        <div className="uso-instalador__header">
         <div className="uso-instalador__title-section">
           <h1 className="uso-instalador__title">
-            🗓️ USO DO INSTALADOR
+            Uso do Instalador
             <span className="uso-instalador__week-range">
               Semana {formatDateShort(weekStart)} a {formatDateShort(weekEnd)}
             </span>
           </h1>
           {isLoading && (
             <span className="uso-instalador__loading">
-              ⏳ Carregando atividades...
+              <Spinner size="tiny" />
+              <Text size={200}>Carregando atividades...</Text>
             </span>
           )}
           {error && (
             <span className="uso-instalador__error">
-              ⚠️ {error} (usando dados de exemplo)
+              <Text size={200}>{error} (usando dados de exemplo)</Text>
             </span>
           )}
         </div>
         
         <div className="uso-instalador__nav">
-          <button 
-            className="uso-instalador__nav-btn" 
+          <Button
+            appearance="subtle"
+            className="uso-instalador__nav-btn"
+            icon={<ChevronLeft24Regular />}
             onClick={handlePrevWeek}
             title="Semana anterior"
-          >
-            ◀
-          </button>
+          />
           <div className="uso-instalador__date-picker">
-            <input 
+            <Input
               type="date"
               className="uso-instalador__date-input"
               value={datePickerValue}
-              onChange={(e) => handleDatePick(e.target.value)}
+              onChange={(_, data) => handleDatePick(data.value)}
               aria-label="Selecionar data"
             />
           </div>
-          <button 
-            className="uso-instalador__nav-btn" 
+          <Button
+            appearance="subtle"
+            className="uso-instalador__nav-btn"
+            icon={<ChevronRight24Regular />}
             onClick={handleNextWeek}
             title="Próxima semana"
-          >
-            ▶
-          </button>
+          />
         </div>
         
         <div className="uso-instalador__actions">
-          <button 
-            className="uso-instalador__btn"
+          <Button
+            appearance="secondary"
+            icon={<ArrowSync24Regular />}
             onClick={handleRefresh}
             title="Recarregar dados da semana"
           >
-            ↻ Atualizar
-          </button>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-            <input
-              type="checkbox"
-              checked={showSunday}
-              onChange={(e) => setShowSunday(e.target.checked)}
-              aria-label="Domingo"
-            />
-            Domingo
-          </label>
-          <button 
-            className="uso-instalador__btn"
+            Atualizar
+          </Button>
+          <Button
+            appearance="secondary"
+            icon={<People24Regular />}
             onClick={handleOpenUserSelector}
             title="Selecionar colaboradores que aparecem sempre"
           >
-            👥 Colaboradores
-          </button>
-          <button 
-            className="uso-instalador__btn"
+            Colaboradores
+          </Button>
+          <Button
+            appearance="secondary"
+            icon={allExpanded ? <ChevronUp24Regular /> : <ChevronDown24Regular />}
             onClick={handleToggleAll}
             title={allExpanded ? 'Colapsar todos' : 'Expandir todos'}
           >
-            {allExpanded ? '▼' : '▶'} {allExpanded ? 'Colapsar Todos' : 'Expandir Todos'}
-          </button>
-          <button 
-            className="uso-instalador__btn uso-instalador__btn--primary"
+            {allExpanded ? 'Colapsar Todos' : 'Expandir Todos'}
+          </Button>
+          <Button
+            appearance="primary"
+            icon={<Add24Regular />}
             onClick={handleNewActivity}
           >
-            ➕ Nova Atividade
-          </button>
-          <span className="uso-instalador__version">v{APP_VERSION}</span>
+            Nova Atividade
+          </Button>
+          <Badge appearance="tint" color="brand" className="uso-instalador__version">
+            v{APP_VERSION}
+          </Badge>
         </div>
-      </div>
-      
-      {/* Mensagem de erro na edição inline de horário */}
-      {editingCellError && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          backgroundColor: '#f44336',
-          color: 'white',
-          padding: '12px 16px',
-          borderRadius: '4px',
-          fontSize: '14px',
-          zIndex: 1000,
-          maxWidth: '300px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-        }}>
-          ⚠️ {editingCellError}
         </div>
       )}
       
-      {/* Mensagem de erro na edição inline de duração */}
-      {editingCellDurationError && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          backgroundColor: '#f44336',
-          color: 'white',
-          padding: '12px 16px',
-          borderRadius: '4px',
-          fontSize: '14px',
-          zIndex: 1000,
-          maxWidth: '300px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-        }}>
-          ⚠️ {editingCellDurationError}
-        </div>
-      )}
+      <Toaster toasterId={toasterId} position="bottom-end" />
       
       {/* User Selector Modal */}
-      {userSelectorOpen && (
-        <div className="uso-instalador__modal-overlay" onClick={() => setUserSelectorOpen(false)}>
-          <div className="uso-instalador__modal" onClick={(e) => e.stopPropagation()}>
-            <div className="uso-instalador__modal-header">
-              <h3>👥 Selecionar Colaboradores</h3>
-              <button 
-                className="uso-instalador__modal-close"
-                onClick={() => setUserSelectorOpen(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="uso-instalador__modal-subheader">
-              Marque os colaboradores que devem aparecer sempre na linha do tempo, mesmo sem atividades:
-            </div>
-            <div className="uso-instalador__modal-search">
-              <input
-                type="text"
-                placeholder="Buscar por nome..."
-                value={userSearchFilter}
-                onChange={(e) => setUserSearchFilter(e.target.value)}
-                className="uso-instalador__modal-search-input"
-              />
-            </div>
-            <div className="uso-instalador__modal-content">
-              {isLoadingUsers ? (
-                <div className="uso-instalador__modal-loading">
-                  <div className="uso-instalador__loading-spinner"></div>
-                  <span>Carregando usuários...</span>
-                </div>
-              ) : (
-                <div className="uso-instalador__user-list">
-                  {availableUsers
-                    .filter(u => 
-                      userSearchFilter === '' || 
-                      u.fullname.toLowerCase().includes(userSearchFilter.toLowerCase())
-                    )
-                    .map(user => (
-                      <div 
-                        key={user.id}
-                        className={`uso-instalador__user-item ${user.isFixed ? 'uso-instalador__user-item--selected' : ''}`}
-                        onClick={() => handleToggleFixedUser(user.id)}
-                      >
-                        <div className="uso-instalador__user-checkbox">
-                          {isTogglingUser === user.id ? (
-                            <div className="uso-instalador__loading-spinner uso-instalador__loading-spinner--small"></div>
-                          ) : (
-                            user.isFixed ? '☑' : '☐'
-                          )}
+      <Dialog
+        open={userSelectorOpen}
+        onOpenChange={(_, data) => {
+          if (!data.open) {
+            setUserSelectorOpen(false);
+          }
+        }}
+      >
+        <DialogSurface className="uso-instalador__modal">
+          <DialogBody>
+            <DialogTitle
+              action={
+                <Button
+                  appearance="subtle"
+                  icon={<Dismiss24Regular />}
+                  onClick={() => setUserSelectorOpen(false)}
+                  aria-label="Fechar"
+                />
+              }
+            >
+              Selecionar Colaboradores
+            </DialogTitle>
+            <DialogContent>
+              <div className="uso-instalador__modal-subheader">
+                Marque os colaboradores que devem aparecer sempre na linha do tempo, mesmo sem atividades:
+              </div>
+              <div className="uso-instalador__modal-search">
+                <Input
+                  placeholder="Buscar por nome..."
+                  value={userSearchFilter}
+                  onChange={(_, data) => setUserSearchFilter(data.value)}
+                  className="uso-instalador__modal-search-input"
+                />
+              </div>
+              <div className="uso-instalador__modal-content">
+                {isLoadingUsers ? (
+                  <div className="uso-instalador__modal-loading">
+                    <Spinner size="small" />
+                    <Text>Carregando usuários...</Text>
+                  </div>
+                ) : (
+                  <div className="uso-instalador__user-list">
+                    {availableUsers
+                      .filter(u =>
+                        userSearchFilter === '' ||
+                        u.fullname.toLowerCase().includes(userSearchFilter.toLowerCase())
+                      )
+                      .map(user => (
+                        <div
+                          key={user.id}
+                          className={`uso-instalador__user-item ${user.isFixed ? 'uso-instalador__user-item--selected' : ''}`}
+                          onClick={() => handleToggleFixedUser(user.id)}
+                        >
+                          <div className="uso-instalador__user-checkbox">
+                            {isTogglingUser === user.id ? (
+                              <Spinner size="tiny" />
+                            ) : (
+                              <Checkbox
+                                checked={user.isFixed}
+                                onChange={(event) => {
+                                  event.stopPropagation();
+                                  handleToggleFixedUser(user.id);
+                                }}
+                              />
+                            )}
+                          </div>
+                          <div className="uso-instalador__user-info">
+                            <Text size={300} weight="semibold" className="uso-instalador__user-name">
+                              {user.fullname}
+                            </Text>
+                            {user.email && (
+                              <Text size={200} className="uso-instalador__user-email">
+                                {user.email}
+                              </Text>
+                            )}
+                          </div>
                         </div>
-                        <div className="uso-instalador__user-info">
-                          <span className="uso-instalador__user-name">{user.fullname}</span>
-                          {user.email && (
-                            <span className="uso-instalador__user-email">{user.email}</span>
-                          )}
-                        </div>
+                      ))
+                    }
+                    {availableUsers.length === 0 && !isLoadingUsers && (
+                      <div className="uso-instalador__modal-empty">
+                        Nenhum usuário encontrado
                       </div>
-                    ))
-                  }
-                  {availableUsers.length === 0 && !isLoadingUsers && (
-                    <div className="uso-instalador__modal-empty">
-                      Nenhum usuário encontrado
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="uso-instalador__modal-footer">
-              <button 
-                className="uso-instalador__btn"
-                onClick={() => setUserSelectorOpen(false)}
-              >
+                    )}
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button appearance="secondary" onClick={() => setUserSelectorOpen(false)}>
                 Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
       
       {/* Modal de Criação de Nova Atividade */}
-      {createModalOpen && (
-        <div className="uso-instalador__modal-overlay" onClick={() => setCreateModalOpen(false)}>
-          <div className="uso-instalador__modal uso-instalador__modal--large" onClick={(e) => e.stopPropagation()}>
-            <div className="uso-instalador__modal-header">
-              <h3>➕ Nova Atividade</h3>
-              <button 
-                className="uso-instalador__modal-close"
-                onClick={() => setCreateModalOpen(false)}
-                disabled={createSubmitting}
-              >
-                ✕
-              </button>
-            </div>
+      <Dialog
+        open={createModalOpen}
+        onOpenChange={(_, data) => {
+          if (!data.open) {
+            setCreateModalOpen(false);
+          }
+        }}
+      >
+        <DialogSurface className="uso-instalador__modal uso-instalador__modal--large">
+          <DialogBody>
+            <DialogTitle
+              action={
+                <Button
+                  appearance="subtle"
+                  icon={<Dismiss24Regular />}
+                  onClick={() => setCreateModalOpen(false)}
+                  disabled={createSubmitting}
+                  aria-label="Fechar"
+                />
+              }
+            >
+              Nova Atividade
+            </DialogTitle>
             
             {/* Step Indicator */}
             <div className="uso-instalador__modal-steps">
@@ -2479,11 +2492,11 @@ export default function UsoInstalador({
 
                 {/* Campo de pesquisa */}
                 <div className="uso-instalador__modal-search">
-                  <input
+                  <Input
                     className="uso-instalador__modal-search-input"
                     placeholder="Pesquisar projeto..."
                     value={projectSearchTerm}
-                    onChange={(e) => setProjectSearchTerm(e.target.value)}
+                    onChange={(_, data) => setProjectSearchTerm(data.value)}
                     aria-label="Pesquisar projetos"
                   />
                 </div>
@@ -2491,24 +2504,30 @@ export default function UsoInstalador({
                 <div className="uso-instalador__modal-content">
                   {createOSLoading ? (
                     <div className="uso-instalador__modal-loading">
-                      <div className="uso-instalador__loading-spinner"></div>
-                      <span>Carregando Projetos...</span>
+                      <Spinner size="small" />
+                      <Text>Carregando Projetos...</Text>
                     </div>
                   ) : (
                     <div className="uso-instalador__os-list">
                       {availableProjects.map(project => (
-                        <div 
+                        <Button
                           key={project.id}
+                          appearance="subtle"
                           className="uso-instalador__os-item"
                           onClick={() => handleSelectProjectStep(project)}
+                          style={{ width: '100%', justifyContent: 'flex-start' }}
                         >
                           <div className="uso-instalador__os-main">
-                            <span className="uso-instalador__os-id">🏗️ {project.name}</span>
+                            <Text weight="semibold" className="uso-instalador__os-id">
+                              {project.name}
+                            </Text>
                           </div>
                           <div className="uso-instalador__os-details">
-                            <span className="uso-instalador__os-projeto">Status: {project.status}</span>
+                            <Text size={200} className="uso-instalador__os-projeto">
+                              Status: {project.status}
+                            </Text>
                           </div>
-                        </div>
+                        </Button>
                       ))}
                       {availableProjects.length === 0 && !createOSLoading && (
                         <div className="uso-instalador__modal-empty">
@@ -2519,12 +2538,9 @@ export default function UsoInstalador({
                   )}
                 </div>
                 <div className="uso-instalador__modal-footer">
-                  <button 
-                    className="uso-instalador__btn"
-                    onClick={() => setCreateModalOpen(false)}
-                  >
+                  <Button appearance="secondary" onClick={() => setCreateModalOpen(false)}>
                     Cancelar
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -2539,40 +2555,53 @@ export default function UsoInstalador({
                 </div>
                 {createError && (
                   <div className="uso-instalador__modal-error">
-                    ⚠️ {createError}
+                    <Text size={300}>{createError}</Text>
                   </div>
                 )}
                 <div className="uso-instalador__modal-content">
                   {createOSLoading ? (
                     <div className="uso-instalador__modal-loading">
-                      <div className="uso-instalador__loading-spinner"></div>
-                      <span>Carregando Ordens de Serviço...</span>
+                      <Spinner size="small" />
+                      <Text>Carregando Ordens de Serviço...</Text>
                     </div>
                   ) : (
                     <div className="uso-instalador__os-list">
                       {availableOS.map(os => (
-                        <div 
+                        <Button
                           key={os.id}
+                          appearance="subtle"
                           className="uso-instalador__os-item"
                           onClick={() => handleSelectOS(os)}
+                          style={{ width: '100%', justifyContent: 'flex-start' }}
                         >
                           <div className="uso-instalador__os-main">
-                            <span className="uso-instalador__os-id">📋 {os.identificador}</span>
+                            <Text weight="semibold" className="uso-instalador__os-id">
+                              {os.identificador}
+                            </Text>
                           </div>
                           <div className="uso-instalador__os-details">
                             {os.clienteNome && (
-                              <span className="uso-instalador__os-cliente">👤 {os.clienteNome}</span>
+                              <Text size={200} className="uso-instalador__os-cliente">
+                                {os.clienteNome}
+                              </Text>
                             )}
                             {os.tipoOrdemServico && (
-                              <div className="uso-instalador__os-tipo">🔖 {os.tipoOrdemServico}</div>
+                              <Text size={200} className="uso-instalador__os-tipo">
+                                {os.tipoOrdemServico}
+                              </Text>
                             )}
                             {os.produtos && os.produtos.length > 0 ? (
-                              <ProdutosDataGrid produtos={os.produtos} ordemId={os.id} onRequestServerSort={handleSortProdutos} loading={os.produtosLoading} />
+                              <ProdutosDataGrid
+                                produtos={os.produtos}
+                                ordemId={os.id}
+                                onRequestServerSort={handleSortProdutos}
+                                loading={os.produtosLoading}
+                              />
                             ) : (
                               <div className="uso-instalador__os-no-produtos">Sem produtos</div>
                             )}
                           </div>
-                        </div>
+                        </Button>
                       ))}
                       {availableOS.length === 0 && !createOSLoading && (
                         <div className="uso-instalador__modal-empty">
@@ -2583,18 +2612,16 @@ export default function UsoInstalador({
                   )}
                 </div>
                 <div className="uso-instalador__modal-footer">
-                  <button 
-                    className="uso-instalador__btn"
+                  <Button
+                    appearance="secondary"
+                    icon={<ChevronLeft24Regular />}
                     onClick={() => setCurrentModalStep(MODAL_STEPS.PROJECT_SELECTION)}
                   >
-                    ← Voltar
-                  </button>
-                  <button 
-                    className="uso-instalador__btn"
-                    onClick={() => setCreateModalOpen(false)}
-                  >
+                    Voltar
+                  </Button>
+                  <Button appearance="secondary" onClick={() => setCreateModalOpen(false)}>
                     Cancelar
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -2611,136 +2638,139 @@ export default function UsoInstalador({
                 
                 {createError && (
                   <div className="uso-instalador__modal-error">
-                    ⚠️ {createError}
+                    <Text size={300}>{createError}</Text>
                   </div>
                 )}
                 
                 <div className="uso-instalador__modal-content uso-instalador__modal-content--form">
                   {/* Colaborador */}
                   <div className="uso-instalador__form-field">
-                    <label className="uso-instalador__form-label">
-                      👷 Colaborador <span className="uso-instalador__form-required">*</span>
-                    </label>
-                    {createUsersLoading ? (
-                      <div className="uso-instalador__loading">Carregando...</div>
-                    ) : (
-                      <select
-                        className="uso-instalador__form-select"
-                        value={createSelectedEmployee}
-                        onChange={(e) => setCreateSelectedEmployee(e.target.value)}
-                        disabled={createSubmitting}
-                      >
-                        <option value="">Selecione o colaborador</option>
-                        {createUsersList.map(user => (
-                          <option key={user.id} value={user.id}>
-                            {user.fullname}
-                          </option>
-                        ))}
-                      </select>
-                    )}
+                    <Field label="Colaborador" required>
+                      {createUsersLoading ? (
+                        <div className="uso-instalador__loading">
+                          <Spinner size="small" />
+                          <Text>Carregando...</Text>
+                        </div>
+                      ) : (
+                        <Dropdown
+                          placeholder="Selecione o colaborador"
+                          value={createSelectedEmployee
+                            ? createUsersList.find(user => user.id === createSelectedEmployee)?.fullname ?? ''
+                            : ''}
+                          onOptionSelect={(_, data) => setCreateSelectedEmployee(data.optionValue as string)}
+                          disabled={createSubmitting}
+                          className="uso-instalador__form-select"
+                        >
+                          {createUsersList.map(user => (
+                            <Option key={user.id} value={user.id}>
+                              {user.fullname}
+                            </Option>
+                          ))}
+                        </Dropdown>
+                      )}
+                    </Field>
                   </div>
                   
                   {/* Data do Agendamento */}
                   <div className="uso-instalador__form-field">
-                    <label className="uso-instalador__form-label">
-                      📅 Data do Agendamento <span className="uso-instalador__form-required">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      className="uso-instalador__form-input"
-                      value={createAgendamentoDate}
-                      min={(() => {
-                        const today = new Date();
-                        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                      })()}
-                      onChange={(e) => setCreateAgendamentoDate(e.target.value)}
-                      disabled={createSubmitting}
-                    />
-                    <span className="uso-instalador__form-hint">
-                      ⚠️ Apenas datas futuras são permitidas
-                    </span>
+                    <Field
+                      label="Data do Agendamento"
+                      required
+                      hint="Apenas datas futuras são permitidas"
+                    >
+                      <Input
+                        type="date"
+                        className="uso-instalador__form-input"
+                        value={createAgendamentoDate}
+                        min={(() => {
+                          const today = new Date();
+                          return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                        })()}
+                        onChange={(_, data) => setCreateAgendamentoDate(data.value)}
+                        disabled={createSubmitting}
+                      />
+                    </Field>
                   </div>
                   
                   {/* Horário */}
                   <div className="uso-instalador__form-field">
-                    <label className="uso-instalador__form-label">
-                      🕐 Horário <span className="uso-instalador__form-required">*</span>
-                    </label>
-                    <input
-                      type="time"
-                      className="uso-instalador__form-input"
-                      value={createAgendamentoTime}
-                      onChange={(e) => setCreateAgendamentoTime(e.target.value)}
-                      disabled={createSubmitting}
-                    />
+                    <Field label="Horário" required>
+                      <Input
+                        type="time"
+                        className="uso-instalador__form-input"
+                        value={createAgendamentoTime}
+                        onChange={(_, data) => setCreateAgendamentoTime(data.value)}
+                        disabled={createSubmitting}
+                      />
+                    </Field>
                   </div>
                   
                   {/* Duração */}
                   <div className="uso-instalador__form-field">
-                    <label className="uso-instalador__form-label">
-                      ⏱️ Duração
-                    </label>
-                    <select
-                      className="uso-instalador__form-select"
-                      value={createDuracao}
-                      onChange={(e) => setCreateDuracao(Number(e.target.value))}
-                      disabled={createSubmitting}
-                    >
-                      <option value={60}>1 hora</option>
-                      <option value={120}>2 horas</option>
-                      <option value={180}>3 horas</option>
-                      <option value={240}>4 horas</option>
-                      <option value={300}>5 horas</option>
-                      <option value={360}>6 horas</option>
-                      <option value={420}>7 horas</option>
-                      <option value={480}>8 horas</option>
-                    </select>
+                    <Field label="Duração">
+                      <Dropdown
+                        value={`${createDuracao / 60} hora${createDuracao === 60 ? '' : 's'}`}
+                        onOptionSelect={(_, data) => setCreateDuracao(Number(data.optionValue))}
+                        disabled={createSubmitting}
+                        className="uso-instalador__form-select"
+                      >
+                        <Option value="60">1 hora</Option>
+                        <Option value="120">2 horas</Option>
+                        <Option value="180">3 horas</Option>
+                        <Option value="240">4 horas</Option>
+                        <Option value="300">5 horas</Option>
+                        <Option value="360">6 horas</Option>
+                        <Option value="420">7 horas</Option>
+                        <Option value="480">8 horas</Option>
+                      </Dropdown>
+                    </Field>
                   </div>
                   
                   {/* Descrição */}
                   <div className="uso-instalador__form-field">
-                    <label className="uso-instalador__form-label">
-                      📝 Descrição <span style={{color: 'red'}}>*</span>
-                    </label>
-                    <textarea
-                      className="uso-instalador__form-textarea"
-                      value={createDescricao}
-                      onChange={(e) => setCreateDescricao(e.target.value)}
-                      placeholder="insira a descrição aqui"
-                      rows={3}
-                      disabled={createSubmitting}
-                    />
+                    <Field label="Descrição" required>
+                      <Textarea
+                        className="uso-instalador__form-textarea"
+                        value={createDescricao}
+                        onChange={(_, data) => setCreateDescricao(data.value)}
+                        placeholder="Insira a descrição aqui"
+                        rows={3}
+                        disabled={createSubmitting}
+                      />
+                    </Field>
                   </div>
                 </div>
                 
                 <div className="uso-instalador__modal-footer">
-                  <button 
-                    className="uso-instalador__btn"
+                  <Button
+                    appearance="secondary"
+                    icon={<ChevronLeft24Regular />}
                     onClick={() => setCurrentModalStep(MODAL_STEPS.ORDER_SELECTION)}
                     disabled={createSubmitting}
                   >
-                    ← Voltar
-                  </button>
-                  <button 
-                    className="uso-instalador__btn"
+                    Voltar
+                  </Button>
+                  <Button
+                    appearance="secondary"
                     onClick={() => setCreateModalOpen(false)}
                     disabled={createSubmitting}
                   >
                     Cancelar
-                  </button>
-                  <button 
-                    className="uso-instalador__btn uso-instalador__btn--primary"
+                  </Button>
+                  <Button
+                    appearance="primary"
+                    icon={createSubmitting ? <Spinner size="tiny" /> : <Add24Regular />}
                     onClick={handleCreateActivity}
                     disabled={createSubmitting || !createSelectedEmployee}
                   >
-                    {createSubmitting ? '⏳ Criando...' : '✅ Criar Atividade'}
-                  </button>
+                    {createSubmitting ? 'Criando...' : 'Criar Atividade'}
+                  </Button>
                 </div>
               </>
             )}
-          </div>
-        </div>
-      )}
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
       
       {/* Grid */}
       <div className="uso-instalador__grid-container">
@@ -2770,8 +2800,8 @@ export default function UsoInstalador({
             {isLoading ? (
               <div className="uso-instalador__empty-row">
                 <div className="uso-instalador__empty-cell uso-instalador__loading-state" style={{ gridColumn: '1 / -1' }}>
-                  <div className="uso-instalador__loading-spinner"></div>
-                  <span>Carregando atividades...</span>
+                  <Spinner size="small" />
+                  <Text size={200}>Carregando atividades...</Text>
                 </div>
               </div>
             ) : gridData.length === 0 ? (
@@ -2816,29 +2846,36 @@ export default function UsoInstalador({
                         />
                         {/* Color Picker Popup (Portal) */}
                         {colorPickerOpen === installer.id && createPortal(
-                          <div className="uso-instalador__color-picker-overlay" onClick={() => setColorPickerOpen(null)}>
+                          <div
+                            className="uso-instalador__color-picker-overlay"
+                            style={themeStyles}
+                            onClick={() => setColorPickerOpen(null)}
+                          >
                             <div 
                               className="uso-instalador__color-picker"
                               onClick={(e) => e.stopPropagation()}
                               style={{ position: 'absolute', top: colorPickerPos?.top ?? 0, left: colorPickerPos?.left ?? 0 }}
                             >
                               <div className="uso-instalador__color-picker-header">
-                                <span>Selecione a cor para a semana</span>
-                                <button 
+                                <Text size={200}>Selecione a cor para a semana</Text>
+                                <Button
+                                  appearance="subtle"
                                   className="uso-instalador__color-picker-close"
+                                  icon={<Dismiss24Regular />}
                                   onClick={() => setColorPickerOpen(null)}
-                                >
-                                  ×
-                                </button>
+                                  aria-label="Fechar seletor de cores"
+                                />
                               </div>
                               <div className="uso-instalador__color-picker-grid">
                                 {availableColors.map((color) => (
-                                  <button
+                                  <Button
                                     key={color}
+                                    appearance="subtle"
                                     className={`uso-instalador__color-picker-item ${installer.color === color ? 'uso-instalador__color-picker-item--selected' : ''}`}
-                                    style={{ backgroundColor: InstallerColorMap[color].primary }}
+                                    icon={<span className="uso-instalador__color-picker-swatch" style={{ backgroundColor: InstallerColorMap[color].primary }} />}
                                     onClick={() => handleColorChange(installer.id, color)}
                                     disabled={isUpdatingColor}
+                                    aria-label={`Selecionar cor ${color}`}
                                     title={color}
                                   />
                                 ))}
@@ -2853,17 +2890,19 @@ export default function UsoInstalador({
                           document.body
                         )}
                         <div className="uso-instalador__installer-name-wrapper">
-                          <button 
+                          <Button
+                            appearance="subtle"
+                            size="small"
                             className={`uso-instalador__expand-btn ${
                               isExpanded ? 'uso-instalador__expand-btn--expanded' : ''
                             }`}
+                            icon={<ChevronRight24Regular />}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleToggleExpand(installer.id);
                             }}
-                          >
-                            ▶
-                          </button>
+                            aria-label={isExpanded ? 'Colapsar instalador' : 'Expandir instalador'}
+                          />
                           <div className="uso-instalador__installer-info">
                             <span className="uso-instalador__installer-name">
                               {installer.name}
@@ -2998,32 +3037,39 @@ export default function UsoInstalador({
       {/* Legend */}
       <div className="uso-instalador__legend">
         <div className="uso-instalador__legend-item">
-          <span className="uso-instalador__legend-icon">⚠️</span>
-          <span>Sobrecarga (&gt;8h)</span>
+          <Badge appearance="filled" className="uso-instalador__legend-badge uso-instalador__legend-badge--overload">
+            !
+          </Badge>
+          <Text size={200}>Sobrecarga (&gt;8h)</Text>
         </div>
         <div className="uso-instalador__legend-item">
-          <span className="uso-instalador__legend-icon">🔴</span>
-          <span>Crítico (&gt;12h)</span>
+          <Badge appearance="filled" className="uso-instalador__legend-badge uso-instalador__legend-badge--critical">
+            !!
+          </Badge>
+          <Text size={200}>Crítico (&gt;12h)</Text>
         </div>
         <div className="uso-instalador__legend-item">
-          <span className="uso-instalador__legend-icon">🟥</span>
-          <span>Conflito</span>
+          <Badge appearance="filled" className="uso-instalador__legend-badge uso-instalador__legend-badge--conflict">
+            C
+          </Badge>
+          <Text size={200}>Conflito</Text>
         </div>
         <div className="uso-instalador__legend-item">
-          <span className="uso-instalador__legend-icon">🚗</span>
-          <span>Deslocamento</span>
+          <Badge appearance="filled" className="uso-instalador__legend-badge uso-instalador__legend-badge--travel">
+            D
+          </Badge>
+          <Text size={200}>Deslocamento</Text>
         </div>
         <div className="uso-instalador__legend-item">
-          <span>—</span>
-          <span>Sem alocação</span>
+          <Badge appearance="filled" className="uso-instalador__legend-badge uso-instalador__legend-badge--empty">
+            -
+          </Badge>
+          <Text size={200}>Sem alocação</Text>
         </div>
       </div>
       
-      {/* Tooltip */}
-      {tooltip && <Tooltip activity={tooltip.activity} position={tooltip.position} />}
-      
       {/* Detail Panel */}
-      <DetailPanel 
+      <DetailPanel
         state={detailPanel}
         onClose={handleCloseDetail}
         onSave={handleSaveActivity}
@@ -3031,4 +3077,34 @@ export default function UsoInstalador({
       />
     </div>
   );
+
+  return {
+    view,
+    weekStart,
+    weekEnd,
+    weekDays: weekDaysWithToggle,
+    datePickerValue,
+    showSunday,
+    setShowSunday,
+    isLoading,
+    error,
+    allExpanded,
+    handlePrevWeek,
+    handleNextWeek,
+    handleDatePick,
+    handleRefresh,
+    handleOpenUserSelector,
+    handleToggleAll,
+    handleNewActivity,
+    appVersion: APP_VERSION,
+  };
+}
+
+// ============================================
+// DEFAULT EXPORT (VIEW ONLY)
+// ============================================
+
+export default function UsoInstalador(props: UsoInstaladorProps) {
+  const { view } = useUsoInstaladorController(props, { showHeader: true });
+  return view;
 }

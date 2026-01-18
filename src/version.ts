@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.29';
+export const APP_VERSION = '0.0.30';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.30',
+    date: '2026-01-18',
+    changes: 'Adequada a tela Linha do Tempo ao template com CommandBar/PageHeader, controles Fluent UI e tokens de tema.',
+  },
   { 
     version: '0.0.29', 
     date: '2026-01-18', 

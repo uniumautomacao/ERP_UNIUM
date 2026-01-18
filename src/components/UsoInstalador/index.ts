@@ -1,3 +1,3 @@
-export { default as UsoInstalador } from './UsoInstalador';
+export { default as UsoInstalador, useUsoInstaladorController } from './UsoInstalador';
 export * from './types';
 export * from './mockData';
