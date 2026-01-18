@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.21';
+export const APP_VERSION = '0.0.23';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.23', 
+    date: '2026-01-18', 
+    changes: 'Ajustada busca de usuários para garantir retorno com isdisabled ne 1 e fallback delegável quando não houver resultados.' 
+  },
   { 
     version: '0.0.21', 
     date: '2026-01-18', 
@@ -10,11 +15,6 @@ export const VERSION_HISTORY = [
     version: '0.0.20', 
     date: '2026-01-18', 
     changes: 'Adicionado left padding no nome das security roles na Matriz de Acesso.' 
-  },
-  { 
-    version: '0.0.19', 
-    date: '2026-01-18', 
-    changes: 'Ajustes de UI na Matriz de Acesso: colunas fixas mais consistentes, overlay de carregamento sem perder a pesquisa, estados vazios e alinhamento de checkboxes.' 
   },
   { 
     version: '0.0.18', 

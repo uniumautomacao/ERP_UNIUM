@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Text,
   Card,
@@ -6,21 +6,13 @@ import {
   tokens,
   Spinner,
   Input,
-  DataGrid,
-  DataGridBody,
-  DataGridRow,
-  DataGridHeader,
-  DataGridHeaderCell,
-  DataGridCell,
-  createTableColumn,
-  TableColumnDefinition,
-  Badge,
+  Checkbox,
+  Tooltip,
 } from '@fluentui/react-components';
 import { 
-  PeopleSettings24Regular, 
   Search24Regular,
-  Person24Regular,
-  ShieldLock24Regular
+  Info20Regular,
+  ArrowSync24Regular,
 } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -31,300 +23,399 @@ import {
   RolesService 
 } from '../../generated';
 import type { Systemusers } from '../../generated/models/SystemusersModel';
+import type { Roles } from '../../generated/models/RolesModel';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalL,
+    height: '100%',
   },
-  searchSection: {
+  card: {
+    padding: '0',
+    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-    padding: tokens.spacingHorizontalM,
-    marginBottom: tokens.spacingVerticalM,
+    height: '100%',
   },
-  resultsLayout: {
-    display: 'grid',
-    gridTemplateColumns: '350px 1fr',
-    gap: tokens.spacingHorizontalL,
-    '@media (max-width: 900px)': {
-      gridTemplateColumns: '1fr',
-    }
+  tableWrapper: {
+    overflow: 'auto',
+    flexGrow: 1,
+    position: 'relative',
   },
-  userList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    maxHeight: '600px',
-    overflowY: 'auto',
-    padding: '4px',
+  table: {
+    borderCollapse: 'separate',
+    borderSpacing: 0,
+    width: 'max-content',
+    minWidth: '100%',
   },
-  userItem: {
-    cursor: 'pointer',
-    padding: tokens.spacingVerticalS,
-    transition: 'background-color 0.2s',
-    '&:hover': {
+  tableRow: {
+    ':hover': {
       backgroundColor: tokens.colorNeutralBackground1Hover,
     },
   },
-  userItemSelected: {
-    backgroundColor: tokens.colorNeutralBackground1Selected,
-    borderLeft: `4px solid ${tokens.colorCompoundBrandStroke}`,
+  th: {
+    backgroundColor: tokens.colorNeutralBackground1,
+    padding: '8px 12px',
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    textAlign: 'center',
+    fontSize: '12px',
   },
-  detailsCard: {
-    height: 'fit-content',
+  thUser: {
+    position: 'sticky',
+    zIndex: 20,
+    textAlign: 'left',
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    boxShadow: `2px 0 0 ${tokens.colorNeutralStroke2}`,
+    paddingLeft: tokens.spacingHorizontalM,
+  },
+  td: {
+    padding: '4px 8px',
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    textAlign: 'center',
+  },
+  tdUser: {
+    position: 'sticky',
+    zIndex: 5,
+    backgroundColor: tokens.colorNeutralBackground1,
+    textAlign: 'left',
+    fontWeight: 'medium',
+    whiteSpace: 'nowrap',
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    boxShadow: `2px 0 0 ${tokens.colorNeutralStroke2}`,
+    paddingLeft: tokens.spacingHorizontalM,
+  },
+  tdCentered: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   loadingContainer: {
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
     padding: tokens.spacingVerticalXXL,
   },
-  roleBadge: {
-    fontFamily: 'monospace',
-    fontSize: '10px',
-  }
+  loadingOverlay: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: tokens.colorNeutralBackground1,
+    opacity: 0.6,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 25,
+  },
+  searchBar: {
+    padding: tokens.spacingHorizontalM,
+    paddingBottom: tokens.spacingVerticalM,
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+  },
+  searchInput: {
+    flexGrow: 1,
+    maxWidth: '400px',
+  },
+  errorBar: {
+    padding: tokens.spacingHorizontalM,
+    paddingBottom: tokens.spacingVerticalS,
+    color: tokens.colorPaletteRedForeground1,
+  },
 });
-
-interface UserRoleInfo {
-  roleId: string;
-  name: string;
-}
 
 export function SuperAdminUserRolesPage() {
   const styles = useStyles();
-  
   const [searchTerm, setSearchTerm] = useState('');
+  const [roles, setRoles] = useState<Roles[]>([]);
   const [users, setUsers] = useState<Systemusers[]>([]);
-  const [selectedUser, setSelectedUser] = useState<Systemusers | null>(null);
-  const [userRoles, setUserRoles] = useState<UserRoleInfo[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [loadingRoles, setLoadingRoles] = useState(false);
+  const [linkMap, setLinkMap] = useState<Map<string, Map<string, string>>>(new Map());
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [inFlightCells, setInFlightCells] = useState<Set<string>>(new Set());
+  const userColumnWidth = 280;
 
-  const searchUsers = useCallback(async (term: string) => {
-    setLoadingUsers(true);
-    try {
-      const filter = term 
-        ? `isdisabled eq false and (contains(fullname, '${term}') or contains(internalemailaddress, '${term}'))`
-        : 'isdisabled eq false';
-        
-      const result = await SystemusersService.getAll({
-        filter,
-        select: ['fullname', 'internalemailaddress', 'systemuserid', 'azureactivedirectoryobjectid'],
-        orderBy: ['fullname asc'],
-        top: 20
-      });
-      setUsers(result.data || []);
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-    } finally {
-      setLoadingUsers(false);
-    }
+  const escapeOData = (value: string) => value.replace(/'/g, "''");
+
+  const fetchRoles = useCallback(async () => {
+    const result = await RolesService.getAll({
+      select: ['roleid', 'name'],
+      orderBy: ['name asc']
+    });
+    return result.data || [];
   }, []);
 
-  const fetchUserRoles = async (userId: string) => {
-    setLoadingRoles(true);
-    setUserRoles([]);
-    try {
-      // 1. Buscar IDs das roles do usuário
-      const userRolesResult = await SystemuserrolescollectionService.getAll({
-        filter: `systemuserid eq '${userId}'`,
-        select: ['roleid']
-      });
+  const fetchUsers = useCallback(async (term: string) => {
+    const normalized = term.trim();
+    const safeTerm = escapeOData(normalized);
+    const baseFilter = 'isdisabled ne 1';
+    const altBaseFilter = 'isdisabled eq false';
+    const searchFilter = normalized
+      ? `(contains(fullname, '${safeTerm}') or contains(internalemailaddress, '${safeTerm}'))`
+      : '';
 
-      if (!userRolesResult.data || userRolesResult.data.length === 0) {
-        setUserRoles([]);
-        return;
-      }
+    const buildFilter = (base: string) => (searchFilter ? `${base} and ${searchFilter}` : base);
+    const primaryFilter = buildFilter(baseFilter);
+    const fallbackFilter = buildFilter(altBaseFilter);
 
-      const roleIds = userRolesResult.data.map(ur => ur.roleid);
-      
-      // 2. Buscar nomes das roles
-      // Divide em lotes de 10 para evitar URLs muito longas no filtro OData
-      const batchSize = 10;
-      const allRoleDetails: UserRoleInfo[] = [];
-
-      for (let i = 0; i < roleIds.length; i += batchSize) {
-        const batch = roleIds.slice(i, i + batchSize);
-        const filter = batch.map(id => `roleid eq '${id}'`).join(' or ');
-        const result = await RolesService.getAll({
-          filter,
-          select: ['roleid', 'name']
-        });
-        if (result.data) {
-          allRoleDetails.push(...result.data.map(r => ({ roleId: r.roleid, name: r.name })));
-        }
-      }
-
-      allRoleDetails.sort((a, b) => a.name.localeCompare(b.name));
-      setUserRoles(allRoleDetails);
-    } catch (error) {
-      console.error('Erro ao buscar roles do usuário:', error);
-    } finally {
-      setLoadingRoles(false);
+    const result = await SystemusersService.getAll({
+      filter: primaryFilter,
+      select: ['fullname', 'internalemailaddress', 'systemuserid'],
+      orderBy: ['fullname asc'],
+      top: 50
+    });
+    if ((result.data || []).length > 0 || !normalized) {
+      return result.data || [];
     }
-  };
 
-  useEffect(() => {
-    searchUsers('');
-  }, [searchUsers]);
+    const fallbackResult = await SystemusersService.getAll({
+      filter: fallbackFilter,
+      select: ['fullname', 'internalemailaddress', 'systemuserid'],
+      orderBy: ['fullname asc'],
+      top: 50
+    });
+    return fallbackResult.data || [];
+  }, []);
+
+  const fetchLinksForUsers = useCallback(async (currentUsers: Systemusers[]) => {
+    if (currentUsers.length === 0) return new Map<string, Map<string, string>>();
+    const filter = currentUsers.map(u => `systemuserid eq '${u.systemuserid}'`).join(' or ');
+    const result = await SystemuserrolescollectionService.getAll({
+      filter: `(${filter})`,
+      select: ['systemuserid', 'roleid', 'systemuserroleid']
+    });
+
+    const map = new Map<string, Map<string, string>>();
+    (result.data || []).forEach(link => {
+      if (!map.has(link.systemuserid)) {
+        map.set(link.systemuserid, new Map());
+      }
+      map.get(link.systemuserid)!.set(link.roleid, link.systemuserroleid);
+    });
+    return map;
+  }, []);
+
+  const fetchMatrix = useCallback(async (term: string) => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const [rolesResult, usersResult] = await Promise.all([
+        fetchRoles(),
+        fetchUsers(term),
+      ]);
+      const linksResult = await fetchLinksForUsers(usersResult);
+      setRoles(rolesResult);
+      setUsers(usersResult);
+      setLinkMap(linksResult);
+    } catch (error: any) {
+      console.error('Erro ao carregar matriz de usuários:', error);
+      setErrorMessage(error?.message || 'Erro ao carregar dados.');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchRoles, fetchUsers, fetchLinksForUsers]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (searchTerm.length >= 2 || searchTerm === '') {
-        searchUsers(searchTerm);
-      }
+      fetchMatrix(searchTerm);
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, searchUsers]);
+  }, [searchTerm, fetchMatrix]);
 
-  const handleUserSelect = (user: Systemusers) => {
-    setSelectedUser(user);
-    fetchUserRoles(user.systemuserid);
+  const sortedUsers = useMemo(() => {
+    return [...users].sort((a, b) => {
+      const aHasRole = (linkMap.get(a.systemuserid)?.size ?? 0) > 0;
+      const bHasRole = (linkMap.get(b.systemuserid)?.size ?? 0) > 0;
+      if (aHasRole !== bHasRole) return aHasRole ? -1 : 1;
+      return (a.fullname || '').localeCompare(b.fullname || '');
+    });
+  }, [users, linkMap]);
+
+  const getCellKey = (userId: string, roleId: string) => `${userId}|${roleId}`;
+
+  const isChecked = (userId: string, roleId: string) => {
+    return !!linkMap.get(userId)?.has(roleId);
   };
 
-  const roleColumns: TableColumnDefinition<UserRoleInfo>[] = [
-    createTableColumn<UserRoleInfo>({
-      columnId: 'name',
-      renderHeaderCell: () => 'Nome da Role',
-      renderCell: (role) => <Text weight="semibold">{role.name}</Text>,
-    }),
-    createTableColumn<UserRoleInfo>({
-      columnId: 'id',
-      renderHeaderCell: () => 'GUID',
-      renderCell: (role) => (
-        <Text font="monospace" size={100} color={tokens.colorNeutralForeground4}>
-          {role.roleId}
-        </Text>
-      ),
-    }),
-  ];
+  const updateLinkMap = (userId: string, roleId: string, linkId?: string) => {
+    setLinkMap(prev => {
+      const next = new Map(prev);
+      const row = new Map(next.get(userId) || []);
+      if (linkId) {
+        row.set(roleId, linkId);
+      } else {
+        row.delete(roleId);
+      }
+      if (row.size === 0) {
+        next.delete(userId);
+      } else {
+        next.set(userId, row);
+      }
+      return next;
+    });
+  };
+
+  const toggleRole = async (userId: string, roleId: string) => {
+    const key = getCellKey(userId, roleId);
+    if (inFlightCells.has(key)) return;
+
+    setInFlightCells(prev => new Set(prev).add(key));
+    setErrorMessage(null);
+
+    try {
+      const existingLinkId = linkMap.get(userId)?.get(roleId);
+      if (existingLinkId) {
+        await SystemuserrolescollectionService.delete(existingLinkId);
+        updateLinkMap(userId, roleId);
+      } else {
+        const createResult = await SystemuserrolescollectionService.create({
+          systemuserid: userId,
+          roleid: roleId,
+        });
+        let newLinkId = createResult.data?.systemuserroleid;
+        if (!newLinkId) {
+          const lookup = await SystemuserrolescollectionService.getAll({
+            filter: `systemuserid eq '${userId}' and roleid eq '${roleId}'`,
+            select: ['systemuserroleid'],
+            top: 1
+          });
+          newLinkId = lookup.data?.[0]?.systemuserroleid;
+        }
+        if (newLinkId) {
+          updateLinkMap(userId, roleId, newLinkId);
+        } else {
+          setErrorMessage('Vínculo criado, mas não foi possível recuperar o ID.');
+        }
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar vínculo de role:', error);
+      setErrorMessage(error?.message || 'Erro ao atualizar vínculo de role.');
+    } finally {
+      setInFlightCells(prev => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }
+  };
 
   return (
     <>
-      <CommandBar primaryActions={[]} />
+      <CommandBar 
+        primaryActions={[
+          {
+            id: 'refresh',
+            label: 'Atualizar',
+            icon: <ArrowSync24Regular />,
+            onClick: () => fetchMatrix(searchTerm),
+            disabled: loading,
+          }
+        ]}
+      />
       <PageHeader
         title="Roles por Usuário"
-        subtitle="Visualize quais Security Roles estão atribuídas a cada usuário no Dataverse"
+        subtitle="Gerencie quais Security Roles estão atribuídas a cada usuário"
       />
       <PageContainer>
         <div className={styles.container}>
-          <div className={styles.resultsLayout}>
-            {/* Coluna da Esquerda: Busca e Lista de Usuários */}
-            <Card>
-              <div className={styles.searchSection}>
-                <Text weight="semibold">Buscar Usuário</Text>
-                <Input
-                  contentBefore={<Search24Regular />}
-                  placeholder="Nome ou e-mail..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+          <Card className={styles.card}>
+            <div className={styles.searchBar}>
+              <Input
+                className={styles.searchInput}
+                contentBefore={<Search24Regular />}
+                placeholder="Pesquisar usuário por nome ou email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Pesquisar usuário"
+              />
+              {loading && <Spinner size="tiny" />}
+            </div>
 
-              {loadingUsers ? (
-                <div className={styles.loadingContainer}>
-                  <Spinner size="small" label="Buscando usuários..." />
-                </div>
-              ) : (
-                <div className={styles.userList}>
-                  {users.map(user => (
-                    <div 
-                      key={user.systemuserid} 
-                      className={`${styles.userItem} ${selectedUser?.systemuserid === user.systemuserid ? styles.userItemSelected : ''}`}
-                      onClick={() => handleUserSelect(user)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Person24Regular />
-                        <div className="flex flex-col">
-                          <Text weight="semibold">{user.fullname}</Text>
-                          <Text size={200} color={tokens.colorNeutralForeground4}>{user.internalemailaddress}</Text>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {users.length === 0 && !loadingUsers && (
-                    <div className="p-4 text-center">
-                      <Text italic color={tokens.colorNeutralForeground4}>Nenhum usuário encontrado.</Text>
-                    </div>
-                  )}
+            {errorMessage && (
+              <div className={styles.errorBar}>
+                <Text size={200}>{errorMessage}</Text>
+              </div>
+            )}
+
+            <div className={styles.tableWrapper}>
+              {loading && (
+                <div className={styles.loadingOverlay}>
+                  <Spinner label="Carregando matriz de usuários..." />
                 </div>
               )}
-            </Card>
-
-            {/* Coluna da Direita: Detalhes e Roles */}
-            <Card className={styles.detailsCard}>
-              {selectedUser ? (
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between border-b pb-4 mb-2">
-                    <div className="flex items-center gap-3">
-                      <div style={{ padding: '8px', backgroundColor: tokens.colorNeutralBackground3, borderRadius: '50%' }}>
-                        <Person24Regular fontSize={32} />
-                      </div>
-                      <div className="flex flex-col">
-                        <Text size={500} weight="bold">{selectedUser.fullname}</Text>
-                        <Text size={300}>{selectedUser.internalemailaddress}</Text>
-                      </div>
-                    </div>
-                    <Badge appearance="outline" color="brand">
-                      ID: {selectedUser.systemuserid.substring(0, 8)}...
-                    </Badge>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <ShieldLock24Regular />
-                      <Text weight="semibold">Security Roles Atribuídas</Text>
-                    </div>
-
-                    {loadingRoles ? (
-                      <div className={styles.loadingContainer}>
-                        <Spinner label="Carregando roles do usuário..." />
-                      </div>
-                    ) : userRoles.length > 0 ? (
-                      <DataGrid
-                        items={userRoles}
-                        columns={roleColumns}
-                        getRowId={(item) => item.roleId}
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th
+                      className={`${styles.th} ${styles.thUser}`}
+                      style={{ left: 0, minWidth: userColumnWidth, width: userColumnWidth }}
+                    >
+                      Usuário
+                    </th>
+                    {roles.map(role => (
+                      <th key={role.roleid} className={styles.th}>
+                        <Tooltip content={role.roleid} relationship="label">
+                          <Text size={200}>{role.name}</Text>
+                        </Tooltip>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedUsers.map(user => (
+                    <tr key={user.systemuserid} className={styles.tableRow}>
+                      <td
+                        className={styles.tdUser}
+                        style={{ left: 0, minWidth: userColumnWidth, width: userColumnWidth }}
                       >
-                        <DataGridHeader>
-                          <DataGridRow>
-                            {({ renderHeaderCell }) => (
-                              <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
-                            )}
-                          </DataGridRow>
-                        </DataGridHeader>
-                        <DataGridBody<UserRoleInfo>>
-                          {({ item, rowId }) => (
-                            <DataGridRow key={rowId}>
-                              {({ renderCell }) => (
-                                <DataGridCell>{renderCell(item)}</DataGridCell>
-                              )}
-                            </DataGridRow>
-                          )}
-                        </DataGridBody>
-                      </DataGrid>
-                    ) : (
-                      <div className="p-8 text-center border-dashed border-2 rounded-lg">
-                        <Text italic color={tokens.colorNeutralForeground4}>
-                          Este usuário não possui nenhuma role atribuída diretamente no Dataverse.
+                        <div className="flex items-center gap-1">
+                          <Text size={200} weight="semibold">{user.fullname}</Text>
+                          <Tooltip content={user.systemuserid} relationship="description">
+                            <Info20Regular fontSize={14} style={{ opacity: 0.5 }} />
+                          </Tooltip>
+                        </div>
+                        <Text size={200} color={tokens.colorNeutralForeground4}>
+                          {user.internalemailaddress}
                         </Text>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center p-20 gap-4 opacity-30">
-                  <PeopleSettings24Regular style={{ fontSize: '64px' }} />
-                  <Text size={400} align="center">
-                    Selecione um usuário na lista ao lado para ver suas security roles.
+                      </td>
+                      {roles.map(role => {
+                        const key = getCellKey(user.systemuserid, role.roleid);
+                        const checked = isChecked(user.systemuserid, role.roleid);
+                        const disabled = inFlightCells.has(key);
+                        return (
+                          <td key={role.roleid} className={styles.td}>
+                            <div className={styles.tdCentered}>
+                              <Checkbox
+                                checked={checked}
+                                disabled={disabled}
+                                onChange={() => toggleRole(user.systemuserid, role.roleid)}
+                                aria-label={`${role.name} para ${user.fullname}`}
+                              />
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!loading && sortedUsers.length === 0 && (
+                <div className={styles.loadingContainer}>
+                  <Text italic color={tokens.colorNeutralForeground4}>
+                    Nenhum usuário encontrado para o filtro informado.
                   </Text>
                 </div>
               )}
-            </Card>
-          </div>
+            </div>
+          </Card>
         </div>
       </PageContainer>
     </>
