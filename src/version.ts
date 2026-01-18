@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.23';
+export const APP_VERSION = '0.0.25';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.25', 
+    date: '2026-01-18', 
+    changes: 'Adicionados filtros de exclusão na matriz de usuários para ignorar nomes iniciando com # e emails terminando com @onmicrosoft.com.' 
+  },
+  { 
+    version: '0.0.24', 
+    date: '2026-01-18', 
+    changes: 'Corrigida lógica de busca de usuários na matriz para garantir exibição de ativos mesmo com busca vazia e tipos de dados variados no Dataverse.' 
+  },
   { 
     version: '0.0.23', 
     date: '2026-01-18', 

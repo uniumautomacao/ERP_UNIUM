@@ -155,33 +155,37 @@ export function SuperAdminUserRolesPage() {
   const fetchUsers = useCallback(async (term: string) => {
     const normalized = term.trim();
     const safeTerm = escapeOData(normalized);
-    const baseFilter = 'isdisabled ne 1';
-    const altBaseFilter = 'isdisabled eq false';
+    
+    // Parte da busca: se não houver termo, fica null
     const searchFilter = normalized
       ? `(contains(fullname, '${safeTerm}') or contains(internalemailaddress, '${safeTerm}'))`
-      : '';
+      : null;
 
-    const buildFilter = (base: string) => (searchFilter ? `${base} and ${searchFilter}` : base);
-    const primaryFilter = buildFilter(baseFilter);
-    const fallbackFilter = buildFilter(altBaseFilter);
-
-    const result = await SystemusersService.getAll({
-      filter: primaryFilter,
-      select: ['fullname', 'internalemailaddress', 'systemuserid'],
-      orderBy: ['fullname asc'],
-      top: 50
-    });
-    if ((result.data || []).length > 0 || !normalized) {
+    // Função auxiliar para tentar buscar com um filtro de habilitado específico
+    const tryFetch = async (enabledBase: string) => {
+      const exclusionFilter = "not startswith(fullname, '#') and not endswith(internalemailaddress, '@onmicrosoft.com') and not endswith(internalemailaddress, '@microsoft.com')";
+      const baseWithExclusion = `${enabledBase} and ${exclusionFilter}`;
+      const filter = searchFilter ? `${baseWithExclusion} and ${searchFilter}` : baseWithExclusion;
+      
+      const result = await SystemusersService.getAll({
+        filter,
+        select: ['fullname', 'internalemailaddress', 'systemuserid'],
+        orderBy: ['fullname asc'],
+        top: 50
+      });
       return result.data || [];
+    };
+
+    // Tenta primeiro com 'ne 1'
+    const results = await tryFetch('isdisabled ne 1');
+    
+    // Se encontrou algo, retorna. Se não (e isso inclui o caso de busca vazia), tenta o fallback.
+    if (results.length > 0) {
+      return results;
     }
 
-    const fallbackResult = await SystemusersService.getAll({
-      filter: fallbackFilter,
-      select: ['fullname', 'internalemailaddress', 'systemuserid'],
-      orderBy: ['fullname asc'],
-      top: 50
-    });
-    return fallbackResult.data || [];
+    // Fallback com 'eq false' (cobre casos onde o campo é booleano ou o 'ne 1' falhou)
+    return await tryFetch('isdisabled eq false');
   }, []);
 
   const fetchLinksForUsers = useCallback(async (currentUsers: Systemusers[]) => {
