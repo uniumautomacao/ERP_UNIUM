@@ -54,6 +54,11 @@ const useStyles = makeStyles({
     width: 'max-content',
     minWidth: '100%',
   },
+  tableRow: {
+    ':hover': {
+      backgroundColor: tokens.colorNeutralBackground1Hover,
+    },
+  },
   th: {
     backgroundColor: tokens.colorNeutralBackground1,
     padding: '8px 12px',
@@ -74,17 +79,18 @@ const useStyles = makeStyles({
   },
   thRole: {
     position: 'sticky',
-    left: 0,
     zIndex: 20,
     textAlign: 'left',
-    minWidth: '250px',
     backgroundColor: tokens.colorNeutralBackground1,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    boxShadow: `2px 0 0 ${tokens.colorNeutralStroke2}`,
+    paddingLeft: tokens.spacingHorizontalM,
   },
   thAll: {
     position: 'sticky',
-    left: '250px',
     zIndex: 20,
     backgroundColor: tokens.colorNeutralBackground1,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
   },
   td: {
     padding: '4px 8px',
@@ -94,27 +100,44 @@ const useStyles = makeStyles({
   },
   tdRole: {
     position: 'sticky',
-    left: 0,
     zIndex: 5,
     backgroundColor: tokens.colorNeutralBackground1,
     textAlign: 'left',
     fontWeight: 'medium',
     whiteSpace: 'nowrap',
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    boxShadow: `2px 0 0 ${tokens.colorNeutralStroke2}`,
+    paddingLeft: tokens.spacingHorizontalM,
   },
   tdAll: {
     position: 'sticky',
-    left: '250px',
     zIndex: 5,
     backgroundColor: tokens.colorNeutralBackground1,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
   },
   tdOverride: {
     backgroundColor: tokens.colorNeutralBackground1Selected,
+  },
+  tdCentered: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   loadingContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     padding: '100px',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: tokens.colorNeutralBackground1,
+    opacity: 0.6,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 25,
   },
   actions: {
     display: 'flex',
@@ -144,11 +167,6 @@ const useStyles = makeStyles({
   }
 });
 
-interface MatrixRule {
-  ruleId?: string;
-  hasAccess: boolean;
-}
-
 export function SuperAdminPageAccessPage() {
   const styles = useStyles();
   const { refresh: refreshAccess } = useAccessControl();
@@ -159,6 +177,7 @@ export function SuperAdminPageAccessPage() {
   const [saving, setSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Map<string, boolean>>(new Map());
   const [searchTerm, setSearchTerm] = useState('');
+  const roleColumnWidth = 260;
 
   // Estrutura das colunas: Seções -> Páginas
   const columns = useMemo(() => {
@@ -312,14 +331,6 @@ export function SuperAdminPageAccessPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <Spinner label="Carregando matriz de permissões..." />
-      </div>
-    );
-  }
-
   return (
     <div className={styles.container}>
       <CommandBar 
@@ -367,14 +378,27 @@ export function SuperAdminPageAccessPage() {
           </div>
 
           <div className={styles.tableWrapper}>
+            {loading && (
+              <div className={styles.loadingOverlay}>
+                <Spinner label="Carregando matriz de permissões..." />
+              </div>
+            )}
             <table className={styles.table}>
               <thead>
                 {/* Linha 1: Seções */}
                 <tr>
-                  <th className={`${styles.th} ${styles.thRole} ${styles.stickyHeaderRole}`} rowSpan={2}>
+                  <th
+                    className={`${styles.th} ${styles.thRole} ${styles.stickyHeaderRole}`}
+                    rowSpan={2}
+                    style={{ left: 0, minWidth: roleColumnWidth, width: roleColumnWidth }}
+                  >
                     Security Role
                   </th>
-                  <th className={`${styles.th} ${styles.thAll} ${styles.stickyHeaderAll}`} rowSpan={2}>
+                  <th
+                    className={`${styles.th} ${styles.thAll} ${styles.stickyHeaderAll}`}
+                    rowSpan={2}
+                    style={{ left: roleColumnWidth }}
+                  >
                     All (*)
                   </th>
                   {columns.bySection.map(([section, pages]) => (
@@ -399,8 +423,11 @@ export function SuperAdminPageAccessPage() {
                   const isAllChecked = getAccessStatus(role.roleid, '*');
                   
                   return (
-                    <tr key={role.roleid}>
-                      <td className={styles.tdRole}>
+                    <tr key={role.roleid} className={styles.tableRow}>
+                      <td
+                        className={styles.tdRole}
+                        style={{ left: 0, minWidth: roleColumnWidth, width: roleColumnWidth }}
+                      >
                         <div className="flex items-center gap-1">
                           <Text size={200} weight="semibold">{role.name}</Text>
                           <Tooltip content={role.roleid} relationship="description">
@@ -408,11 +435,14 @@ export function SuperAdminPageAccessPage() {
                           </Tooltip>
                         </div>
                       </td>
-                      <td className={styles.tdAll}>
-                        <Checkbox 
-                          checked={isAllChecked} 
-                          onChange={() => toggleAccess(role.roleid, '*')} 
-                        />
+                      <td className={styles.tdAll} style={{ left: roleColumnWidth }}>
+                        <div className={styles.tdCentered}>
+                          <Checkbox 
+                            checked={isAllChecked} 
+                            onChange={() => toggleAccess(role.roleid, '*')} 
+                            aria-label={`Wildcard * para ${role.name}`}
+                          />
+                        </div>
                       </td>
                       {columns.allPages.map(page => {
                         const isChecked = isAllChecked || getAccessStatus(role.roleid, page.key);
@@ -423,11 +453,14 @@ export function SuperAdminPageAccessPage() {
                             key={page.key} 
                             className={`${styles.td} ${isDisabled ? styles.tdOverride : ''}`}
                           >
-                            <Checkbox 
-                              checked={isChecked}
-                              disabled={isDisabled}
-                              onChange={() => toggleAccess(role.roleid, page.key)}
-                            />
+                            <div className={styles.tdCentered}>
+                              <Checkbox 
+                                checked={isChecked}
+                                disabled={isDisabled}
+                                onChange={() => toggleAccess(role.roleid, page.key)}
+                                aria-label={`${page.label} para ${role.name}`}
+                              />
+                            </div>
                           </td>
                         );
                       })}
@@ -436,6 +469,13 @@ export function SuperAdminPageAccessPage() {
                 })}
               </tbody>
             </table>
+            {!loading && sortedRoles.length === 0 && (
+              <div className={styles.loadingContainer}>
+                <Text italic color={tokens.colorNeutralForeground4}>
+                  Nenhuma security role encontrada para o filtro informado.
+                </Text>
+              </div>
+            )}
           </div>
 
           {pendingChanges.size > 0 && (

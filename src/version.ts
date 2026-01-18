@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.18';
+export const APP_VERSION = '0.0.20';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.20', 
+    date: '2026-01-18', 
+    changes: 'Adicionado left padding no nome das security roles na Matriz de Acesso.' 
+  },
+  { 
+    version: '0.0.19', 
+    date: '2026-01-18', 
+    changes: 'Ajustes de UI na Matriz de Acesso: colunas fixas mais consistentes, overlay de carregamento sem perder a pesquisa, estados vazios e alinhamento de checkboxes.' 
+  },
   { 
     version: '0.0.18', 
     date: '2026-01-18', 
@@ -10,11 +20,6 @@ export const VERSION_HISTORY = [
     version: '0.0.17', 
     date: '2026-01-18', 
     changes: 'Reformulada página de Acesso por Role para formato de matriz, com agrupamento por seção, ordenação customizada de roles e comportamento visual de override para o wildcard (*).' 
-  },
-  { 
-    version: '0.0.16', 
-    date: '2026-01-18', 
-    changes: 'Criada seção Super Admin com páginas de gerenciamento de acesso por roles e visualização de roles por usuário. Implementado bypass para System Administrator.' 
   },
   { 
     version: '0.0.15', 
