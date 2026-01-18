@@ -21,10 +21,10 @@ export function SidebarItem({ icon, label, path, isCollapsed, onClick }: Sidebar
             icon={IconElement}
             style={{
               width: '100%',
-              justifyContent: isCollapsed ? 'center' : 'flex-start',
+              justifyContent: isCollapsed ? 'flex-start' : 'flex-start',
               height: '36px',
-              paddingLeft: isCollapsed ? '0' : '12px',
-              paddingRight: isCollapsed ? '0' : '12px',
+              paddingLeft: isCollapsed ? '10px' : '12px',
+              paddingRight: isCollapsed ? '0px' : '12px',
               borderRadius: '4px',
               backgroundColor: isActive ? tokens.colorBrandBackground2 : 'transparent',
               color: isActive ? tokens.colorBrandForeground1 : tokens.colorNeutralForeground1,
