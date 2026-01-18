@@ -7,6 +7,8 @@ import { powerApps, powerAppsCorsOrigins } from "./plugins/powerApps";
 export default defineConfig({
   base: "./",
   server: {
+    host: "0.0.0.0",
+    port: 3000,
     cors: {
       // allow apps.powerapps.com to access dev server
       origin: powerAppsCorsOrigins,

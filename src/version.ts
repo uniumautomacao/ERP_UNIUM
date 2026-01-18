@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.6';
+export const APP_VERSION = '0.0.7';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.7', 
+    date: '2026-01-18', 
+    changes: 'Ajustadas configurações de host para 0.0.0.0 e porta para 3000 no vite.config.ts.' 
+  },
   { 
     version: '0.0.6', 
     date: '2026-01-18', 
