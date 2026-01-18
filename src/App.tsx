@@ -9,6 +9,7 @@ import { ReportsPage } from './pages/section1-analytics/ReportsPage';
 import { InventoryPage } from './pages/section2-operations/InventoryPage';
 import { ProjectPlannerPage } from './pages/section2-operations/ProjectPlannerPage';
 import { TeamManagementPage } from './pages/section2-operations/TeamManagementPage';
+import { DevPage } from './pages/section3-dev/DevPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/projects" element={<ProjectPlannerPage />} />
               <Route path="/team" element={<TeamManagementPage />} />
+              <Route path="/dev" element={<DevPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AppShell>

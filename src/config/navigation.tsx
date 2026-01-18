@@ -6,6 +6,7 @@ import {
   Box24Regular,
   CalendarLtr24Regular,
   People24Regular,
+  DeveloperBoard24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
 
@@ -67,6 +68,18 @@ export const navigation: NavSection[] = [
         label: 'Team Management',
         icon: <People24Regular />,
         path: '/team',
+      },
+    ],
+  },
+  {
+    id: 'dev',
+    label: 'DEV',
+    items: [
+      {
+        id: 'dev-page',
+        label: 'Dev Page',
+        icon: <DeveloperBoard24Regular />,
+        path: '/dev',
       },
     ],
   },

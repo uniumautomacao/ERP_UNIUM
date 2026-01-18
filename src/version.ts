@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.7';
+export const APP_VERSION = '0.0.8';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  { 
+    version: '0.0.8', 
+    date: '2026-01-18', 
+    changes: 'Adicionada nova seção DEV no menu com uma página em branco para desenvolvimento.' 
+  },
   { 
     version: '0.0.7', 
     date: '2026-01-18', 
