@@ -12,6 +12,7 @@ import { createPortal } from 'react-dom';
 import {
   Badge,
   Button,
+  Card,
   Checkbox,
   Dialog,
   DialogActions,
@@ -43,15 +44,19 @@ import {
 import {
   Add24Regular,
   ArrowSync24Regular,
+  Building24Regular,
   ChevronDown24Regular,
   ChevronLeft24Regular,
+  ChevronRight12Regular,
   ChevronRight24Regular,
   ChevronUp24Regular,
   Checkmark24Regular,
   Dismiss24Regular,
+  DocumentText24Regular,
   Edit24Regular,
   Link24Regular,
   People24Regular,
+  Search24Regular,
 } from '@fluentui/react-icons';
 import type {
   UsoInstaladorProps,
@@ -2189,7 +2194,7 @@ export function useUsoInstaladorController({
       </div>
     );
 
-    if (activity) {
+    if (activity && tooltipContent) {
       return (
         <FluentTooltip content={tooltipContent} relationship="label">
           {cellContent}
@@ -2465,154 +2470,355 @@ export function useUsoInstaladorController({
             >
               Nova Atividade
             </DialogTitle>
-            
-            {/* Step Indicator */}
-            <div className="uso-instalador__modal-steps">
-              <div className={`uso-instalador__modal-step ${currentModalStep === MODAL_STEPS.PROJECT_SELECTION ? 'uso-instalador__modal-step--active' : ''} ${selectedProject ? 'uso-instalador__modal-step--completed' : ''}`}>
-                <span className="uso-instalador__modal-step-number">1</span>
-                <span className="uso-instalador__modal-step-label">Projeto</span>
-              </div>
-              <div className="uso-instalador__modal-step-divider" />
-              <div className={`uso-instalador__modal-step ${currentModalStep === MODAL_STEPS.ORDER_SELECTION ? 'uso-instalador__modal-step--active' : ''} ${selectedOS ? 'uso-instalador__modal-step--completed' : ''}`}>
-                <span className="uso-instalador__modal-step-number">2</span>
-                <span className="uso-instalador__modal-step-label">Ordem de Serviço</span>
-              </div>
-              <div className="uso-instalador__modal-step-divider" />
-              <div className={`uso-instalador__modal-step ${currentModalStep === MODAL_STEPS.EMPLOYEE_SELECTION || currentModalStep === MODAL_STEPS.ACTIVITY_DETAILS ? 'uso-instalador__modal-step--active' : ''}`}>
-                <span className="uso-instalador__modal-step-number">3</span>
-                <span className="uso-instalador__modal-step-label">Detalhes</span>
-              </div>
-            </div>
-            
-            {/* Etapa 1: Seleção de Projeto */}
-            {currentModalStep === MODAL_STEPS.PROJECT_SELECTION && (
-              <>
-                <div className="uso-instalador__modal-subheader">
-                  Selecione o Projeto para a nova atividade:
-                </div>
 
-                {/* Campo de pesquisa */}
-                <div className="uso-instalador__modal-search">
-                  <Input
-                    className="uso-instalador__modal-search-input"
-                    placeholder="Pesquisar projeto..."
-                    value={projectSearchTerm}
-                    onChange={(_, data) => setProjectSearchTerm(data.value)}
-                    aria-label="Pesquisar projetos"
-                  />
+            <DialogContent className="uso-instalador__modal-wizard">
+              {/* Step Indicator */}
+              <div className="uso-instalador__modal-steps">
+                <div
+                  className={`uso-instalador__modal-step ${
+                    currentModalStep === MODAL_STEPS.PROJECT_SELECTION ? 'uso-instalador__modal-step--active' : ''
+                  } ${selectedProject ? 'uso-instalador__modal-step--completed' : ''}`}
+                >
+                  <span className="uso-instalador__modal-step-number">1</span>
+                  <span className="uso-instalador__modal-step-label">Projeto</span>
                 </div>
+                <div className="uso-instalador__modal-step-divider" />
+                <div
+                  className={`uso-instalador__modal-step ${
+                    currentModalStep === MODAL_STEPS.ORDER_SELECTION ? 'uso-instalador__modal-step--active' : ''
+                  } ${selectedOS ? 'uso-instalador__modal-step--completed' : ''}`}
+                >
+                  <span className="uso-instalador__modal-step-number">2</span>
+                  <span className="uso-instalador__modal-step-label">Ordem de Serviço</span>
+                </div>
+                <div className="uso-instalador__modal-step-divider" />
+                <div
+                  className={`uso-instalador__modal-step ${
+                    currentModalStep === MODAL_STEPS.EMPLOYEE_SELECTION || currentModalStep === MODAL_STEPS.ACTIVITY_DETAILS
+                      ? 'uso-instalador__modal-step--active'
+                      : ''
+                  }`}
+                >
+                  <span className="uso-instalador__modal-step-number">3</span>
+                  <span className="uso-instalador__modal-step-label">Detalhes</span>
+                </div>
+              </div>
 
-                <div className="uso-instalador__modal-content">
-                  {createOSLoading ? (
-                    <div className="uso-instalador__modal-loading">
-                      <Spinner size="small" />
-                      <Text>Carregando Projetos...</Text>
-                    </div>
-                  ) : (
-                    <div className="uso-instalador__os-list">
-                      {availableProjects.map(project => (
-                        <Button
-                          key={project.id}
-                          appearance="subtle"
-                          className="uso-instalador__os-item"
-                          onClick={() => handleSelectProjectStep(project)}
-                          style={{ width: '100%', justifyContent: 'flex-start' }}
-                        >
-                          <div className="uso-instalador__os-main">
-                            <Text weight="semibold" className="uso-instalador__os-id">
-                              {project.name}
-                            </Text>
-                          </div>
-                          <div className="uso-instalador__os-details">
-                            <Text size={200} className="uso-instalador__os-projeto">
-                              Status: {project.status}
-                            </Text>
-                          </div>
-                        </Button>
-                      ))}
-                      {availableProjects.length === 0 && !createOSLoading && (
-                        <div className="uso-instalador__modal-empty">
-                          Nenhum projeto disponível
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="uso-instalador__modal-footer">
-                  <Button appearance="secondary" onClick={() => setCreateModalOpen(false)}>
-                    Cancelar
-                  </Button>
-                </div>
-              </>
-            )}
-            
-            {/* Etapa 2: Seleção de OS */}
-            {currentModalStep === MODAL_STEPS.ORDER_SELECTION && (
-              <>
-                <div className="uso-instalador__modal-subheader">
-                  <strong>Projeto:</strong> {selectedProject?.name}
-                  <br />
-                  Selecione a Ordem de Serviço:
-                </div>
-                {createError && (
-                  <div className="uso-instalador__modal-error">
-                    <Text size={300}>{createError}</Text>
+              {/* Etapa 1: Seleção de Projeto */}
+              {currentModalStep === MODAL_STEPS.PROJECT_SELECTION && (
+                <div className="flex flex-col gap-4">
+                  <div className="uso-instalador__modal-subheader">
+                    <Text weight="semibold">1/3 — Selecione o Projeto</Text>
+                    <Text size={200} block>
+                      Pesquise e selecione o projeto para o qual deseja criar uma nova atividade.
+                    </Text>
                   </div>
-                )}
-                <div className="uso-instalador__modal-content">
-                  {createOSLoading ? (
-                    <div className="uso-instalador__modal-loading">
-                      <Spinner size="small" />
-                      <Text>Carregando Ordens de Serviço...</Text>
+
+                  <div className="uso-instalador__modal-search">
+                    <Input
+                      className="w-full"
+                      placeholder="Pesquisar projeto..."
+                      value={projectSearchTerm}
+                      onChange={(_, data) => setProjectSearchTerm(data.value)}
+                      aria-label="Pesquisar projetos"
+                      contentBefore={<Search24Regular />}
+                    />
+                  </div>
+
+                  <div className="uso-instalador__modal-list">
+                    {createOSLoading ? (
+                      <div className="uso-instalador__modal-loading">
+                        <Spinner size="small" />
+                        <Text>Carregando Projetos...</Text>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {availableProjects.map(project => (
+                          <Card
+                            key={project.id}
+                            className="uso-instalador__selection-card"
+                            onClick={() => handleSelectProjectStep(project)}
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-3">
+                                <div className="uso-instalador__card-icon">
+                                  <Building24Regular />
+                                </div>
+                                <div className="flex flex-col">
+                                  <Text weight="semibold">{project.name}</Text>
+                                  <Text size={200} className="uso-instalador__text-muted">
+                                    {project.client}
+                                  </Text>
+                                </div>
+                              </div>
+                              <Badge appearance="tint" color={project.status === 'active' ? 'success' : 'subtle'}>
+                                {project.status}
+                              </Badge>
+                            </div>
+                          </Card>
+                        ))}
+                        {availableProjects.length === 0 && !createOSLoading && (
+                          <div className="uso-instalador__modal-empty">Nenhum projeto disponível</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Etapa 2: Seleção de OS */}
+              {currentModalStep === MODAL_STEPS.ORDER_SELECTION && (
+                <div className="flex flex-col gap-4">
+                  <div className="uso-instalador__modal-subheader">
+                    <Text weight="semibold">2/3 — Selecione a Ordem de Serviço</Text>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge appearance="filled" color="brand" size="small">
+                        {selectedProject?.name}
+                      </Badge>
                     </div>
-                  ) : (
-                    <div className="uso-instalador__os-list">
-                      {availableOS.map(os => (
-                        <Button
-                          key={os.id}
-                          appearance="subtle"
-                          className="uso-instalador__os-item"
-                          onClick={() => handleSelectOS(os)}
-                          style={{ width: '100%', justifyContent: 'flex-start' }}
-                        >
-                          <div className="uso-instalador__os-main">
-                            <Text weight="semibold" className="uso-instalador__os-id">
-                              {os.identificador}
-                            </Text>
-                          </div>
-                          <div className="uso-instalador__os-details">
-                            {os.clienteNome && (
-                              <Text size={200} className="uso-instalador__os-cliente">
-                                {os.clienteNome}
-                              </Text>
-                            )}
-                            {os.tipoOrdemServico && (
-                              <Text size={200} className="uso-instalador__os-tipo">
-                                {os.tipoOrdemServico}
-                              </Text>
-                            )}
-                            {os.produtos && os.produtos.length > 0 ? (
-                              <ProdutosDataGrid
-                                produtos={os.produtos}
-                                ordemId={os.id}
-                                onRequestServerSort={handleSortProdutos}
-                                loading={os.produtosLoading}
-                              />
-                            ) : (
-                              <div className="uso-instalador__os-no-produtos">Sem produtos</div>
-                            )}
-                          </div>
-                        </Button>
-                      ))}
-                      {availableOS.length === 0 && !createOSLoading && (
-                        <div className="uso-instalador__modal-empty">
-                          Nenhuma OS encontrada para este projeto
-                        </div>
-                      )}
+                  </div>
+
+                  {createError && (
+                    <div className="uso-instalador__modal-error">
+                      <Text size={300}>{createError}</Text>
                     </div>
                   )}
+
+                  <div className="uso-instalador__modal-list">
+                    {createOSLoading ? (
+                      <div className="uso-instalador__modal-loading">
+                        <Spinner size="small" />
+                        <Text>Carregando Ordens de Serviço...</Text>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-3">
+                        {availableOS.map(os => (
+                          <Card
+                            key={os.id}
+                            className="uso-instalador__selection-card uso-instalador__selection-card--rich"
+                            onClick={() => handleSelectOS(os)}
+                          >
+                            <div className="flex flex-col gap-3">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="uso-instalador__card-icon">
+                                    <DocumentText24Regular />
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <Text weight="semibold">{os.identificador}</Text>
+                                    <Text size={200} className="uso-instalador__text-muted">
+                                      {os.clienteNome || 'Cliente não informado'}
+                                    </Text>
+                                  </div>
+                                </div>
+                                {os.tipoOrdemServico && (
+                                  <Badge appearance="tint" color="brand">
+                                    {os.tipoOrdemServico}
+                                  </Badge>
+                                )}
+                              </div>
+
+                              {os.produtos && os.produtos.length > 0 && (
+                                <div className="uso-instalador__os-produtos-contained" onClick={e => e.stopPropagation()}>
+                                  <ProdutosDataGrid
+                                    produtos={os.produtos}
+                                    ordemId={os.id}
+                                    onRequestServerSort={handleSortProdutos}
+                                    loading={os.produtosLoading}
+                                    compact
+                                  />
+                                </div>
+                              )}
+                              {(!os.produtos || os.produtos.length === 0) && (
+                                <Text size={100} className="uso-instalador__text-muted italic px-2">
+                                  Sem produtos vinculados
+                                </Text>
+                              )}
+                            </div>
+                          </Card>
+                        ))}
+                        {availableOS.length === 0 && !createOSLoading && (
+                          <div className="uso-instalador__modal-empty">Nenhuma OS encontrada para este projeto</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="uso-instalador__modal-footer">
+              )}
+
+              {/* Etapa 3: Detalhes da Atividade */}
+              {currentModalStep === MODAL_STEPS.EMPLOYEE_SELECTION && selectedOS && (
+                <div className="flex flex-col gap-4">
+                  <div className="uso-instalador__modal-subheader">
+                    <Text weight="semibold">3/3 — Detalhes da Atividade</Text>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <Badge appearance="filled" color="brand" size="small">
+                        {selectedProject?.name}
+                      </Badge>
+                      <ChevronRight12Regular className="text-muted" />
+                      <Badge appearance="filled" color="brand" size="small">
+                        {selectedOS.identificador}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {createError && (
+                    <div className="uso-instalador__modal-error">
+                      <Text size={300}>{createError}</Text>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 desktop:grid-cols-3 gap-6">
+                    {/* Coluna do Formulário */}
+                    <div className="desktop:col-span-2 flex flex-col gap-4">
+                      <div className="uso-instalador__form-field">
+                        <Field label="Colaborador" required>
+                          {createUsersLoading ? (
+                            <div className="uso-instalador__loading">
+                              <Spinner size="small" />
+                              <Text>Carregando...</Text>
+                            </div>
+                          ) : (
+                            <Dropdown
+                              placeholder="Selecione o colaborador"
+                              value={
+                                createSelectedEmployee
+                                  ? createUsersList.find(user => user.id === createSelectedEmployee)?.fullname ?? ''
+                                  : ''
+                              }
+                              onOptionSelect={(_, data) => setCreateSelectedEmployee(data.optionValue as string)}
+                              disabled={createSubmitting}
+                              className="w-full"
+                            >
+                              {createUsersList.map(user => (
+                                <Option key={user.id} value={user.id}>
+                                  {user.fullname}
+                                </Option>
+                              ))}
+                            </Dropdown>
+                          )}
+                        </Field>
+                      </div>
+
+                      <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
+                        <div className="uso-instalador__form-field">
+                          <Field label="Data do Agendamento" required hint="Apenas datas futuras são permitidas">
+                            <Input
+                              type="date"
+                              className="w-full"
+                              value={createAgendamentoDate}
+                              min={(() => {
+                                const today = new Date();
+                                return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(
+                                  today.getDate()
+                                ).padStart(2, '0')}`;
+                              })()}
+                              onChange={(_, data) => setCreateAgendamentoDate(data.value)}
+                              disabled={createSubmitting}
+                            />
+                          </Field>
+                        </div>
+
+                        <div className="uso-instalador__form-field">
+                          <Field label="Horário" required>
+                            <Input
+                              type="time"
+                              className="w-full"
+                              value={createAgendamentoTime}
+                              onChange={(_, data) => setCreateAgendamentoTime(data.value)}
+                              disabled={createSubmitting}
+                            />
+                          </Field>
+                        </div>
+                      </div>
+
+                      <div className="uso-instalador__form-field">
+                        <Field label="Duração">
+                          <Dropdown
+                            value={`${createDuracao / 60} hora${createDuracao === 60 ? '' : 's'}`}
+                            onOptionSelect={(_, data) => setCreateDuracao(Number(data.optionValue))}
+                            disabled={createSubmitting}
+                            className="w-full"
+                          >
+                            <Option value="60">1 hora</Option>
+                            <Option value="120">2 horas</Option>
+                            <Option value="180">3 horas</Option>
+                            <Option value="240">4 horas</Option>
+                            <Option value="300">5 horas</Option>
+                            <Option value="360">6 horas</Option>
+                            <Option value="420">7 horas</Option>
+                            <Option value="480">8 horas</Option>
+                          </Dropdown>
+                        </Field>
+                      </div>
+
+                      <div className="uso-instalador__form-field">
+                        <Field label="Descrição" required>
+                          <Textarea
+                            className="w-full"
+                            value={createDescricao}
+                            onChange={(_, data) => setCreateDescricao(data.value)}
+                            placeholder="Insira a descrição da atividade..."
+                            rows={4}
+                            disabled={createSubmitting}
+                          />
+                        </Field>
+                      </div>
+                    </div>
+
+                    {/* Coluna de Resumo */}
+                    <div className="desktop:col-span-1">
+                      <Card className="bg-neutral-subtle h-full">
+                        <div className="flex flex-col gap-4">
+                          <Text weight="semibold" size={400}>
+                            Resumo da Atividade
+                          </Text>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex flex-col">
+                              <Text size={200} className="uso-instalador__text-muted">
+                                Projeto
+                              </Text>
+                              <Text weight="medium">{selectedProject?.name}</Text>
+                            </div>
+                            <div className="flex flex-col">
+                              <Text size={200} className="uso-instalador__text-muted">
+                                Ordem de Serviço
+                              </Text>
+                              <Text weight="medium">{selectedOS.identificador}</Text>
+                            </div>
+                            <div className="flex flex-col">
+                              <Text size={200} className="uso-instalador__text-muted">
+                                Cliente
+                              </Text>
+                              <Text weight="medium">{selectedOS.clienteNome || '—'}</Text>
+                            </div>
+                            <div className="flex flex-col">
+                              <Text size={200} className="uso-instalador__text-muted">
+                                Previsão
+                              </Text>
+                              <Text weight="medium">
+                                {createAgendamentoDate ? new Date(createAgendamentoDate + 'T00:00:00').toLocaleDateString() : '—'} às{' '}
+                                {createAgendamentoTime} ({createDuracao / 60}h)
+                              </Text>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+
+            <DialogActions>
+              {currentModalStep === MODAL_STEPS.PROJECT_SELECTION && (
+                <Button appearance="secondary" onClick={() => setCreateModalOpen(false)}>
+                  Cancelar
+                </Button>
+              )}
+
+              {currentModalStep === MODAL_STEPS.ORDER_SELECTION && (
+                <>
                   <Button
                     appearance="secondary"
                     icon={<ChevronLeft24Regular />}
@@ -2623,126 +2829,11 @@ export function useUsoInstaladorController({
                   <Button appearance="secondary" onClick={() => setCreateModalOpen(false)}>
                     Cancelar
                   </Button>
-                </div>
-              </>
-            )}
-            
-            {/* Etapa 3: Detalhes da Atividade */}
-            {currentModalStep === MODAL_STEPS.EMPLOYEE_SELECTION && selectedOS && (
-              <>
-                <div className="uso-instalador__modal-subheader">
-                  <strong>Projeto:</strong> {selectedProject?.name}
-                  <br />
-                  <strong>OS Selecionada:</strong> {selectedOS.identificador}
-                  {selectedOS.clienteNome && ` - ${selectedOS.clienteNome}`}
-                </div>
-                
-                {createError && (
-                  <div className="uso-instalador__modal-error">
-                    <Text size={300}>{createError}</Text>
-                  </div>
-                )}
-                
-                <div className="uso-instalador__modal-content uso-instalador__modal-content--form">
-                  {/* Colaborador */}
-                  <div className="uso-instalador__form-field">
-                    <Field label="Colaborador" required>
-                      {createUsersLoading ? (
-                        <div className="uso-instalador__loading">
-                          <Spinner size="small" />
-                          <Text>Carregando...</Text>
-                        </div>
-                      ) : (
-                        <Dropdown
-                          placeholder="Selecione o colaborador"
-                          value={createSelectedEmployee
-                            ? createUsersList.find(user => user.id === createSelectedEmployee)?.fullname ?? ''
-                            : ''}
-                          onOptionSelect={(_, data) => setCreateSelectedEmployee(data.optionValue as string)}
-                          disabled={createSubmitting}
-                          className="uso-instalador__form-select"
-                        >
-                          {createUsersList.map(user => (
-                            <Option key={user.id} value={user.id}>
-                              {user.fullname}
-                            </Option>
-                          ))}
-                        </Dropdown>
-                      )}
-                    </Field>
-                  </div>
-                  
-                  {/* Data do Agendamento */}
-                  <div className="uso-instalador__form-field">
-                    <Field
-                      label="Data do Agendamento"
-                      required
-                      hint="Apenas datas futuras são permitidas"
-                    >
-                      <Input
-                        type="date"
-                        className="uso-instalador__form-input"
-                        value={createAgendamentoDate}
-                        min={(() => {
-                          const today = new Date();
-                          return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                        })()}
-                        onChange={(_, data) => setCreateAgendamentoDate(data.value)}
-                        disabled={createSubmitting}
-                      />
-                    </Field>
-                  </div>
-                  
-                  {/* Horário */}
-                  <div className="uso-instalador__form-field">
-                    <Field label="Horário" required>
-                      <Input
-                        type="time"
-                        className="uso-instalador__form-input"
-                        value={createAgendamentoTime}
-                        onChange={(_, data) => setCreateAgendamentoTime(data.value)}
-                        disabled={createSubmitting}
-                      />
-                    </Field>
-                  </div>
-                  
-                  {/* Duração */}
-                  <div className="uso-instalador__form-field">
-                    <Field label="Duração">
-                      <Dropdown
-                        value={`${createDuracao / 60} hora${createDuracao === 60 ? '' : 's'}`}
-                        onOptionSelect={(_, data) => setCreateDuracao(Number(data.optionValue))}
-                        disabled={createSubmitting}
-                        className="uso-instalador__form-select"
-                      >
-                        <Option value="60">1 hora</Option>
-                        <Option value="120">2 horas</Option>
-                        <Option value="180">3 horas</Option>
-                        <Option value="240">4 horas</Option>
-                        <Option value="300">5 horas</Option>
-                        <Option value="360">6 horas</Option>
-                        <Option value="420">7 horas</Option>
-                        <Option value="480">8 horas</Option>
-                      </Dropdown>
-                    </Field>
-                  </div>
-                  
-                  {/* Descrição */}
-                  <div className="uso-instalador__form-field">
-                    <Field label="Descrição" required>
-                      <Textarea
-                        className="uso-instalador__form-textarea"
-                        value={createDescricao}
-                        onChange={(_, data) => setCreateDescricao(data.value)}
-                        placeholder="Insira a descrição aqui"
-                        rows={3}
-                        disabled={createSubmitting}
-                      />
-                    </Field>
-                  </div>
-                </div>
-                
-                <div className="uso-instalador__modal-footer">
+                </>
+              )}
+
+              {currentModalStep === MODAL_STEPS.EMPLOYEE_SELECTION && (
+                <>
                   <Button
                     appearance="secondary"
                     icon={<ChevronLeft24Regular />}
@@ -2751,11 +2842,7 @@ export function useUsoInstaladorController({
                   >
                     Voltar
                   </Button>
-                  <Button
-                    appearance="secondary"
-                    onClick={() => setCreateModalOpen(false)}
-                    disabled={createSubmitting}
-                  >
+                  <Button appearance="secondary" onClick={() => setCreateModalOpen(false)} disabled={createSubmitting}>
                     Cancelar
                   </Button>
                   <Button
@@ -2766,9 +2853,9 @@ export function useUsoInstaladorController({
                   >
                     {createSubmitting ? 'Criando...' : 'Criar Atividade'}
                   </Button>
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </DialogActions>
           </DialogBody>
         </DialogSurface>
       </Dialog>

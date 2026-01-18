@@ -9,11 +9,12 @@ interface Props {
   ordemId?: string;
   onRequestServerSort?: (ordemId: string, column: 'quantidade' | 'referenciaProduto' | 'descricao' | 'situacaoReserva', dir: 'asc' | 'desc') => Promise<void>;
   loading?: boolean;
+  compact?: boolean;
 }
 
 type SortKey = 'quantidade' | 'referenciaProduto' | 'descricao' | 'situacaoReserva' | null;
 
-const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerSort, loading = false }) => {
+const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerSort, loading = false, compact = false }) => {
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>({ quantidade: 80, referenciaProduto: 160, descricao: 200, situacaoReserva: 100 });
@@ -87,7 +88,13 @@ const ProdutosDataGrid: React.FC<Props> = ({ produtos, ordemId, onRequestServerS
   };
 
   return (
-    <div className="uso-instalador__os-produtos-table-wrapper" role="region" aria-label="Produtos da OS">
+    <div
+      className={`uso-instalador__os-produtos-table-wrapper ${
+        compact ? 'uso-instalador__os-produtos-table-wrapper--compact' : ''
+      }`}
+      role="region"
+      aria-label="Produtos da OS"
+    >
       {/* Loading indicator if parent sets produtos to loading by clearing array or by external flag */}
       <table className="uso-instalador__os-produtos-table" role="table">
         <thead>

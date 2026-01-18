@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.30';
+export const APP_VERSION = '0.0.31';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.31',
+    date: '2026-01-18',
+    changes: 'Redesenhado o modal de Nova Atividade para melhorar o layout, hierarquia visual e responsividade.',
+  },
   {
     version: '0.0.30',
     date: '2026-01-18',
