@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { AppShell } from './components/layout/AppShell';
+import { RoutePersistence } from './routing/RoutePersistence';
 import { HomePage } from './pages/HomePage';
 import { TimelinePage } from './pages/section0-installations/TimelinePage';
 import { DispositivosIOPage } from './pages/section-cadastros/DispositivosIOPage';
@@ -22,7 +23,8 @@ import { RequirePageAccess } from './security/RequirePageAccess';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
+      <RoutePersistence />
       <ThemeProvider>
         <SidebarProvider>
           <AccessControlProvider>
@@ -147,7 +149,7 @@ function App() {
           </AccessControlProvider>
         </SidebarProvider>
       </ThemeProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
