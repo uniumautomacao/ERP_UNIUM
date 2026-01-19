@@ -57,7 +57,7 @@ export class SystemuserrolescollectionService {
   }
 
   public static getMetadata(
-    options: GetEntityMetadataOptions<Systemuserrolescollection> = {}
+    options: GetEntityMetadataOptions<any> = {}
   ): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return SystemuserrolescollectionService.client.executeAsync({
       dataverseRequest: {

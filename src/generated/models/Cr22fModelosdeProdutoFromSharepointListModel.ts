@@ -9,6 +9,7 @@ export interface Cr22fModelosdeProdutoFromSharepointListBase {
   cr22f_title?: string;
   cr22f_fabricanteid?: string;
   cr22f_categoriadeprodutoid?: string;
+  new_controlasn?: boolean;
   "new_Fabricante@odata.bind"?: string;
   "new_ModelodoCaboporMetroCaixadeCabo@odata.bind"?: string;
   statecode?: number;

@@ -52,7 +52,7 @@ export function HomePage() {
                     <Button
                       key={item.path}
                       appearance="subtle"
-                      icon={item.icon}
+                      icon={item.icon as any}
                       onClick={() => navigate(item.path)}
                       style={{ justifyContent: 'flex-start' }}
                     >

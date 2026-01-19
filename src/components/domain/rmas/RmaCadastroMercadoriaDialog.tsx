@@ -60,7 +60,8 @@ interface EstoqueRmaRow {
   tipoRma?: number | null;
   referencia?: string | null;
   createdOn?: string | null;
-  serialNumber?: string | null;
+  serialAntigo?: string | null;
+  serialNovo?: string | null;
 }
 
 const DEFAULT_DEBOUNCE = 300;
@@ -140,9 +141,14 @@ export function RmaCadastroMercadoriaDialog({ open, rmaId, onClose, onSaved }: R
       renderCell: (item) => item.referencia ?? '-',
     }),
     createTableColumn<EstoqueRmaRow>({
-      columnId: 'serialNumber',
-      renderHeaderCell: () => 'Nº de Série',
-      renderCell: (item) => item.serialNumber ?? '-',
+      columnId: 'serialAntigo',
+      renderHeaderCell: () => 'S/N Antigo',
+      renderCell: (item) => item.serialAntigo ?? '-',
+    }),
+    createTableColumn<EstoqueRmaRow>({
+      columnId: 'serialNovo',
+      renderHeaderCell: () => 'S/N Novo',
+      renderCell: (item) => item.serialNovo ?? '-',
     }),
     createTableColumn<EstoqueRmaRow>({
       columnId: 'createdOn',
@@ -250,24 +256,62 @@ export function RmaCadastroMercadoriaDialog({ open, rmaId, onClose, onSaved }: R
           'new_etiquetaprodutonovo',
           'new_tipoderma',
           'new_referenciadoproduto',
+          '_new_produto_value',
+          '_new_produtonovo_value',
           'createdon',
         ],
-        expand: {
-          new_Produto: {
-            select: ['cr22f_serialnumber'],
-          },
-        },
         orderBy: ['createdon desc'],
       });
-      const rows = (result.data || []).map((item: any) => ({
-        id: item.new_estoquermaid,
-        etiquetaAntigo: item.new_etiquetaprodutoantigo ?? null,
-        etiquetaNovo: item.new_etiquetaprodutonovo ?? null,
-        tipoRma: item.new_tipoderma ?? null,
-        referencia: item.new_referenciadoproduto ?? null,
-        createdOn: item.createdon ?? null,
-        serialNumber: (item.new_Produto as any)?.cr22f_serialnumber ?? null,
-      }));
+      const items = result.data || [];
+      const uniqueProdutoIds: Record<string, true> = {};
+      const produtoIds: string[] = [];
+
+      for (const item of items) {
+        const produtoId = item._new_produto_value;
+        if (produtoId && !uniqueProdutoIds[produtoId]) {
+          uniqueProdutoIds[produtoId] = true;
+          produtoIds.push(produtoId);
+        }
+        const produtoNovoId = item._new_produtonovo_value;
+        if (produtoNovoId && !uniqueProdutoIds[produtoNovoId]) {
+          uniqueProdutoIds[produtoNovoId] = true;
+          produtoIds.push(produtoNovoId);
+        }
+      }
+
+      const serialByProdutoId: Record<string, string | null> = {};
+      if (produtoIds.length > 0) {
+        const filter = produtoIds
+          .map((id) => `cr22f_estoquefromsharepointlistid eq '${id}'`)
+          .join(' or ');
+        const estoqueResult = await Cr22fEstoqueFromSharepointListService.getAll({
+          select: ['cr22f_estoquefromsharepointlistid', 'cr22f_serialnumber'],
+          filter,
+        });
+        const estoqueItems = estoqueResult.data || [];
+        for (const estoque of estoqueItems) {
+          const estoqueId = estoque.cr22f_estoquefromsharepointlistid;
+          if (estoqueId) {
+            serialByProdutoId[estoqueId] = estoque.cr22f_serialnumber ?? null;
+          }
+        }
+      }
+
+      const rows: EstoqueRmaRow[] = [];
+      for (const item of items) {
+        const produtoId = item._new_produto_value;
+        const produtoNovoId = item._new_produtonovo_value;
+        rows.push({
+          id: item.new_estoquermaid,
+          etiquetaAntigo: item.new_etiquetaprodutoantigo ?? null,
+          etiquetaNovo: item.new_etiquetaprodutonovo ?? null,
+          tipoRma: item.new_tipoderma ?? null,
+          referencia: item.new_referenciadoproduto ?? null,
+          createdOn: item.createdon ?? null,
+          serialAntigo: produtoId ? serialByProdutoId[produtoId] ?? null : null,
+          serialNovo: produtoNovoId ? serialByProdutoId[produtoNovoId] ?? null : null,
+        });
+      }
       setEstoqueRmaRows(rows);
     } catch (err) {
       console.error('[RmaCadastroMercadoriaDialog] erro ao carregar mercadorias', err);
@@ -705,7 +749,7 @@ export function RmaCadastroMercadoriaDialog({ open, rmaId, onClose, onSaved }: R
                             'new_OrdemdeServico@odata.bind': null,
                           });
                         }}
-                        onChange={(_, data) => setProjetoSearch(data.value ?? '')}
+                        onChange={(ev) => setProjetoSearch(ev.target.value)}
                       >
                         {projetoOptions.map((item) => (
                           <Option key={item.id} value={item.id}>
@@ -727,7 +771,7 @@ export function RmaCadastroMercadoriaDialog({ open, rmaId, onClose, onSaved }: R
                             'new_OrdemdeServico@odata.bind': nextId ? `/new_ordemdeservicofieldcontrols(${nextId})` : null,
                           });
                         }}
-                        onChange={(_, data) => setOsSearch(data.value ?? '')}
+                        onChange={(ev) => setOsSearch(ev.target.value)}
                         disabled={!selectedProjetoId}
                       >
                         {osOptions.map((item) => (
@@ -826,7 +870,7 @@ export function RmaCadastroMercadoriaDialog({ open, rmaId, onClose, onSaved }: R
                               const next = produtoAntigoOptions.find((item) => item.id === data.optionValue) ?? null;
                               setSelectedProdutoAntigo(next);
                             }}
-                            onChange={(_, data) => setProdutoAntigoSearch(data.value ?? '')}
+                            onChange={(ev) => setProdutoAntigoSearch(ev.target.value)}
                             disabled={!selectedProjetoId}
                           >
                             {produtoAntigoOptions.map((item) => (
@@ -860,7 +904,7 @@ export function RmaCadastroMercadoriaDialog({ open, rmaId, onClose, onSaved }: R
                               const next = produtoNovoOptions.find((item) => item.id === data.optionValue) ?? null;
                               setSelectedProdutoNovo(next);
                             }}
-                            onChange={(_, data) => setProdutoNovoSearch(data.value ?? '')}
+                            onChange={(ev) => setProdutoNovoSearch(ev.target.value)}
                           >
                             {produtoNovoOptions.map((item) => (
                               <Option key={item.id} value={item.id}>

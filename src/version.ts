@@ -1,10 +1,15 @@
-export const APP_VERSION = '0.0.47';
+export const APP_VERSION = '0.0.49';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
   {
-    version: '0.0.47',
+    version: '0.0.49',
     date: '2026-01-19',
-    changes: 'Adicionada coluna de número de série no grid de mercadorias devolvidas do RMA.',
+    changes: 'Publicação do app no PowerApps com correções de RMA e mercadorias devolvidas.',
+  },
+  {
+    version: '0.0.48',
+    date: '2026-01-19',
+    changes: 'Corrigida a carga de S/N no grid de mercadorias devolvidas, exibindo S/N Antigo e S/N Novo.',
   },
   {
     version: '0.0.46',

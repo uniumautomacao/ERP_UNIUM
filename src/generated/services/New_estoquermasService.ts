@@ -57,7 +57,7 @@ export class New_estoquermasService {
   }
 
   public static getMetadata(
-    options: GetEntityMetadataOptions<New_estoquermas> = {}
+    options: GetEntityMetadataOptions<any> = {}
   ): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return New_estoquermasService.client.executeAsync({
       dataverseRequest: {

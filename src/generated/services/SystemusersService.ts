@@ -57,7 +57,7 @@ export class SystemusersService {
   }
 
   public static getMetadata(
-    options: GetEntityMetadataOptions<Systemusers> = {}
+    options: GetEntityMetadataOptions<any> = {}
   ): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return SystemusersService.client.executeAsync({
       dataverseRequest: {

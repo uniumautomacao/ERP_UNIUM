@@ -57,7 +57,7 @@ export class New_rmasService {
   }
 
   public static getMetadata(
-    options: GetEntityMetadataOptions<New_rmas> = {}
+    options: GetEntityMetadataOptions<any> = {}
   ): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return New_rmasService.client.executeAsync({
       dataverseRequest: {

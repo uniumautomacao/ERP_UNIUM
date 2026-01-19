@@ -56,7 +56,7 @@ export class NewCodeAppPageAllowedSecurityRoleService {
   }
 
   public static getMetadata(
-    options: GetEntityMetadataOptions<NewCodeAppPageAllowedSecurityRole> = {}
+    options: GetEntityMetadataOptions<any> = {}
   ): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return NewCodeAppPageAllowedSecurityRoleService.client.executeAsync({
       dataverseRequest: {

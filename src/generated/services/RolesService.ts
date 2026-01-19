@@ -57,7 +57,7 @@ export class RolesService {
   }
 
   public static getMetadata(
-    options: GetEntityMetadataOptions<Roles> = {}
+    options: GetEntityMetadataOptions<any> = {}
   ): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return RolesService.client.executeAsync({
       dataverseRequest: {
