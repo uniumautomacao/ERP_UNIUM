@@ -41,6 +41,19 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    id: 'vistorias',
+    label: 'Vistorias',
+    description: 'Contagem cíclica e auditorias de estoque',
+    items: [
+      {
+        id: 'contagem-estoque',
+        label: 'Contagem de Estoque',
+        icon: <QrCode24Regular />,
+        path: '/vistorias/contagem',
+      },
+    ],
+  },
+  {
     id: 'logistica',
     label: 'Logística',
     description: 'Gerencie logística e transporte',

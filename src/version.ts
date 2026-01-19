@@ -1,6 +1,26 @@
-export const APP_VERSION = '0.0.57';
+export const APP_VERSION = '0.0.61';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.61',
+    date: '2026-01-19',
+    changes: 'Removida a leitura automática de quantidade do QR Code; agora o sistema absorve apenas a Tag.',
+  },
+  {
+    version: '0.0.60',
+    date: '2026-01-19',
+    changes: 'Alterada a lógica do QR Code para o formato TAG|QTD e busca por Tag em vez de GUID.',
+  },
+  {
+    version: '0.0.59',
+    date: '2026-01-19',
+    changes: 'Ajustada a exibição dos itens na lista do dia para incluir tag e endereço, evitando repetição da referência.',
+  },
+  {
+    version: '0.0.58',
+    date: '2026-01-19',
+    changes: 'Adicionada a seção Vistorias com fluxo mobile de contagem por QR Code.',
+  },
   {
     version: '0.0.57',
     date: '2026-01-19',
