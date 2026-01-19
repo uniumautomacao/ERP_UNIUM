@@ -15,6 +15,7 @@ import { RMAsKanbanPage } from './pages/section2-operations/RMAsKanbanPage';
 import { SuperAdminPageAccessPage } from './pages/section3-super-admin/SuperAdminPageAccessPage';
 import { SuperAdminUserRolesPage } from './pages/section3-super-admin/SuperAdminUserRolesPage';
 import { DevPage } from './pages/section3-dev/DevPage';
+import { QrCodeScannerPage } from './pages/section3-dev/QrCodeScannerPage';
 import { ForbiddenPage } from './pages/ForbiddenPage';
 import { AccessControlProvider } from './security/AccessControlContext';
 import { RequirePageAccess } from './security/RequirePageAccess';
@@ -128,6 +129,14 @@ function App() {
                   element={
                     <RequirePageAccess>
                       <DevPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/dev/qrcode"
+                  element={
+                    <RequirePageAccess>
+                      <QrCodeScannerPage />
                     </RequirePageAccess>
                   }
                 />

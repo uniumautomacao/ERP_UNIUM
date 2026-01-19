@@ -10,6 +10,7 @@ import {
   PeopleCheckmark24Regular,
   DeveloperBoard24Regular,
   Board24Regular,
+  QrCode24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
 
@@ -94,6 +95,12 @@ export const navigation: NavSection[] = [
         label: 'Dev Page',
         icon: <DeveloperBoard24Regular />,
         path: '/dev',
+      },
+      {
+        id: 'dev-qrcode',
+        label: 'Leitor QR Code',
+        icon: <QrCode24Regular />,
+        path: '/dev/qrcode',
       },
     ],
   },

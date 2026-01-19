@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.49';
+export const APP_VERSION = '0.0.50';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.50',
+    date: '2026-01-19',
+    changes: 'Adicionada página DEV para leitura de QR Code com câmera do dispositivo.',
+  },
   {
     version: '0.0.49',
     date: '2026-01-19',
