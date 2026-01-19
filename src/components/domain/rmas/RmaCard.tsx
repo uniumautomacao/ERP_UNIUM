@@ -88,6 +88,7 @@ export function RmaCard({
         borderStyle: alertHighlight ? 'dashed' : 'solid',
         borderColor: alertHighlight ? tokens.colorPaletteRedBorder2 : tokens.colorNeutralStroke2,
         backgroundColor: tokens.colorNeutralBackground1,
+        minHeight: 140,
       }}
     >
       <div className="flex items-start justify-between gap-2">

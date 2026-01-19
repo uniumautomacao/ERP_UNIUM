@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.0.50';
+export const APP_VERSION = '0.0.53';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.53',
+    date: '2026-01-19',
+    changes: 'Definida altura mínima nos cards de RMA para evitar encolhimento vertical.',
+  },
+  {
+    version: '0.0.52',
+    date: '2026-01-19',
+    changes: 'Aumentada a largura mínima das colunas no Kanban de RMAs para evitar cartões encolhidos.',
+  },
+  {
+    version: '0.0.51',
+    date: '2026-01-19',
+    changes: 'Ajustado o quadro de RMAs para rolar horizontalmente quando as colunas não cabem na tela.',
+  },
   {
     version: '0.0.50',
     date: '2026-01-19',

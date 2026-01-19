@@ -7,8 +7,14 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children }: KanbanBoardProps) {
   return (
     <div
-      className="grid gap-4 pb-4"
-      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}
+      className="gap-4 pb-4"
+      style={{
+        display: 'grid',
+        gridAutoFlow: 'column',
+        gridAutoColumns: 'minmax(320px, 1fr)',
+        overflowX: 'auto',
+        overflowY: 'hidden',
+      }}
     >
       {children}
     </div>
