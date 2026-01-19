@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.42';
-export const APP_BUILD_DATE = '2026-01-18';
+export const APP_VERSION = '0.0.43';
+export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.43',
+    date: '2026-01-19',
+    changes: 'Reformulado o card de RMA no Kanban com layout compacto, ações agrupadas e pré-carregamento das referências de produtos.',
+  },
   {
     version: '0.0.42',
     date: '2026-01-18',

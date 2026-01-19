@@ -1,5 +1,6 @@
 export interface RmaCardData {
   id: string;
+  codigo?: string | null;
   stageValue?: number;
   position?: number | null;
   descricao?: string | null;

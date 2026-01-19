@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dropdown, Option, Text, tokens } from '@fluentui/react-components';
 import { Add24Regular, ArrowSync24Regular } from '@fluentui/react-icons';
 import { DndContext, closestCorners, DragEndEvent } from '@dnd-kit/core';
@@ -53,6 +53,16 @@ const selectFields = [
   'new_codigoderastreiodatransportadora',
 ];
 
+const REFERENCE_CHUNK_SIZE = 25;
+
+const chunkRmaIds = (items: string[], chunkSize: number) => {
+  const chunks: string[][] = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    chunks.push(items.slice(i, i + chunkSize));
+  }
+  return chunks;
+};
+
 export function RMAsKanbanPage() {
   const { systemUserId, loading: userLoading, error: userError } = useCurrentSystemUser();
   const [searchValue, setSearchValue] = useState('');
@@ -61,6 +71,9 @@ export function RMAsKanbanPage() {
   const [columns, setColumns] = useState<Record<number, RmaCardData[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [referencesByRmaId, setReferencesByRmaId] = useState<Record<string, string[]>>({});
+  const [referencesLoading, setReferencesLoading] = useState(false);
+  const referencesRequestId = useRef(0);
 
   const effectiveStages = useMemo(() => {
     const stageValues = selectedStages.length
@@ -91,6 +104,7 @@ export function RMAsKanbanPage() {
 
   const mapRecordToCard = useCallback((record: any): RmaCardData => ({
     id: record.new_rmaid,
+    codigo: record.new_id ?? null,
     stageValue: record.new_situacao ?? undefined,
     position: record.new_posicao ?? null,
     descricao: record.new_descricao ?? null,
@@ -108,9 +122,68 @@ export function RMAsKanbanPage() {
   }), []);
 
   const buildTitle = useCallback((item: RmaCardData, fallbackId?: string | null) => {
-    const idLabel = fallbackId || item.id;
+    const idLabel = item.codigo || fallbackId || item.id;
     const name = item.nomeClienteFx || item.projetoApelidoFx;
     return name ? `${idLabel}: ${name}` : `${idLabel}`;
+  }, []);
+
+  const loadReferencesForRmas = useCallback(async (rmaIds: string[]) => {
+    const uniqueIds = Array.from(new Set(rmaIds)).filter(Boolean);
+    const requestId = ++referencesRequestId.current;
+
+    if (uniqueIds.length === 0) {
+      setReferencesByRmaId({});
+      setReferencesLoading(false);
+      return;
+    }
+
+    setReferencesLoading(true);
+    try {
+      const chunks = chunkRmaIds(uniqueIds, REFERENCE_CHUNK_SIZE);
+      const results = await Promise.all(
+        chunks.map((chunk) => (
+          New_estoquermasService.getAll({
+            filter: chunk.map((id) => `_new_rma_value eq '${id}'`).join(' or '),
+            select: ['_new_rma_value', 'new_referenciadoproduto'],
+          })
+        ))
+      );
+
+      if (requestId !== referencesRequestId.current) return;
+
+      const next: Record<string, string[]> = {};
+      uniqueIds.forEach((id) => {
+        next[id] = [];
+      });
+
+      results.forEach((result) => {
+        (result.data || []).forEach((row) => {
+          const rmaId = row._new_rma_value;
+          if (!rmaId) return;
+          if (!next[rmaId]) {
+            next[rmaId] = [];
+          }
+          if (row.new_referenciadoproduto) {
+            next[rmaId].push(row.new_referenciadoproduto);
+          }
+        });
+      });
+
+      Object.keys(next).forEach((id) => {
+        next[id] = Array.from(new Set(next[id]));
+      });
+
+      setReferencesByRmaId(next);
+    } catch (err) {
+      console.error('[RMAsKanbanPage] erro ao carregar referencias de produtos', err);
+      if (requestId === referencesRequestId.current) {
+        setReferencesByRmaId({});
+      }
+    } finally {
+      if (requestId === referencesRequestId.current) {
+        setReferencesLoading(false);
+      }
+    }
   }, []);
 
   const loadStagePreferences = useCallback(async () => {
@@ -242,13 +315,17 @@ export function RMAsKanbanPage() {
         nextColumns[column.stageValue] = column.items;
       });
       setColumns(nextColumns);
+      const allRmaIds = results.flatMap((column) => column.items.map((item) => item.id));
+      void loadReferencesForRmas(allRmaIds);
     } catch (err) {
       console.error('[RMAsKanbanPage] erro ao carregar RMAs', err);
       setError('Erro ao carregar RMAs.');
+      setReferencesByRmaId({});
+      setReferencesLoading(false);
     } finally {
       setLoading(false);
     }
-  }, [effectiveStages, mapRecordToCard, searchValue]);
+  }, [effectiveStages, loadReferencesForRmas, mapRecordToCard, searchValue]);
 
   const fixMissingPositions = useCallback(async () => {
     try {
@@ -261,7 +338,7 @@ export function RMAsKanbanPage() {
       await Promise.all(result.data.map((item) => (
         New_rmasService.update(item.new_rmaid, {
           new_posicao: Math.floor(Math.random() * 1001),
-        })
+        } as any)
       )));
     } catch (err) {
       console.error('[RMAsKanbanPage] erro ao corrigir posicoes', err);
@@ -517,6 +594,8 @@ export function RMAsKanbanPage() {
                             key={item.id}
                             item={item}
                             title={buildTitle(item, item.id)}
+                            references={referencesByRmaId[item.id]}
+                            referencesLoading={referencesLoading}
                             onOpenRma={openRmaRecord}
                             onOpenCadastro={openCadastroMercadoria}
                             onClienteInformadoChange={handleClienteInformado}
