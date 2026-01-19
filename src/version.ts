@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.41';
+export const APP_VERSION = '0.0.42';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.42',
+    date: '2026-01-18',
+    changes: 'Implementada busca combinada: agora é possível pesquisar RMAs por campos do RMA e por informações dos itens de estoque vinculados (número de série, referência, etc).',
+  },
   {
     version: '0.0.41',
     date: '2026-01-18',

@@ -22,9 +22,10 @@ import {
   RMA_STAGE_DEVOLVIDO,
   RMA_STAGES,
 } from '../../features/rmas/constants';
-import { buildRmaSearchFilter, getStageOwnerLabel } from '../../features/rmas/utils';
+import { buildRmaSearchFilter, buildEstoqueRmaSearchFilter, getStageOwnerLabel } from '../../features/rmas/utils';
 import { RmaCardData } from '../../features/rmas/types';
 import { New_rmasService } from '../../generated/services/New_rmasService';
+import { New_estoquermasService } from '../../generated/services/New_estoquermasService';
 import { NewAppPreferenceService } from '../../generated/services/NewAppPreferenceService';
 
 interface PreferenceRecord {
@@ -178,14 +179,51 @@ export function RMAsKanbanPage() {
     setLoading(true);
     setError(null);
     try {
+      let rmaIdsFromEstoque: string[] = [];
       const searchFilter = buildRmaSearchFilter(searchValue);
+      const estoqueSearchFilter = buildEstoqueRmaSearchFilter(searchValue);
+
+      if (searchValue.trim()) {
+        const estoqueResult = await New_estoquermasService.getAll({
+          filter: `statecode eq 0 and ${estoqueSearchFilter}`,
+          select: ['_new_rma_value'],
+        });
+        
+        if (estoqueResult.data) {
+          rmaIdsFromEstoque = Array.from(new Set(
+            estoqueResult.data
+              .map(item => item._new_rma_value)
+              .filter((id): id is string => Boolean(id))
+          ));
+        }
+      }
+
       const baseFilter = `statecode eq 0`;
       const promises = effectiveStages.map(async (stage) => {
-        const filters = [`${baseFilter}`, `new_situacao eq ${stage.value}`];
-        if (searchFilter) {
-          filters.push(searchFilter);
+        let filterParts = [`${baseFilter}`, `new_situacao eq ${stage.value}`];
+        
+        if (searchValue.trim()) {
+          const rmaConditions = [];
+          if (searchFilter) {
+            rmaConditions.push(searchFilter);
+          }
+          if (rmaIdsFromEstoque.length > 0) {
+            // Dividir em chunks se a lista for muito grande (limite de URL OData)
+            // Para simplificar aqui, assumimos que não passará de centenas
+            const idConditions = rmaIdsFromEstoque.map(id => `new_rmaid eq ${id}`).join(' or ');
+            rmaConditions.push(`(${idConditions})`);
+          }
+          
+          if (rmaConditions.length > 0) {
+            filterParts.push(`(${rmaConditions.join(' or ')})`);
+          } else {
+            // Se tem busca mas não achou nada em RMA nem em Estoque, 
+            // forçamos o filtro a não retornar nada para este estágio
+            filterParts.push(`new_rmaid eq null`);
+          }
         }
-        const filter = filters.join(' and ');
+
+        const filter = filterParts.join(' and ');
 
         const result = await New_rmasService.getAll({
           select: selectFields,

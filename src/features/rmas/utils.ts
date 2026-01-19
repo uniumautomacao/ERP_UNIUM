@@ -20,6 +20,24 @@ export const buildRmaSearchFilter = (searchText: string) => {
   return `(${fields.map((field) => `contains(${field}, '${safe}')`).join(' or ')})`;
 };
 
+export const buildEstoqueRmaSearchFilter = (searchText: string) => {
+  const trimmed = searchText.trim();
+  if (!trimmed) {
+    return '';
+  }
+  const safe = escapeODataString(trimmed);
+  const fields = [
+    'new_referenciadoproduto',
+    'new_etiquetaprodutoantigo',
+    'new_etiquetaprodutonovo',
+    'new_Produto/cr22f_serialnumber',
+    'new_Produto/cr22f_title',
+    'new_Produto/new_fabricantefx'
+  ];
+
+  return `(${fields.map((field) => `contains(${field}, '${safe}')`).join(' or ')})`;
+};
+
 export const getStageOwnerLabel = (stageValue?: number) => {
   if (!stageValue) {
     return 'CS';
