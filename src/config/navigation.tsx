@@ -89,12 +89,6 @@ export const navigation: NavSection[] = [
         path: '/inventory',
       },
       {
-        id: 'rmas',
-        label: 'Quadro de RMAs',
-        icon: <Board24Regular />,
-        path: '/rmas',
-      },
-      {
         id: 'projects',
         label: 'Project Planner',
         icon: <CalendarLtr24Regular />,
