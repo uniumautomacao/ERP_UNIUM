@@ -17,6 +17,85 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Modelos de Produto From Sharepoint List | `cr22f_modelosdeprodutofromsharepointlist` | `cr22f_modelosdeprodutofromsharepointlists` | `cr22f_modelosdeprodutofromsharepointlistid` |
 | Device IO | `new_deviceio` | `new_deviceios` | `new_deviceioid` |
 | Device IO Connection | `new_deviceioconnection` | `new_deviceioconnections` | `new_deviceioconnectionid` |
+| Contact | `contact` | `contacts` | `contactid` |
+| Estoque From Sharepoint List | `cr22f_estoquefromsharepointlist` | `cr22f_estoquefromsharepointlists` | `cr22f_estoquefromsharepointlistid` |
+| Estoque-RMA | `new_estoquerma` | `new_estoquermas` | `new_estoquermaid` |
+| RMA | `new_rma` | `new_rmas` | `new_rmaid` |
+
+---
+
+## 🔵 contact (Contact)
+
+### Informações Básicas
+```
+EntityLogicalName:                contact
+EntityLogicalCollectionName:      contacts
+EntitySetName:                    contacts
+PrimaryKey:                       contactid
+```
+
+---
+
+## 🔵 cr22f_estoquefromsharepointlist (Estoque From Sharepoint List)
+
+### Informações Básicas
+```
+EntityLogicalName:                cr22f_estoquefromsharepointlist
+EntityLogicalCollectionName:      cr22f_estoquefromsharepointlists
+EntitySetName:                    cr22f_estoquefromsharepointlists
+PrimaryKey:                       cr22f_estoquefromsharepointlistid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_modelodeproduto | new_ModelodeProduto | cr22f_modelosdeprodutofromsharepointlists |
+| new_insercao | new_Insercao | cr22f_estoquefromsharepointlists |
+| new_mercadoriaanteriordorma | new_MercadoriaAnteriordoRMA | cr22f_estoquefromsharepointlists |
+| new_grupodeorigem | new_GrupodeOrigem | cr22f_estoquefromsharepointlists |
+| new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
+| new_produtoservico | new_ProdutoServico | new_produtoservicos |
+
+---
+
+## 🔵 new_estoquerma (Estoque-RMA)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_estoquerma
+EntityLogicalCollectionName:      new_estoquermas
+EntitySetName:                    new_estoquermas
+PrimaryKey:                       new_estoquermaid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_produto | new_Produto | cr22f_estoquefromsharepointlists |
+| new_produtonovo | new_ProdutoNovo | cr22f_estoquefromsharepointlists |
+| new_rma | new_RMA | new_rmas |
+| new_itemdevolucao | new_ItemDevolucao | cr22f_estoquefromsharepointlists |
+| new_orcamentodevolucao | new_OrcamentoDevolucao | cr22f_estoquefromsharepointlists |
+
+---
+
+## 🔵 new_rma (RMA)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_rma
+EntityLogicalCollectionName:      new_rmas
+EntitySetName:                    new_rmas
+PrimaryKey:                       new_rmaid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_cliente | new_Cliente | contacts |
+| new_projeto | new_Projeto | cr22f_projetos |
+| new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
+| new_transportadora | new_Transportadora | cr22f_fabricantesfromsharpointlists |
 
 ---
 

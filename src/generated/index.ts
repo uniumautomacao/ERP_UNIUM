@@ -19,6 +19,10 @@ export * as Cr22fFabricantesFromSharpointListModel from './models/Cr22fFabricant
 export * as Cr22fModelosdeProdutoFromSharepointListModel from './models/Cr22fModelosdeProdutoFromSharepointListModel';
 export * as NewDeviceIOModel from './models/NewDeviceIOModel';
 export * as NewDeviceIOConnectionModel from './models/NewDeviceIOConnectionModel';
+export * as ContactModel from './models/ContactModel';
+export * as Cr22fEstoqueFromSharepointListModel from './models/Cr22fEstoqueFromSharepointListModel';
+export * as NewEstoqueRMAModel from './models/NewEstoqueRMAModel';
+export * as NewRMAModel from './models/NewRMAModel';
 
 // Services
 export * from './services/RolesService';
@@ -35,3 +39,7 @@ export * from './services/Cr22fFabricantesFromSharpointListService';
 export * from './services/Cr22fModelosdeProdutoFromSharepointListService';
 export * from './services/NewDeviceIOService';
 export * from './services/NewDeviceIOConnectionService';
+export * from './services/ContactService';
+export * from './services/Cr22fEstoqueFromSharepointListService';
+export * from './services/NewEstoqueRMAService';
+export * from './services/NewRMAService';
