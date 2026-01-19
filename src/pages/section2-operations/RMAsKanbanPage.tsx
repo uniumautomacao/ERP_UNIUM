@@ -11,12 +11,11 @@ import { FilterBar } from '../../components/shared/FilterBar';
 import { LoadingState } from '../../components/shared/LoadingState';
 import { KanbanBoard } from '../../components/domain/rmas/KanbanBoard';
 import { KanbanColumn } from '../../components/domain/rmas/KanbanColumn';
+import { RmaCadastroMercadoriaDialog } from '../../components/domain/rmas/RmaCadastroMercadoriaDialog';
 import { RmaCard } from '../../components/domain/rmas/RmaCard';
 import { useCurrentSystemUser } from '../../hooks/useCurrentSystemUser';
 import {
-  APP_PREFERENCE_RMA_CONTEXT_PREFIX,
   APP_PREFERENCE_STAGE_PREFIX,
-  DYNAMICS_CADASTRO_MERCADORIA_URL,
   DYNAMICS_RMA_RECORD_URL_BASE,
   RMA_STAGE_DEFAULTS,
   RMA_STAGE_DEVOLVIDO,
@@ -74,6 +73,8 @@ export function RMAsKanbanPage() {
   const [referencesByRmaId, setReferencesByRmaId] = useState<Record<string, string[]>>({});
   const [referencesLoading, setReferencesLoading] = useState(false);
   const referencesRequestId = useRef(0);
+  const [cadastroOpen, setCadastroOpen] = useState(false);
+  const [cadastroRmaId, setCadastroRmaId] = useState<string | null>(null);
 
   const effectiveStages = useMemo(() => {
     const stageValues = selectedStages.length
@@ -86,21 +87,10 @@ export function RMAsKanbanPage() {
     window.open(`${DYNAMICS_RMA_RECORD_URL_BASE}${rmaId}`, '_blank');
   }, []);
 
-  const openCadastroMercadoria = useCallback(async (rmaId: string) => {
-    if (!systemUserId) return;
-    const nowKey = `${APP_PREFERENCE_RMA_CONTEXT_PREFIX}${new Date().toISOString()}`;
-    try {
-      await NewAppPreferenceService.create({
-        new_preferencekey: nowKey,
-        new_stringvalue: rmaId,
-        'new_User@odata.bind': `/systemusers(${systemUserId})`,
-      });
-      window.open(DYNAMICS_CADASTRO_MERCADORIA_URL, '_blank');
-    } catch (err) {
-      console.error('[RMAsKanbanPage] erro ao abrir cadastro mercadoria', err);
-      setError('Erro ao abrir cadastro de mercadoria.');
-    }
-  }, [systemUserId]);
+  const openCadastroMercadoria = useCallback((rmaId: string) => {
+    setCadastroRmaId(rmaId);
+    setCadastroOpen(true);
+  }, []);
 
   const mapRecordToCard = useCallback((record: any): RmaCardData => ({
     id: record.new_rmaid,
@@ -609,6 +599,12 @@ export function RMAsKanbanPage() {
             </DndContext>
           )}
         </div>
+        <RmaCadastroMercadoriaDialog
+          open={cadastroOpen}
+          rmaId={cadastroRmaId}
+          onClose={() => setCadastroOpen(false)}
+          onSaved={loadColumnData}
+        />
       </PageContainer>
     </>
   );

@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.0.44';
+export const APP_VERSION = '0.0.47';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.47',
+    date: '2026-01-19',
+    changes: 'Adicionada coluna de número de série no grid de mercadorias devolvidas do RMA.',
+  },
+  {
+    version: '0.0.46',
+    date: '2026-01-19',
+    changes: 'Implementado salvamento automático (autosave) nos campos de informações do RMA na janela de cadastro de mercadorias.',
+  },
+  {
+    version: '0.0.45',
+    date: '2026-01-19',
+    changes: 'Recriada a janela interna de cadastro de mercadorias do RMA com regras do app legado, integrando ao quadro de RMAs.',
+  },
   {
     version: '0.0.44',
     date: '2026-01-19',
