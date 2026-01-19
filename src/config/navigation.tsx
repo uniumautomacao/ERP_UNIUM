@@ -40,6 +40,19 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    id: 'logistica',
+    label: 'Logística',
+    description: 'Gerencie logística e transporte',
+    items: [
+      {
+        id: 'rmas',
+        label: 'Quadro de RMAs',
+        icon: <Board24Regular />,
+        path: '/rmas',
+      }
+    ],
+  },
+  {
     id: 'cadastros',
     label: 'Cadastros',
     description: 'Gerencie cadastros e configurações básicas',
@@ -49,56 +62,6 @@ export const navigation: NavSection[] = [
         label: 'Dispositivos IO',
         icon: <DeveloperBoard24Regular />,
         path: '/dispositivos-io',
-      },
-    ],
-  },
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    description: 'Visualize dados e métricas do seu negócio',
-    items: [
-      {
-        id: 'dashboard',
-        label: 'Dashboard',
-        icon: <DataBarVertical24Regular />,
-        path: '/dashboard',
-      },
-      {
-        id: 'analytics',
-        label: 'Analytics',
-        icon: <ChartMultiple24Regular />,
-        path: '/analytics',
-      },
-      {
-        id: 'reports',
-        label: 'Reports',
-        icon: <DocumentBulletList24Regular />,
-        path: '/reports',
-      },
-    ],
-  },
-  {
-    id: 'operations',
-    label: 'Operations',
-    description: 'Gerencie operações e recursos',
-    items: [
-      {
-        id: 'inventory',
-        label: 'Inventory',
-        icon: <Box24Regular />,
-        path: '/inventory',
-      },
-      {
-        id: 'projects',
-        label: 'Project Planner',
-        icon: <CalendarLtr24Regular />,
-        path: '/projects',
-      },
-      {
-        id: 'team',
-        label: 'Team Management',
-        icon: <People24Regular />,
-        path: '/team',
       },
     ],
   },
@@ -134,4 +97,54 @@ export const navigation: NavSection[] = [
       },
     ],
   },
+  {
+    id: 'analytics',
+    label: 'Template - Analytics',
+    description: 'Visualize dados e métricas do seu negócio',
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        icon: <DataBarVertical24Regular />,
+        path: '/dashboard',
+      },
+      {
+        id: 'analytics',
+        label: 'Analytics',
+        icon: <ChartMultiple24Regular />,
+        path: '/analytics',
+      },
+      {
+        id: 'reports',
+        label: 'Reports',
+        icon: <DocumentBulletList24Regular />,
+        path: '/reports',
+      }
+    ]
+  },
+  {
+    id: 'operations',
+    label: 'Template - Operations',
+    description: 'Gerencie operações e recursos',
+    items: [
+      {
+        id: 'inventory',
+        label: 'Inventory',
+        icon: <Box24Regular />,
+        path: '/inventory',
+      },
+      {
+        id: 'projects',
+        label: 'Project Planner',
+        icon: <CalendarLtr24Regular />,
+        path: '/projects',
+      },
+      {
+        id: 'team',
+        label: 'Team Management',
+        icon: <People24Regular />,
+        path: '/team',
+      }
+    ]
+  }
 ];
