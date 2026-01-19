@@ -790,5 +790,42 @@ public partial class new_RMA : Microsoft.Xrm.Sdk.Entity, System.ComponentModel.I
 			return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
 		}
 	}
+	
+	/// <summary>
+	/// 1:N new_estoquerma_RMA_new_rma
+	/// </summary>
+	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_estoquerma_RMA_new_rma")]
+	public System.Collections.Generic.IEnumerable<new_EstoqueRMA> new_estoquerma_RMA_new_rma
+	{
+		get
+		{
+			return this.GetRelatedEntities<new_EstoqueRMA>("new_estoquerma_RMA_new_rma", null);
+		}
+		set
+		{
+			this.OnPropertyChanging("new_estoquerma_RMA_new_rma");
+			this.SetRelatedEntities<new_EstoqueRMA>("new_estoquerma_RMA_new_rma", null, value);
+			this.OnPropertyChanged("new_estoquerma_RMA_new_rma");
+		}
+	}
+	
+	/// <summary>
+	/// N:1 new_rma_Cliente_contact
+	/// </summary>
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_cliente")]
+	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_rma_Cliente_contact")]
+	public Contact new_rma_Cliente_contact
+	{
+		get
+		{
+			return this.GetRelatedEntity<Contact>("new_rma_Cliente_contact", null);
+		}
+		set
+		{
+			this.OnPropertyChanging("new_rma_Cliente_contact");
+			this.SetRelatedEntity<Contact>("new_rma_Cliente_contact", null, value);
+			this.OnPropertyChanged("new_rma_Cliente_contact");
+		}
+	}
 }
 #pragma warning restore CS1591

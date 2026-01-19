@@ -571,5 +571,62 @@ public partial class new_EstoqueRMA : Microsoft.Xrm.Sdk.Entity, System.Component
 			return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
 		}
 	}
+	
+	/// <summary>
+	/// N:1 new_estoquerma_Produto_cr22f_estoquefromshare
+	/// </summary>
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_produto")]
+	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_estoquerma_Produto_cr22f_estoquefromshare")]
+	public cr22f_EstoqueFromSharepointList new_estoquerma_Produto_cr22f_estoquefromshare
+	{
+		get
+		{
+			return this.GetRelatedEntity<cr22f_EstoqueFromSharepointList>("new_estoquerma_Produto_cr22f_estoquefromshare", null);
+		}
+		set
+		{
+			this.OnPropertyChanging("new_estoquerma_Produto_cr22f_estoquefromshare");
+			this.SetRelatedEntity<cr22f_EstoqueFromSharepointList>("new_estoquerma_Produto_cr22f_estoquefromshare", null, value);
+			this.OnPropertyChanged("new_estoquerma_Produto_cr22f_estoquefromshare");
+		}
+	}
+	
+	/// <summary>
+	/// N:1 new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist
+	/// </summary>
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_produtonovo")]
+	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist")]
+	public cr22f_EstoqueFromSharepointList new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist
+	{
+		get
+		{
+			return this.GetRelatedEntity<cr22f_EstoqueFromSharepointList>("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist", null);
+		}
+		set
+		{
+			this.OnPropertyChanging("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist");
+			this.SetRelatedEntity<cr22f_EstoqueFromSharepointList>("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist", null, value);
+			this.OnPropertyChanged("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist");
+		}
+	}
+	
+	/// <summary>
+	/// N:1 new_estoquerma_RMA_new_rma
+	/// </summary>
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_rma")]
+	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_estoquerma_RMA_new_rma")]
+	public new_RMA new_estoquerma_RMA_new_rma
+	{
+		get
+		{
+			return this.GetRelatedEntity<new_RMA>("new_estoquerma_RMA_new_rma", null);
+		}
+		set
+		{
+			this.OnPropertyChanging("new_estoquerma_RMA_new_rma");
+			this.SetRelatedEntity<new_RMA>("new_estoquerma_RMA_new_rma", null, value);
+			this.OnPropertyChanged("new_estoquerma_RMA_new_rma");
+		}
+	}
 }
 #pragma warning restore CS1591

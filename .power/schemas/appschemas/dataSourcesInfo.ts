@@ -102,5 +102,33 @@ export const dataSourcesInfo = {
     "primaryKey": "new_deviceioconnectionid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "contacts": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "contactid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "cr22f_estoquefromsharepointlists": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "cr22f_estoquefromsharepointlistid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_estoquermas": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_estoquermaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_rmas": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_rmaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

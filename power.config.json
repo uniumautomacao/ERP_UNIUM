@@ -82,6 +82,26 @@
           "entitySetName": "new_deviceioconnections",
           "logicalName": "new_deviceioconnection",
           "isHidden": false
+        },
+        "contacts": {
+          "entitySetName": "contacts",
+          "logicalName": "contact",
+          "isHidden": false
+        },
+        "cr22f_estoquefromsharepointlists": {
+          "entitySetName": "cr22f_estoquefromsharepointlists",
+          "logicalName": "cr22f_estoquefromsharepointlist",
+          "isHidden": false
+        },
+        "new_estoquermas": {
+          "entitySetName": "new_estoquermas",
+          "logicalName": "new_estoquerma",
+          "isHidden": false
+        },
+        "new_rmas": {
+          "entitySetName": "new_rmas",
+          "logicalName": "new_rma",
+          "isHidden": false
         }
       },
       "actions": null
