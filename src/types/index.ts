@@ -156,6 +156,7 @@ export interface NavItem {
 export interface NavSection {
   id: string;
   label: string;
+  description?: string;
   items: NavItem[];
 }
 

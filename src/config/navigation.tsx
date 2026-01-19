@@ -29,6 +29,7 @@ export const navigation: NavSection[] = [
   {
     id: 'installations',
     label: 'Instalações',
+    description: 'Gerencie o cronograma e linha do tempo das instalações',
     items: [
       {
         id: 'timeline',
@@ -41,6 +42,7 @@ export const navigation: NavSection[] = [
   {
     id: 'cadastros',
     label: 'Cadastros',
+    description: 'Gerencie cadastros e configurações básicas',
     items: [
       {
         id: 'dispositivos-io',
@@ -53,6 +55,7 @@ export const navigation: NavSection[] = [
   {
     id: 'analytics',
     label: 'Analytics',
+    description: 'Visualize dados e métricas do seu negócio',
     items: [
       {
         id: 'dashboard',
@@ -77,6 +80,7 @@ export const navigation: NavSection[] = [
   {
     id: 'operations',
     label: 'Operations',
+    description: 'Gerencie operações e recursos',
     items: [
       {
         id: 'inventory',
@@ -107,6 +111,7 @@ export const navigation: NavSection[] = [
   {
     id: 'super-admin',
     label: 'Super Admin',
+    description: 'Configurações avançadas de acesso e administração',
     items: [
       {
         id: 'page-access',
@@ -125,6 +130,7 @@ export const navigation: NavSection[] = [
   {
     id: 'dev',
     label: 'DEV',
+    description: 'Ferramentas e páginas de desenvolvimento',
     items: [
       {
         id: 'dev-page',

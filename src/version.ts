@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.43';
+export const APP_VERSION = '0.0.44';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.44',
+    date: '2026-01-19',
+    changes: 'Centralizada a definição de seções/páginas para menu e Home, reaproveitando as mesmas regras de permissão.',
+  },
   {
     version: '0.0.43',
     date: '2026-01-19',

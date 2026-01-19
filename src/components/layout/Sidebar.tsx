@@ -7,6 +7,7 @@ import { useAccessControl } from '../../security/AccessControlContext';
 import { SidebarSection } from './SidebarSection';
 import { ThemeToggle } from './ThemeToggle';
 import { navigation } from '../../config/navigation';
+import { filterNavigationByAccess } from '../../config/navigationUtils';
 import { LAYOUT } from '../../config/theme';
 
 export function Sidebar() {
@@ -15,13 +16,7 @@ export function Sidebar() {
   const { canAccessPath } = useAccessControl();
 
   const filteredNavigation = useMemo(
-    () =>
-      navigation
-        .map((section) => {
-          const items = section.items.filter((item) => canAccessPath(item.path));
-          return items.length > 0 ? { ...section, items } : null;
-        })
-        .filter((section): section is typeof navigation[number] => section !== null),
+    () => filterNavigationByAccess(navigation, canAccessPath),
     [canAccessPath]
   );
 
