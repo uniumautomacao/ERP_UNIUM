@@ -114,15 +114,15 @@
     "DocumentType": "Page",
     "EnableInstrumentation": false,
     "FileID": "042705d4-2c4e-4f6a-935b-0045f3665fc4",
-    "Id": "3a0bf39e-2b0e-49fc-a765-869dcf8c2b4c",
+    "Id": "77a202fa-c067-4466-a82f-ce1c0a2b97f9",
     "ManualOfflineProfileId": "",
-    "Name": "UXVhZHJvIGRlIFJNQXM.msapp",
+    "Name": "Q2FkYXN0cm8gZGUgUmV0b3JubyBkZSBNZXJjYWRvcmlhIFBhZ2U.msapp",
     "OriginatingVersion": "1.321",
     "ParserErrorCount": 1,
     "ShowStatusBar": false
   },
   "PublishInfo": {
-    "AppName": "Quadro de RMAs",
+    "AppName": "Cadastro de Retorno de Mercadoria Page",
     "BackgroundColor": "RGBA(0,176,240,1)",
     "IconColor": "RGBA(255,255,255,1)",
     "IconName": "Edit",

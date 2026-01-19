@@ -186,6 +186,10 @@
       "OptionSetReferenceItem0": {
         "OptionSetReferenceColumnName": "new_opcaodedevolucao",
         "OptionSetReferenceEntityName": "Estoque-RMAS"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_opcaodedevolucao",
+        "OptionSetReferenceEntityName": "Produtos-Serviço"
       }
     },
     "OptionSetTypeKey": "PicklistType",

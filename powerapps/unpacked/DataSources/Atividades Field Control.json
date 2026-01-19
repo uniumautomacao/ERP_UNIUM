@@ -1,0 +1,477 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_atividadefieldcontrols",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_atividadefieldcontrol",
+    "MaxGetRowsCount": 500,
+    "Name": "Atividades Field Control",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_agendamento": "Agendamento",
+      "new_agendamentoconfirmadocomcliente": "Agendamento Confirmado Com Cliente",
+      "new_agendamentooriginal": "Agendamento Original",
+      "new_agendamentouserlocaldate": "Agendamento (User Local Date)",
+      "new_apelidodoprojeto": "Apelido do Projeto",
+      "new_atividadefieldcontrol_AsyncOperations": "System Jobs",
+      "new_atividadefieldcontrol_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_atividadefieldcontrol_DuplicateBaseRecord": "Duplicate Records (new_atividadefieldcontrol_DuplicateBaseRecord)",
+      "new_atividadefieldcontrol_DuplicateMatchingRecord": "Duplicate Records (new_atividadefieldcontrol_DuplicateMatchingRecord)",
+      "new_atividadefieldcontrol_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_atividadefieldcontrol_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_atividadefieldcontrol_ProcessSession": "Process Sessions",
+      "new_atividadefieldcontrol_SyncErrors": "Sync Errors",
+      "new_atividadefieldcontrolid": "Atividade Field Control",
+      "new_atualizacaodetipodeospendente": "Atualização de Tipo de OS Pendente",
+      "new_avaliacaopendentedescricaoai": "Avaliação Pendente (Descrição AI)",
+      "new_cliente": "Cliente",
+      "new_clientefieldcontrolid": "Cliente (Field Control Id)",
+      "new_colaboradorfieldcontrolid": "ColaboradorFieldControlId",
+      "new_colaboradorpuid": "Colaborador PUID",
+      "new_colaboradoruserid": "Colaborador User Id",
+      "new_completedat": "Completada Em",
+      "new_comprimentodedescricaodostatus": "Comprimento de Descrição do Status",
+      "new_comprimentodedescricaodostatusespelho": "Comprimento de Descrição do Status (Espelho)",
+      "new_contemsiteomada": "Contém Site Omada",
+      "new_datacontatoconfirmacaoagendamento": "Data Contato Confirmação Agendamento",
+      "new_datadefinicaodoagendamento": "Data Definição do Agendamento",
+      "new_dataultimocontatoposatendimento": "Data Último Contato Pós-Atendimento",
+      "new_descricaoaprovada": "Descrição Aprovada",
+      "new_descricaoaprovadareason": "Descrição Aprovada (Reason)",
+      "new_descricaodostatuseditadaai": "Descrição do Status Editada (AI)",
+      "new_descricaoopenaimirror": "Descrição (OpenAI Mirror)",
+      "new_description": "Descrição",
+      "new_duracao": "Duração",
+      "new_duracaotemporal": "Duração Temporal",
+      "new_eatividadedesenhodepti": "É Atividade Desenho de PTI",
+      "new_employee": "Colaborador",
+      "new_estaatribuidoaocolaborador": "Está Atribuído ao Colaborador",
+      "new_feedbackevalido": "Feedback é Válido",
+      "new_feedbackfoienviado": "Feedback Foi Enviado",
+      "new_FinishLocation": "Finish Location",
+      "new_finishlocationisvalid": "Finish Location Is Valid",
+      "new_finishlocationoffsetdistancemeter": "Finish Location Offset Distance (Meter)",
+      "new_id": "Id",
+      "new_identificadorordemdeservico": "Identificador Ordem de Serviço",
+      "new_incluiremcampanha": "Incluir em Campanha",
+      "new_indicedeatrasomenormelhor": "Índice de Atraso (menor melhor)",
+      "new_isfuturescheduledate": "Is Future Schedule Date",
+      "new_MensagemdeFeedback": "Mensagem de Feedback",
+      "new_mensagemdefeedbackdatetime": "Mensagem de Feedback Date Time",
+      "new_nomedocolaborador": "Nome do Colaborador",
+      "new_OrdemdeServico": "Ordem de Serviço",
+      "new_ordemdeservicofieldcontrolid": "Ordem de Serviço Field Control",
+      "new_pontualidade": "Pontualidade",
+      "new_previsaodefinalizacao": "Previsão de Finalização",
+      "new_Projeto": "Projeto",
+      "new_quantidadedeatividadesparaconclusao": "Quantidade de Atividades Para Conclusão",
+      "new_situacao": "Situação",
+      "new_startedat": "Iniciada Em",
+      "new_StartLocation": "Start Location",
+      "new_startlocationimageid": "Start Location Image Id",
+      "new_startlocationisvalid": "Start Location Is Valid",
+      "new_startlocationoffsetdistancemeter": "Start Location Offset Distance (Meter)",
+      "new_status": "Status Atividade",
+      "new_statuscolorb": "Status Color B",
+      "new_statuscolorg": "Status Color G",
+      "new_statuscolorr": "Status Color R",
+      "new_statusdescription": "Descrição do Status",
+      "new_statusoficial": "Status Oficial",
+      "new_tags": "Tags",
+      "new_tarefasjson": "Tarefas (JSON)",
+      "new_tipodeservico": "Tipo de Serviço",
+      "new_tipodeservicodefinido": "Tipo de Serviço Definido",
+      "new_tipodeservicotexto": "Tipo de Serviço (Texto)",
+      "new_viagemuber_AtividadedeOrdemdeServico_new_atividadefieldcontrol": "Viagem Ubers",
+      "new_vinculodeprojetopendente": "Vínculo de Projeto Pendente",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Atividades Field Control",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Atividades Field Control (Views)",
+    "Name": "_new_atividadefieldcontrol_views",
+    "RelatedEntityName": "Atividades Field Control",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "00d0f889-b092-ed11-aad1-000d3ac190e8": "Atividades Campanha 2023.1",
+      "1570ede6-9878-ed11-81ac-000d3ac190e8": "Atividades Campanha Teste 2022",
+      "159b19a6-76c3-ed11-b597-000d3ac190e8": "Atividades Próximas",
+      "288423fe-92a0-ed11-aad1-000d3ac190e8": "Atividades de Amanhã",
+      "5ebcc31d-6917-ed11-b83e-002248376bcc": "Atividades da semana",
+      "611fb7fd-1c2b-ef11-840a-002248e0c0bc": "Atividades de Hoje Sem Feedback",
+      "6c25b6eb-40e5-4d83-af0c-a5f080c2b526": "Atividade Field Control Associated View",
+      "99a5e735-6917-ed11-b83e-002248376bcc": "Atividades deste mês",
+      "a708574a-a929-419a-9f65-920232837f28": "Atividade Field Control Lookup View",
+      "b38d47f7-ff7a-ed11-81ad-000d3ac190e8": "Atividades Campanha Teste 2022 (Até Hoje)",
+      "be02d5dc-b492-ed11-aad1-000d3ac190e8": "Atividades Com Faltas Campanha 2023.1",
+      "d3c3954a-78fb-46ba-ae49-4249348f061c": "Inactive Atividades Field Control",
+      "d81d3837-1113-401e-b2fd-8248a4068189": "Atividades Field Control",
+      "d95b2b57-386c-ed11-81ac-000d3ac190e8": "Atividades Campanha 2022.2",
+      "d96fd453-a563-ed11-9562-000d3ac190e8": "Atividades de Hoje (Card)",
+      "ea0670f5-6817-ed11-b83e-002248376bcc": "Atividades de Hoje",
+      "f8a97464-e13a-ef11-a316-000d3ac1eaa6": "Atividades Campanha 2024.2 (Até Hoje)",
+      "fa58c4e8-b092-ed11-aad1-000d3ac190e8": "Atividades Campanha 2023.1 (Até Hoje)",
+      "ff441682-cb16-4649-8b34-c8a518ade1f1": "Atividade Field Control Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "Agendamento Confirmado Com Cliente (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_agendamentoconfirmadocomcliente",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_agendamentoconfirmadocomcliente",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_agendamentoconfirmadocomcliente",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Atualização de Tipo de OS Pendente (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_atualizacaodetipodeospendente",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_atualizacaodetipodeospendente",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_atualizacaodetipodeospendente",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Avaliação Pendente (Descrição AI) (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_avaliacaopendentedescricaoai",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_avaliacaopendentedescricaoai",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_avaliacaopendentedescricaoai",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Contém Site Omada (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_contemsiteomada",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_contemsiteomada",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_contemsiteomada",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Descrição Aprovada (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_descricaoaprovada",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_descricaoaprovada",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_descricaoaprovada",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "É Atividade Desenho de PTI (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_eatividadedesenhodepti",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_eatividadedesenhodepti",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_eatividadedesenhodepti",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Está Atribuído ao Colaborador (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_estaatribuidoaocolaborador",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_estaatribuidoaocolaborador",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_estaatribuidoaocolaborador",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Feedback é Válido (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_feedbackevalido",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_feedbackevalido",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_feedbackevalido",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Feedback Foi Enviado (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_feedbackfoienviado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_feedbackfoienviado",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_feedbackfoienviado",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Finish Location Is Valid (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_finishlocationisvalid",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_finishlocationisvalid",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_finishlocationisvalid",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Incluir em Campanha (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_incluiremcampanha",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_incluiremcampanha",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_incluiremcampanha",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Is Future Schedule Date (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_isfuturescheduledate",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_isfuturescheduledate",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_isfuturescheduledate",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Start Location Is Valid (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_startlocationisvalid",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_startlocationisvalid",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_startlocationisvalid",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Tipo de Serviço Definido (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_tipodeservicodefinido",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_tipodeservicodefinido",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_tipodeservicodefinido",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Vínculo de Projeto Pendente (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_new_vinculodeprojetopendente",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_vinculodeprojetopendente",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_vinculodeprojetopendente",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Atividades Field Control)",
+    "Name": "new_atividadefieldcontrol_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Atividades Field Control"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Atividades Field Control",
+    "Type": "OptionSetInfo"
+  }
+]

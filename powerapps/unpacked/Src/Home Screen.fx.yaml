@@ -1,11 +1,13 @@
 "'Home Screen' As screen":
     LoadingSpinnerColor: =RGBA(0, 120, 212, 1)
-    OnVisible: |
+    OnVisible: |-
         =If(
             IsBlank(SpinCounter),
-            UpdateContext({SpinCounter: 0}),
-            Select(RefreshButton)
+            UpdateContext({SpinCounter: 0});
+            Reset(ProjetoComboboxCanvas);
+            Reset(OSComboboxCanvas)
         );
+        Select(RefreshButton)
 
     RootLayoutContainer_HS As groupContainer.verticalAutoLayoutContainer:
         Fill: =RGBA(250, 250, 250, 1)
@@ -39,126 +41,110 @@
                 Height: =200
                 Items: |-
                     =Table(
-                            {
-                                ItemKey: "Refresh",
-                                ItemIconName: "Refresh",
-                                ItemDisplayName: "Atualizar"
-                            },
-                            {
-                                ItemKey: "New",
-                                ItemIconName: "Add",
-                                ItemDisplayName: "Novo RMA"
-                            }
-                        )
+                        {
+                            ItemKey: "Back",
+                            ItemIconName: "Back",
+                            ItemDisplayName: "Voltar"
+                        },{
+                            ItemKey: "Refresh",
+                            ItemIconName: "Refresh",
+                            ItemDisplayName: "Atualizar"
+                        }
+                    )
                 LayoutMaxHeight: =
                 LayoutMaxWidth: =
                 LayoutMinHeight: =200
+                LayoutMinWidth: =200
                 OnSelect: |-
-                    =UpdateContext({SpinCounter: SpinCounter + 1});
-                    Switch(
+                    =Switch(
                         Self.Selected.ItemKey,
-                        "Refresh",
-                        Select(RefreshButton),
-                        "New",
-                        Launch(
-                            "https://unium.crm2.dynamics.com/main.aspx?appid=3ec4d8a9-2a8e-ee11-8179-002248de6f66&forceUCI=1&pagetype=entityrecord&etn=new_rma&id=" & Patch(
-                                Defaults(RMAS),
-                                {
-                                    new_posicao: Min(
-                                        RMASAtivos As L,
-                                        L.Posição
-                                    ) - 1
-                                }
-                            ).RMA,
-                            Blank(),
-                            LaunchTarget.New
-                        )
-                    );
-                    UpdateContext({SpinCounter: SpinCounter - 1})
+                        "Back",
+                        Back(),
+                        Select(RefreshButton)
+                    )
                 Theme: =AppThemeJson
                 Width: =600 
                 X: =0
                 Y: =0
                 ZIndex: =1
 
-            RefreshButton As Button:
-                BorderColor: =
-                DisabledBorderColor: =
-                DisabledFillColor: =
-                DisabledTextColor: =
-                DisplayMode: =DisplayMode.Edit
-                FillColor: =
-                Height: =32
-                HoverBorderColor: =
-                HoverFillColor: =
-                HoverTextColor: =
-                LayoutMaxHeight: =
-                LayoutMaxWidth: =
-                LayoutMinHeight: =32
-                LayoutMinWidth: =96
-                OnChange: =false
-                OnSelect: |-
-                    =UpdateContext({SpinCounter: SpinCounter + 1});
-                    Concurrent(
-                        Refresh(RMAS),
-                        Refresh(AppPreferences)
-                    );
-                    With(
-                        {
-                            Value: Filter(
-                                RMAS As L,
-                                IsBlank(L.Posição)
-                            )
-                        } As PosicaoVazia,
-                        ForAll(
-                            PosicaoVazia.Value As Item,
-                            Patch(
-                                RMAS,
-                                {
-                                    RMA: Item.RMA,
-                                    Posição: RandBetween(
-                                        0,
-                                        1000
-                                    )
-                                }
-                            )
-                        )
-                    );
-                    UpdateContext({SpinCounter: SpinCounter - 1})
-                PressedBorderColor: =
-                PressedFillColor: =
-                PressedTextColor: =
-                TextColor: =
-                Visible: =false
-                Width: =96
-                X: =0
-                Y: =0
-                ZIndex: =2
-
             TextCanvas1 As Text:
                 Align: ='TextCanvas.Align'.Center
                 BorderColor: =
                 DisplayMode: =DisplayMode.Edit
                 Fill: =
-                Font: =Font.Lato
                 FontColor: =
                 Height: =32
-                LayoutMaxHeight: =
-                LayoutMaxWidth: =
-                LayoutMinHeight: =32
-                LayoutMinWidth: =96
-                Text: ="V2.8"
+                LayoutMaxHeight: =0
+                LayoutMaxWidth: =0
+                LayoutMinHeight: =16
+                LayoutMinWidth: =16
+                Text: ="V0.37"
                 VerticalAlign: =VerticalAlign.Middle
+                Width: =96
+                X: =0
+                Y: =0
+                ZIndex: =2
+
+            RefreshButton As Button:
+                BasePaletteColor: =
+                BorderColor: =
+                DisplayMode: =DisplayMode.Edit
+                FontColor: =
+                Height: =32
+                LayoutMaxHeight: =0
+                LayoutMaxWidth: =0
+                LayoutMinHeight: =16
+                LayoutMinWidth: =16
+                OnSelect: |-
+                    =UpdateContext({SpinCounter: SpinCounter + 1});
+                    Concurrent(
+                        Refresh('Estoque-RMAS'),
+                        Refresh(AppPreferences),
+                        Refresh('Produtos-Serviço'),
+                        Refresh(Projetos)
+                    );
+                    UpdateContext({SpinCounter: SpinCounter - 1})
+                Visible: =false
                 Width: =96
                 X: =0
                 Y: =0
                 ZIndex: =3
 
+            ButtonCanvas2 As Button:
+                BasePaletteColor: =
+                BorderColor: =
+                DisplayMode: =DisplayMode.Edit
+                FontColor: =
+                Height: =32
+                LayoutMaxHeight: =0
+                LayoutMaxWidth: =0
+                LayoutMinHeight: =16
+                LayoutMinWidth: =16
+                OnSelect: |-
+                    =Concurrent(
+                            Refresh(AppPreferences),
+                            Refresh(Users),
+                            Refresh('Estoque-RMAS'),
+                            Refresh(RMAS),
+                            Refresh('Estoque From SharepointLists'),
+                            Refresh('Produtos-Serviço'),
+                            Refresh(Projetos),
+                            Refresh('Ordens de Serviço Field Control'),
+                            Refresh('Atividades Field Control'),
+                            Reset(ProjetoComboboxCanvas),
+                            Reset(OSComboboxCanvas)
+                        )
+                Visible: =false
+                Width: =96
+                X: =0
+                Y: =0
+                ZIndex: =4
+
         SubheaderContainer_HS As groupContainer.horizontalAutoLayoutContainer:
             FillPortions: =0
             Height: =70
             LayoutAlignItems: =LayoutAlignItems.Center
-            LayoutGap: =10
             LayoutGridColumns: =6
             LayoutGridRows: =6
             LayoutMaxHeight: =
@@ -185,150 +171,17 @@
                 LayoutMaxHeight: =
                 LayoutMaxWidth: =
                 PaddingLeft: =20
-                Text: ="Quadro de RMAs"
+                Text: ="Cadastro de Retorno de Mercadoria | " & First(ProjetoSelecionado).Apelido
                 Width: =240
                 Y: =241
                 ZIndex: =1
 
-            ComboboxCanvas1 As Combobox.pcfdataset:
-                DefaultSelectedItems: =EstagiosSelecionados
-                DisplayMode: =DisplayMode.Edit
-                Height: =32
-                InputTextPlaceholder: ="Selecione os estágios desejados"
-                Items: =Estagios
-                LayoutMaxHeight: =
-                LayoutMaxWidth: =
-                LayoutMinHeight: =32
-                LayoutMinWidth: =320
-                OnChange: |-
-                    =/*Patch(
-                        AppPreferences,
-                        Coalesce(
-                            LookUp(
-                                AppPreferences As P,
-                                And(
-                                    P.User.'Primary Email' = User().Email,
-                                    P.'Preference Key' = "EstagioQuadroRMA_" & Self.Selected.Value
-                                )
-                            ),
-                            Defaults(AppPreferences)
-                        ),
-                        {
-                            'Preference Key': "EstagioQuadroRMA_" & Self.Selected.Value,
-                            User: LookUp(
-                                Users As U,
-                                U.'Primary Email' = User().Email
-                            ),
-                            BoolValue: If(
-                                LookUp(
-                                    AppPreferences As P,
-                                    And(
-                                        P.User.'Primary Email' = User().Email,
-                                        P.'Preference Key' = "EstagioQuadroRMA_" & Self.Selected.Value
-                                    ),
-                                    P.BoolValue
-                                ) = true,
-                                false,
-                                true
-                            )
-                        }
-                    );*/With(
-                        {
-                            Value: Filter(
-                                AppPreferences As P,
-                                P.User.'Primary Email' = User().Email,
-                                StartsWith(
-                                    P.'Preference Key',
-                                    "EstagioQuadroRMA_"
-                                )
-                            )
-                        } As Prefs,
-                        Concurrent(
-                            ForAll(
-                                Self.SelectedItems As Item,
-                                With(
-                                    {Value: "EstagioQuadroRMA_" & Item.Value} As Key,
-                                    If(
-                                        CountRows(
-                                            Filter(
-                                                AppPreferences As P,
-                                                P.User.'Primary Email' = User().Email,
-                                                P.'Preference Key' = Key.Value
-                                            )
-                                        ) = 0,
-                                        Patch(
-                                            AppPreferences,
-                                            Defaults(AppPreferences),
-                                            {
-                                                'Preference Key': Key.Value,
-                                                User: LookUp(
-                                                    Users As U,
-                                                    U.'Primary Email' = User().Email
-                                                ),
-                                                BoolValue: true
-                                            }
-                                        )
-                                    )
-                                )
-                            ),
-                            ForAll(
-                                Prefs.Value As P,
-                                Patch(
-                                    AppPreferences,
-                                    P,
-                                    {
-                                        BoolValue: Last(
-                                            Split(
-                                                P.'Preference Key',
-                                                "_"
-                                            )
-                                        ).Value in ForAll(
-                                            Self.SelectedItems As I,
-                                            Text(I.Value)
-                                        )
-                                    }
-                                )
-                            )
-                        )
-                    )
-                SelectMultiple: =true
-                Width: =320
-                X: =0
-                Y: =0
-                ZIndex: =2
-
-            SearchBox_1 As SearchBox:
-                LayoutMaxHeight: =
-                LayoutMaxWidth: =
-                LayoutMinHeight: =640
-                LayoutMinWidth: =640
-                Styles: |-
-                    =Table({Name: "PrimaryColor1Value", Value: "#ffffff"},
-                    {Name: "PrimaryColor1TextValue", Value: "#292929"},
-                    {Name: "PrimaryColor2Value", Value: "#0078d4"},
-                    {Name: "PrimaryColor2TextValue", Value: "#ffffff"},
-                    {Name: "PrimaryColor3Value", Value: "#303030"},
-                    {Name: "PrimaryColor3TextValue", Value: "#080808"},
-                    {Name: "PrimaryColor4Value", Value: "#006e7d"},
-                    {Name: "defaultLabelColorValue", Value: "#333333"},
-                    {Name: "RadiusValue", Value: "0"},
-                    {Name: "TextBodyFontFaceValue", Value: "Segoe UI" },
-                    {Name: "PaddingValue", Value: "8"},
-                    {Name: "TextEmphasisFontSizeValue", Value: "16"},
-                    {Name: "TextEmphasisFontSizePhoneValue", Value: "24"},
-                    {Name: "TextBodyFontSizeValue", Value: "12"},
-                    {Name: "TextBodyFontSizePhoneValue", Value: "21"},
-                    {Name: "BackgroundColorValue", Value: "#ffffff"},
-                    {Name: "BorderThicknessValue", Value: "0"},
-                    {Name: "BorderColorValue", Value: "#FFFFFF"},
-                    {Name: "FocusedBorderThicknessValue", Value: "0"},
-                    {Name: "BackgroundColorValue", Value :"#FFFFFF"}
-                    )
-                ZIndex: =4
-
         ContentContainer_HS As groupContainer.verticalAutoLayoutContainer:
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
             LayoutGridColumns: =6
             LayoutGridRows: =6
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
             LayoutMaxHeight: =
             LayoutMaxWidth: =
             LayoutMinHeight: =100
@@ -336,970 +189,1678 @@
             LayoutMode: =LayoutMode.Auto
             ZIndex: =5
 
-            RMASGallery As gallery.BrowseLayout_Horizontal_TwoTextOneImageVariant_pcfCore:
-                BorderColor: =RGBA(166, 166, 166, 1)
-                DelayItemLoading: =true
-                FocusedBorderColor: =RGBA(0, 120, 212, 1)
-                FocusedBorderThickness: =2
-                Height: =365
-                Items: |-
-                    =/*AddColumns(
-                        If(
-                            CountRows(EstagiosSelecionados) = 0,
-                            Estagios,
-                            EstagiosSelecionados
-                        ) As Item,
-                        Items,
-                        Filter(
-                            RMASAtivos As L,
-                            L.Situação = Item.Value
-                        )
-                    )*/
-                    If(
-                        CountRows(EstagiosSelecionados) = 0,
-                        Estagios,
-                        EstagiosSelecionados
-                    )
-                LayoutMaxHeight: =
-                LayoutMaxWidth: =
-                LayoutMinHeight: =182
-                LayoutMinWidth: =0
-                LoadingSpinner: =LoadingSpinner.Data
-                TemplateSize: =LaneWidth
+            BodyContainer As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.Light
+                LayoutAlignItems: =LayoutAlignItems.Stretch
+                LayoutGap: =10
+                LayoutGridColumns: =6
+                LayoutGridRows: =6
+                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                LayoutMaxHeight: =0
+                LayoutMaxWidth: =0
+                LayoutMinHeight: =16
+                LayoutMinWidth: =16
+                LayoutMode: =LayoutMode.Auto
+                PaddingBottom: =10
+                PaddingLeft: =10
+                PaddingRight: =10
+                PaddingTop: =10
+                RadiusBottomLeft: =4
+                RadiusBottomRight: =4
+                RadiusTopLeft: =4
+                RadiusTopRight: =4
                 ZIndex: =1
 
-                Rectangle1 As rectangle:
-                    BorderColor: =ColorValue(AppTheme.palette.neutralLight)
-                    BorderThickness: =1
-                    DisabledFill: =RGBA(0,0,0,0)
-                    Fill: =RGBA(0,0,0,0)
-                    FocusedBorderColor: =RGBA(0, 120, 212, 1)
-                    Height: =Parent.TemplateHeight
-                    HoverFill: =RGBA(0,0,0,0)
-                    OnSelect: =Select(Parent)
-                    PressedFill: =RGBA(0,0,0,0)
-                    TabIndex: =0
-                    Visible: =false
-                    Width: =Parent.TemplateWidth
-                    ZIndex: =1
-
-                RMASGalleryTemplate As groupContainer.verticalAutoLayoutContainer:
+                MercadoriasContainer As groupContainer.horizontalAutoLayoutContainer:
                     DropShadow: =DropShadow.Light
-                    Height: =Parent.TemplateHeight
+                    Fill: =RGBA(255, 255, 255, 1)
                     LayoutAlignItems: =LayoutAlignItems.Stretch
                     LayoutDirection: =LayoutDirection.Vertical
+                    LayoutGap: =10
                     LayoutGridColumns: =6
                     LayoutGridRows: =6
                     LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                    LayoutMaxHeight: =0
+                    LayoutMaxWidth: =0
+                    LayoutMinHeight: =16
+                    LayoutMinWidth: =16
                     LayoutMode: =LayoutMode.Auto
-                    RadiusBottomLeft: =4
-                    RadiusBottomRight: =4
-                    RadiusTopLeft: =4
-                    RadiusTopRight: =4
-                    Width: =Parent.TemplateWidth
-                    ZIndex: =4
+                    PaddingBottom: =8
+                    PaddingLeft: =8
+                    PaddingRight: =8
+                    PaddingTop: =8
+                    RadiusBottomLeft: =10
+                    RadiusBottomRight: =10
+                    RadiusTopLeft: =10
+                    RadiusTopRight: =10
+                    ZIndex: =6
 
-                    RMASGalleryTitleLabel As Label:
-                        AcceptsFocus: =false
-                        Alignment: =Align.Center
-                        AutoHeight: =true
-                        Color: =
-                        DisplayMode: =DisplayMode.Edit
-                        Font: =Font.Lato
-                        FontSize: =10.5
-                        FontWeight: =FontWeight.Semibold
-                        Height: =24
-                        Italic: =false
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinHeight: =32
-                        OnChange: =false
-                        OnSelect: =
-                        Strikethrough: =false
-                        TabIndex: =-1
-                        Text: |-
-                            =If(
-                                IsBlank(ThisItem.Value),
-                                "Novos",
-                                ThisItem.Value
-                            )
-                        Underline: =false
-                        VerticalAlignment: =VerticalAlign.Top
-                        Width: =
-                        X: =1
-                        Y: =
-                        ZIndex: =1
-
-                    RMASGalleryResponsavelLabel As Label:
-                        AcceptsFocus: =false
-                        Alignment: =Align.Center
-                        AutoHeight: =true
-                        Color: =
+                    RMAInfoHeaderText As Text:
+                        Align: ='TextCanvas.Align'.Center
+                        AutoHeight: =false
+                        BorderColor: =
+                        BorderStyle: =""
                         ContentLanguage: =""
                         DisplayMode: =DisplayMode.Edit
+                        Fill: =
                         Font: =Font.Lato
-                        FontSize: =10.5
-                        FontWeight: =FontWeight.Semibold
-                        Height: =24
-                        Italic: =false
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinHeight: =32
-                        OnChange: =false
-                        OnSelect: =
-                        Overflow: ="Hidden"
-                        PaddingBottom: =0
-                        PaddingEnd: =0
-                        PaddingStart: =0
-                        PaddingTop: =0
-                        Strikethrough: =false
-                        TabIndex: =-1
-                        Text: |-
-                            =If(
-                                ThisItem.Value in [
-                                    'RMA Stage'.'Enviar para assistência',
-                                    'RMA Stage'.'Em trânsito para assistência',
-                                    'RMA Stage'.'Em análise',
-                                    'RMA Stage'.'Em reparo',
-                                    'RMA Stage'.'Em trânsito de retorno'
-                                ],
-                                "Adm",
-                                If(
-                                    ThisItem.Value in [
-                                        'RMA Stage'.'Em avaliação interna',
-                                        'RMA Stage'.'Recebido da assistência'
-                                    ],
-                                    "Estoquista",
-                                    "CS"
-                                )
-                            )
-                        TextRole: ="Default"
+                        FontColor: =
+                        FontItalic: =false
+                        FontStrikethrough: =false
+                        FontUnderline: =false
+                        Height: =32
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =14
+                        TabIndex: =0
+                        Text: ="Informações do RMA"
                         Tooltip: =""
-                        Underline: =false
-                        VerticalAlignment: =VerticalAlign.Top
+                        VerticalAlign: =VerticalAlign.Middle
                         Visible: =true
-                        Width: =
+                        Weight: ='TextCanvas.Weight'.Bold
+                        Width: =96
                         Wrap: =true
-                        X: =1
-                        Y: =
-                        ZIndex: =2
+                        X: =0
+                        Y: =0
+                        ZIndex: =1
 
-                    LaneSubtitleContainer As groupContainer.horizontalAutoLayoutContainer:
-                        Fill: =RGBA(0,0,0,0)
+                    FormRowContainer_2 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
                         FillPortions: =0
-                        Height: =29
+                        Height: =48
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutGridColumns: =6
                         LayoutGridRows: =6
                         LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinHeight: =29
-                        LayoutMinWidth: =0
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
                         LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
                         PaddingLeft: =10
                         PaddingRight: =10
-                        ZIndex: =3
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        ZIndex: =2
 
-                        LaneCounterLabel As Label:
-                            AcceptsFocus: =false
-                            Alignment: =Align.Left
-                            Color: =ColorValue(AppTheme.palette.neutralSecondary)
+                        FormRowLabelText_2 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Projeto"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =120
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
+
+                        ProjetoComboboxCanvas As Combobox.pcfdataset:
+                            AccessibleLabel: =""
+                            Appearance: ="FilledDarker"
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DefaultSelectedItems: =[LookUp(Projetos As P,P.Projeto = RMASelecionado.Projeto.Projeto)]//ProjetoSelecionado
                             DisplayMode: =DisplayMode.Edit
                             FillPortions: =1
-                            Font: =Font.Lato
+                            Font: =""
+                            FontItalic: =false
+                            FontSize: =0
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            FontWeight: =""
                             Height: =32
-                            Italic: =false
-                            LayoutMaxHeight: =
-                            LayoutMaxWidth: =
-                            OnChange: =false
-                            Strikethrough: =false
-                            Text: |-
-                                =With(
-                                    {
-                                        Value: CountRows(
-                                            Filter(
-                                                RMASAtivos As L,
-                                                L.Situação = ThisItem.Value
-                                            )
-                                        )
-                                    } As C,
-                                    If(
-                                        C.Value = 1,
-                                        "1 negócio",
-                                        C.Value & " itens"
-                                    )
+                            InputTextPlaceholder: ="Buscar projetos"
+                            IsSearchable: =true
+                            Items: |-
+                                =Search(
+                                    Projetos,
+                                    Self.SearchText,
+                                    Apelido
                                 )
-                            Underline: =false
-                            Width: =
+                            LayoutMaxHeight: =32
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =32
+                            LayoutMinWidth: =16
+                            MultiValueDelimiter: =", "
+                            OnChange: |-
+                                =Patch(
+                                    RMAS,
+                                    LookUp(// registro que será atualizado
+                                        RMAS,
+                                        RMA = RMAId// condição pra achar o RMA certo
+                                    ),
+                                    {
+                                        Projeto: LookUp(
+                                            Projetos As P,
+                                            P.Projeto = Self.Selected.Projeto
+                                        )// ou Self.Selected se estiver no próprio ComboBox
+                                    }
+                                );
+                                ClearCollect(
+                                    ProjetoSelecionado,
+                                    If(
+                                        !IsBlank(RMASelecionado.Projeto),
+                                        LookUp(
+                                            Projetos As P,
+                                            P.Projeto = RMASelecionado.Projeto.Projeto
+                                        )
+                                    )
+                                );
+                                Reset(OSComboboxCanvas)
+                            Required: =false
+                            SelectMultiple: =false
+                            TabIndex: =0
+                            Tooltip: =""
+                            TriggerOutput: ='ComboboxCanvas.TriggerOutput'.Keypress
+                            ValidationState: ="None"
+                            Visible: =true
+                            Width: =320
                             X: =0
                             Y: =0
                             ZIndex: =2
 
-                    RMASLaneGallery As gallery.BrowseLayout_Flexible_NewsFeed_pcfCore:
-                        BorderColor: =RGBA(166, 166, 166, 1)
-                        DelayItemLoading: =true
-                        FocusedBorderColor: =RGBA(0, 120, 212, 1)
-                        FocusedBorderThickness: =2
-                        Items: |-
-                            =With(
-                                {
-                                    Value: Search(
-                                        Filter(
-                                            RMASAtivos As L,
-                                            L.Situação = ThisItem.Value
-                                        ),
-                                        SearchBox_1.SearchText,
-                                        'Assistência Técnica',
-                                        Descrição,
-                                        Observações,
-                                        'Nome do Cliente (Fx)',
-                                        'Projeto (Apelido) (Fx)',
-                                        'Código de Rastreio da Transportadora',
-                                        Observações
-                                    )
-                                } As Items,
-                                If(
-                                    ThisItem.Value = 'RMA Stage'.Devolvido,
-                                    SortByColumns(
-                                        FirstN(
-                                            SortByColumns(
-                                                Items.Value,
-                                                "modifiedon",
-                                                SortOrder.Descending
-                                            ),
-                                            50
-                                        ),
-                                        "new_lembreteexpirado",
-                                        SortOrder.Descending,
-                                        "new_posicao",
-                                        SortOrder.Ascending
-                                    ),
-                                    Items.Value
-                                )
-                            )
-                        Layout: =Layout.Vertical
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinHeight: =287
-                        LayoutMinWidth: =320
-                        LoadingSpinner: =LoadingSpinner.Data
-                        OnSelect: =
-                        TemplateSize: =100
-                        ZIndex: =4
-
-                        Separator1 As rectangle:
-                            BorderColor: =RGBA(0, 0, 0, 0)
-                            Fill: =ColorFade(RGBA(0, 120, 212, 1), -30%)
-                            Height: =1
-                            OnSelect: =Select(Parent)
-                            Visible: =false
-                            Width: =Parent.TemplateWidth
-                            Y: =RMASLaneTemplateContainer.Y+RMASLaneTemplateContainer.Height
-                            ZIndex: =1
-
-                        RMASubtitleLabel_1 As label:
-                            Align: =Align.Center
-                            AutoHeight: =true
-                            BorderColor: =RGBA(0, 0, 0, 0)
-                            BorderStyle: =BorderStyle.None
-                            BorderThickness: =2
-                            Color: =RGBA(51, 51, 51, 1)
-                            DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FocusedBorderThickness: =2
-                            Font: =Font.Lato
-                            Height: =
-                            OnSelect: =
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =10.5
-                            Text: ="R$ 0,00"
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =
-                            X: =20
-                            Y: =40
-                            ZIndex: =2
-
-                        RMASLaneTemplateRectangle As rectangle:
-                            BorderColor: =RGBA(255, 0, 0, 1)
-                            BorderStyle: =
-                            BorderThickness: =1
-                            DisabledFill: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(0, 0, 0, 0)
-                            FocusedBorderColor: =RGBA(0, 120, 212, 1)
-                            Height: =RMASLaneTemplateContainer.Height
-                            HoverFill: =RGBA(0, 0, 0, 0.1)
-                            OnSelect: |
-                                =Patch(
-                                    AppPreferences,
-                                    Defaults(AppPreferences),
-                                    {
-                                        User: CurrentUser,
-                                        'Preference Key': "CadastroMercadoriaRMA_" & Now(),
-                                        StringValue: ThisItem.RMA
-                                    }
-                                );
-                                Launch(
-                                    //"https://unium.crm2.dynamics.com/main.aspx?appid=3ec4d8a9-2a8e-ee11-8179-002248de6f66&forceUCI=1&pagetype=entityrecord&etn=new_rma&id=" & ThisItem.RMA,
-                                    "https://unium.crm2.dynamics.com/main.aspx?appid=090088ff-5c8d-ee11-8179-002248de672c&pagetype=custom&name=new_cadastroderetornodemercadoriapage_754dc",//"https://unium.crm2.dynamics.com/main.aspx?pagetype=custom&name=new_cadastroderetornodemercadoriapage_754dc",
-                                    Blank(),
-                                    LaunchTarget.New
-                                );
-                            PressedFill: =RGBA(255, 255, 255, 0.1)
-                            Width: =RMASLaneTemplateContainer.Width
-                            ZIndex: =3
-
-                        RMASLaneTemplateContainer As groupContainer.verticalAutoLayoutContainer:
-                            BorderColor: =Color.Red
-                            BorderStyle: |-
-                                =If(
-                                    Or(
-                                        ThisItem.Sinalizar = true,
-                                        And(
-                                            ThisItem.'Data do Lembrete' < Now(),
-                                            !IsBlank(ThisItem.'Data do Lembrete')
-                                        )
-                                    ),
-                                    BorderStyle.Dotted,
-                                    BorderStyle.None
-                                )
-                            BorderThickness: =1
-                            DropShadow: =DropShadow.Semilight
-                            Height: |-
-                                =RMATitleLabel.Height + RMASubtitleContainer.Height + If(
-                                    RMABodyLabel.Visible,
-                                    RMABodyLabel.Height + Self.LayoutGap
-                                ) + RMATitleLabel.Height + If(
-                                    RMALembreteLabel.Visible,
-                                    RMALembreteLabel.Height + Self.LayoutGap
-                                ) + SituacaoContainer.Height + ClienteInformadoCheckbox.Height + Self.LayoutGap * 6
-                            LayoutAlignItems: =LayoutAlignItems.Stretch
-                            LayoutDirection: =LayoutDirection.Vertical
-                            LayoutGap: =5
-                            LayoutGridColumns: =6
-                            LayoutGridRows: =6
-                            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-                            LayoutMode: =LayoutMode.Auto
-                            PaddingBottom: =10
-                            PaddingLeft: =10
-                            PaddingRight: =10
-                            PaddingTop: =10
-                            RadiusBottomLeft: =4
-                            RadiusBottomRight: =4
-                            RadiusTopLeft: =4
-                            RadiusTopRight: =4
-                            Width: =LaneWidth-Parent.TemplatePadding*2
-                            ZIndex: =4
-
-                            RMATitleLabel As label:
-                                AutoHeight: =true
-                                BorderColor: =RGBA(0, 0, 0, 0)
-                                BorderStyle: =BorderStyle.None
-                                BorderThickness: =2
-                                Color: =RGBA(51, 51, 51, 1)
-                                DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                DisabledColor: =RGBA(166, 166, 166, 1)
-                                FocusedBorderThickness: =2
-                                Font: =Font.Lato
-                                FontWeight: =FontWeight.Semibold
-                                LayoutMaxHeight: =
-                                LayoutMaxWidth: =
-                                LayoutMinHeight: =0
-                                LayoutMinWidth: =0
-                                OnSelect: =Select(RMASLaneTemplateRectangle)
-                                PaddingBottom: =0
-                                PaddingLeft: =0
-                                PaddingRight: =0
-                                PaddingTop: =0
-                                Size: =10.5
-                                Text: |-
-                                    =ThisItem.Id & ": " & LookUp(
-                                        RMAS As R,
-                                        R.RMA = ThisItem.RMA,
-                                        Coalesce(
-                                            R.Cliente.'Full Name',
-                                            R.'Ordem de Serviço'.'Projeto (Apelido)',
-                                            R.'Ordem de Serviço'.'Nome do Cliente (Fx)',
-                                            R.'Ordem de Serviço'.Name
-                                        )
-                                    )
-                                VerticalAlign: =VerticalAlign.Top
-                                Width: =
-                                X: =12
-                                Y: =6
+                            Apelido1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="Apelido"
+                                FieldName: ="cr22f_apelido"
+                                FieldType: ="s"
+                                FieldVariantName: ="textualColumn"
+                                Order: =1
                                 ZIndex: =1
 
-                            RMASubtitleContainer As groupContainer.horizontalAutoLayoutContainer:
-                                FillPortions: =0
-                                Height: =Max(InfoContainer.Height,40)
-                                LayoutAlignItems: =LayoutAlignItems.Stretch
-                                LayoutGridColumns: =6
-                                LayoutGridRows: =6
-                                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-                                LayoutMaxHeight: =
-                                LayoutMaxWidth: =
-                                LayoutMinHeight: =100
-                                LayoutMinWidth: =0
-                                LayoutMode: =LayoutMode.Auto
-                                RadiusBottomLeft: =4
-                                RadiusBottomRight: =4
-                                RadiusTopLeft: =4
-                                RadiusTopRight: =4
-                                ZIndex: =3
+                            Ano1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="Ano"
+                                FieldName: ="cr22f_ano"
+                                FieldType: ="s"
+                                FieldVariantName: ="textualColumn"
+                                Order: =2
+                                ZIndex: =2
 
-                                PosicaoContainer_1 As groupContainer.verticalAutoLayoutContainer:
-                                    AlignInContainer: =AlignInContainer.SetByContainer
-                                    FillPortions: =0
-                                    Height: =40
-                                    LayoutAlignItems: =LayoutAlignItems.End
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGridColumns: =6
-                                    LayoutGridRows: =6
-                                    LayoutJustifyContent: =LayoutJustifyContent.Center
-                                    LayoutMaxHeight: =
-                                    LayoutMaxWidth: =
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                    LayoutMode: =LayoutMode.Auto
-                                    RadiusBottomLeft: =4
-                                    RadiusBottomRight: =4
-                                    RadiusTopLeft: =4
-                                    RadiusTopRight: =4
-                                    Width: =30
-                                    ZIndex: =1
+                    FormRowContainer_4 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        ZIndex: =3
 
-                                    PosicaoUpButton_1 As Button:
-                                        Appearance: ='ButtonCanvas.Appearance'.Transparent
-                                        BasePaletteColor: =
-                                        BorderColor: =
-                                        DisplayMode: =DisplayMode.Edit
-                                        FillPortions: =1
-                                        FontColor: =
-                                        Height: =32
-                                        Icon: ="ChevronUp"
-                                        Layout: ='ButtonCanvas.Layout'.IconOnly
-                                        LayoutMaxHeight: =
-                                        LayoutMaxWidth: =
-                                        LayoutMinWidth: =96
-                                        OnSelect: |-
-                                            =// Definir a variável global para armazenar a lista atual ordenada corretamente
-                                            UpdateContext({SpinCounter:SpinCounter+1});
-                                            Set(
-                                                colItensOrdenados,
-                                                ShowColumns(
-                                                    Filter(
-                                                        RMASAtivos As L,
-                                                        L.Situação = ThisItem.Situação
-                                                    ),
-                                                    Posição,
-                                                    RMA
-                                                )
-                                            );
-                                            // Encontrar o índice do item na lista ordenada
-                                            Set(
-                                                indexItem,
-                                                LookUp(
-                                                    ForAll(
-                                                        Sequence(CountRows(colItensOrdenados)),
-                                                        {
-                                                            Index: Value,
-                                                            ID: Last(
-                                                                FirstN(
-                                                                    colItensOrdenados,
-                                                                    Value
-                                                                )
-                                                            ).new_rmaid
-                                                        }
-                                                    ),
-                                                    ID = ThisItem.RMA
-                                                ).Index
-                                            );
-                                            // Se o item estiver no topo, não faz nada
-                                            If(
-                                                indexItem = 1,
-                                                Notify(
-                                                    "Este item já está no topo.",
-                                                    NotificationType.Warning
-                                                ),
-                                                With(
-                                                    {
-                                                        itemAtual: LookUp(
-                                                            colItensOrdenados,
-                                                            new_rmaid = ThisItem.RMA
-                                                        ),
-                                                        itemAnterior: Last(
-                                                            FirstN(
-                                                                colItensOrdenados,
-                                                                indexItem - 1
-                                                            )
-                                                        )
-                                                    },
-                                                    Concurrent(
-                                                        Patch(
-                                                            RMAS,
-                                                            itemAtual,
-                                                            {Posição: itemAnterior.new_posicao}
-                                                        ),
-                                                        Patch(
-                                                            RMAS,
-                                                            itemAnterior,
-                                                            {Posição: itemAtual.new_posicao}
-                                                        )
-                                                    )
-                                                )
-                                            );
-                                            Select(RefreshButton);
-                                            UpdateContext({SpinCounter:SpinCounter-1})
-                                        Text: ="Up"
-                                        Width: =40
-                                        X: =0
-                                        Y: =0
-                                        ZIndex: =1
+                        FormRowLabelText_4 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="OS"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =120
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
 
-                                    PosicaoDownButton_1 As Button:
-                                        Appearance: ='ButtonCanvas.Appearance'.Transparent
-                                        BasePaletteColor: =
-                                        BorderColor: =
-                                        DisplayMode: =DisplayMode.Edit
-                                        FillPortions: =1
-                                        FontColor: =
-                                        Height: =32
-                                        Icon: ="ChevronDown"
-                                        Layout: ='ButtonCanvas.Layout'.IconOnly
-                                        LayoutMaxHeight: =
-                                        LayoutMaxWidth: =
-                                        LayoutMinWidth: =96
-                                        OnSelect: |-
-                                            =UpdateContext({SpinCounter:SpinCounter+1});
-                                            // Definir a variável global para armazenar a lista atual ordenada corretamente
-                                            Set(
-                                                colItensOrdenados,
-                                                ShowColumns(
-                                                    Filter(
-                                                        RMASAtivos As L,
-                                                        L.Situação = ThisItem.Situação
-                                                    ),
-                                                    Posição,
-                                                    RMA
-                                                )
-                                            );
-                                            // Encontrar o índice do item na lista ordenada
-                                            Set(
-                                                indexItem,
-                                                LookUp(
-                                                    ForAll(
-                                                        Sequence(CountRows(colItensOrdenados)),
-                                                        {
-                                                            Index: Value,
-                                                            ID: Last(
-                                                                FirstN(
-                                                                    colItensOrdenados,
-                                                                    Value
-                                                                )
-                                                            ).new_rmaid
-                                                        }
-                                                    ),
-                                                    ID = ThisItem.RMA
-                                                ).Index
-                                            );
-                                            // Se o item já estiver na última posição, não faz nada
-                                            If(
-                                                indexItem = CountRows(colItensOrdenados),
-                                                Notify(
-                                                    "Este item já está na última posição.",
-                                                    NotificationType.Warning
-                                                ),
-                                                With(
-                                                    {
-                                                        itemAtual: LookUp(
-                                                            colItensOrdenados,
-                                                            new_rmaid = ThisItem.RMA
-                                                        ),
-                                                        itemProximo: Last(
-                                                            FirstN(
-                                                                colItensOrdenados,
-                                                                indexItem + 1
-                                                            )
-                                                        )
-                                                    },
-                                                    Concurrent(
-                                                        Patch(
-                                                            RMAS,
-                                                            itemAtual,
-                                                            {Posição: itemProximo.new_posicao}
-                                                        ),
-                                                        Patch(
-                                                            RMAS,
-                                                            itemProximo,
-                                                            {Posição: itemAtual.new_posicao}
-                                                        )
-                                                    )
-                                                )
-                                            );
-                                            Select(RefreshButton);
-                                            UpdateContext({SpinCounter:SpinCounter-1})
-                                            /*
-                                            Patch(RMAS,
-                                                            itemAtual, 
-                                                            { new_posicao: itemProximo.Posição }
-                                                        );
-                                                        Patch(RMAS,
-                                                            itemProximo, 
-                                                            { new_posicao: Items.itemAtual.Posição }
-                                                        )
-                                            */
-                                        Text: ="Down"
-                                        Width: =40
-                                        X: =0
-                                        Y: =0
-                                        ZIndex: =2
-
-                                    ExpandButton As Button:
-                                        Appearance: ='ButtonCanvas.Appearance'.Transparent
-                                        BasePaletteColor: =
-                                        BorderColor: =
-                                        DisplayMode: =DisplayMode.Edit
-                                        FillPortions: =1
-                                        FontColor: =
-                                        Height: =32
-                                        Icon: ="Info"
-                                        Layout: ='ButtonCanvas.Layout'.IconOnly
-                                        LayoutMaxHeight: =
-                                        LayoutMaxWidth: =
-                                        LayoutMinWidth: =96
-                                        OnSelect: |-
-                                            =UpdateContext(
-                                                {
-                                                    ItemToExpand: If(
-                                                        ItemToExpand = ThisItem.RMA,
-                                                        Blank(),
-                                                        ThisItem.RMA
-                                                    )
-                                                }
-                                            )
-                                        Text: ="Expand"
-                                        Visible: |-
-                                            =If(
-                                                (Len(ThisItem.Descrição) + Len(ThisItem.Observações)) > 60,
-                                                true,
-                                                false
-                                            )
-                                        Width: =40
-                                        X: =0
-                                        Y: =0
-                                        ZIndex: =3
-
-                                InfoContainer As groupContainer.verticalAutoLayoutContainer:
-                                    AlignInContainer: =AlignInContainer.Center
-                                    Height: =If(RMAValueLabel.Visible,RMAValueLabel.Height)
-                                    LayoutAlignItems: =LayoutAlignItems.Stretch
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGridColumns: =6
-                                    LayoutGridRows: =6
-                                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-                                    LayoutMaxHeight: =
-                                    LayoutMaxWidth: =
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                    LayoutMode: =LayoutMode.Auto
-                                    LayoutWrap: =true
-                                    RadiusBottomLeft: =4
-                                    RadiusBottomRight: =4
-                                    RadiusTopLeft: =4
-                                    RadiusTopRight: =4
-                                    ZIndex: =4
-
-                                    RMAValueLabel As label:
-                                        AlignInContainer: =AlignInContainer.Stretch
-                                        AutoHeight: =true
-                                        BorderColor: =RGBA(0, 0, 0, 0)
-                                        BorderStyle: =BorderStyle.None
-                                        BorderThickness: =2
-                                        Color: =RGBA(51, 51, 51, 1)
-                                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                        DisabledColor: =RGBA(166, 166, 166, 1)
-                                        FocusedBorderThickness: =2
-                                        Font: =Font.Lato
-                                        Height: =0
-                                        LayoutMaxHeight: =
-                                        LayoutMaxWidth: =
-                                        LayoutMinWidth: =0
-                                        OnSelect: =Select(RMASLaneTemplateRectangle)
-                                        PaddingBottom: =0
-                                        PaddingLeft: =0
-                                        PaddingRight: =0
-                                        PaddingTop: =0
-                                        Size: =9
-                                        Text: |-
-                                            =With(
-                                                {
-                                                    Value: ThisItem.Descrição & If(
-                                                        Len(TrimEnds(ThisItem.Observações)) > 0,
-                                                        "
-                                                
-                                            " & ThisItem.Observações
-                                                    )
-                                                } As T,
-                                                If(
-                                                    Len(T.Value) <= 60,
-                                                    T.Value,
-                                                    If(
-                                                        ItemToExpand = ThisItem.RMA,
-                                                        T.Value,
-                                                        Left(
-                                                            T.Value,
-                                                            60
-                                                        ) & "..."
-                                                    )
-                                                )
-                                            )
-                                        VerticalAlign: =VerticalAlign.Top
-                                        Width: =
-                                        X: =12
-                                        Y: =6
-                                        ZIndex: =1
-
-                            RMABodyLabel As label:
-                                AutoHeight: =true
-                                BorderColor: =RGBA(0, 0, 0, 0)
-                                BorderStyle: =BorderStyle.None
-                                BorderThickness: =2
-                                Color: =RGBA(51, 51, 51, 1)
-                                DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                DisabledColor: =RGBA(166, 166, 166, 1)
-                                FocusedBorderThickness: =2
-                                Font: =Font.Lato
-                                FontWeight: =FontWeight.Lighter
-                                Height: =
-                                LayoutMaxHeight: =
-                                LayoutMaxWidth: =
-                                LayoutMinWidth: =0
-                                OnSelect: =
-                                PaddingBottom: =0
-                                PaddingLeft: =0
-                                PaddingRight: =0
-                                PaddingTop: =0
-                                Size: =8
-                                Text: |-
-                                    =Concatenate(
-                                        LookUp(
-                                            RMAS As R,
-                                            R.RMA = ThisItem.RMA,
-                                            R.'Tipo de RMA'
+                        OSComboboxCanvas As Combobox.pcfdataset:
+                            AccessibleLabel: =""
+                            Appearance: ="FilledDarker"
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DefaultSelectedItems: |-
+                                =[
+                                    LookUp(
+                                        'Ordens de Serviço Field Control' As OS,
+                                        OS.'Ordem de Serviço Field Control' = RMASelecionado.'Ordem de Serviço'.'Ordem de Serviço Field Control'
+                                    )
+                                ]//OSSelecionada
+                            DisplayMode: =DisplayMode.Edit
+                            FillPortions: =1
+                            Font: =""
+                            FontItalic: =false
+                            FontSize: =0
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            FontWeight: =""
+                            Height: =32
+                            InputTextPlaceholder: ="Buscar OS"
+                            IsSearchable: =true
+                            Items: |-
+                                =AddColumns(
+                                    Search(
+                                        Filter(
+                                            'Ordens de Serviço Field Control' As OS,
+                                            !IsBlank(OS.Projeto),
+                                            OS.Projeto.Projeto = ProjetoComboboxCanvas.Selected.Projeto
                                         ),
-                                        ": ",
-                                        Concat(
-                                            Distinct(
-                                                Filter(
-                                                    'Estoque-RMAS' As E,
-                                                    E.'Estoque-RMA' in Distinct(
-                                                        ThisItem.'Estoque-RMAS' As I,
-                                                        I.'Estoque-RMA'
-                                                    )
-                                                ) As Item,
-                                                Item.Produto.'Referência do Produto'
-                                            ) As Item,
-                                            Item.Value,
-                                            ", "
+                                        Self.SearchText,
+                                        Name,
+                                        'Nome do Cliente (Fx)'
+                                    ) As OS,
+                                    _Label,
+                                    OS.Name & " - " & First(
+                                        SortByColumns(
+                                            Filter(
+                                                'Atividades Field Control' As T,
+                                                !IsBlank(T.'Ordem de Serviço Field Control'),
+                                                T.'Ordem de Serviço'.'Ordem de Serviço Field Control' = OS.'Ordem de Serviço Field Control',
+                                                T.'Status Atividade' = "done"
+                                            ),
+                                            "new_agendamento",
+                                            SortOrder.Descending
+                                        )
+                                    ).Agendamento
+                                )
+                            LayoutMaxHeight: =32
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =32
+                            LayoutMinWidth: =16
+                            MultiValueDelimiter: =", "
+                            OnChange: |-
+                                =Patch(
+                                    RMAS,
+                                    LookUp(// registro que será atualizado
+                                        RMAS,
+                                        RMA = RMAId// condição pra achar o RMA certo
+                                    ),
+                                    {
+                                        'Ordem de Serviço': LookUp(
+                                            'Ordens de Serviço Field Control' As OS,
+                                            OS.'Ordem de Serviço Field Control' = Self.Selected.'Ordem de Serviço Field Control'
+                                        )// ou Self.Selected se estiver no próprio ComboBox
+                                    }
+                                );
+                                ClearCollect(
+                                    OSSelecionada,
+                                    If(
+                                        !IsBlank(RMASelecionado.'Ordem de Serviço'),
+                                        LookUp(
+                                            'Ordens de Serviço Field Control' As OS,
+                                            OS.'Ordem de Serviço Field Control' = RMASelecionado.'Ordem de Serviço'.'Ordem de Serviço Field Control'
                                         )
                                     )
-                                VerticalAlign: =VerticalAlign.Top
-                                Visible: =Len(Self.Text) > 0
-                                Width: =
-                                X: =12
-                                Y: =6
-                                ZIndex: =4
+                                )
+                            Required: =false
+                            SelectMultiple: =false
+                            TabIndex: =0
+                            Tooltip: =""
+                            TriggerOutput: ='ComboboxCanvas.TriggerOutput'.Keypress
+                            ValidationState: ="None"
+                            Visible: =true
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
 
-                            RMALembreteLabel As label:
-                                AutoHeight: =true
-                                BorderColor: =RGBA(0, 0, 0, 0)
-                                BorderStyle: =BorderStyle.None
-                                BorderThickness: =2
-                                Color: =RGBA(51, 51, 51, 1)
-                                DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                DisabledColor: =RGBA(166, 166, 166, 1)
-                                FocusedBorderThickness: =2
-                                Font: =Font.Lato
-                                FontWeight: =FontWeight.Lighter
-                                Height: =
-                                LayoutMaxHeight: =
-                                LayoutMaxWidth: =
-                                LayoutMinWidth: =0
-                                OnSelect: =
-                                PaddingBottom: =0
-                                PaddingLeft: =0
-                                PaddingRight: =0
-                                PaddingTop: =0
-                                Size: =8
-                                Text: |-
-                                    ="Data Lembrete: " & Text(ThisItem.'Data do Lembrete',DateTimeFormat.ShortDate,"pt-BR")
-                                VerticalAlign: =VerticalAlign.Top
-                                Visible: =!IsBlank(ThisItem.'Data do Lembrete')
-                                Width: =
-                                X: =12
-                                Y: =6
-                                ZIndex: =5
+                            _Label2 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="_Label"
+                                FieldName: ="_Label"
+                                FieldType: ="s"
+                                FieldVariantName: ="textualColumn"
+                                Order: =1
+                                ZIndex: =1
 
-                            SituacaoContainer As groupContainer.verticalAutoLayoutContainer:
-                                AlignInContainer: =AlignInContainer.SetByContainer
-                                FillPortions: =0
-                                Height: =20
-                                LayoutAlignItems: =LayoutAlignItems.Stretch
-                                LayoutGridColumns: =6
-                                LayoutGridRows: =6
-                                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-                                LayoutMaxHeight: =
-                                LayoutMaxWidth: =
-                                LayoutMinHeight: =0
-                                LayoutMinWidth: =0
-                                LayoutMode: =LayoutMode.Auto
-                                RadiusBottomLeft: =4
-                                RadiusBottomRight: =4
-                                RadiusTopLeft: =4
-                                RadiusTopRight: =4
-                                Width: =30
-                                ZIndex: =6
+                    FormRowContainer_7 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        ZIndex: =4
 
-                                SituacaoLeftButton As Button:
-                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
-                                    BasePaletteColor: =
-                                    BorderColor: =
-                                    DisplayMode: |-
-                                        =If(
-                                            Or(
-                                                ThisItem.Situação = Blank(),
-                                                ThisItem.Situação = Min(
-                                                    Choices('RMA Stage') As S,
-                                                    S.Value
+                        FormRowLabelText_7 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Situação"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =120
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                        SituacaoComboboxCanvas As Combobox.pcfdataset:
+                            AccessibleLabel: =""
+                            Appearance: ="FilledDarker"
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DefaultSelectedItems: =[RMASelecionado.Situação]
+                            DisplayMode: =DisplayMode.Edit
+                            FillPortions: =1
+                            Font: =""
+                            FontItalic: =false
+                            FontSize: =0
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            FontWeight: =""
+                            Height: =32
+                            InputTextPlaceholder: ="Escolha a situação"
+                            IsSearchable: =true
+                            Items: =Choices('RMA Stage')
+                            LayoutMaxHeight: =32
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =32
+                            LayoutMinWidth: =16
+                            MultiValueDelimiter: =", "
+                            OnChange: |-
+                                =Patch(
+                                    RMAS,
+                                    LookUp(// registro que será atualizado
+                                        RMAS,
+                                        RMA = RMAId// condição pra achar o RMA certo
+                                    ),
+                                    {
+                                        Situação: Self.Selected.Value
+                                    }
+                                )
+                            Required: =false
+                            SelectMultiple: =false
+                            TabIndex: =0
+                            Tooltip: =""
+                            TriggerOutput: ='ComboboxCanvas.TriggerOutput'.Keypress
+                            ValidationState: ="None"
+                            Visible: =true
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =3
+
+                            Value1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="Value"
+                                FieldName: ="Value"
+                                FieldType: ="l"
+                                FieldVariantName: ="textualColumn"
+                                Order: =1
+                                ZIndex: =1
+
+                    FormRowContainer_8 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =100
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        ZIndex: =5
+
+                        FormRowLabelText_8 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Observações"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =120
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
+
+                        "TextInputCanvas1 As 'Text input'":
+                            BasePaletteColor: =
+                            BorderColor: =
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            FillPortions: =1
+                            FontColor: =
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =16
+                            LayoutMinWidth: =16
+                            OnChange: |-
+                                =Patch(
+                                    RMAS,{RMA:RMASelecionado.RMA,Observações:Self.Value}
+                                )
+                            Value: =RMASelecionado.Observações
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                    MercadoriasHeaderText As Text:
+                        Align: ='TextCanvas.Align'.Center
+                        BorderColor: =
+                        DisplayMode: =DisplayMode.Edit
+                        Fill: =
+                        Font: =Font.Lato
+                        FontColor: =
+                        Height: =24
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Text: ="Mercadorias Devolvidas"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Weight: ='TextCanvas.Weight'.Bold
+                        Width: =96
+                        X: =0
+                        Y: =0
+                        ZIndex: =6
+
+                    "MercadoriasCommandBar As 'Fluent Command Bar (1.1.29)'.pcfdataset":
+                        AccessibilityLabel: =""
+                        ContentLanguage: =""
+                        DisplayMode: =DisplayMode.Edit
+                        Height: =32
+                        InputEvent: =""
+                        Items: |-
+                            =Table(
+                                {
+                                    ItemKey: "New",
+                                    ItemIconName: "Add",
+                                    ItemDisplayName: "Nova Mercadoria"
+                                }
+                            )
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =200
+                        LayoutMinWidth: =200
+                        OnChange: =false
+                        OnSelect: |-
+                            =Switch(
+                                Self.Selected.ItemKey,
+                                "New",
+                                Set(
+                                    NovoCadastro,
+                                    true
+                                )
+                            )
+                        TabIndex: =0
+                        Theme: =AppThemeJson
+                        Tooltip: ="Command Bar component"
+                        Visible: =true
+                        Width: =600 
+                        X: =0
+                        Y: =0
+                        ZIndex: =7
+
+                    MercadoriasTable As Table.pcfdataset:
+                        DateOnlyFormat: ='PowerAppsOneGrid.DateOnlyFormat'.ShortDate
+                        DateTimeFormat: ='PowerAppsOneGrid.DateTimeFormat'.ShortDateTime
+                        DisplayMode: =DisplayMode.Edit
+                        FillPortions: =1
+                        Height: =If(Self.Y + 500 > Parent.Height, Parent.Height - Self.Y, 500)
+                        Items: |-
+                            =SortByColumns(
+                                Filter(
+                                    'Estoque-RMAS' As ER,
+                                    !IsBlank(ER.RMA),
+                                    ER.RMA.RMA = RMAId
+                                ),
+                                "createdon",
+                                SortOrder.Descending
+                            )
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        onCellValueChange: =false
+                        onFilter: =false
+                        onNavigate: =false
+                        onRowSelect: =false
+                        onSave: =false
+                        OnSelect: |-
+                            =Set(
+                                NovoCadastro,
+                                false
+                            );
+                            Set(
+                                EstoqueRMASelecionadoId,
+                                Self.Selected.RMA
+                            )
+                        Width: =If(Self.X + 800 > Parent.Width, Parent.Width - Self.X, 800)
+                        X: =0
+                        Y: =0
+                        ZIndex: =8
+
+                        "'Etiqueta Produto Antigo1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Etiqueta Produto Antigo"
+                            FieldName: ="new_etiquetaprodutoantigo"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =1
+                            Width: =0
+                            ZIndex: =1
+
+                        "'Etiqueta Produto Novo1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Etiqueta Produto Novo"
+                            FieldName: ="new_etiquetaprodutonovo"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =2
+                            Width: =0
+                            ZIndex: =2
+
+                        "'Tipo de RMA1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Tipo de RMA"
+                            FieldName: ="new_tipoderma"
+                            FieldType: ="l"
+                            FieldVariantName: ="textualColumn"
+                            Order: =3
+                            Width: =0
+                            ZIndex: =3
+
+                        "'Referência do Produto1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Referência do Produto"
+                            FieldName: ="new_referenciadoproduto"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =5
+                            Width: =0
+                            ZIndex: =5
+
+                        "'Created On1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Created On"
+                            FieldName: ="createdon"
+                            FieldType: ="d"
+                            FieldVariantName: ="textualColumn"
+                            Order: =5
+                            Width: =0
+                            ZIndex: =5
+
+                MercadoriasContainer_1 As groupContainer.horizontalAutoLayoutContainer:
+                    DropShadow: =DropShadow.Light
+                    Fill: =RGBA(255, 255, 255, 1)
+                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                    LayoutDirection: =LayoutDirection.Vertical
+                    LayoutGap: =10
+                    LayoutGridColumns: =6
+                    LayoutGridRows: =6
+                    LayoutMaxHeight: =0
+                    LayoutMaxWidth: =0
+                    LayoutMinHeight: =16
+                    LayoutMinWidth: =16
+                    LayoutMode: =LayoutMode.Auto
+                    PaddingBottom: =8
+                    PaddingLeft: =8
+                    PaddingRight: =8
+                    PaddingTop: =8
+                    RadiusBottomLeft: =10
+                    RadiusBottomRight: =10
+                    RadiusTopLeft: =10
+                    RadiusTopRight: =10
+                    Visible: =ShowMercadoriaInfo
+                    ZIndex: =7
+
+                    DetalhesMercadoriaHeaderText As Text:
+                        Align: ='TextCanvas.Align'.Center
+                        AutoHeight: =false
+                        BorderColor: =
+                        BorderStyle: =""
+                        ContentLanguage: =""
+                        DisplayMode: =DisplayMode.Edit
+                        Fill: =
+                        Font: =Font.Lato
+                        FontColor: =
+                        FontItalic: =false
+                        FontStrikethrough: =false
+                        FontUnderline: =false
+                        Height: =32
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =14
+                        TabIndex: =0
+                        Text: ="Detalhes da Mercadoria"
+                        Tooltip: =""
+                        VerticalAlign: =VerticalAlign.Middle
+                        Visible: =true
+                        Weight: ='TextCanvas.Weight'.Bold
+                        Width: =96
+                        Wrap: =true
+                        X: =0
+                        Y: =0
+                        ZIndex: =1
+
+                    FormRowContainer As groupContainer.verticalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        ZIndex: =2
+
+                        FormRowLabelText As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Tipo Devolução"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =200
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                        TipoDevolucaoDropdown As Dropdown.pcfdataset:
+                            AlignInContainer: =AlignInContainer.End
+                            DefaultSelectedItems: =[]
+                            DisplayMode: =If(NovoCadastro = true,DisplayMode.Edit,DisplayMode.View)
+                            FillPortions: =1
+                            Height: =32
+                            Items: =Choices('Tipo de RMA')
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =16
+                            LayoutMinWidth: =16
+                            OnChange: =Reset(ProdutoAntigoCombobox)
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =3
+
+                    FormRowContainer_1 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Visible: |-
+                            =TipoDevolucaoDropdown.Selected.Value in [
+                                'Tipo de RMA'.'Devolução de Empréstimo',
+                                'Tipo de RMA'.'Devolução Definitiva do Produto',
+                                'Tipo de RMA'.'Retorno Temporário ao Estoque',
+                                'Tipo de RMA'.'Retorno Para Troca de Produto'
+                            ]
+                        ZIndex: =3
+
+                        FormRowLabelText_1 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Produto Antigo"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =200
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                        ProdutoAntigoCombobox As Combobox.pcfdataset:
+                            DisplayMode: =If(NovoCadastro = true,DisplayMode.Edit,DisplayMode.View)
+                            FillPortions: =1
+                            Height: =32
+                            InputTextPlaceholder: ="Buscar mercadorias"
+                            Items: |-
+                                =AddColumns(
+                                    Switch(
+                                        TipoDevolucaoDropdown.Selected.Value,
+                                        'Tipo de RMA'.'Devolução de Empréstimo',
+                                        Search(
+                                            Filter(
+                                                'Estoque From SharepointLists' As E,
+                                                !IsBlank(E.'Produto-Serviço'),
+                                                E.'Produto-Serviço'.'É Empréstimo' = 'É Empréstimo (Produtos-Serviço)'.Yes,
+                                                E.'Produto-Serviço'.'Empréstimo Devolvido' <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes,
+                                                E.'Produto-Serviço'.Projeto.Projeto = ProjetoComboboxCanvas.Selected.Projeto,
+                                                Or(
+                                                    E.Situação = "Entregue",
+                                                    E.'Produto-Serviço'.Entregue = 'Entregue (Produtos-Serviço)'.Yes
                                                 )
                                             ),
-                                            DisplayMode.Disabled,
-                                            DisplayMode.Edit
+                                            Self.SearchText,
+                                            'Referência do Produto',
+                                            'Etiqueta Em Texto (Calculated)'
+                                        ),
+                                        'Tipo de RMA'.Manutenção,
+                                        Search(
+                                            Filter(
+                                                'Estoque From SharepointLists' As E,
+                                                !IsBlank(E.'Produto-Serviço'),
+                                                E.'Produto-Serviço'.'É Empréstimo' <> 'É Empréstimo (Produtos-Serviço)'.Yes,
+                                                E.'Produto-Serviço'.'Empréstimo Devolvido' <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes,
+                                                E.'Produto-Serviço'.Projeto.Projeto = ProjetoComboboxCanvas.Selected.Projeto,
+                                                Or(
+                                                    E.Situação = "Entregue",
+                                                    E.'Produto-Serviço'.Entregue = 'Entregue (Produtos-Serviço)'.Yes
+                                                ),
+                                                E.Quantidade = 1
+                                            ),
+                                            Self.SearchText,
+                                            'Referência do Produto',
+                                            'Etiqueta Em Texto (Calculated)'
+                                        ),
+                                        'Tipo de RMA'.'Devolução Definitiva do Produto',
+                                        Search(
+                                            Filter(
+                                                'Estoque From SharepointLists' As E,
+                                                !IsBlank(E.'Produto-Serviço'),
+                                                E.'Produto-Serviço'.'Opção de Fornecimento' = 'Opção de Fornecimento'.Padrão,
+                                                E.'Produto-Serviço'.'É Empréstimo' <> 'É Empréstimo (Produtos-Serviço)'.Yes,
+                                                E.'Produto-Serviço'.Projeto.Projeto = ProjetoComboboxCanvas.Selected.Projeto,
+                                                Or(
+                                                    E.Situação = "Entregue",
+                                                    E.'Produto-Serviço'.Entregue = 'Entregue (Produtos-Serviço)'.Yes
+                                                ),
+                                                E.'Quantidade Disponível Devolução' > 0
+                                            ),
+                                            Self.SearchText,
+                                            'Referência do Produto',
+                                            'Etiqueta Em Texto (Calculated)'
+                                        ),
+                                        'Tipo de RMA'.'Retorno Temporário ao Estoque',
+                                        Search(
+                                            Filter(
+                                                'Estoque From SharepointLists' As E,
+                                                !IsBlank(E.'Produto-Serviço'),
+                                                E.'Produto-Serviço'.'Opção de Fornecimento' = 'Opção de Fornecimento'.Padrão,
+                                                E.'Produto-Serviço'.'É Empréstimo' <> 'É Empréstimo (Produtos-Serviço)'.Yes,
+                                                E.'Produto-Serviço'.Projeto.Projeto = ProjetoComboboxCanvas.Selected.Projeto,
+                                                Or(
+                                                    E.Situação = "Entregue",
+                                                    E.'Produto-Serviço'.Entregue = 'Entregue (Produtos-Serviço)'.Yes
+                                                ),
+                                                E.Quantidade = 1
+                                            ),
+                                            Self.SearchText,
+                                            'Referência do Produto',
+                                            'Etiqueta Em Texto (Calculated)'
+                                        ),
+                                        'Tipo de RMA'.'Retorno Para Troca de Produto',
+                                        Search(
+                                            Filter(
+                                                'Estoque From SharepointLists' As E,
+                                                !IsBlank(E.'Produto-Serviço'),
+                                                E.'Produto-Serviço'.'Opção de Fornecimento' = 'Opção de Fornecimento'.Padrão,
+                                                E.'Produto-Serviço'.'É Empréstimo' <> 'É Empréstimo (Produtos-Serviço)'.Yes,
+                                                E.'Produto-Serviço'.Projeto.Projeto = ProjetoComboboxCanvas.Selected.Projeto,
+                                                Or(
+                                                    E.Situação = "Entregue",
+                                                    E.'Produto-Serviço'.Entregue = 'Entregue (Produtos-Serviço)'.Yes
+                                                ),
+                                                E.Quantidade = 1
+                                            ),
+                                            Self.SearchText,
+                                            'Referência do Produto',
+                                            'Etiqueta Em Texto (Calculated)'
                                         )
-                                    FillPortions: =1
-                                    FontColor: =
-                                    Height: =32
-                                    Icon: ="ChevronLeft"
-                                    Layout: ='ButtonCanvas.Layout'.IconOnly
-                                    LayoutMaxHeight: =
-                                    LayoutMaxWidth: =
-                                    OnSelect: |-
-                                        =UpdateContext({SpinCounter: SpinCounter + 1});
+                                    ) As E,
+                                    _Label,
+                                    E.'Etiqueta Em Texto (Calculated)' & " - " & E.'Referência do Produto'
+                                )
+                            LayoutMaxHeight: =32
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =32
+                            LayoutMinWidth: =16
+                            OnChange: |-
+                                =Set(
+                                    _SN,
+                                    LookUp(
+                                        'Estoque From SharepointLists' As E,
+                                        E.'Estoque From SharepointList' = Self.Selected.'Estoque From SharepointList',
+                                        E.'Número de Série'
+                                    )
+                                )
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =3
+
+                            new_etiquetaemtextocalculated1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="new_etiquetaemtextocalculated"
+                                FieldName: ="new_etiquetaemtextocalculated"
+                                FieldType: ="s"
+                                FieldVariantName: ="textualColumn"
+                                Order: =3
+                                ZIndex: =2
+
+                            _Label1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="_Label"
+                                FieldName: ="_Label"
+                                FieldType: ="s"
+                                FieldVariantName: ="textualColumn"
+                                Order: =2
+                                ZIndex: =3
+
+                            new_referenciadoproduto1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="new_referenciadoproduto"
+                                FieldName: ="new_referenciadoproduto"
+                                FieldType: ="s"
+                                FieldVariantName: ="textualColumn"
+                                Order: =3
+                                ZIndex: =3
+
+                    FormRowContainer_9 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Visible: |-
+                            =TipoDevolucaoDropdown.Selected.Value in [
+                                'Tipo de RMA'.'Devolução de Empréstimo',
+                                'Tipo de RMA'.'Devolução Definitiva do Produto',
+                                'Tipo de RMA'.'Retorno Temporário ao Estoque',
+                                'Tipo de RMA'.'Retorno Para Troca de Produto'
+                            ]
+                        ZIndex: =4
+
+                        FormRowLabelText_9 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Quantidade Devolvida"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =200
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
+
+                        "NumberInput1 As 'Number input'":
+                            BasePaletteColor: =
+                            BorderColor: =
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            FillPortions: =1
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =16
+                            LayoutMinWidth: =16
+                            Max: |-
+                                =LookUp(
+                                    'Estoque From SharepointLists' As E,
+                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                    E.'Quantidade Disponível Devolução'
+                                )
+                            Min: =1
+                            Value: |-
+                                =LookUp(
+                                    'Estoque From SharepointLists' As E,
+                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                    E.'Quantidade Disponível Devolução'
+                                )
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                    FormRowContainer_6 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Visible: |-
+                            =Or(
+                                TipoDevolucaoDropdown.Selected.Value in ['Tipo de RMA'.Manutenção,'Tipo de RMA'.'Devolução Definitiva do Produto']
+                            )
+                        ZIndex: =5
+
+                        FormRowLabelText_6 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Produto Novo"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =200
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
+
+                        ProdutoNovoCombobox As Combobox.pcfdataset:
+                            AccessibleLabel: =""
+                            Appearance: ="FilledDarker"
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =If(NovoCadastro = true,DisplayMode.Edit,DisplayMode.View)
+                            FillPortions: =1
+                            Font: =""
+                            FontItalic: =false
+                            FontSize: =0
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            FontWeight: =""
+                            Height: =32
+                            InputTextPlaceholder: ="Buscar mercadorias"
+                            IsSearchable: =true
+                            Items: |-
+                                =AddColumns(
+                                    Switch(
+                                        TipoDevolucaoDropdown.Selected.Value,
+                                        'Tipo de RMA'.Manutenção,
+                                        SortByColumns(
+                                            Search(
+                                                Filter(
+                                                    'Estoque From SharepointLists' As E,
+                                                    IsBlank(E.'Produto-Serviço'),
+                                                    E.'Produto-Serviço'.'Empréstimo Devolvido' <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes,
+                                                    E.Situação = "Disponível",
+                                                    E.Quantidade = 1
+                                                ),
+                                                Self.SearchText,
+                                                'Referência do Produto',
+                                                'Etiqueta Em Texto (Calculated)'
+                                            ),
+                                            "new_datadaultimaleitura",
+                                            SortOrder.Descending
+                                        ),
+                                        'Tipo de RMA'.'Devolução Definitiva do Produto',
                                         With(
                                             {
-                                                Value: Filter(
-                                                    Estagios As R,
-                                                    R.Value < ThisItem.Situação
+                                                EstoqueId: ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                ModeloId: LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                    E.'Modelo de Produto'.'Modelos de Produto From Sharepoint List'
                                                 )
-                                            } As Estagios,
+                                            } As Param,
+                                            Search(
+                                                Filter(
+                                                    'Estoque From SharepointLists' As E,
+                                                    !IsBlank(E.'Produto-Serviço'),
+                                                    E.'Produto-Serviço'.'Opção de Fornecimento' = 'Opção de Fornecimento'.Padrão,
+                                                    E.'Produto-Serviço'.'É Empréstimo' <> 'É Empréstimo (Produtos-Serviço)'.Yes,
+                                                    E.Quantidade = NumberInput1.Value,
+                                                    E.'Quantidade Disponível Devolução' = NumberInput1.Value,
+                                                    E.'Quantidade Disponível Devolução' > 0,
+                                                    Or(
+                                                        E.'Estoque From SharepointList' = Param.EstoqueId,
+                                                        And(
+                                                            !IsBlank(E.'Modelo de Produto'),
+                                                            E.'Modelo de Produto'.'Modelos de Produto From Sharepoint List' = Param.ModeloId,
+                                                            E.Situação = "Disponível"
+                                                        )
+                                                    )
+                                                ),
+                                                Self.SearchText,
+                                                'Referência do Produto',
+                                                'Etiqueta Em Texto (Calculated)'
+                                            )
+                                        )
+                                    ) As E,
+                                    _Label,
+                                    E.'Etiqueta Em Texto (Calculated)' & " - " & E.'Referência do Produto'
+                                )
+                            LayoutMaxHeight: =32
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =32
+                            LayoutMinWidth: =16
+                            MultiValueDelimiter: =", "
+                            OnChange: =false
+                            Required: =false
+                            SelectMultiple: =false
+                            TabIndex: =0
+                            Tooltip: =""
+                            TriggerOutput: ="Keypress"
+                            ValidationState: ="None"
+                            Visible: =true
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                            new_etiquetaemtextocalculated1_1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="new_etiquetaemtextocalculated"
+                                FieldName: ="new_etiquetaemtextocalculated"
+                                FieldType: ="s"
+                                Order: =3
+                                Type: ="s"
+                                ZIndex: =1
+
+                            _Label1_1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="_Label"
+                                FieldName: ="_Label"
+                                FieldType: ="s"
+                                Order: =2
+                                Type: ="s"
+                                ZIndex: =2
+
+                            new_referenciadoproduto1_1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                FieldDisplayName: ="new_referenciadoproduto"
+                                FieldName: ="new_referenciadoproduto"
+                                FieldType: ="s"
+                                Order: =3
+                                Type: ="s"
+                                ZIndex: =3
+
+                    FormRowContainer_3 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Visible: |-
+                            =TipoDevolucaoDropdown.Selected.Value in [
+                                'Tipo de RMA'.'Devolução de Empréstimo',
+                                'Tipo de RMA'.'Devolução Definitiva do Produto',
+                                'Tipo de RMA'.'Retorno Para Troca de Produto'
+                            ]
+                        ZIndex: =6
+
+                        FormRowLabelText_3 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =200
+                            LayoutMinWidth: =200
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Aprovar Para Venda"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =200
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
+
+                        AprovarVendaToggle As Toggle:
+                            BasePaletteColor: =
+                            DisplayMode: =If(NovoCadastro = true,DisplayMode.Edit,DisplayMode.View)
+                            FillPortions: =1
+                            FontColor: =
+                            Height: =35
+                            Label: =If(Self.Checked = true,"Sim","Não")
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =16
+                            LayoutMinWidth: =16
+                            OnCheck: =false
+                            OnUncheck: =false
+                            Width: =113
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                    FormRowContainer_5 As groupContainer.horizontalAutoLayoutContainer:
+                        DropShadow: =DropShadow.Light
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutGap: =10
+                        LayoutGridColumns: =6
+                        LayoutGridRows: =6
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        LayoutMode: =LayoutMode.Auto
+                        PaddingBottom: =8
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =8
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Visible: |-
+                            =TipoDevolucaoDropdown.Selected.Value in [
+                                'Tipo de RMA'.'Devolução de Empréstimo',
+                                'Tipo de RMA'.Manutenção,
+                                'Tipo de RMA'.'Devolução Definitiva do Produto',
+                                'Tipo de RMA'.'Retorno Temporário ao Estoque',
+                                'Tipo de RMA'.'Retorno Para Troca de Produto'
+                            ]
+                        ZIndex: =7
+
+                        FormRowLabelText_5 As Text:
+                            Align: ='TextCanvas.Align'.Start
+                            AutoHeight: =false
+                            BorderColor: =
+                            BorderStyle: =""
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =
+                            FillPortions: =1
+                            Font: =Font.Lato
+                            FontColor: =
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =190
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            Size: =14
+                            TabIndex: =0
+                            Text: ="Número de Série"
+                            Tooltip: =""
+                            VerticalAlign: =VerticalAlign.Middle
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Bold
+                            Width: =200
+                            Wrap: =true
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
+
+                        "SNTextInput As 'Text input'":
+                            BasePaletteColor: =
+                            BorderColor: =
+                            DisplayMode: =If(NovoCadastro = true,DisplayMode.Edit,DisplayMode.View)
+                            Fill: =
+                            FillPortions: =1
+                            Font: =Font.Lato
+                            FontColor: =
+                            Height: =32
+                            LayoutMaxHeight: =0
+                            LayoutMaxWidth: =0
+                            LayoutMinHeight: =16
+                            LayoutMinWidth: =16
+                            OnChange: =Set(_SN,Self.Value)
+                            Value: =_SN
+                            Width: =320
+                            X: =0
+                            Y: =0
+                            ZIndex: =2
+
+                    SaveButton As Button:
+                        BasePaletteColor: =
+                        BorderColor: =
+                        DisplayMode: |-
+                            =If(
+                                NovoCadastro = true,
+                                Switch(
+                                    TipoDevolucaoDropdown.Selected.Value,
+                                    'Tipo de RMA'.'Devolução de Empréstimo',
+                                    If(
+                                        And(
+                                            !IsBlank(ProdutoAntigoCombobox.Selected.'Estoque From SharepointList'),
                                             With(
                                                 LookUp(
-                                                    Choices('RMA Stage') As S,
-                                                    S.Value = Max(
-                                                        Estagios.Value As E,
-                                                        E.Value
-                                                    )
-                                                ) As EstagioAnterior,
-                                                Patch(
-                                                    RMAS,
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
                                                     {
-                                                        RMA: ThisItem.RMA,
-                                                        Situação: EstagioAnterior.Value
+                                                        Emprestimo: E.'Produto-Serviço'.'É Empréstimo',
+                                                        Devolvido: E.'Produto-Serviço'.'Empréstimo Devolvido'
                                                     }
+                                                ) As Prod,
+                                                And(
+                                                    Prod.Emprestimo = 'É Empréstimo (Produtos-Serviço)'.Yes,
+                                                    Prod.Devolvido <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes
                                                 )
                                             )
-                                        );
-                                        UpdateContext({SpinCounter: SpinCounter - 1})
-                                    Text: ="Left"
-                                    Width: =40
-                                    X: =0
-                                    Y: =0
-                                    ZIndex: =1
-
-                                PosicaoRightButton As Button:
-                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
-                                    BasePaletteColor: =
-                                    BorderColor: =
-                                    DisplayMode: =If(ThisItem.Situação = Max(Choices('RMA Stage') As S, S.Value),DisplayMode.Disabled,DisplayMode.Edit)
-                                    FillPortions: =1
-                                    FontColor: =
-                                    Height: =32
-                                    Icon: ="ChevronRight"
-                                    Layout: ='ButtonCanvas.Layout'.IconOnly
-                                    LayoutMaxHeight: =
-                                    LayoutMaxWidth: =
-                                    OnSelect: |-
-                                        =UpdateContext({SpinCounter: SpinCounter + 1});
-                                        With(
-                                            {
-                                                Value: Filter(
-                                                    Estagios As R,
-                                                    R.Value > ThisItem.Situação
-                                                )
-                                            } As Estagios,
+                                        ),
+                                        DisplayMode.Edit,
+                                        DisplayMode.Disabled
+                                    ),
+                                    'Tipo de RMA'.Manutenção,
+                                    If(
+                                        And(
+                                            !IsBlank(ProdutoNovoCombobox.Selected.'Estoque From SharepointList'),
                                             With(
                                                 LookUp(
-                                                    Choices('RMA Stage') As S,
-                                                    S.Value = Min(
-                                                        Estagios.Value As E,
-                                                        E.Value
-                                                    )
-                                                ) As ProximoEstagio,
-                                                Patch(
-                                                    RMAS,
-                                                    {
-                                                        RMA: ThisItem.RMA,
-                                                        Situação: ProximoEstagio.Value
-                                                    }
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoNovoCombobox.Selected.'Estoque From SharepointList',
+                                                    {Devolvido: E.'Produto-Serviço'.'Empréstimo Devolvido'}
+                                                ) As Prod,
+                                                Prod.Devolvido <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes
+                                            ),
+                                            !IsBlank(OSComboboxCanvas.Selected.'Ordem de Serviço Field Control'),
+                                            Or(
+                                                Len(TrimEnds(_SN)) > 3,
+                                                LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoNovoCombobox.Selected.'Estoque From SharepointList',
+                                                    E.'Modelo de Produto'.'Controla S/N' <> 'Controla S/N (Modelos de Produto From Sharepoint Lists)'.Yes
                                                 )
                                             )
-                                        );
-                                        UpdateContext({SpinCounter: SpinCounter - 1})
-                                    Text: ="Down"
-                                    Width: =40
-                                    X: =0
-                                    Y: =0
-                                    ZIndex: =2
-
-                            ClienteInformadoCheckbox As Checkbox:
-                                BasePaletteColor: =
-                                Checked: |-
-                                    =LookUp(
-                                        RMAS As R,
-                                        R.RMA = ThisItem.RMA,
-                                        R.'Cliente Informado Sobre Estágio Atual'
-                                    )
-                                DisplayMode: =DisplayMode.Edit
-                                FontColor: =
-                                Height: =32
-                                Label: ="Cliente Informado"
-                                LayoutMaxHeight: =
-                                LayoutMaxWidth: =
-                                LayoutMinHeight: =32
-                                LayoutMinWidth: =160
-                                OnCheck: |-
-                                    =Patch(
-                                        RMAS,
-                                        {
-                                            RMA: ThisItem.RMA,
-                                            'Último Estágio Informado ao Cliente': ThisItem.Situação
-                                        }
-                                    )
-                                OnUncheck: |-
-                                    =Patch(
-                                        RMAS,
-                                        {
-                                            RMA: ThisItem.RMA,
-                                            'Último Estágio Informado ao Cliente': Blank()
-                                        }
-                                    )
-                                Width: =160
-                                X: =0
-                                Y: =0
-                                ZIndex: =7
+                                        ),
+                                        DisplayMode.Edit,
+                                        DisplayMode.Disabled
+                                    ),
+                                    'Tipo de RMA'.'Devolução Definitiva do Produto',
+                                    If(
+                                        And(
+                                            !IsBlank(ProdutoAntigoCombobox.Selected.'Estoque From SharepointList'),
+                                            With(
+                                                LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                    {
+                                                        Devolvido: E.'Produto-Serviço'.'Empréstimo Devolvido',
+                                                        Fornecimento: E.'Produto-Serviço'.'Opção de Fornecimento'
+                                                    }
+                                                ) As Prod,
+                                                And(
+                                                    Prod.Devolvido <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes,
+                                                    Prod.Fornecimento = 'Opção de Fornecimento'.Padrão
+                                                )
+                                            ),
+                                            Or(
+                                                Len(TrimEnds(_SN)) > 3,
+                                                LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                    E.'Modelo de Produto'.'Controla S/N' <> 'Controla S/N (Modelos de Produto From Sharepoint Lists)'.Yes
+                                                )
+                                            ),
+                                            !IsBlank(ProdutoNovoCombobox.Selected)
+                                        ),
+                                        DisplayMode.Edit,
+                                        DisplayMode.Disabled
+                                    ),
+                                    'Tipo de RMA'.'Retorno Temporário ao Estoque',
+                                    If(
+                                        And(
+                                            !IsBlank(ProdutoAntigoCombobox.Selected.'Estoque From SharepointList'),
+                                            With(
+                                                LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                    {
+                                                        Devolvido: E.'Produto-Serviço'.'Empréstimo Devolvido',
+                                                        Fornecimento: E.'Produto-Serviço'.'Opção de Fornecimento',
+                                                        Emprestimo: E.'Produto-Serviço'.'É Empréstimo'
+                                                    }
+                                                ) As Prod,
+                                                And(
+                                                    Prod.Devolvido <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes,
+                                                    Prod.Fornecimento = 'Opção de Fornecimento'.Padrão,
+                                                    Prod.Emprestimo <> 'É Empréstimo (Produtos-Serviço)'.Yes
+                                                )
+                                            ),
+                                            Or(
+                                                Len(TrimEnds(_SN)) > 3,
+                                                LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                    E.'Modelo de Produto'.'Controla S/N' <> 'Controla S/N (Modelos de Produto From Sharepoint Lists)'.Yes
+                                                )
+                                            )
+                                        ),
+                                        DisplayMode.Edit,
+                                        DisplayMode.Disabled
+                                    ),
+                                    'Tipo de RMA'.'Retorno Para Troca de Produto',
+                                    If(
+                                        And(
+                                            !IsBlank(ProdutoAntigoCombobox.Selected.'Estoque From SharepointList'),
+                                            With(
+                                                LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                    {
+                                                        Devolvido: E.'Produto-Serviço'.'Empréstimo Devolvido',
+                                                        Fornecimento: E.'Produto-Serviço'.'Opção de Fornecimento',
+                                                        Emprestimo: E.'Produto-Serviço'.'É Empréstimo'
+                                                    }
+                                                ) As Prod,
+                                                And(
+                                                    Prod.Devolvido <> 'Empréstimo Devolvido (Produtos-Serviço)'.Yes,
+                                                    Prod.Fornecimento = 'Opção de Fornecimento'.Padrão,
+                                                    Prod.Emprestimo <> 'É Empréstimo (Produtos-Serviço)'.Yes
+                                                )
+                                            ),
+                                            Or(
+                                                Len(TrimEnds(_SN)) > 3,
+                                                LookUp(
+                                                    'Estoque From SharepointLists' As E,
+                                                    E.'Estoque From SharepointList' = ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                                    E.'Modelo de Produto'.'Controla S/N' <> 'Controla S/N (Modelos de Produto From Sharepoint Lists)'.Yes
+                                                )
+                                            ),
+                                            AprovarVendaToggle.Checked = true
+                                        ),
+                                        DisplayMode.Edit,
+                                        DisplayMode.Disabled
+                                    ),
+                                    DisplayMode.Disabled
+                                ),
+                                DisplayMode.View
+                            )
+                        Font: =Font.Lato
+                        FontColor: =
+                        Height: =32
+                        LayoutMaxHeight: =0
+                        LayoutMaxWidth: =0
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        OnSelect: |-
+                            =UpdateContext({SpinCounter: SpinCounter + 1});
+                            Switch(
+                                TipoDevolucaoDropdown.Selected.Value,
+                                'Tipo de RMA'.'Devolução de Empréstimo',
+                                '(Estoque-RMA)-Registrardevoluçãodeempréstimo'.Run(
+                                    ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                    RMASelecionado.RMA,
+                                    AprovarVendaToggle.Checked
+                                ),
+                                'Tipo de RMA'.Manutenção,
+                                '(Estoque-RMA)-Registrarretornodeprodutoparamanutenção'.Run(
+                                    ProdutoNovoCombobox.Selected.'Estoque From SharepointList',
+                                    RMASelecionado.RMA,
+                                    OSComboboxCanvas.Selected.'Ordem de Serviço Field Control',
+                                    _SN
+                                ),
+                                'Tipo de RMA'.'Devolução Definitiva do Produto',
+                                '(Estoque-RMA)-Registrardevoluçãodefinitivadeprodutovendido'.Run(
+                                    ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                    RMASelecionado.RMA,
+                                    AprovarVendaToggle.Checked,
+                                    _SN,
+                                    ProdutoNovoCombobox.Selected.'Estoque From SharepointList'
+                                ),
+                                'Tipo de RMA'.'Retorno Temporário ao Estoque',
+                                '(Estoque-RMA)-Registrarretornotemporáriodeprodutoaoestoque'.Run(
+                                    ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                    RMASelecionado.RMA,
+                                    _SN
+                                ),
+                                'Tipo de RMA'.'Retorno Para Troca de Produto',
+                                '(Estoque-RMA)-Registrarretornoparatrocadeproduto'.Run(
+                                    ProdutoAntigoCombobox.Selected.'Estoque From SharepointList',
+                                    RMASelecionado.RMA,
+                                    _SN,
+                                    AprovarVendaToggle.Checked
+                                ),
+                                false
+                            );
+                            Select(RefreshButton);
+                            Reset(TipoDevolucaoDropdown);
+                            Reset(ProdutoAntigoCombobox);
+                            Reset(AprovarVendaToggle);
+                            Reset(ProdutoNovoCombobox);
+                            Set(
+                                _SN,
+                                Blank()
+                            );
+                            UpdateContext({SpinCounter: SpinCounter - 1})
+                        Text: ="Registrar Retorno"
+                        Width: =96
+                        X: =0
+                        Y: =0
+                        ZIndex: =8
 
     "Spinner1 As 'Fluent Spinner (1.1.29) Preview'":
         BackgroundColor: |-
@@ -1314,4 +1875,24 @@
         X: =0
         Y: =0
         ZIndex: =2
+
+    ButtonCanvas1 As Button:
+        BasePaletteColor: =
+        BorderColor: =
+        DisplayMode: =DisplayMode.Edit
+        FontColor: =
+        Height: =32
+        OnSelect: |-
+            =Set(
+                RMAId,
+                Last(RMAS).RMA
+            );
+            Reset(ProjetoComboboxCanvas);
+            Reset(OSComboboxCanvas)
+        Text: ="TESTE"
+        Visible: =false
+        Width: =96
+        X: =564
+        Y: =72
+        ZIndex: =3
 

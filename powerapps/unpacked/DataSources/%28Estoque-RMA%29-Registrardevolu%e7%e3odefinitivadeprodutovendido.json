@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "4a3edd6b-b602-4099-9a31-c3f06f90398d",
+    "Name": "(Estoque-RMA)-Registrardevoluçãodefinitivadeprodutovendido",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "0bc44094-e9ce-f011-8544-000d3ac17330"
+  }
+]
