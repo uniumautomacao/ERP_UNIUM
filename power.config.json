@@ -15,82 +15,12 @@
       "instanceUrl": "https://dev-unium.crm2.dynamics.com/",
       "webApiVersion": "v9.0",
       "dataSources": {
-        "systemusers": {
-          "entitySetName": "systemusers",
-          "logicalName": "systemuser",
-          "isHidden": false
-        },
-        "roles": {
-          "entitySetName": "roles",
-          "logicalName": "role",
-          "isHidden": false
-        },
-        "systemuserrolescollection": {
-          "entitySetName": "systemuserrolescollection",
-          "logicalName": "systemuserroles",
-          "isHidden": false
-        },
-        "new_codeapppageallowedsecurityroles": {
-          "entitySetName": "new_codeapppageallowedsecurityroles",
-          "logicalName": "new_codeapppageallowedsecurityrole",
-          "isHidden": false
-        },
-        "cr22f_projetos": {
-          "entitySetName": "cr22f_projetos",
-          "logicalName": "cr22f_projeto",
-          "isHidden": false
-        },
-        "new_apppreferences": {
-          "entitySetName": "new_apppreferences",
-          "logicalName": "new_apppreference",
-          "isHidden": false
-        },
-        "new_atividadefieldcontrols": {
-          "entitySetName": "new_atividadefieldcontrols",
-          "logicalName": "new_atividadefieldcontrol",
-          "isHidden": false
-        },
-        "new_corcolaboradorlinhadotempos": {
-          "entitySetName": "new_corcolaboradorlinhadotempos",
-          "logicalName": "new_corcolaboradorlinhadotempo",
-          "isHidden": false
-        },
-        "new_ordemdeservicofieldcontrols": {
-          "entitySetName": "new_ordemdeservicofieldcontrols",
-          "logicalName": "new_ordemdeservicofieldcontrol",
-          "isHidden": false
-        },
-        "new_produtoservicos": {
-          "entitySetName": "new_produtoservicos",
-          "logicalName": "new_produtoservico",
-          "isHidden": false
-        },
-        "cr22f_fabricantesfromsharpointlists": {
-          "entitySetName": "cr22f_fabricantesfromsharpointlists",
-          "logicalName": "cr22f_fabricantesfromsharpointlist",
-          "isHidden": false
-        },
-        "cr22f_modelosdeprodutofromsharepointlists": {
-          "entitySetName": "cr22f_modelosdeprodutofromsharepointlists",
-          "logicalName": "cr22f_modelosdeprodutofromsharepointlist",
-          "isHidden": false
-        },
-        "new_deviceios": {
-          "entitySetName": "new_deviceios",
-          "logicalName": "new_deviceio",
-          "isHidden": false
-        },
-        "new_deviceioconnections": {
-          "entitySetName": "new_deviceioconnections",
-          "logicalName": "new_deviceioconnection",
-          "isHidden": false
-        },
-        "new_rmas": {
+        "rmas": {
           "entitySetName": "new_rmas",
           "logicalName": "new_rma",
           "isHidden": false
         },
-        "new_estoquermas": {
+        "estoque_rmas": {
           "entitySetName": "new_estoquermas",
           "logicalName": "new_estoquerma",
           "isHidden": false
