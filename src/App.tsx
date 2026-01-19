@@ -14,6 +14,7 @@ import { ProjectPlannerPage } from './pages/section2-operations/ProjectPlannerPa
 import { TeamManagementPage } from './pages/section2-operations/TeamManagementPage';
 import { RMAsKanbanPage } from './pages/section2-operations/RMAsKanbanPage';
 import { ContagemEstoqueMobilePage } from './pages/section4-vistorias/ContagemEstoqueMobilePage';
+import { ContagemEstoqueGestaoPage } from './pages/section4-vistorias/ContagemEstoqueGestaoPage';
 import { SuperAdminPageAccessPage } from './pages/section3-super-admin/SuperAdminPageAccessPage';
 import { SuperAdminUserRolesPage } from './pages/section3-super-admin/SuperAdminUserRolesPage';
 import { DevPage } from './pages/section3-dev/DevPage';
@@ -116,6 +117,14 @@ function App() {
                   element={
                     <RequirePageAccess>
                       <ContagemEstoqueMobilePage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/vistorias/contagem/gestao"
+                  element={
+                    <RequirePageAccess>
+                      <ContagemEstoqueGestaoPage />
                     </RequirePageAccess>
                   }
                 />

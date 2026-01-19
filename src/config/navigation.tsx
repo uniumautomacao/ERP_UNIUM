@@ -51,6 +51,12 @@ export const navigation: NavSection[] = [
         icon: <QrCode24Regular />,
         path: '/vistorias/contagem',
       },
+      {
+        id: 'contagem-gestao',
+        label: 'Gestão de Contagem',
+        icon: <DataBarVertical24Regular />,
+        path: '/vistorias/contagem/gestao',
+      },
     ],
   },
   {

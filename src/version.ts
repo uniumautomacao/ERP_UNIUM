@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.61';
+export const APP_VERSION = '0.0.63';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.63',
+    date: '2026-01-19',
+    changes: 'Corrigida a ordem dos hooks na gestão de contagem para evitar erro de inicialização.',
+  },
+  {
+    version: '0.0.62',
+    date: '2026-01-19',
+    changes: 'Adicionada a tela de gestão de contagem com abas (dashboard, divergências, ajustes, configurações e relatórios).',
+  },
   {
     version: '0.0.61',
     date: '2026-01-19',

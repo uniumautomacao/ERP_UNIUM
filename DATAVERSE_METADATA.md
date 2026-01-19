@@ -61,6 +61,7 @@ PrimaryKey:                       new_ajustedeestoqueid
 | new_usuarioajuste | new_UsuarioAjuste | systemusers |
 | new_contagem | new_Contagem | new_contagemestoques |
 | new_contagem | new_Contagem | new_contagemestoques |
+| new_contagem | new_Contagem | new_contagemestoques |
 
 ---
 
