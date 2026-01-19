@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.56';
+export const APP_VERSION = '0.0.57';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.57',
+    date: '2026-01-19',
+    changes: 'Atualizados os metadados da tabela new_ajustedeestoque (campo new_contagem alterado para lookup).',
+  },
   {
     version: '0.0.56',
     date: '2026-01-19',

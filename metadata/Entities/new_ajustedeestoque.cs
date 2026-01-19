@@ -210,11 +210,11 @@ public partial class new_AjustedeEstoque : Microsoft.Xrm.Sdk.Entity, System.Comp
 	}
 	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_contagem")]
-	public System.Nullable<int> new_Contagem
+	public Microsoft.Xrm.Sdk.EntityReference new_Contagem
 	{
 		get
 		{
-			return this.GetAttributeValue<System.Nullable<int>>("new_contagem");
+			return this.GetAttributeValue<Microsoft.Xrm.Sdk.EntityReference>("new_contagem");
 		}
 		set
 		{

@@ -10,7 +10,7 @@ export interface NewAjustedeEstoqueBase {
   new_justificativa?: string;
   new_saldoanterior?: number;
   new_saldonovo?: number;
-  new_contagem?: number;
+  "new_Contagem@odata.bind"?: string;
   "new_ItemEstoque@odata.bind"?: string;
   "new_UsuarioAjuste@odata.bind"?: string;
   statecode?: number;
@@ -18,6 +18,7 @@ export interface NewAjustedeEstoqueBase {
 }
 
 export interface NewAjustedeEstoque extends NewAjustedeEstoqueBase {
+  _new_contagem_value?: string;
   _new_itemestoque_value?: string;
   _new_usuarioajuste_value?: string;
 }
