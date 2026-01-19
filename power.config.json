@@ -102,6 +102,16 @@
           "entitySetName": "new_rmas",
           "logicalName": "new_rma",
           "isHidden": false
+        },
+        "new_contagemestoques": {
+          "entitySetName": "new_contagemestoques",
+          "logicalName": "new_contagemestoque",
+          "isHidden": false
+        },
+        "new_ajustedeestoques": {
+          "entitySetName": "new_ajustedeestoques",
+          "logicalName": "new_ajustedeestoque",
+          "isHidden": false
         }
       },
       "actions": null

@@ -23,6 +23,8 @@ export * as ContactModel from './models/ContactModel';
 export * as Cr22fEstoqueFromSharepointListModel from './models/Cr22fEstoqueFromSharepointListModel';
 export * as NewEstoqueRMAModel from './models/NewEstoqueRMAModel';
 export * as NewRMAModel from './models/NewRMAModel';
+export * as NewContagemEstoqueModel from './models/NewContagemEstoqueModel';
+export * as NewAjustedeEstoqueModel from './models/NewAjustedeEstoqueModel';
 
 // Services
 export * from './services/RolesService';
@@ -43,3 +45,5 @@ export * from './services/ContactService';
 export * from './services/Cr22fEstoqueFromSharepointListService';
 export * from './services/NewEstoqueRMAService';
 export * from './services/NewRMAService';
+export * from './services/NewContagemEstoqueService';
+export * from './services/NewAjustedeEstoqueService';

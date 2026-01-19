@@ -130,5 +130,19 @@ export const dataSourcesInfo = {
     "primaryKey": "new_rmaid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_contagemestoques": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_contagemestoqueid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_ajustedeestoques": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_ajustedeestoqueid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.54';
+export const APP_VERSION = '0.0.55';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.55',
+    date: '2026-01-19',
+    changes: 'Importadas tabelas do Dataverse: new_contagemestoque e new_ajustedeestoque.',
+  },
   {
     version: '0.0.54',
     date: '2026-01-19',

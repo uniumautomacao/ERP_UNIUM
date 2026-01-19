@@ -21,6 +21,44 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Estoque From Sharepoint List | `cr22f_estoquefromsharepointlist` | `cr22f_estoquefromsharepointlists` | `cr22f_estoquefromsharepointlistid` |
 | Estoque-RMA | `new_estoquerma` | `new_estoquermas` | `new_estoquermaid` |
 | RMA | `new_rma` | `new_rmas` | `new_rmaid` |
+| Contagem Estoque | `new_contagemestoque` | `new_contagemestoques` | `new_contagemestoqueid` |
+| Ajuste de Estoque | `new_ajustedeestoque` | `new_ajustedeestoques` | `new_ajustedeestoqueid` |
+
+---
+
+## 🔵 new_contagemestoque (Contagem Estoque)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_contagemestoque
+EntityLogicalCollectionName:      new_contagemestoques
+EntitySetName:                    new_contagemestoques
+PrimaryKey:                       new_contagemestoqueid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_itemestoque | new_ItemEstoque | cr22f_estoquefromsharepointlists |
+| new_usuario | new_Usuario | systemusers |
+
+---
+
+## 🔵 new_ajustedeestoque (Ajuste de Estoque)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_ajustedeestoque
+EntityLogicalCollectionName:      new_ajustedeestoques
+EntitySetName:                    new_ajustedeestoques
+PrimaryKey:                       new_ajustedeestoqueid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_itemestoque | new_ItemEstoque | cr22f_estoquefromsharepointlists |
+| new_usuarioajuste | new_UsuarioAjuste | systemusers |
 
 ---
 
