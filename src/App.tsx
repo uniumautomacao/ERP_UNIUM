@@ -11,6 +11,7 @@ import { ReportsPage } from './pages/section1-analytics/ReportsPage';
 import { InventoryPage } from './pages/section2-operations/InventoryPage';
 import { ProjectPlannerPage } from './pages/section2-operations/ProjectPlannerPage';
 import { TeamManagementPage } from './pages/section2-operations/TeamManagementPage';
+import { RMAsKanbanPage } from './pages/section2-operations/RMAsKanbanPage';
 import { SuperAdminPageAccessPage } from './pages/section3-super-admin/SuperAdminPageAccessPage';
 import { SuperAdminUserRolesPage } from './pages/section3-super-admin/SuperAdminUserRolesPage';
 import { DevPage } from './pages/section3-dev/DevPage';
@@ -95,6 +96,14 @@ function App() {
                   element={
                     <RequirePageAccess>
                       <TeamManagementPage />
+                    </RequirePageAccess>
+                  }
+                />
+                <Route
+                  path="/rmas"
+                  element={
+                    <RequirePageAccess>
+                      <RMAsKanbanPage />
                     </RequirePageAccess>
                   }
                 />

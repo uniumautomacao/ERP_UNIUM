@@ -9,6 +9,7 @@ import {
   ShieldLock24Regular,
   PeopleCheckmark24Regular,
   DeveloperBoard24Regular,
+  Board24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
 
@@ -82,6 +83,12 @@ export const navigation: NavSection[] = [
         label: 'Inventory',
         icon: <Box24Regular />,
         path: '/inventory',
+      },
+      {
+        id: 'rmas',
+        label: 'Quadro de RMAs',
+        icon: <Board24Regular />,
+        path: '/rmas',
       },
       {
         id: 'projects',

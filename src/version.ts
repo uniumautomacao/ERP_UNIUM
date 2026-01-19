@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.37';
+export const APP_VERSION = '0.0.38';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.38',
+    date: '2026-01-18',
+    changes: 'Criada a página Quadro de RMAs com Kanban em drag&drop, filtros, preferências de estágios e ações integradas ao Dataverse.',
+  },
   {
     version: '0.0.37',
     date: '2026-01-18',
