@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.39';
+export const APP_VERSION = '0.0.40';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.40',
+    date: '2026-01-18',
+    changes: 'Melhorado o espaçamento e alinhamento dos filtros na página de RMAs.',
+  },
   {
     version: '0.0.39',
     date: '2026-01-18',

@@ -41,7 +41,7 @@ export function FilterBar({
     : 'flex items-center gap-3 mb-3';
 
   return (
-    <div>
+    <div className={isInline ? 'contents' : ''}>
       {/* Filter Controls */}
       <div className={controlsClassName}>
         {/* Search */}

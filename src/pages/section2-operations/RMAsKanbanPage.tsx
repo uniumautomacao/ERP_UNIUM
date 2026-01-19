@@ -420,10 +420,11 @@ export function RMAsKanbanPage() {
               onSearchChange={setSearchValue}
               isInline
             />
-            <div style={{ minWidth: 260 }}>
+            <div className="flex items-center gap-3">
               <Dropdown
                 multiselect
                 placeholder="Selecione os estágios"
+                style={{ minWidth: 260 }}
                 selectedOptions={selectedStages.map(String)}
                 onOptionSelect={(_, data) => {
                   const selected = (data.selectedOptions || []).map((value) => Number(value));
@@ -437,7 +438,14 @@ export function RMAsKanbanPage() {
                   </Option>
                 ))}
               </Dropdown>
-              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+              <Text 
+                size={200} 
+                style={{ 
+                  color: tokens.colorNeutralForeground3,
+                  whiteSpace: 'nowrap',
+                  marginTop: '4px' // Pequeno ajuste para alinhar visualmente com a base do dropdown
+                }}
+              >
                 {selectedStages.length === 0 ? 'Exibindo todos os estágios' : `${selectedStages.length} selecionados`}
               </Text>
             </div>
