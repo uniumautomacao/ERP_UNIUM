@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.55';
+export const APP_VERSION = '0.0.56';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.56',
+    date: '2026-01-19',
+    changes: 'Atualizados os metadados da tabela cr22f_estoquefromsharepointlist com novos campos de localização e criticidade.',
+  },
   {
     version: '0.0.55',
     date: '2026-01-19',

@@ -11,6 +11,13 @@ export interface Cr22fEstoqueFromSharepointListBase {
   cr22f_status?: string;
   cr22f_nf?: number;
   cr22f_localizao?: string;
+  new_ultimacontagem?: string;
+  new_centrodedistribuicao?: number;
+  new_deposito?: number;
+  new_rua?: number;
+  new_estante?: number;
+  new_prateleira?: number;
+  new_classecriticidade?: number;
   "new_ModelodeProduto@odata.bind"?: string;
   "new_ProdutoServico@odata.bind"?: string;
   "new_GrupodeOrigem@odata.bind"?: string;

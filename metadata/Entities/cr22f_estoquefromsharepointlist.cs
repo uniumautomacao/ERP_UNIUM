@@ -647,6 +647,21 @@ public partial class cr22f_EstoqueFromSharepointList : Microsoft.Xrm.Sdk.Entity,
 		}
 	}
 	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_classecriticidade")]
+	public virtual new_classedeproduto? new_ClasseCriticidade
+	{
+		get
+		{
+			return ((new_classedeproduto?)(EntityOptionSetEnum.GetEnum(this, "new_classecriticidade")));
+		}
+		set
+		{
+			this.OnPropertyChanging("new_ClasseCriticidade");
+			this.SetAttributeValue("new_classecriticidade", value.HasValue ? new Microsoft.Xrm.Sdk.OptionSetValue((int)value) : null);
+			this.OnPropertyChanged("new_ClasseCriticidade");
+		}
+	}
+	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_clientefx")]
 	public string new_ClienteFx
 	{
@@ -1310,6 +1325,21 @@ public partial class cr22f_EstoqueFromSharepointList : Microsoft.Xrm.Sdk.Entity,
 		}
 	}
 	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_ultimacontagem")]
+	public System.Nullable<System.DateTime> new_UltimaContagem
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<System.DateTime>>("new_ultimacontagem");
+		}
+		set
+		{
+			this.OnPropertyChanging("new_UltimaContagem");
+			this.SetAttributeValue("new_ultimacontagem", value);
+			this.OnPropertyChanged("new_UltimaContagem");
+		}
+	}
+	
 	/// <summary>
 	/// Date and time that the record was migrated.
 	/// </summary>
@@ -1527,42 +1557,6 @@ public partial class cr22f_EstoqueFromSharepointList : Microsoft.Xrm.Sdk.Entity,
 					"epointlist", Microsoft.Xrm.Sdk.EntityRole.Referenced, value);
 			this.OnPropertyChanged("Referencednew_cr22f_estoquefromsharepointlist_MercadoriaAnteriordoRMA_cr22f_estoq" +
 					"uefromsharepointlist");
-		}
-	}
-	
-	/// <summary>
-	/// 1:N new_estoquerma_Produto_cr22f_estoquefromshare
-	/// </summary>
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_estoquerma_Produto_cr22f_estoquefromshare")]
-	public System.Collections.Generic.IEnumerable<new_EstoqueRMA> new_estoquerma_Produto_cr22f_estoquefromshare
-	{
-		get
-		{
-			return this.GetRelatedEntities<new_EstoqueRMA>("new_estoquerma_Produto_cr22f_estoquefromshare", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_estoquerma_Produto_cr22f_estoquefromshare");
-			this.SetRelatedEntities<new_EstoqueRMA>("new_estoquerma_Produto_cr22f_estoquefromshare", null, value);
-			this.OnPropertyChanged("new_estoquerma_Produto_cr22f_estoquefromshare");
-		}
-	}
-	
-	/// <summary>
-	/// 1:N new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist
-	/// </summary>
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist")]
-	public System.Collections.Generic.IEnumerable<new_EstoqueRMA> new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist
-	{
-		get
-		{
-			return this.GetRelatedEntities<new_EstoqueRMA>("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist");
-			this.SetRelatedEntities<new_EstoqueRMA>("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist", null, value);
-			this.OnPropertyChanged("new_estoquerma_ProdutoNovo_cr22f_estoquefromsharepointlist");
 		}
 	}
 	

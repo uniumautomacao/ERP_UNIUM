@@ -84,6 +84,15 @@ EntitySetName:                    cr22f_estoquefromsharepointlists
 PrimaryKey:                       cr22f_estoquefromsharepointlistid
 ```
 
+### ⚡ Campos Adicionais (Atualizados)
+*   `new_ultimacontagem`: Data da última contagem realizada.
+*   `new_centrodedistribuicao`: Centro de distribuição vinculado.
+*   `new_deposito`: Depósito vinculado.
+*   `new_rua`: Rua no depósito.
+*   `new_estante`: Estante no depósito.
+*   `new_prateleira`: Prateleira no depósito.
+*   `new_classecriticidade`: Classe de criticidade do produto.
+
 ### ⚡ Campos de Lookup (Navigation Properties)
 | Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
 |------------------------------|---------------------|------------------|
