@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.40';
+export const APP_VERSION = '0.0.41';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.41',
+    date: '2026-01-18',
+    changes: 'Corrigido o cálculo de overflow do CommandBar para ser mais estável e evitar esconder itens sem necessidade.',
+  },
   {
     version: '0.0.40',
     date: '2026-01-18',

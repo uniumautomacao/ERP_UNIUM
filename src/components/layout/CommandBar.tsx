@@ -67,10 +67,19 @@ export function CommandBar({ primaryActions = [], secondaryActions = [], overflo
     }
 
     const recalc = () => {
-      const containerWidth = containerRef.current?.getBoundingClientRect().width ?? 0;
-      if (!containerWidth) {
-        return;
-      }
+      const container = containerRef.current;
+      if (!container) return;
+
+      const parent = container.parentElement;
+      if (!parent) return;
+
+      // Usar clientWidth do pai descontando o padding para maior estabilidade
+      const parentStyle = window.getComputedStyle(parent);
+      const paddingLeft = parseFloat(parentStyle.paddingLeft);
+      const paddingRight = parseFloat(parentStyle.paddingRight);
+      const availableWidth = parent.clientWidth - paddingLeft - paddingRight;
+
+      if (availableWidth <= 0) return;
 
       const actionWidths = allActions.map((_, index) => (
         measureActionRefs.current[index]?.getBoundingClientRect().width ?? 0
@@ -80,27 +89,34 @@ export function CommandBar({ primaryActions = [], secondaryActions = [], overflo
       const dividerWidth = measureDividerRef.current?.getBoundingClientRect().width ?? 0;
 
       let count = 0;
+      // Adicionamos uma tolerância de 2px para evitar overflow por arredondamento
+      const tolerance = 2;
+
       for (let i = 0; i < actionWidths.length; i += 1) {
         const rightEdge = actionOffsets[i] + actionWidths[i];
         const hiddenCount = actionWidths.length - (i + 1);
         const willShowOverflow = hiddenCount > 0 || overflowActions.length > 0;
+        
         const overflowExtra = willShowOverflow
           ? (rightEdge > 0 ? itemGap + dividerWidth + itemGap : 0) + overflowWidth
           : 0;
+          
         const requiredWidth = rightEdge + overflowExtra;
-        if (requiredWidth <= containerWidth) {
+        
+        if (requiredWidth <= availableWidth + tolerance) {
           count = i + 1;
         } else {
           break;
         }
       }
 
-      setVisibleCount(count);
+      setVisibleCount((prev) => (prev !== count ? count : prev));
     };
 
     const observer = new ResizeObserver(recalc);
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const container = containerRef.current;
+    if (container && container.parentElement) {
+      observer.observe(container.parentElement);
     }
     recalc();
 

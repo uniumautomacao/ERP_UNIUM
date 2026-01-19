@@ -360,7 +360,7 @@ export function RMAsKanbanPage() {
     return () => clearTimeout(timer);
   }, [loadColumnData, systemUserId, userLoading, searchValue, selectedStages]);
 
-  const commandPrimaryActions = [
+  const commandPrimaryActions = useMemo(() => [
     {
       id: 'new-rma',
       label: 'Novo RMA',
@@ -374,7 +374,7 @@ export function RMAsKanbanPage() {
       icon: <ArrowSync24Regular />,
       onClick: handleRefresh,
     },
-  ];
+  ], [handleNewRma, handleRefresh]);
 
   const stageOptions = RMA_STAGE_DEFAULTS.map((stage) => ({
     key: String(stage.value),
