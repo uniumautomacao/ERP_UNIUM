@@ -14,6 +14,7 @@ interface ActiveFilter {
 interface FilterBarProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  isInline?: boolean;
   filters?: {
     id: string;
     label: string;
@@ -29,15 +30,20 @@ interface FilterBarProps {
 export function FilterBar({
   searchValue,
   onSearchChange,
+  isInline = false,
   filters = [],
   activeFilters = [],
   onClearFilter,
   onClearAll,
 }: FilterBarProps) {
+  const controlsClassName = isInline
+    ? 'flex items-center gap-3'
+    : 'flex items-center gap-3 mb-3';
+
   return (
     <div>
       {/* Filter Controls */}
-      <div className="flex items-center gap-3 mb-3">
+      <div className={controlsClassName}>
         {/* Search */}
         {onSearchChange && (
           <SearchBox

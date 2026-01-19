@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.38';
+export const APP_VERSION = '0.0.39';
 export const APP_BUILD_DATE = '2026-01-18';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.39',
+    date: '2026-01-18',
+    changes: 'Ajustado o layout do app e do Kanban de RMAs para evitar cortes, suportar quebra em linhas e melhorar o espaçamento dos filtros.',
+  },
   {
     version: '0.0.38',
     date: '2026-01-18',

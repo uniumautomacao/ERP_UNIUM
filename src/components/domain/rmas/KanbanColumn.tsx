@@ -19,14 +19,12 @@ export function KanbanColumn({ stageValue, title, ownerLabel, count, children }:
     <div
       ref={setNodeRef}
       style={{
-        width: 280,
-        minWidth: 280,
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         borderRadius: 6,
         backgroundColor: isOver ? tokens.colorNeutralBackground1Hover : tokens.colorNeutralBackground1,
         display: 'flex',
         flexDirection: 'column',
-        maxHeight: 'calc(100vh - 260px)',
+        minHeight: 0,
       }}
     >
       <div

@@ -413,11 +413,12 @@ export function RMAsKanbanPage() {
         subtitle="Kanban de acompanhamento e movimentação de RMAs"
       />
       <PageContainer>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 h-full min-h-0">
           <div className="flex flex-wrap items-center gap-3">
             <FilterBar
               searchValue={searchValue}
               onSearchChange={setSearchValue}
+              isInline
             />
             <div style={{ minWidth: 260 }}>
               <Dropdown

@@ -26,9 +26,10 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Main Content */}
         <div
-          className="flex flex-col flex-grow relative"
+          className="flex flex-col flex-grow relative min-w-0"
           style={{
             marginLeft: `${sidebarWidth}px`,
+            width: `calc(100vw - ${sidebarWidth}px)`,
             transition: 'margin-left 250ms cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
