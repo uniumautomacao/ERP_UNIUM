@@ -1,6 +1,31 @@
-export const APP_VERSION = '0.0.63';
+export const APP_VERSION = '0.0.69';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.69',
+    date: '2026-01-19',
+    changes: 'Carregamento de etiqueta e S/N via estoque relacionado no dashboard.',
+  },
+  {
+    version: '0.0.68',
+    date: '2026-01-19',
+    changes: 'Adicionadas colunas de Etiqueta e Número de Série no dashboard de gestão.',
+  },
+  {
+    version: '0.0.67',
+    date: '2026-01-19',
+    changes: 'Removida a opção de validar contagem sem ajuste; agora apenas o ajuste de estoque é permitido para divergências.',
+  },
+  {
+    version: '0.0.65',
+    date: '2026-01-19',
+    changes: 'Reordenadas colunas de divergências para evitar referência antes da inicialização.',
+  },
+  {
+    version: '0.0.64',
+    date: '2026-01-19',
+    changes: 'Adicionadas ações de validação e ajuste na tabela de divergências.',
+  },
   {
     version: '0.0.63',
     date: '2026-01-19',

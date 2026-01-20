@@ -10,11 +10,12 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { ArrowSync24Regular, Checkmark24Regular, Filter24Regular } from '@fluentui/react-icons';
+import { ArrowSync24Regular, Filter24Regular } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { DataGrid, createTableColumn } from '../../components/shared/DataGrid';
+import { BarChart } from '../../components/charts/BarChart';
 import { useCurrentSystemUser } from '../../hooks/useCurrentSystemUser';
 import {
   Cr22fEstoqueFromSharepointListService,
@@ -22,6 +23,7 @@ import {
   NewAppPreferenceService,
   NewContagemEstoqueService,
 } from '../../generated';
+import type { ChartDataPoint } from '../../types';
 
 type ContagemRecord = {
   new_contagemestoqueid: string;
@@ -33,6 +35,10 @@ type ContagemRecord = {
   new_situacao?: number;
   _new_itemestoque_value?: string;
   _new_usuario_value?: string;
+  new_ItemEstoque?: {
+    cr22f_querytag?: number;
+    cr22f_serialnumber?: string;
+  };
 };
 
 type AjusteRecord = {
@@ -126,12 +132,19 @@ const formatDate = (iso?: string) => (iso ? new Date(iso).toLocaleString('pt-BR'
 
 const formatShortId = (value?: string) => (value ? `${value.slice(0, 6)}...` : '---');
 
+const formatChartLabel = (iso: string) =>
+  new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
 export function ContagemEstoqueGestaoPage() {
   const styles = useStyles();
   const { systemUserId } = useCurrentSystemUser();
   const [selectedTab, setSelectedTab] = useState('dashboard');
 
-  const [dashboardStart, setDashboardStart] = useState(() => new Date().toISOString().slice(0, 10));
+  const [dashboardStart, setDashboardStart] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 7);
+    return date.toISOString().slice(0, 10);
+  });
   const [dashboardEnd, setDashboardEnd] = useState(() => new Date().toISOString().slice(0, 10));
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
@@ -140,6 +153,8 @@ export function ContagemEstoqueGestaoPage() {
     pendentes: 0,
     validadas: 0,
   });
+  const [dashboardItems, setDashboardItems] = useState<ContagemRecord[]>([]);
+  const [dashboardChartData, setDashboardChartData] = useState<ChartDataPoint[]>([]);
 
   const [divergenciasLoading, setDivergenciasLoading] = useState(false);
   const [divergenciasError, setDivergenciasError] = useState<string | null>(null);
@@ -207,7 +222,7 @@ export function ContagemEstoqueGestaoPage() {
     []
   );
 
-  const divergenciasColumns = useMemo(
+  const dashboardColumns = useMemo(
     () => [
       createTableColumn<ContagemRecord>({
         columnId: 'data',
@@ -215,9 +230,19 @@ export function ContagemEstoqueGestaoPage() {
         renderCell: (item) => formatDate(item.new_datacontagem),
       }),
       createTableColumn<ContagemRecord>({
+        columnId: 'tag',
+        renderHeaderCell: () => 'Etiqueta',
+        renderCell: (item) => item.new_ItemEstoque?.cr22f_querytag || '---',
+      }),
+      createTableColumn<ContagemRecord>({
         columnId: 'sku',
         renderHeaderCell: () => 'SKU',
         renderCell: (item) => item.new_sku || '---',
+      }),
+      createTableColumn<ContagemRecord>({
+        columnId: 'serial',
+        renderHeaderCell: () => 'S/N',
+        renderCell: (item) => item.new_ItemEstoque?.cr22f_serialnumber || '---',
       }),
       createTableColumn<ContagemRecord>({
         columnId: 'endereco',
@@ -277,7 +302,7 @@ export function ContagemEstoqueGestaoPage() {
       const end = toIsoEnd(dashboardEnd);
       const dateFilter = `new_datacontagem ge ${start} and new_datacontagem le ${end}`;
 
-      const [totalResult, pendenteResult, validadaResult] = await Promise.all([
+      const [totalResult, pendenteResult, validadaResult, listResult] = await Promise.all([
         NewContagemEstoqueService.getAll({
           filter: `${dateFilter} and statecode eq 0`,
           select: ['new_contagemestoqueid'],
@@ -290,6 +315,21 @@ export function ContagemEstoqueGestaoPage() {
           filter: `${dateFilter} and statecode eq 0 and new_situacao eq ${SITUACAO_CONTAGEM.Validada}`,
           select: ['new_contagemestoqueid'],
         }),
+        NewContagemEstoqueService.getAll({
+          filter: `${dateFilter} and statecode eq 0`,
+          orderBy: ['new_datacontagem desc'],
+          select: [
+            'new_contagemestoqueid',
+            'new_datacontagem',
+            'new_sku',
+            'new_enderecocompleto',
+            'new_quantidadecontada',
+            'new_quantidadeesperada',
+            '_new_usuario_value',
+          ],
+          expand: ['new_ItemEstoque($select=cr22f_querytag,cr22f_serialnumber)'],
+          top: 500,
+        }),
       ]);
 
       setDashboardStats({
@@ -297,6 +337,77 @@ export function ContagemEstoqueGestaoPage() {
         pendentes: pendenteResult.data?.length ?? 0,
         validadas: validadaResult.data?.length ?? 0,
       });
+
+      const items = (listResult.data ?? []) as ContagemRecord[];
+      const estoqueIds: string[] = [];
+      const estoqueIdsSet = new Set<string>();
+      for (const item of items) {
+        const itemId = item._new_itemestoque_value;
+        if (itemId && !estoqueIdsSet.has(itemId)) {
+          estoqueIdsSet.add(itemId);
+          estoqueIds.push(itemId);
+        }
+      }
+
+      let enrichedItems = items;
+      if (estoqueIds.length > 0) {
+        const chunkSize = 50;
+        const estoqueRequests: Promise<any>[] = [];
+        for (let i = 0; i < estoqueIds.length; i += chunkSize) {
+          const chunk = estoqueIds.slice(i, i + chunkSize);
+          const filter = chunk.map((id) => `cr22f_estoquefromsharepointlistid eq '${id}'`).join(' or ');
+          estoqueRequests.push(
+            Cr22fEstoqueFromSharepointListService.getAll({
+              filter,
+              select: ['cr22f_estoquefromsharepointlistid', 'cr22f_querytag', 'cr22f_serialnumber'],
+              top: chunk.length,
+            })
+          );
+        }
+
+        const estoqueResults = await Promise.all(estoqueRequests);
+        const estoqueMap = new Map<string, { cr22f_querytag?: number; cr22f_serialnumber?: string }>();
+        for (const result of estoqueResults) {
+          const data = (result.data ?? []) as Array<{
+            cr22f_estoquefromsharepointlistid?: string;
+            cr22f_querytag?: number;
+            cr22f_serialnumber?: string;
+          }>;
+          for (const record of data) {
+            if (record.cr22f_estoquefromsharepointlistid) {
+              estoqueMap.set(record.cr22f_estoquefromsharepointlistid, {
+                cr22f_querytag: record.cr22f_querytag,
+                cr22f_serialnumber: record.cr22f_serialnumber,
+              });
+            }
+          }
+        }
+
+        enrichedItems = items.map((item) => {
+          const estoque = item._new_itemestoque_value
+            ? estoqueMap.get(item._new_itemestoque_value)
+            : undefined;
+          return estoque ? { ...item, new_ItemEstoque: estoque } : item;
+        });
+      }
+
+      setDashboardItems(enrichedItems);
+
+      const grouped = enrichedItems.reduce<Record<string, number>>((acc, item) => {
+        if (!item.new_datacontagem) return acc;
+        const dayKey = item.new_datacontagem.slice(0, 10);
+        acc[dayKey] = (acc[dayKey] ?? 0) + 1;
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(grouped)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([dayKey, count]) => ({
+          date: formatChartLabel(dayKey),
+          value: count,
+        }));
+
+      setDashboardChartData(chartData);
     } catch (err: any) {
       console.error('[GestaoContagem] erro dashboard', err);
       setDashboardError(err.message || 'Erro ao carregar dashboard.');
@@ -364,23 +475,53 @@ export function ContagemEstoqueGestaoPage() {
     }
   }, [ajustesEnd, ajustesStart]);
 
-  const handleValidate = useCallback(async (contagem: ContagemRecord) => {
-    try {
-      await NewContagemEstoqueService.update(contagem.new_contagemestoqueid, {
-        new_situacao: SITUACAO_CONTAGEM.Validada,
-      });
-      void loadDivergencias();
-    } catch (err) {
-      console.error('[GestaoContagem] erro validar', err);
-      setDivergenciasError('Erro ao validar contagem.');
-    }
-  }, [loadDivergencias]);
-
   const handleOpenAjuste = useCallback((contagem: ContagemRecord) => {
     setAjusteTarget(contagem);
-    setAjusteSaldoNovo('');
+    setAjusteSaldoNovo(String(contagem.new_quantidadecontada ?? ''));
     setAjusteJustificativa('');
   }, []);
+
+  const divergenciasColumns = useMemo(
+    () => [
+      createTableColumn<ContagemRecord>({
+        columnId: 'data',
+        renderHeaderCell: () => 'Data',
+        renderCell: (item) => formatDate(item.new_datacontagem),
+      }),
+      createTableColumn<ContagemRecord>({
+        columnId: 'sku',
+        renderHeaderCell: () => 'SKU',
+        renderCell: (item) => item.new_sku || '---',
+      }),
+      createTableColumn<ContagemRecord>({
+        columnId: 'endereco',
+        renderHeaderCell: () => 'Endereço',
+        renderCell: (item) => item.new_enderecocompleto || '---',
+      }),
+      createTableColumn<ContagemRecord>({
+        columnId: 'contada',
+        renderHeaderCell: () => 'Contada',
+        renderCell: (item) => item.new_quantidadecontada ?? 0,
+      }),
+      createTableColumn<ContagemRecord>({
+        columnId: 'esperada',
+        renderHeaderCell: () => 'Esperada',
+        renderCell: (item) => item.new_quantidadeesperada ?? 0,
+      }),
+      createTableColumn<ContagemRecord>({
+        columnId: 'acoes',
+        renderHeaderCell: () => 'Ações',
+        renderCell: (item) => (
+          <div className={styles.actionsRow}>
+            <Button appearance="primary" size="small" onClick={() => handleOpenAjuste(item)}>
+              Gerar ajuste
+            </Button>
+          </div>
+        ),
+      }),
+    ],
+    [handleOpenAjuste, styles.actionsRow]
+  );
 
   const handleConfirmAjuste = useCallback(async () => {
     if (!ajusteTarget || !systemUserId) return;
@@ -642,6 +783,20 @@ export function ContagemEstoqueGestaoPage() {
           {dashboardError && <Text className={styles.errorText}>{dashboardError}</Text>}
         </div>
       </Card>
+      <Card>
+        <div className="flex flex-col gap-4 p-4">
+          <Text weight="semibold">Itens contados por dia</Text>
+          {dashboardLoading ? (
+            <Spinner label="Carregando gráfico..." />
+          ) : dashboardChartData.length === 0 ? (
+            <Text size={200} className={styles.infoText}>
+              Sem dados para o período selecionado.
+            </Text>
+          ) : (
+            <BarChart data={dashboardChartData} dataKey="value" />
+          )}
+        </div>
+      </Card>
       <div className={styles.cardsGrid}>
         <Card>
           <div className="flex flex-col gap-2 p-4">
@@ -674,6 +829,42 @@ export function ContagemEstoqueGestaoPage() {
           </div>
         </Card>
       </div>
+      <Card>
+        <div className="flex flex-col gap-4 p-4">
+          <Text weight="semibold">Produtos contados no período</Text>
+          {dashboardLoading && <Spinner label="Carregando lista..." />}
+          {!dashboardLoading && dashboardItems.length === 0 && (
+            <Text size={200} className={styles.infoText}>
+              Nenhum item contado no período.
+            </Text>
+          )}
+          <div className={styles.tableWrapper}>
+            <DataGrid items={dashboardItems} columns={dashboardColumns} />
+          </div>
+          <div className={styles.cardList}>
+            {dashboardItems.map((item) => (
+              <Card key={item.new_contagemestoqueid}>
+                <div className="flex flex-col gap-2 p-3">
+                  <div className="flex items-center justify-between">
+                    <Text weight="semibold">{item.new_sku || 'SKU'}</Text>
+                    <Text size={200} className={styles.infoText}>
+                      Tag: {item.new_ItemEstoque?.cr22f_querytag || '---'}
+                    </Text>
+                  </div>
+                  <Text size={200}>S/N: {item.new_ItemEstoque?.cr22f_serialnumber || '---'}</Text>
+                  <Text size={200}>{item.new_enderecocompleto || 'Endereço não informado'}</Text>
+                  <Text size={200}>
+                    Contada: {item.new_quantidadecontada ?? 0} | Esperada: {item.new_quantidadeesperada ?? 0}
+                  </Text>
+                  <Text size={200} className={styles.infoText}>
+                    {formatDate(item.new_datacontagem)}
+                  </Text>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </Card>
     </div>
   );
 
@@ -710,13 +901,6 @@ export function ContagemEstoqueGestaoPage() {
                     {formatDate(item.new_datacontagem)}
                   </Text>
                   <div className={styles.actionsRow}>
-                    <Button
-                      appearance="secondary"
-                      icon={<Checkmark24Regular />}
-                      onClick={() => void handleValidate(item)}
-                    >
-                      Validar
-                    </Button>
                     <Button appearance="primary" onClick={() => handleOpenAjuste(item)}>
                       Gerar ajuste
                     </Button>
