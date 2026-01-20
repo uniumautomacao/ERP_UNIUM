@@ -1,6 +1,36 @@
-export const APP_VERSION = '0.0.75';
-export const APP_BUILD_DATE = '2026-01-19';
+export const APP_VERSION = '0.0.81';
+export const APP_BUILD_DATE = '2026-01-20';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.81',
+    date: '2026-01-20',
+    changes: 'Remove redirect em iframe e mantém autenticação via popup.',
+  },
+  {
+    version: '0.0.80',
+    date: '2026-01-20',
+    changes: 'Habilita redirect em iframe no MSAL como fallback para login.',
+  },
+  {
+    version: '0.0.79',
+    date: '2026-01-20',
+    changes: 'Remove fallback de redirect no MSAL e melhora erro de popup.',
+  },
+  {
+    version: '0.0.78',
+    date: '2026-01-20',
+    changes: 'Fallback para login/redirect no MSAL quando popup expira.',
+  },
+  {
+    version: '0.0.77',
+    date: '2026-01-20',
+    changes: 'Inicializa MSAL antes de autenticar o fluxo HTTP.',
+  },
+  {
+    version: '0.0.76',
+    date: '2026-01-20',
+    changes: 'Integra ajuste de divergência via Flow HTTP com autenticação do usuário.',
+  },
   {
     version: '0.0.75',
     date: '2026-01-19',
