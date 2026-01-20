@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.82';
+export const APP_VERSION = '0.0.83';
 export const APP_BUILD_DATE = '2026-01-20';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.83',
+    date: '2026-01-20',
+    changes: 'Ajusta escopo MSAL para Flow (user_impersonation) para evitar erro AADSTS650057.',
+  },
   {
     version: '0.0.82',
     date: '2026-01-20',
