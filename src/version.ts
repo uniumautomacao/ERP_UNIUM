@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.73';
+export const APP_VERSION = '0.0.74';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.74',
+    date: '2026-01-19',
+    changes: 'Normaliza agrupamento do gráfico para data local.',
+  },
   {
     version: '0.0.73',
     date: '2026-01-19',

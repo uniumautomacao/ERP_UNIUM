@@ -132,8 +132,16 @@ const formatDate = (iso?: string) => (iso ? new Date(iso).toLocaleString('pt-BR'
 
 const formatShortId = (value?: string) => (value ? `${value.slice(0, 6)}...` : '---');
 
-const formatChartLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+const formatChartLabel = (date: Date) =>
+  date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
+const toLocalDateKey = (iso: string) => {
+  const date = new Date(iso);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export function ContagemEstoqueGestaoPage() {
   const styles = useStyles();
@@ -422,17 +430,21 @@ export function ContagemEstoqueGestaoPage() {
 
       const grouped = enrichedItems.reduce<Record<string, number>>((acc, item) => {
         if (!item.new_datacontagem) return acc;
-        const dayKey = item.new_datacontagem.slice(0, 10);
+        const dayKey = toLocalDateKey(item.new_datacontagem);
         acc[dayKey] = (acc[dayKey] ?? 0) + 1;
         return acc;
       }, {});
 
       const chartData = Object.entries(grouped)
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([dayKey, count]) => ({
-          date: formatChartLabel(dayKey),
-          value: count,
-        }));
+        .map(([dayKey, count]) => {
+          const [year, month, day] = dayKey.split('-').map((value) => Number(value));
+          const date = new Date(year, month - 1, day);
+          return {
+            date: formatChartLabel(date),
+            value: count,
+          };
+        });
 
       setDashboardChartData(chartData);
     } catch (err: any) {
