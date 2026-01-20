@@ -12,7 +12,7 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { QrCode24Regular } from '@fluentui/react-icons';
+import { Search24Regular, QrCode24Regular } from '@fluentui/react-icons';
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
 import { NotFoundException } from '@zxing/library';
 import { CommandBar } from '../../components/layout/CommandBar';
@@ -181,11 +181,11 @@ const getCountStatus = (item: EstoqueItem, now: Date) => {
   return { label: 'No prazo', color: tokens.colorPaletteYellowForeground1, overdueDays: atraso };
 };
 
-const buildListaDoDiaFilter = (now: Date) => {
+const buildListaDoDiaFilter = (now: Date, search?: string) => {
   const limitA = getDueLimitDate(now, 100000000).toISOString();
   const limitB = getDueLimitDate(now, 100000001).toISOString();
   const limitC = getDueLimitDate(now, 100000002).toISOString();
-  return [
+  let filter = [
     'statecode eq 0',
     'and (',
     'new_ultimacontagem eq null',
@@ -194,6 +194,18 @@ const buildListaDoDiaFilter = (now: Date) => {
     `or (new_classecriticidade eq 100000002 and new_ultimacontagem le ${limitC})`,
     ')',
   ].join(' ');
+
+  if (search) {
+    const escaped = search.replace(/'/g, "''");
+    let searchPart = `contains(new_referenciadoproduto, '${escaped}')`;
+    const asNum = Number(search);
+    if (!Number.isNaN(asNum) && Number.isInteger(asNum)) {
+      searchPart = `(${searchPart} or cr22f_querytag eq ${asNum})`;
+    }
+    filter = `${filter} and (${searchPart})`;
+  }
+
+  return filter;
 };
 
 const buildDayRange = (now: Date) => {
@@ -231,6 +243,8 @@ export function ContagemEstoqueMobilePage() {
 
   const [contagensHoje, setContagensHoje] = useState(0);
   const [contagensLoading, setContagensLoading] = useState(false);
+
+  const [searchText, setSearchText] = useState('');
 
   const stopScan = useCallback(() => {
     controlsRef.current?.stop();
@@ -281,13 +295,13 @@ export function ContagemEstoqueMobilePage() {
     }
   }, [loadContagensHoje, systemUserId]);
 
-  const loadListaDoDia = useCallback(async () => {
+  const loadListaDoDia = useCallback(async (search?: string) => {
     setListaLoading(true);
     setListaError(null);
     try {
       const now = new Date();
       const result = await Cr22fEstoqueFromSharepointListService.getAll({
-        filter: buildListaDoDiaFilter(now),
+        filter: "cr22f_querytag eq 36514",//buildListaDoDiaFilter(now, search),
         select: [
           'cr22f_estoquefromsharepointlistid',
           'new_referenciadoproduto',
@@ -523,6 +537,7 @@ export function ContagemEstoqueMobilePage() {
             onClick={() => {
               resetFlow();
               setView('list');
+              setSearchText('');
               void loadListaDoDia();
             }}
           >
@@ -676,15 +691,41 @@ export function ContagemEstoqueMobilePage() {
         <div className="flex flex-col gap-4 p-4">
           <div className="flex items-center justify-between">
             <Text weight="semibold">Lista do dia</Text>
-            <Button appearance="subtle" onClick={loadListaDoDia} disabled={listaLoading}>
-              Atualizar
+            <Button
+              appearance="subtle"
+              onClick={() => {
+                setSearchText('');
+                void loadListaDoDia();
+              }}
+              disabled={listaLoading}
+            >
+              Limpar/Atualizar
             </Button>
           </div>
+
+          <div className="flex gap-2">
+            <Input
+              placeholder="Buscar SKU ou Tag..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  void loadListaDoDia(searchText);
+                }
+              }}
+              contentBefore={<Search24Regular />}
+              style={{ flex: 1 }}
+            />
+            <Button appearance="primary" onClick={() => void loadListaDoDia(searchText)} disabled={listaLoading}>
+              Buscar
+            </Button>
+          </div>
+
           {listaLoading && <Spinner label="Carregando lista..." />}
           {listaError && <Text className={styles.errorText}>{listaError}</Text>}
           {!listaLoading && listaDoDia.length === 0 && (
             <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-              Nenhum item pendente hoje.
+              {searchText ? 'Nenhum item encontrado para esta busca.' : 'Nenhum item pendente hoje.'}
             </Text>
           )}
           {groupedLista.map(([grupo, itens]) => (
