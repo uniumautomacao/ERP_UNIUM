@@ -150,7 +150,7 @@ const FLOW_TENANT_ID = 'e3d20045-1678-4bd0-96bb-4195baba23a6';
 const FLOW_CLIENT_ID = '46f2a64f-f3ef-4585-aa24-2d3182c6429b';
 // Delegated permission required in Entra ID (App Registration):
 // API Permissions -> Microsoft Flow Service -> Delegated -> user_impersonation
-const FLOW_SCOPES = ['https://service.flow.microsoft.com//User'];
+const FLOW_SCOPES = ['https://service.flow.microsoft.com/Flows.Run'];
 
 const msalInstance = new PublicClientApplication({
   auth: {

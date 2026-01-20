@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.84';
+export const APP_VERSION = '0.0.85';
 export const APP_BUILD_DATE = '2026-01-20';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.85',
+    date: '2026-01-20',
+    changes: 'Corrige scope MSAL para Flows.Run (permissão para executar Flows).',
+  },
   {
     version: '0.0.84',
     date: '2026-01-20',
