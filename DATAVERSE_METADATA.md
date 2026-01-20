@@ -60,8 +60,6 @@ PrimaryKey:                       new_ajustedeestoqueid
 | new_itemestoque | new_ItemEstoque | cr22f_estoquefromsharepointlists |
 | new_usuarioajuste | new_UsuarioAjuste | systemusers |
 | new_contagem | new_Contagem | new_contagemestoques |
-| new_contagem | new_Contagem | new_contagemestoques |
-| new_contagem | new_Contagem | new_contagemestoques |
 
 ---
 
@@ -89,12 +87,18 @@ PrimaryKey:                       cr22f_estoquefromsharepointlistid
 
 ### ⚡ Campos Adicionais (Atualizados)
 *   `new_ultimacontagem`: Data da última contagem realizada.
-*   `new_centrodedistribuicao`: Centro de distribuição vinculado.
-*   `new_deposito`: Depósito vinculado.
-*   `new_rua`: Rua no depósito.
-*   `new_estante`: Estante no depósito.
-*   `new_prateleira`: Prateleira no depósito.
-*   `new_classecriticidade`: Classe de criticidade do produto.
+*   `new_centrodedistribuicao`: Centro de distribuição vinculado (OptionSet).
+*   `new_deposito`: Depósito vinculado (OptionSet).
+*   `new_rua`: Rua no depósito (OptionSet).
+*   `new_estante`: Estante no depósito (OptionSet).
+*   `new_prateleira`: Prateleira no depósito (OptionSet).
+*   `new_classecriticidade`: Classe de criticidade do produto (OptionSet).
+*   `new_confirmacaodeetiqueta`: Confirmação manual da etiqueta.
+*   `new_confirmacaodetag`: Confirmação manual da tag.
+*   `new_contemrma`: Indica se há RMA associado.
+*   `new_endereco`: Endereço completo formatado.
+*   `new_etiquetaemtextocalculated`: Etiqueta legível calculada.
+*   `new_referenciadoproduto`: Referência do produto.
 
 ### ⚡ Campos de Lookup (Navigation Properties)
 | Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
@@ -103,6 +107,9 @@ PrimaryKey:                       cr22f_estoquefromsharepointlistid
 | new_produtoservico | new_ProdutoServico | new_produtoservicos |
 | new_grupodeorigem | new_GrupodeOrigem | cr22f_estoquefromsharepointlists |
 | new_mercadoriaanteriordorma | new_MercadoriaAnteriordoRMA | cr22f_estoquefromsharepointlists |
+| new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
+| new_insercao | new_Insercao | cr22f_estoquefromsharepointlists |
+| new_remessa | new_Remessa | new_remessas |
 
 ---
 

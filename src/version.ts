@@ -1,6 +1,26 @@
-export const APP_VERSION = '0.0.69';
+export const APP_VERSION = '0.0.73';
 export const APP_BUILD_DATE = '2026-01-19';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.73',
+    date: '2026-01-19',
+    changes: 'Inclui lookup _new_itemestoque_value na lista do dashboard.',
+  },
+  {
+    version: '0.0.72',
+    date: '2026-01-19',
+    changes: 'Remove parâmetro expand e mantém logs de diagnóstico.',
+  },
+  {
+    version: '0.0.71',
+    date: '2026-01-19',
+    changes: 'Logs de diagnóstico no dashboard para itens de estoque vinculados.',
+  },
+  {
+    version: '0.0.70',
+    date: '2026-01-19',
+    changes: 'Reimportada a tabela cr22f_estoquefromsharepointlist com atualização completa de campos e lookups.',
+  },
   {
     version: '0.0.69',
     date: '2026-01-19',

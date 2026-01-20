@@ -654,12 +654,6 @@ public partial class cr22f_EstoqueFromSharepointList : Microsoft.Xrm.Sdk.Entity,
 		{
 			return ((new_classedeproduto?)(EntityOptionSetEnum.GetEnum(this, "new_classecriticidade")));
 		}
-		set
-		{
-			this.OnPropertyChanging("new_ClasseCriticidade");
-			this.SetAttributeValue("new_classecriticidade", value.HasValue ? new Microsoft.Xrm.Sdk.OptionSetValue((int)value) : null);
-			this.OnPropertyChanged("new_ClasseCriticidade");
-		}
 	}
 	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_clientefx")]
@@ -1127,6 +1121,33 @@ public partial class cr22f_EstoqueFromSharepointList : Microsoft.Xrm.Sdk.Entity,
 		get
 		{
 			return this.GetAttributeValue<string>("new_prateleiratexto");
+		}
+	}
+	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_precodecompraatualizado")]
+	public Microsoft.Xrm.Sdk.Money new_PrecodeCompraAtualizado
+	{
+		get
+		{
+			return this.GetAttributeValue<Microsoft.Xrm.Sdk.Money>("new_precodecompraatualizado");
+		}
+		set
+		{
+			this.OnPropertyChanging("new_PrecodeCompraAtualizado");
+			this.SetAttributeValue("new_precodecompraatualizado", value);
+			this.OnPropertyChanged("new_PrecodeCompraAtualizado");
+		}
+	}
+	
+	/// <summary>
+	/// Value of the Preço de Compra Atualizado in base currency.
+	/// </summary>
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_precodecompraatualizado_base")]
+	public Microsoft.Xrm.Sdk.Money new_precodecompraatualizado_Base
+	{
+		get
+		{
+			return this.GetAttributeValue<Microsoft.Xrm.Sdk.Money>("new_precodecompraatualizado_base");
 		}
 	}
 	

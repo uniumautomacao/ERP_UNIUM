@@ -298,6 +298,10 @@ export function ContagemEstoqueGestaoPage() {
     setDashboardLoading(true);
     setDashboardError(null);
     try {
+      console.info('[GestaoContagem][Dashboard] Iniciando carregamento', {
+        dashboardStart,
+        dashboardEnd,
+      });
       const start = toIsoStart(dashboardStart);
       const end = toIsoEnd(dashboardEnd);
       const dateFilter = `new_datacontagem ge ${start} and new_datacontagem le ${end}`;
@@ -326,11 +330,17 @@ export function ContagemEstoqueGestaoPage() {
             'new_quantidadecontada',
             'new_quantidadeesperada',
             '_new_usuario_value',
+            '_new_itemestoque_value',
           ],
-          expand: ['new_ItemEstoque($select=cr22f_querytag,cr22f_serialnumber)'],
           top: 500,
         }),
       ]);
+
+      console.info('[GestaoContagem][Dashboard] Totais', {
+        total: totalResult.data?.length ?? 0,
+        pendentes: pendenteResult.data?.length ?? 0,
+        validadas: validadaResult.data?.length ?? 0,
+      });
 
       setDashboardStats({
         total: totalResult.data?.length ?? 0,
@@ -339,6 +349,10 @@ export function ContagemEstoqueGestaoPage() {
       });
 
       const items = (listResult.data ?? []) as ContagemRecord[];
+      console.info('[GestaoContagem][Dashboard] Contagens carregadas', {
+        total: items.length,
+        sample: items.slice(0, 3),
+      });
       const estoqueIds: string[] = [];
       const estoqueIdsSet = new Set<string>();
       for (const item of items) {
@@ -351,6 +365,9 @@ export function ContagemEstoqueGestaoPage() {
 
       let enrichedItems = items;
       if (estoqueIds.length > 0) {
+        console.info('[GestaoContagem][Dashboard] Carregando estoque relacionado', {
+          totalIds: estoqueIds.length,
+        });
         const chunkSize = 50;
         const estoqueRequests: Promise<any>[] = [];
         for (let i = 0; i < estoqueIds.length; i += chunkSize) {
@@ -382,6 +399,10 @@ export function ContagemEstoqueGestaoPage() {
             }
           }
         }
+        console.info('[GestaoContagem][Dashboard] Estoque relacionado carregado', {
+          totalRegistros: estoqueMap.size,
+          sample: Array.from(estoqueMap.entries()).slice(0, 3),
+        });
 
         enrichedItems = items.map((item) => {
           const estoque = item._new_itemestoque_value
@@ -389,6 +410,12 @@ export function ContagemEstoqueGestaoPage() {
             : undefined;
           return estoque ? { ...item, new_ItemEstoque: estoque } : item;
         });
+        console.info('[GestaoContagem][Dashboard] Contagens enriquecidas', {
+          total: enrichedItems.length,
+          sample: enrichedItems.slice(0, 3),
+        });
+      } else {
+        console.warn('[GestaoContagem][Dashboard] Nenhuma contagem com item de estoque relacionado.');
       }
 
       setDashboardItems(enrichedItems);
