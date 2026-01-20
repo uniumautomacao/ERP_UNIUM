@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.81';
+export const APP_VERSION = '0.0.82';
 export const APP_BUILD_DATE = '2026-01-20';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.82',
+    date: '2026-01-20',
+    changes: 'Publicação do app no PowerApps com fluxos de contagem e gestão de vistorias.',
+  },
   {
     version: '0.0.81',
     date: '2026-01-20',
