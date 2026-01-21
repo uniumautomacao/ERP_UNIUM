@@ -208,7 +208,7 @@ export function InteligenciaComercialPage() {
       renderHeaderCell: () => 'Lucro',
       renderCell: (item) => (
         <TableCellLayout>
-          <Text weight="semibold" style={{ color: tokens.colorPaletteBlueForeground1 }}>
+          <Text weight="semibold" style={{ color: tokens.colorPaletteBlueForeground2 }}>
             {formatCurrency(item.lucro)}
           </Text>
         </TableCellLayout>

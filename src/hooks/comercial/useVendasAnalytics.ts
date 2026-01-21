@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { NewRegistrodevendaService, NewRegistrodevenda } from '../../generated';
+import { NewRegistrodevendaService } from '../../generated';
+import type { NewRegistrodevenda } from '../../generated/models/NewRegistrodevendaModel';
 import { ChartDataPoint } from '../../types';
 
 interface DonutChartData {
