@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, ComponentType } from 'react';
 
 // KPI Data
 export interface KPIData {
@@ -155,6 +155,7 @@ export interface NavItem {
   icon: ReactNode;
   path: string;
   exact?: boolean;
+  component: ComponentType;
 }
 
 export interface NavSection {

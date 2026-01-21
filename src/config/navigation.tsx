@@ -13,6 +13,23 @@ import {
   QrCode24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
+import { HomePage } from '../pages/HomePage';
+import { TimelinePage } from '../pages/section0-installations/TimelinePage';
+import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
+import { DashboardPage } from '../pages/section1-analytics/DashboardPage';
+import { AnalyticsPage } from '../pages/section1-analytics/AnalyticsPage';
+import { ReportsPage } from '../pages/section1-analytics/ReportsPage';
+import { InventoryPage } from '../pages/section2-operations/InventoryPage';
+import { ProjectPlannerPage } from '../pages/section2-operations/ProjectPlannerPage';
+import { TeamManagementPage } from '../pages/section2-operations/TeamManagementPage';
+import { RMAsKanbanPage } from '../pages/section2-operations/RMAsKanbanPage';
+import { ContagemEstoqueMobilePage } from '../pages/section4-vistorias/ContagemEstoqueMobilePage';
+import { ContagemEstoqueGestaoPage } from '../pages/section4-vistorias/ContagemEstoqueGestaoPage';
+import { LeitorMercadoriasPage } from '../pages/section4-vistorias/LeitorMercadoriasPage';
+import { SuperAdminPageAccessPage } from '../pages/section3-super-admin/SuperAdminPageAccessPage';
+import { SuperAdminUserRolesPage } from '../pages/section3-super-admin/SuperAdminUserRolesPage';
+import { DevPage } from '../pages/section3-dev/DevPage';
+import { QrCodeScannerPage } from '../pages/section3-dev/QrCodeScannerPage';
 
 export const navigation: NavSection[] = [
   {
@@ -24,6 +41,7 @@ export const navigation: NavSection[] = [
         label: 'Home',
         icon: <Home24Regular />,
         path: '/',
+        component: HomePage,
       },
     ],
   },
@@ -37,6 +55,7 @@ export const navigation: NavSection[] = [
         label: 'Linha do Tempo',
         icon: <CalendarLtr24Regular />,
         path: '/timeline',
+        component: TimelinePage,
       },
     ],
   },
@@ -51,18 +70,21 @@ export const navigation: NavSection[] = [
         icon: <QrCode24Regular />,
         path: '/vistorias/contagem',
         exact: true,
+        component: ContagemEstoqueMobilePage,
       },
       {
         id: 'contagem-gestao',
         label: 'Gestão de Contagem',
         icon: <DataBarVertical24Regular />,
         path: '/vistorias/contagem/gestao',
+        component: ContagemEstoqueGestaoPage,
       },
       {
         id: 'leitor-mercadorias',
         label: 'Leitor de Mercadorias',
         icon: <QrCode24Regular />,
         path: '/vistorias/leitor-mercadorias',
+        component: LeitorMercadoriasPage,
       },
     ],
   },
@@ -76,6 +98,7 @@ export const navigation: NavSection[] = [
         label: 'Quadro de RMAs',
         icon: <Board24Regular />,
         path: '/rmas',
+        component: RMAsKanbanPage,
       }
     ],
   },
@@ -89,6 +112,7 @@ export const navigation: NavSection[] = [
         label: 'Dispositivos IO',
         icon: <DeveloperBoard24Regular />,
         path: '/dispositivos-io',
+        component: DispositivosIOPage,
       },
     ],
   },
@@ -102,12 +126,14 @@ export const navigation: NavSection[] = [
         label: 'Acesso por Role',
         icon: <ShieldLock24Regular />,
         path: '/super-admin/page-access',
+        component: SuperAdminPageAccessPage,
       },
       {
         id: 'user-roles',
         label: 'Roles por Usuário',
         icon: <PeopleCheckmark24Regular />,
         path: '/super-admin/user-roles',
+        component: SuperAdminUserRolesPage,
       },
     ],
   },
@@ -121,12 +147,14 @@ export const navigation: NavSection[] = [
         label: 'Dev Page',
         icon: <DeveloperBoard24Regular />,
         path: '/dev',
+        component: DevPage,
       },
       {
         id: 'dev-qrcode',
         label: 'Leitor QR Code',
         icon: <QrCode24Regular />,
         path: '/dev/qrcode',
+        component: QrCodeScannerPage,
       },
     ],
   },
@@ -140,18 +168,21 @@ export const navigation: NavSection[] = [
         label: 'Dashboard',
         icon: <DataBarVertical24Regular />,
         path: '/dashboard',
+        component: DashboardPage,
       },
       {
         id: 'analytics',
         label: 'Analytics',
         icon: <ChartMultiple24Regular />,
         path: '/analytics',
+        component: AnalyticsPage,
       },
       {
         id: 'reports',
         label: 'Reports',
         icon: <DocumentBulletList24Regular />,
         path: '/reports',
+        component: ReportsPage,
       }
     ]
   },
@@ -165,18 +196,21 @@ export const navigation: NavSection[] = [
         label: 'Inventory',
         icon: <Box24Regular />,
         path: '/inventory',
+        component: InventoryPage,
       },
       {
         id: 'projects',
         label: 'Project Planner',
         icon: <CalendarLtr24Regular />,
         path: '/projects',
+        component: ProjectPlannerPage,
       },
       {
         id: 'team',
         label: 'Team Management',
         icon: <People24Regular />,
         path: '/team',
+        component: TeamManagementPage,
       }
     ]
   }

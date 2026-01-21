@@ -1,4 +1,7 @@
+import { createElement, ReactElement } from 'react';
+import { Route } from 'react-router-dom';
 import { NavSection } from '../types';
+import { RequirePageAccess } from '../security/RequirePageAccess';
 
 interface FilterNavigationOptions {
   excludeSectionIds?: string[];
@@ -32,4 +35,27 @@ export const filterNavigationByAccess = (
       return items.length > 0 ? { ...section, items } : null;
     })
     .filter((section): section is NavSection => section !== null);
+};
+
+export const generateRoutesFromNavigation = (sections: NavSection[]): ReactElement[] => {
+  const routes: ReactElement[] = [];
+
+  sections.forEach((section) => {
+    section.items.forEach((item) => {
+      const Component = item.component;
+      routes.push(
+        createElement(Route, {
+          key: item.path,
+          path: item.path,
+          element: createElement(
+            RequirePageAccess,
+            null,
+            createElement(Component)
+          ),
+        })
+      );
+    });
+  });
+
+  return routes;
 };
