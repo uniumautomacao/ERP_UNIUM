@@ -32,6 +32,7 @@ import type { ChartDataPoint } from '../../types';
 type ContagemRecord = {
   new_contagemestoqueid: string;
   new_datacontagem?: string;
+  createdon?: string;
   new_sku?: string;
   new_enderecocompleto?: string;
   new_quantidadecontada?: number;
@@ -39,6 +40,7 @@ type ContagemRecord = {
   new_situacao?: number;
   _new_itemestoque_value?: string;
   _new_usuario_value?: string;
+  _usuario_nome?: string;
   new_ItemEstoque?: {
     cr22f_querytag?: number;
     cr22f_serialnumber?: string;
@@ -191,6 +193,34 @@ const formatShortId = (value?: string) => (value ? `${value.slice(0, 6)}...` : '
 const formatChartLabel = (date: Date) =>
   date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
+const getReportDate = (item: ContagemRecord) => item.new_datacontagem || item.createdon;
+
+const extractNextSkipToken = (result: any) => {
+  const directToken =
+    result?.skipToken ??
+    result?.skiptoken ??
+    result?.SkipToken ??
+    result?.['@odata.skipToken'];
+  if (typeof directToken === 'string' && directToken) {
+    return directToken;
+  }
+
+  const nextLink =
+    result?.nextLink ??
+    result?.nextlink ??
+    result?.NextLink ??
+    result?.['@odata.nextLink'] ??
+    result?.['odata.nextLink'];
+  if (typeof nextLink === 'string' && nextLink) {
+    const match = nextLink.match(/(?:\\$skiptoken|%24skiptoken)=([^&]+)/i);
+    if (match?.[1]) {
+      return decodeURIComponent(match[1]);
+    }
+  }
+
+  return null;
+};
+
 const toLocalDateKey = (iso: string) => {
   const date = new Date(iso);
   const year = date.getFullYear();
@@ -254,7 +284,8 @@ export function ContagemEstoqueGestaoPage() {
   });
   const [reportEnd, setReportEnd] = useState(() => new Date().toISOString().slice(0, 10));
   const [reportSituacao, setReportSituacao] = useState('all');
-  const [reportPage, setReportPage] = useState(0);
+  const [reportPageIndex, setReportPageIndex] = useState(0);
+  const [reportPageTokens, setReportPageTokens] = useState<Array<string | null>>([null]);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
   const [reportData, setReportData] = useState<ContagemRecord[]>([]);
@@ -264,7 +295,7 @@ export function ContagemEstoqueGestaoPage() {
       createTableColumn<ContagemRecord>({
         columnId: 'data',
         renderHeaderCell: () => 'Data',
-        renderCell: (item) => formatDate(item.new_datacontagem),
+        renderCell: (item) => formatDate(getReportDate(item)),
       }),
       createTableColumn<ContagemRecord>({
         columnId: 'sku',
@@ -289,7 +320,7 @@ export function ContagemEstoqueGestaoPage() {
       createTableColumn<ContagemRecord>({
         columnId: 'usuario',
         renderHeaderCell: () => 'Usuário',
-        renderCell: (item) => formatShortId(item._new_usuario_value),
+        renderCell: (item) => item._usuario_nome || formatShortId(item._new_usuario_value),
       }),
     ],
     []
@@ -949,51 +980,92 @@ export function ContagemEstoqueGestaoPage() {
     }
   }, [configPrefs, loadConfig, thresholdA, thresholdB, thresholdC]);
 
-  const loadReport = useCallback(async () => {
+  const loadReport = useCallback(
+    async (pageIndex = reportPageIndex) => {
+      const skipToken = reportPageTokens[pageIndex] ?? null;
     setReportLoading(true);
     setReportError(null);
-    try {
-      const start = toIsoStart(reportStart);
-      const end = toIsoEnd(reportEnd);
-      const filters = [`new_datacontagem ge ${start} and new_datacontagem le ${end}`, 'statecode eq 0'];
-      if (reportSituacao !== 'all') {
-        filters.push(`new_situacao eq ${reportSituacao}`);
+      try {
+        const start = toIsoStart(reportStart);
+        const end = toIsoEnd(reportEnd);
+        const filters = [
+          `((new_datacontagem ge ${start} and new_datacontagem le ${end}) or (new_datacontagem eq null and createdon ge ${start} and createdon le ${end}))`,
+          'statecode eq 0',
+        ];
+        if (reportSituacao !== 'all') {
+          filters.push(`new_situacao eq ${reportSituacao}`);
+        }
+        const filter = filters.join(' and ');
+        const result = await NewContagemEstoqueService.getAll({
+          filter,
+          orderBy: ['new_datacontagem desc'],
+          select: [
+            'new_contagemestoqueid',
+            'new_datacontagem',
+            'createdon',
+            'new_sku',
+            'new_enderecocompleto',
+            'new_quantidadecontada',
+            'new_quantidadeesperada',
+            '_new_usuario_value',
+          ],
+          top: 50,
+          ...(skipToken ? { skipToken } : {}),
+        });
+        const reportItems = (result.data ?? []) as ContagemRecord[];
+        const usuarioIds = Array.from(
+          new Set(reportItems.map((item) => item._new_usuario_value).filter(Boolean))
+        ) as string[];
+        const usuarioMap = new Map<string, string>();
+
+        if (usuarioIds.length > 0) {
+          const usuarioFilter = usuarioIds.map((id) => `systemuserid eq '${id}'`).join(' or ');
+          const usuarioResult = await SystemusersService.getAll({
+            filter: usuarioFilter,
+            select: ['systemuserid', 'fullname'],
+            top: usuarioIds.length,
+          });
+          (usuarioResult.data ?? []).forEach((item: any) => {
+            if (item.systemuserid && item.fullname) {
+              usuarioMap.set(item.systemuserid, item.fullname);
+            }
+          });
+        }
+
+        const reportEnriched = reportItems.map((item) => ({
+          ...item,
+          _usuario_nome: item._new_usuario_value
+            ? usuarioMap.get(item._new_usuario_value)
+            : undefined,
+        }));
+
+        setReportData(reportEnriched);
+        const nextToken = extractNextSkipToken(result);
+        setReportPageTokens((prev) => {
+          const next = [...prev];
+          next[pageIndex + 1] = nextToken;
+          return next;
+        });
+      } catch (err: any) {
+        console.error('[GestaoContagem] erro relatorio', err);
+        setReportError(err.message || 'Erro ao carregar relatório.');
+      } finally {
+        setReportLoading(false);
       }
-      const filter = filters.join(' and ');
-      const result = await NewContagemEstoqueService.getAll({
-        filter,
-        orderBy: ['new_datacontagem desc'],
-        select: [
-          'new_contagemestoqueid',
-          'new_datacontagem',
-          'new_sku',
-          'new_enderecocompleto',
-          'new_quantidadecontada',
-          'new_quantidadeesperada',
-          '_new_usuario_value',
-        ],
-        top: 50,
-        skip: reportPage * 50,
-      });
-      setReportData((result.data ?? []) as ContagemRecord[]);
-    } catch (err: any) {
-      console.error('[GestaoContagem] erro relatorio', err);
-      setReportError(err.message || 'Erro ao carregar relatório.');
-    } finally {
-      setReportLoading(false);
-    }
-  }, [reportEnd, reportPage, reportSituacao, reportStart]);
+    },
+    [reportEnd, reportPageIndex, reportPageTokens, reportSituacao, reportStart]
+  );
 
   const exportCsv = useCallback(() => {
     if (reportData.length === 0) return;
     const headers = ['Data', 'SKU', 'Endereço', 'Contada', 'Esperada', 'Usuário'];
     const rows = reportData.map((item) => [
-      formatDate(item.new_datacontagem),
+      formatDate(getReportDate(item)),
       item.new_sku || '',
       item.new_enderecocompleto || '',
       String(item.new_quantidadecontada ?? 0),
       String(item.new_quantidadeesperada ?? 0),
-      item._new_usuario_value || '',
+      item._usuario_nome || item._new_usuario_value || '',
     ]);
     const csv = [headers, ...rows]
       .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
@@ -1055,8 +1127,9 @@ export function ContagemEstoqueGestaoPage() {
           label: 'Filtrar',
           icon: <Filter24Regular />,
           onClick: () => {
-            setReportPage(0);
-            void loadReport();
+            setReportPageIndex(0);
+            setReportPageTokens([null]);
+            void loadReport(0);
           },
         },
       ];
@@ -1159,7 +1232,7 @@ export function ContagemEstoqueGestaoPage() {
                     Contada: {item.new_quantidadecontada ?? 0} | Esperada: {item.new_quantidadeesperada ?? 0}
                   </Text>
                   <Text size={200} className={styles.infoText}>
-                    {formatDate(item.new_datacontagem)}
+                    {formatDate(getReportDate(item))}
                   </Text>
                 </div>
               </Card>
@@ -1406,7 +1479,15 @@ export function ContagemEstoqueGestaoPage() {
               </select>
             </Field>
             <div className="flex items-end gap-2">
-              <Button appearance="primary" onClick={() => { setReportPage(0); void loadReport(); }} disabled={reportLoading}>
+              <Button
+                appearance="primary"
+                onClick={() => {
+                  setReportPageIndex(0);
+                  setReportPageTokens([null]);
+                  void loadReport(0);
+                }}
+                disabled={reportLoading}
+              >
                 Filtrar
               </Button>
               <Button appearance="secondary" onClick={exportCsv} disabled={reportData.length === 0}>
@@ -1448,12 +1529,24 @@ export function ContagemEstoqueGestaoPage() {
           <div className={styles.actionsRow}>
             <Button
               appearance="subtle"
-              onClick={() => setReportPage((value) => Math.max(0, value - 1))}
-              disabled={reportPage === 0}
+              onClick={() => {
+                const nextIndex = Math.max(0, reportPageIndex - 1);
+                setReportPageIndex(nextIndex);
+                void loadReport(nextIndex);
+              }}
+              disabled={reportPageIndex === 0}
             >
               Página anterior
             </Button>
-            <Button appearance="subtle" onClick={() => setReportPage((value) => value + 1)}>
+            <Button
+              appearance="subtle"
+              onClick={() => {
+                const nextIndex = reportPageIndex + 1;
+                setReportPageIndex(nextIndex);
+                void loadReport(nextIndex);
+              }}
+              disabled={!reportPageTokens[reportPageIndex + 1]}
+            >
               Próxima página
             </Button>
           </div>
@@ -1514,7 +1607,11 @@ export function ContagemEstoqueGestaoPage() {
           if (value === 'divergencias') void loadDivergencias();
           if (value === 'ajustes') void loadAjustes();
           if (value === 'config') void loadConfig();
-          if (value === 'relatorios') void loadReport();
+          if (value === 'relatorios') {
+            setReportPageIndex(0);
+            setReportPageTokens([null]);
+            void loadReport(0);
+          }
         }}
       />
       <PageContainer>

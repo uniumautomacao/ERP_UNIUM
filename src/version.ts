@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.0.103';
+export const APP_VERSION = '0.0.106';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.106',
+    date: '2026-01-21',
+    changes: 'Relatórios agora mostram o fullname do usuário em vez do GUID na coluna Usuário.',
+  },
+  {
+    version: '0.0.105',
+    date: '2026-01-21',
+    changes: 'Relatórios corrigidos com paginação via skipToken (removido uso de skip) para evitar resultados vazios.',
+  },
+  {
+    version: '0.0.104',
+    date: '2026-01-21',
+    changes: 'Relatórios agora incluem contagens sem new_datacontagem usando createdon como fallback no filtro e na exibição.',
+  },
   {
     version: '0.0.103',
     date: '2026-01-21',
