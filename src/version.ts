@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.100';
+export const APP_VERSION = '0.0.101';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.101',
+    date: '2026-01-21',
+    changes: 'Histórico de ajustes agora exibe o identificador da contagem pelo campo new_id (em vez de new_name).',
+  },
   {
     version: '0.0.100',
     date: '2026-01-21',

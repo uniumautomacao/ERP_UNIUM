@@ -669,12 +669,12 @@ export function ContagemEstoqueGestaoPage() {
         const contagemFilter = contagemIds.map((id) => `new_contagemestoqueid eq '${id}'`).join(' or ');
         const contagemResult = await NewContagemEstoqueService.getAll({
           filter: contagemFilter,
-          select: ['new_contagemestoqueid', 'new_name'],
+          select: ['new_contagemestoqueid', 'new_id'],
           top: contagemIds.length,
         });
         (contagemResult.data ?? []).forEach((item: any) => {
-          if (item.new_contagemestoqueid && item.new_name) {
-            contagemMap.set(item.new_contagemestoqueid, item.new_name);
+          if (item.new_contagemestoqueid && item.new_id) {
+            contagemMap.set(item.new_contagemestoqueid, item.new_id);
           }
         });
       }
