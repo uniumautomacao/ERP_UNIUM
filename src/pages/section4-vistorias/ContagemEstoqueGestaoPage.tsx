@@ -149,8 +149,8 @@ const FLOW_TRIGGER_URL =
 const FLOW_TENANT_ID = 'e3d20045-1678-4bd0-96bb-4195baba23a6';
 const FLOW_CLIENT_ID = '46f2a64f-f3ef-4585-aa24-2d3182c6429b';
 // Delegated permission required in Entra ID (App Registration):
-// API Permissions -> Microsoft Flow Service -> Delegated -> user_impersonation
-const FLOW_SCOPES = ['https://service.flow.microsoft.com/Flows.Run'];
+// API Permissions -> Power Automate -> Delegated -> User (user_impersonation)
+const FLOW_SCOPES = ['https://service.flow.microsoft.com/.default'];
 
 const msalInstance = new PublicClientApplication({
   auth: {
