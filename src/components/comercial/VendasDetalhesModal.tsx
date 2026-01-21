@@ -67,6 +67,9 @@ export function VendasDetalhesModal({
   periodo,
 }: VendasDetalhesModalProps) {
   const styles = useStyles();
+  const normalizeValue = (value: string) =>
+    value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const isBlankLabel = (value: string) => normalizeValue(value).startsWith('sem ');
 
   // Construir filtros baseado no tipo
   const filterOptions = useMemo(() => {
@@ -76,17 +79,37 @@ export function VendasDetalhesModal({
     };
 
     if (filterType === 'fabricante' && filterValue) {
-      baseOptions.fabricante = filterValue.trim();
+      if (isBlankLabel(filterValue)) {
+        baseOptions.fabricanteBlank = true;
+      } else {
+        baseOptions.fabricante = filterValue.trim();
+      }
     } else if (filterType === 'vendedor' && filterValue) {
-      baseOptions.vendedor = filterValue.trim();
+      if (isBlankLabel(filterValue)) {
+        baseOptions.vendedorBlank = true;
+      } else {
+        baseOptions.vendedor = filterValue.trim();
+      }
     } else if (filterType === 'arquiteto' && filterValue) {
       baseOptions.arquiteto = filterValue.trim();
     } else if (filterType === 'categoria' && filterValue) {
-      baseOptions.categoria = filterValue.trim();
+      if (isBlankLabel(filterValue)) {
+        baseOptions.categoriaBlank = true;
+      } else {
+        baseOptions.categoria = filterValue.trim();
+      }
     } else if (filterType === 'produto' && filterValue) {
-      baseOptions.produto = filterValue.trim();
+      if (isBlankLabel(filterValue)) {
+        baseOptions.produtoBlank = true;
+      } else {
+        baseOptions.produto = filterValue.trim();
+      }
     } else if (filterType === 'cliente' && filterValue) {
-      baseOptions.cliente = filterValue.trim();
+      if (isBlankLabel(filterValue)) {
+        baseOptions.clienteBlank = true;
+      } else {
+        baseOptions.cliente = filterValue.trim();
+      }
     } else if (filterType === 'evolucao' && filterValue) {
       // Para evolução, filtrar por data específica (formato MM/YYYY)
       const [mes, ano] = filterValue.split('/');
@@ -97,10 +120,7 @@ export function VendasDetalhesModal({
         baseOptions.dataFim = dataFim;
       }
     } else if (filterType === 'produto-vs-servico' && filterValue) {
-      const normalized = filterValue
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+      const normalized = normalizeValue(filterValue);
       if (normalized.includes('produto')) {
         baseOptions.produtoVsServico = 'produto';
       } else if (normalized.includes('servico')) {

@@ -27,11 +27,16 @@ interface UseVendasAnalyticsOptions {
   dataInicio?: Date;
   dataFim?: Date;
   categoria?: string;
+  categoriaBlank?: boolean;
   fabricante?: string;
+  fabricanteBlank?: boolean;
   vendedor?: string;
+  vendedorBlank?: boolean;
   arquiteto?: string;
   produto?: string;
+  produtoBlank?: boolean;
   cliente?: string;
+  clienteBlank?: boolean;
   produtoVsServico?: 'produto' | 'servico';
   busca?: string;
 }
@@ -82,15 +87,21 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
         // Função para escapar strings OData
         const escapeODataString = (value: string) => value.replace(/'/g, "''");
 
-        if (options.categoria) {
+        if (options.categoriaBlank) {
+          filters.push("(new_categoriadoproduto eq null or new_categoriadoproduto eq '')");
+        } else if (options.categoria) {
           filters.push(`new_categoriadoproduto eq '${escapeODataString(options.categoria)}'`);
         }
 
-        if (options.fabricante) {
+        if (options.fabricanteBlank) {
+          filters.push("(new_nomedofabricante eq null or new_nomedofabricante eq '')");
+        } else if (options.fabricante) {
           filters.push(`new_nomedofabricante eq '${escapeODataString(options.fabricante)}'`);
         }
 
-        if (options.vendedor) {
+        if (options.vendedorBlank) {
+          filters.push("(new_nomedovendedor eq null or new_nomedovendedor eq '')");
+        } else if (options.vendedor) {
           filters.push(`new_nomedovendedor eq '${escapeODataString(options.vendedor)}'`);
         }
 
@@ -98,11 +109,15 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
           filters.push(`new_nomedoarquiteto eq '${escapeODataString(options.arquiteto)}'`);
         }
 
-        if (options.produto) {
+        if (options.produtoBlank) {
+          filters.push("(new_descricaodoproduto eq null or new_descricaodoproduto eq '')");
+        } else if (options.produto) {
           filters.push(`new_descricaodoproduto eq '${escapeODataString(options.produto)}'`);
         }
 
-        if (options.cliente) {
+        if (options.clienteBlank) {
+          filters.push("(new_nomedocliente eq null or new_nomedocliente eq '')");
+        } else if (options.cliente) {
           filters.push(`new_nomedocliente eq '${escapeODataString(options.cliente)}'`);
         }
 
@@ -168,7 +183,23 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
     };
 
     fetchVendas();
-  }, [options.dataInicio, options.dataFim, options.categoria, options.fabricante, options.vendedor, options.arquiteto, options.produto, options.cliente, options.produtoVsServico, options.busca]);
+  }, [
+    options.dataInicio,
+    options.dataFim,
+    options.categoria,
+    options.categoriaBlank,
+    options.fabricante,
+    options.fabricanteBlank,
+    options.vendedor,
+    options.vendedorBlank,
+    options.arquiteto,
+    options.produto,
+    options.produtoBlank,
+    options.cliente,
+    options.clienteBlank,
+    options.produtoVsServico,
+    options.busca,
+  ]);
 
   const analyticsData: VendasAnalyticsData = useMemo(() => {
     if (vendas.length === 0) {

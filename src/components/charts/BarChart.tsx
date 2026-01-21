@@ -81,14 +81,18 @@ export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horiz
           dataKey={dataKey} 
           radius={[4, 4, 0, 0]}
           style={{ cursor: onBarClick ? 'pointer' : 'default' }}
-          onClick={(data: ChartDataPoint, index: number, event: any) => {
-            if (onBarClick && data) {
-              onBarClick(data);
-            }
-          }}
         >
-          {data.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+          {data.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={chartColors[index % chartColors.length]}
+              style={{ cursor: onBarClick ? 'pointer' : 'default' }}
+              onClick={() => {
+                if (onBarClick) {
+                  onBarClick(entry);
+                }
+              }}
+            />
           ))}
         </Bar>
       </RechartsBarChart>

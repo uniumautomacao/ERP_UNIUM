@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.2';
+export const APP_VERSION = '0.1.3';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.3',
+    date: '2026-01-21',
+    changes: 'Corrigidos cliques de gráficos na Inteligência Comercial: BarChart passa o item correto ao modal, LineChart suporta clique em todos os pontos com série identificada e filtros de valores “Sem ...” delegáveis no Dataverse.',
+  },
   {
     version: '0.1.2',
     date: '2026-01-21',

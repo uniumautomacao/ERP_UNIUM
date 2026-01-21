@@ -2,14 +2,14 @@ import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { tokens } from '@fluentui/react-components';
 import { ChartDataPoint } from '../../types';
 
-// Componente customizado para activeDot com suporte a onClick
-const CustomActiveDot = (props: any) => {
+// Componente customizado para dot com suporte a onClick
+const CustomDot = (props: any) => {
   const { cx, cy, stroke, fill, r, payload, onClick, dataKey } = props;
   return (
     <circle
       cx={cx}
       cy={cy}
-      r={r || 6}
+      r={r || 4}
       stroke={stroke}
       fill={fill}
       style={{ cursor: 'pointer' }}
@@ -91,10 +91,17 @@ export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueF
             name={line.name || line.dataKey}
             stroke={line.color || defaultColors[index % defaultColors.length]}
             strokeWidth={2}
-            dot={{ r: 4 }}
-            activeDot={(props: any) => (
-              <CustomActiveDot 
+            dot={(props: any) => (
+              <CustomDot
                 {...props}
+                dataKey={line.dataKey}
+                onClick={onPointClick}
+              />
+            )}
+            activeDot={(props: any) => (
+              <CustomDot
+                {...props}
+                r={6}
                 dataKey={line.dataKey}
                 onClick={onPointClick}
               />
