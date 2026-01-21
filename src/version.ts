@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.131';
+export const APP_VERSION = '0.1.1';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.1',
+    date: '2026-01-21',
+    changes: 'Ajustada a Análise ABC para agrupar produtos por referência (modelo), mantendo a descrição apenas para exibição.',
+  },
+  {
+    version: '0.1.0',
+    date: '2026-01-21',
+    changes: 'Adicionada aba de Análise ABC na Inteligência Comercial: permite classificar produtos por faturamento ou lucro em classes A/B/C (~80%/15%/5%), com filtro de período delegável ao Dataverse, KPIs por classe, gráfico de distribuição e tabela detalhada.',
+  },
   {
     version: '0.0.131',
     date: '2026-01-21',

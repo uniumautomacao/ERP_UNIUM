@@ -22,6 +22,7 @@ import {
   Label,
   TabList,
   Tab,
+  Switch,
 } from '@fluentui/react-components';
 import {
   ArrowSync24Regular,
@@ -39,6 +40,7 @@ import { BarChart } from '../../components/charts/BarChart';
 import { LineChart } from '../../components/charts/LineChart';
 import { useVendasAnalytics } from '../../hooks/comercial/useVendasAnalytics';
 import { VendasDetalhesModal } from '../../components/comercial/VendasDetalhesModal';
+import { useAnaliseABC, ABCItem } from '../../hooks/comercial/useAnaliseABC';
 
 const useStyles = makeStyles({
   filterSection: {
@@ -145,6 +147,32 @@ const useStyles = makeStyles({
     gap: '16px',
     marginBottom: '24px',
   },
+  abcToggleContainer: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'center',
+    marginBottom: '24px',
+    padding: '16px',
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: '8px',
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
+  },
+  abcTableCard: {
+    padding: '16px',
+    marginTop: '24px',
+  },
+  classA: {
+    color: tokens.colorPaletteGreenForeground1,
+    fontWeight: 'bold',
+  },
+  classB: {
+    color: tokens.colorPaletteDarkOrangeForeground1,
+    fontWeight: 'bold',
+  },
+  classC: {
+    color: tokens.colorPaletteRedForeground1,
+    fontWeight: 'bold',
+  },
 });
 
 interface TopProduto {
@@ -168,7 +196,10 @@ export function InteligenciaComercialPage() {
   const styles = useStyles();
   
   // Estado das abas
-  const [selectedTab, setSelectedTab] = useState<'analise' | 'comparacao'>('analise');
+  const [selectedTab, setSelectedTab] = useState<'analise' | 'comparacao' | 'abc'>('analise');
+  
+  // Estado para análise ABC
+  const [tipoABC, setTipoABC] = useState<'faturamento' | 'lucro'>('faturamento');
   
   // Estados para comparação de anos
   const [anoBase, setAnoBase] = useState(new Date().getFullYear());
@@ -287,6 +318,13 @@ export function InteligenciaComercialPage() {
     dataFim: datasAnoComparacao.dataFim,
   });
 
+  // Hook para aba de análise ABC
+  const { loading: loadingABC, error: errorABC, data: dataABC } = useAnaliseABC({
+    dataInicio,
+    dataFim,
+    tipo: tipoABC,
+  });
+
   const commandBarActions = [
     {
       id: 'refresh',
@@ -337,11 +375,18 @@ export function InteligenciaComercialPage() {
     if (selectedTab === 'comparacao') {
       return `Comparando ${anoBase} vs ${anoComparacao} (${formatDate(datasAnoBase.dataInicio)} - ${formatDate(datasAnoBase.dataFim)})`;
     }
+    if (selectedTab === 'abc') {
+      const tipoTexto = tipoABC === 'faturamento' ? 'Faturamento' : 'Lucro';
+      if (!dataInicio || !dataFim) {
+        return `Análise ABC por ${tipoTexto} - Todos os tempos`;
+      }
+      return `Análise ABC por ${tipoTexto} - ${formatDate(dataInicio)} a ${formatDate(dataFim)}`;
+    }
     if (!dataInicio || !dataFim) {
       return 'Período: Todos os tempos';
     }
     return `Período: ${formatDate(dataInicio)} - ${formatDate(dataFim)}`;
-  }, [selectedTab, dataInicio, dataFim, anoBase, anoComparacao, datasAnoBase]);
+  }, [selectedTab, dataInicio, dataFim, anoBase, anoComparacao, datasAnoBase, tipoABC]);
 
   // Calcular variação percentual
   const calcularVariacao = useCallback((valorAtual: number, valorAnterior: number): number => {
@@ -468,6 +513,82 @@ export function InteligenciaComercialPage() {
     );
   };
 
+  // Colunas para tabela de Análise ABC
+  const abcColumns: TableColumnDefinition<ABCItem>[] = [
+    createTableColumn<ABCItem>({
+      columnId: 'descricao',
+      renderHeaderCell: () => 'Produto',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text weight="semibold">{item.descricao}</Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<ABCItem>({
+      columnId: 'modelo',
+      renderHeaderCell: () => 'Modelo',
+      renderCell: (item) => <TableCellLayout>{item.modelo || '-'}</TableCellLayout>,
+    }),
+    createTableColumn<ABCItem>({
+      columnId: 'fabricante',
+      renderHeaderCell: () => 'Fabricante',
+      renderCell: (item) => <TableCellLayout>{item.fabricante || '-'}</TableCellLayout>,
+    }),
+    createTableColumn<ABCItem>({
+      columnId: 'quantidade',
+      renderHeaderCell: () => 'Qtd',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text>{item.quantidade}</Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<ABCItem>({
+      columnId: 'valor',
+      renderHeaderCell: () => 'Valor',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text weight="semibold" style={{ color: tokens.colorPaletteGreenForeground1 }}>
+            {formatCurrency(item.valor)}
+          </Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<ABCItem>({
+      columnId: 'percentual',
+      renderHeaderCell: () => '%',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text>{item.percentual.toFixed(2)}%</Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<ABCItem>({
+      columnId: 'percentualAcumulado',
+      renderHeaderCell: () => '% Acum.',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text>{item.percentualAcumulado.toFixed(2)}%</Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<ABCItem>({
+      columnId: 'classificacao',
+      renderHeaderCell: () => 'Classe',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text className={
+            item.classificacao === 'A' ? styles.classA :
+            item.classificacao === 'B' ? styles.classB :
+            styles.classC
+          }>
+            {item.classificacao}
+          </Text>
+        </TableCellLayout>
+      ),
+    }),
+  ];
+
   // Colunas para tabela de Top Clientes
   const clientesColumns: TableColumnDefinition<TopCliente>[] = [
     createTableColumn<TopCliente>({
@@ -508,6 +629,185 @@ export function InteligenciaComercialPage() {
       ),
     }),
   ];
+
+  // Função para renderizar a aba de Análise ABC
+  const renderAnaliseABC = () => {
+    if (loadingABC) {
+      return (
+        <div className={styles.loadingContainer}>
+          <Spinner size="extra-large" label="Carregando análise ABC..." />
+        </div>
+      );
+    }
+
+    if (errorABC) {
+      return (
+        <MessageBar intent="error">
+          <MessageBarBody>{errorABC}</MessageBarBody>
+        </MessageBar>
+      );
+    }
+
+    // Dados para gráfico de pizza da distribuição ABC
+    const distribuicaoABC = [
+      { name: 'Classe A', value: dataABC.totais.valorA },
+      { name: 'Classe B', value: dataABC.totais.valorB },
+      { name: 'Classe C', value: dataABC.totais.valorC },
+    ].filter(item => item.value > 0);
+
+    return (
+      <>
+        {/* Filtro de Período e Toggle */}
+        <div className={styles.filterSection}>
+          <div className={styles.dateFilterItem}>
+            <Dropdown
+              value={
+                periodoSelecionado === 'todos-os-tempos' ? 'Todos os tempos' :
+                periodoSelecionado === 'ano-atual' ? 'Este ano' :
+                periodoSelecionado === 'ultimos-30-dias' ? 'Últimos 30 dias' :
+                periodoSelecionado === 'ultimos-12-meses' ? 'Últimos 12 meses' :
+                periodoSelecionado === 'semestre-atual' ? 'Este semestre' :
+                'Período personalizado'
+              }
+              onOptionSelect={(_, data) => {
+                const novoPeriodo = data.optionValue as PeriodoFiltro;
+                setPeriodoSelecionado(novoPeriodo);
+                
+                if (novoPeriodo === 'personalizado') {
+                  const hoje = new Date();
+                  const inicioPadrao = new Date(hoje.getFullYear(), 0, 1);
+                  setDataInicioPersonalizada(formatDateForInput(inicioPadrao));
+                  setDataFimPersonalizada(formatDateForInput(hoje));
+                }
+              }}
+            >
+              <Option value="todos-os-tempos">Todos os tempos</Option>
+              <Option value="ano-atual">Este ano</Option>
+              <Option value="ultimos-30-dias">Últimos 30 dias</Option>
+              <Option value="ultimos-12-meses">Últimos 12 meses</Option>
+              <Option value="semestre-atual">Este semestre</Option>
+              <Option value="personalizado">Período personalizado</Option>
+            </Dropdown>
+          </div>
+          
+          {periodoSelecionado === 'personalizado' && (
+            <div className={styles.customDateContainer}>
+              <div className={styles.customDateField}>
+                <Label htmlFor="data-inicio-abc" size="small">
+                  Data Inicial
+                </Label>
+                <Input
+                  id="data-inicio-abc"
+                  type="date"
+                  value={dataInicioPersonalizada}
+                  onChange={(_, data) => setDataInicioPersonalizada(data.value)}
+                />
+              </div>
+              <div className={styles.customDateField}>
+                <Label htmlFor="data-fim-abc" size="small">
+                  Data Final
+                </Label>
+                <Input
+                  id="data-fim-abc"
+                  type="date"
+                  value={dataFimPersonalizada}
+                  onChange={(_, data) => setDataFimPersonalizada(data.value)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Toggle Faturamento/Lucro */}
+        <div className={styles.abcToggleContainer}>
+          <Label>Analisar por:</Label>
+          <Switch
+            checked={tipoABC === 'lucro'}
+            onChange={(_, data) => setTipoABC(data.checked ? 'lucro' : 'faturamento')}
+            label={tipoABC === 'faturamento' ? 'Faturamento' : 'Lucro'}
+          />
+        </div>
+
+        {/* KPIs por Classificação */}
+        <div className={styles.kpiGrid}>
+          <KPICard
+            label="Classe A - Quantidade"
+            value={dataABC.totais.qtdA.toString()}
+            subtitle="produtos"
+          />
+          <KPICard
+            label="Classe A - Valor"
+            value={formatCurrency(dataABC.totais.valorA)}
+            subtitle={`${dataABC.totais.valorTotal > 0 ? ((dataABC.totais.valorA / dataABC.totais.valorTotal) * 100).toFixed(1) : 0}% do total`}
+          />
+          <KPICard
+            label="Classe B - Quantidade"
+            value={dataABC.totais.qtdB.toString()}
+            subtitle="produtos"
+          />
+          <KPICard
+            label="Classe B - Valor"
+            value={formatCurrency(dataABC.totais.valorB)}
+            subtitle={`${dataABC.totais.valorTotal > 0 ? ((dataABC.totais.valorB / dataABC.totais.valorTotal) * 100).toFixed(1) : 0}% do total`}
+          />
+          <KPICard
+            label="Classe C - Quantidade"
+            value={dataABC.totais.qtdC.toString()}
+            subtitle="produtos"
+          />
+          <KPICard
+            label="Classe C - Valor"
+            value={formatCurrency(dataABC.totais.valorC)}
+            subtitle={`${dataABC.totais.valorTotal > 0 ? ((dataABC.totais.valorC / dataABC.totais.valorTotal) * 100).toFixed(1) : 0}% do total`}
+          />
+        </div>
+
+        {/* Gráfico de Distribuição ABC */}
+        <Card className={styles.chartCard} style={{ marginBottom: '24px' }}>
+          <Text size={500} weight="semibold" className={styles.chartTitle}>
+            Distribuição ABC por {tipoABC === 'faturamento' ? 'Faturamento' : 'Lucro'}
+          </Text>
+          {distribuicaoABC.length > 0 ? (
+            <DonutChart data={distribuicaoABC} height={300} />
+          ) : (
+            <Text>Sem dados para exibir</Text>
+          )}
+        </Card>
+
+        {/* Tabela de Produtos Classificados */}
+        <Card className={styles.abcTableCard}>
+          <Text size={500} weight="semibold" block style={{ marginBottom: '16px' }}>
+            Produtos Classificados por {tipoABC === 'faturamento' ? 'Faturamento' : 'Lucro'}
+          </Text>
+          {dataABC.items.length > 0 ? (
+            <DataGrid
+              items={dataABC.items}
+              columns={abcColumns}
+              sortable
+              getRowId={(item) => item.modelo || item.descricao}
+            >
+              <DataGridHeader>
+                <DataGridRow>
+                  {({ renderHeaderCell }) => (
+                    <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                  )}
+                </DataGridRow>
+              </DataGridHeader>
+              <DataGridBody<ABCItem>>
+                {({ item, rowId }) => (
+                  <DataGridRow<ABCItem> key={rowId}>
+                    {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
+                  </DataGridRow>
+                )}
+              </DataGridBody>
+            </DataGrid>
+          ) : (
+            <Text>Sem dados para exibir</Text>
+          )}
+        </Card>
+      </>
+    );
+  };
 
   // Função para renderizar a aba de comparação
   const renderComparacao = () => {
@@ -793,9 +1093,10 @@ export function InteligenciaComercialPage() {
       <PageContainer>
         {/* Abas */}
         <div className={styles.tabContainer}>
-          <TabList selectedValue={selectedTab} onTabSelect={(_, data) => setSelectedTab(data.value as 'analise' | 'comparacao')}>
+          <TabList selectedValue={selectedTab} onTabSelect={(_, data) => setSelectedTab(data.value as 'analise' | 'comparacao' | 'abc')}>
             <Tab value="analise">Análise</Tab>
             <Tab value="comparacao">Comparação Ano a Ano</Tab>
+            <Tab value="abc">Análise ABC</Tab>
           </TabList>
         </div>
 
@@ -1194,6 +1495,9 @@ export function InteligenciaComercialPage() {
 
         {/* Conteúdo da aba de Comparação */}
         {selectedTab === 'comparacao' && renderComparacao()}
+
+        {/* Conteúdo da aba de Análise ABC */}
+        {selectedTab === 'abc' && renderAnaliseABC()}
 
         {/* Modal de Detalhes */}
         {modalData && (
