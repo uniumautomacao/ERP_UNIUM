@@ -4,7 +4,7 @@ import { ChartDataPoint } from '../../types';
 
 // Componente customizado para activeDot com suporte a onClick
 const CustomActiveDot = (props: any) => {
-  const { cx, cy, stroke, fill, r, payload, onClick } = props;
+  const { cx, cy, stroke, fill, r, payload, onClick, dataKey } = props;
   return (
     <circle
       cx={cx}
@@ -16,7 +16,7 @@ const CustomActiveDot = (props: any) => {
       onClick={(e) => {
         e.stopPropagation();
         if (onClick && payload) {
-          onClick(payload);
+          onClick(payload, { dataKey });
         }
       }}
     />
@@ -33,7 +33,7 @@ interface LineChartProps {
   xAxisKey?: string;
   height?: number;
   valueFormatter?: (value: number) => string;
-  onPointClick?: (data: ChartDataPoint) => void;
+  onPointClick?: (data: ChartDataPoint, meta: { dataKey: string }) => void;
 }
 
 export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueFormatter, onPointClick }: LineChartProps) {
@@ -94,7 +94,8 @@ export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueF
             dot={{ r: 4 }}
             activeDot={(props: any) => (
               <CustomActiveDot 
-                {...props} 
+                {...props}
+                dataKey={line.dataKey}
                 onClick={onPointClick}
               />
             )}

@@ -308,12 +308,12 @@ export function InteligenciaComercialPage() {
   const datasAnoBase = useMemo(() => calcularDatasAno(anoBase), [anoBase, calcularDatasAno]);
   const datasAnoComparacao = useMemo(() => calcularDatasAno(anoComparacao), [anoComparacao, calcularDatasAno]);
 
-  const { loading: loadingAnoBase, data: dataAnoBase } = useVendasAnalytics({
+  const { loading: loadingAnoBase, error: errorAnoBase, data: dataAnoBase } = useVendasAnalytics({
     dataInicio: datasAnoBase.dataInicio,
     dataFim: datasAnoBase.dataFim,
   });
 
-  const { loading: loadingAnoComparacao, data: dataAnoComparacao } = useVendasAnalytics({
+  const { loading: loadingAnoComparacao, error: errorAnoComparacao, data: dataAnoComparacao } = useVendasAnalytics({
     dataInicio: datasAnoComparacao.dataInicio,
     dataFim: datasAnoComparacao.dataFim,
   });
@@ -818,10 +818,19 @@ export function InteligenciaComercialPage() {
         </div>
       );
     }
+    if (errorAnoBase || errorAnoComparacao) {
+      return (
+        <MessageBar intent="error">
+          <MessageBarBody>
+            {errorAnoBase || errorAnoComparacao}
+          </MessageBarBody>
+        </MessageBar>
+      );
+    }
 
     // Preparar dados de evolução mensal comparativa
     const mesesDoAno = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const evolucaoComparativa: ChartDataPoint[] = mesesDoAno.map((mes, index) => {
+    const evolucaoComparativa: (ChartDataPoint & { monthNumber: number })[] = mesesDoAno.map((mes, index) => {
       const mesNum = index + 1;
       
       // Buscar valor do ano base
@@ -838,6 +847,7 @@ export function InteligenciaComercialPage() {
       
       return {
         date: mes,
+        monthNumber: mesNum,
         [anoBase.toString()]: dadoAnoBase?.value || 0,
         [anoComparacao.toString()]: dadoAnoComp?.value || 0,
       };
@@ -921,14 +931,12 @@ export function InteligenciaComercialPage() {
               { dataKey: anoComparacao.toString(), name: `${anoComparacao}`, color: tokens.colorPaletteBlueForeground2 },
             ]}
             height={300}
-            onPointClick={(item) => {
-              // Determinar qual ano foi clicado baseado nas chaves do item
-              // Se o item tem valor para anoBase, foi clicado no ano base
-              // Se tem valor para anoComparacao, foi clicado no ano de comparação
-              const anoClicado = item[anoBase.toString()] !== undefined && item[anoBase.toString()] !== null 
-                ? 'base' 
-                : 'comparacao';
-              setModalData({ type: 'evolucao', value: item.date, anoClicado });
+            onPointClick={(item, meta) => {
+              const anoSelecionado = meta?.dataKey === anoComparacao.toString() ? anoComparacao : anoBase;
+              const anoClicado = meta?.dataKey === anoComparacao.toString() ? 'comparacao' : 'base';
+              const monthNumber = 'monthNumber' in item ? item.monthNumber : undefined;
+              const filterValue = monthNumber ? `${monthNumber}/${anoSelecionado}` : item.date;
+              setModalData({ type: 'evolucao', value: filterValue, anoClicado });
               setModalOpen(true);
             }}
           />
@@ -1276,7 +1284,7 @@ export function InteligenciaComercialPage() {
                   { dataKey: 'lucro', name: 'Lucro', color: tokens.colorPaletteGreenForeground1 },
                 ]}
                 height={250}
-                onPointClick={(item) => {
+                onPointClick={(item, _meta) => {
                   setModalData({ type: 'evolucao', value: item.date });
                   setModalOpen(true);
                 }}

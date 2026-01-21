@@ -96,31 +96,24 @@ export function VendasDetalhesModal({
         baseOptions.dataInicio = dataInicio;
         baseOptions.dataFim = dataFim;
       }
+    } else if (filterType === 'produto-vs-servico' && filterValue) {
+      const normalized = filterValue
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      if (normalized.includes('produto')) {
+        baseOptions.produtoVsServico = 'produto';
+      } else if (normalized.includes('servico')) {
+        baseOptions.produtoVsServico = 'servico';
+      }
     }
-    // Para produto-vs-servico, não aplicamos filtro aqui, será filtrado depois
 
     return baseOptions;
   }, [filterType, filterValue, periodo]);
 
   const { loading, error, data, vendas } = useVendasAnalytics(filterOptions);
 
-  // Filtrar vendas para produto-vs-servico
-  const vendasFiltradas = useMemo(() => {
-    if (!vendas) {
-      return [];
-    }
-
-    // Para produto-vs-servico, filtrar por tipo
-    if (filterType === 'produto-vs-servico') {
-      if (filterValue === 'Produto') {
-        return vendas.filter(v => (v.new_valordeprodutototal || 0) > 0);
-      } else if (filterValue === 'Serviço') {
-        return vendas.filter(v => (v.new_valordeservicototal || 0) > 0);
-      }
-    }
-    
-    return vendas;
-  }, [vendas, filterType, filterValue]);
+  const vendasFiltradas = useMemo(() => vendas ?? [], [vendas]);
 
   // Recalcular KPIs baseado nas vendas filtradas
   const kpisFiltrados = useMemo(() => {

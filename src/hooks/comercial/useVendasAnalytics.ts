@@ -32,6 +32,7 @@ interface UseVendasAnalyticsOptions {
   arquiteto?: string;
   produto?: string;
   cliente?: string;
+  produtoVsServico?: 'produto' | 'servico';
   busca?: string;
 }
 
@@ -105,8 +106,14 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
           filters.push(`new_nomedocliente eq '${escapeODataString(options.cliente)}'`);
         }
 
+        if (options.produtoVsServico === 'produto') {
+          filters.push('new_valordeprodutototal gt 0');
+        } else if (options.produtoVsServico === 'servico') {
+          filters.push('new_valordeservicototal gt 0');
+        }
+
         if (options.busca && options.busca.trim()) {
-          const searchTerm = options.busca.trim();
+          const searchTerm = escapeODataString(options.busca.trim());
           // Busca delegável em múltiplos campos usando contains
           const searchFilters = [
             `contains(new_nomedocliente, '${searchTerm}')`,
@@ -161,7 +168,7 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
     };
 
     fetchVendas();
-  }, [options.dataInicio, options.dataFim, options.categoria, options.fabricante, options.vendedor, options.arquiteto, options.produto, options.cliente, options.busca]);
+  }, [options.dataInicio, options.dataFim, options.categoria, options.fabricante, options.vendedor, options.arquiteto, options.produto, options.cliente, options.produtoVsServico, options.busca]);
 
   const analyticsData: VendasAnalyticsData = useMemo(() => {
     if (vendas.length === 0) {

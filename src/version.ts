@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.1';
+export const APP_VERSION = '0.1.2';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.2',
+    date: '2026-01-21',
+    changes: 'Corrigidos cliques e filtros na Inteligência Comercial: identificação da série clicada no gráfico comparativo, filtro de evolução por mês/ano correto, produto vs serviço delegável e busca OData com escape.',
+  },
   {
     version: '0.1.1',
     date: '2026-01-21',
