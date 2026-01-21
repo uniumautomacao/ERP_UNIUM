@@ -13,6 +13,7 @@ interface DonutChartProps {
   innerRadius?: number;
   outerRadius?: number;
   valueFormatter?: (value: number) => string;
+  onSegmentClick?: (data: DonutChartData) => void;
 }
 
 const DEFAULT_COLORS = [
@@ -23,7 +24,7 @@ const DEFAULT_COLORS = [
   tokens.colorPaletteMagentaForeground2,
 ];
 
-export function DonutChart({ data, height = 300, innerRadius = 60, outerRadius = 100, valueFormatter }: DonutChartProps) {
+export function DonutChart({ data, height = 300, innerRadius = 60, outerRadius = 100, valueFormatter, onSegmentClick }: DonutChartProps) {
   // Formatação padrão de moeda brasileira se não fornecida
   const formatValue = valueFormatter || ((value: number) => 
     new Intl.NumberFormat('pt-BR', {
@@ -44,6 +45,11 @@ export function DonutChart({ data, height = 300, innerRadius = 60, outerRadius =
           fill="#8884d8"
           dataKey="value"
           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          onClick={(event: any, index: number) => {
+            if (onSegmentClick && data && index >= 0 && index < data.length) {
+              onSegmentClick(data[index]);
+            }
+          }}
         >
           {data.map((entry, index) => (
             <Cell

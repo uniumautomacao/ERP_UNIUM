@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.129';
+export const APP_VERSION = '0.0.131';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.131',
+    date: '2026-01-21',
+    changes: 'Corrigidos eventos de clique nos gráficos BarChart e LineChart: BarChart agora usa diretamente o parâmetro data do handler, e LineChart implementa activeDot customizado para capturar cliques nos pontos das linhas.',
+  },
+  {
+    version: '0.0.130',
+    date: '2026-01-21',
+    changes: 'Adicionada funcionalidade de clique nos gráficos da Inteligência Comercial: ao clicar em qualquer item (fabricante, vendedor, arquiteto, categoria, etc), abre modal com KPIs agregados e tabela detalhada de todas as vendas relacionadas.',
+  },
   {
     version: '0.0.129',
     date: '2026-01-21',

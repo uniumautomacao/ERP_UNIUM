@@ -38,6 +38,7 @@ import { DonutChart } from '../../components/charts/DonutChart';
 import { BarChart } from '../../components/charts/BarChart';
 import { LineChart } from '../../components/charts/LineChart';
 import { useVendasAnalytics } from '../../hooks/comercial/useVendasAnalytics';
+import { VendasDetalhesModal } from '../../components/comercial/VendasDetalhesModal';
 
 const useStyles = makeStyles({
   filterSection: {
@@ -167,6 +168,10 @@ export function InteligenciaComercialPage() {
   // Estados para comparação de anos
   const [anoBase, setAnoBase] = useState(new Date().getFullYear());
   const [anoComparacao, setAnoComparacao] = useState(new Date().getFullYear() - 1);
+  
+  // Estados para modal de detalhes
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<{ type: 'fabricante' | 'vendedor' | 'arquiteto' | 'categoria' | 'produto-vs-servico' | 'evolucao'; value: string } | null>(null);
   
   // Função para calcular datas baseado no período
   const calcularDatas = useCallback((periodo: PeriodoFiltro): { dataInicio?: Date; dataFim?: Date } => {
@@ -607,6 +612,10 @@ export function InteligenciaComercialPage() {
               { dataKey: anoComparacao.toString(), name: `${anoComparacao}`, color: tokens.colorPaletteBlueForeground2 },
             ]}
             height={300}
+            onPointClick={(item) => {
+              setModalData({ type: 'evolucao', value: item.date });
+              setModalOpen(true);
+            }}
           />
         </Card>
 
@@ -617,7 +626,14 @@ export function InteligenciaComercialPage() {
               Vendas por Categoria - {anoBase}
             </Text>
             {dataAnoBase.vendasPorCategoria.length > 0 ? (
-              <DonutChart data={dataAnoBase.vendasPorCategoria} height={250} />
+              <DonutChart 
+                data={dataAnoBase.vendasPorCategoria} 
+                height={250}
+                onSegmentClick={(item) => {
+                  setModalData({ type: 'categoria', value: item.name });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para {anoBase}</Text>
             )}
@@ -628,7 +644,14 @@ export function InteligenciaComercialPage() {
               Vendas por Categoria - {anoComparacao}
             </Text>
             {dataAnoComparacao.vendasPorCategoria.length > 0 ? (
-              <DonutChart data={dataAnoComparacao.vendasPorCategoria} height={250} />
+              <DonutChart 
+                data={dataAnoComparacao.vendasPorCategoria} 
+                height={250}
+                onSegmentClick={(item) => {
+                  setModalData({ type: 'categoria', value: item.name });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para {anoComparacao}</Text>
             )}
@@ -642,7 +665,14 @@ export function InteligenciaComercialPage() {
               Produto vs Serviço - {anoBase}
             </Text>
             {dataAnoBase.produtoVsServico.length > 0 ? (
-              <DonutChart data={dataAnoBase.produtoVsServico} height={250} />
+              <DonutChart 
+                data={dataAnoBase.produtoVsServico} 
+                height={250}
+                onSegmentClick={(item) => {
+                  setModalData({ type: 'produto-vs-servico', value: item.name });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para {anoBase}</Text>
             )}
@@ -653,7 +683,14 @@ export function InteligenciaComercialPage() {
               Produto vs Serviço - {anoComparacao}
             </Text>
             {dataAnoComparacao.produtoVsServico.length > 0 ? (
-              <DonutChart data={dataAnoComparacao.produtoVsServico} height={250} />
+              <DonutChart 
+                data={dataAnoComparacao.produtoVsServico} 
+                height={250}
+                onSegmentClick={(item) => {
+                  setModalData({ type: 'produto-vs-servico', value: item.name });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para {anoComparacao}</Text>
             )}
@@ -667,7 +704,16 @@ export function InteligenciaComercialPage() {
               Top 10 Fabricantes - {anoBase}
             </Text>
             {dataAnoBase.topFabricantes.length > 0 ? (
-              <BarChart data={dataAnoBase.topFabricantes} dataKey="value" height={300} horizontal />
+              <BarChart 
+                data={dataAnoBase.topFabricantes} 
+                dataKey="value" 
+                height={300} 
+                horizontal
+                onBarClick={(item) => {
+                  setModalData({ type: 'fabricante', value: item.date });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para {anoBase}</Text>
             )}
@@ -678,7 +724,16 @@ export function InteligenciaComercialPage() {
               Top 10 Fabricantes - {anoComparacao}
             </Text>
             {dataAnoComparacao.topFabricantes.length > 0 ? (
-              <BarChart data={dataAnoComparacao.topFabricantes} dataKey="value" height={300} horizontal />
+              <BarChart 
+                data={dataAnoComparacao.topFabricantes} 
+                dataKey="value" 
+                height={300} 
+                horizontal
+                onBarClick={(item) => {
+                  setModalData({ type: 'fabricante', value: item.date });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para {anoComparacao}</Text>
             )}
@@ -905,6 +960,10 @@ export function InteligenciaComercialPage() {
                   { dataKey: 'lucro', name: 'Lucro', color: tokens.colorPaletteGreenForeground1 },
                 ]}
                 height={250}
+                onPointClick={(item) => {
+                  setModalData({ type: 'evolucao', value: item.date });
+                  setModalOpen(true);
+                }}
               />
             ) : (
               <Text>Sem dados para exibir</Text>
@@ -916,7 +975,14 @@ export function InteligenciaComercialPage() {
               Vendas por Categoria
             </Text>
             {data.vendasPorCategoria.length > 0 ? (
-              <DonutChart data={data.vendasPorCategoria} height={250} />
+              <DonutChart 
+                data={data.vendasPorCategoria} 
+                height={250}
+                onSegmentClick={(item) => {
+                  setModalData({ type: 'categoria', value: item.name });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para exibir</Text>
             )}
@@ -930,7 +996,16 @@ export function InteligenciaComercialPage() {
               Top 10 Fabricantes
             </Text>
             {data.topFabricantes.length > 0 ? (
-              <BarChart data={data.topFabricantes} dataKey="value" height={300} horizontal />
+              <BarChart 
+                data={data.topFabricantes} 
+                dataKey="value" 
+                height={300} 
+                horizontal
+                onBarClick={(item) => {
+                  setModalData({ type: 'fabricante', value: item.date });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para exibir</Text>
             )}
@@ -941,7 +1016,16 @@ export function InteligenciaComercialPage() {
               Ranking de Vendedores
             </Text>
             {data.topVendedores.length > 0 ? (
-              <BarChart data={data.topVendedores} dataKey="value" height={300} horizontal />
+              <BarChart 
+                data={data.topVendedores} 
+                dataKey="value" 
+                height={300} 
+                horizontal
+                onBarClick={(item) => {
+                  setModalData({ type: 'vendedor', value: item.date });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para exibir</Text>
             )}
@@ -955,7 +1039,16 @@ export function InteligenciaComercialPage() {
               Top 10 Arquitetos Especificadores
             </Text>
             {data.topArquitetos.length > 0 ? (
-              <BarChart data={data.topArquitetos} dataKey="value" height={300} horizontal />
+              <BarChart 
+                data={data.topArquitetos} 
+                dataKey="value" 
+                height={300} 
+                horizontal
+                onBarClick={(item) => {
+                  setModalData({ type: 'arquiteto', value: item.date });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para exibir</Text>
             )}
@@ -966,7 +1059,14 @@ export function InteligenciaComercialPage() {
               Distribuição Produto vs Serviço
             </Text>
             {data.produtoVsServico.length > 0 ? (
-              <DonutChart data={data.produtoVsServico} height={250} />
+              <DonutChart 
+                data={data.produtoVsServico} 
+                height={250}
+                onSegmentClick={(item) => {
+                  setModalData({ type: 'produto-vs-servico', value: item.name });
+                  setModalOpen(true);
+                }}
+              />
             ) : (
               <Text>Sem dados para exibir</Text>
             )}
@@ -1061,6 +1161,24 @@ export function InteligenciaComercialPage() {
 
         {/* Conteúdo da aba de Comparação */}
         {selectedTab === 'comparacao' && renderComparacao()}
+
+        {/* Modal de Detalhes */}
+        {modalData && (
+          <VendasDetalhesModal
+            open={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setModalData(null);
+            }}
+            filterType={modalData.type}
+            filterValue={modalData.value}
+            periodo={
+              selectedTab === 'comparacao'
+                ? { dataInicio: datasAnoBase.dataInicio, dataFim: datasAnoBase.dataFim }
+                : { dataInicio, dataFim }
+            }
+          />
+        )}
       </PageContainer>
     </>
   );

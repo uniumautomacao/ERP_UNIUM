@@ -76,20 +76,23 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
           filters.push(`new_datadavenda le '${dataFimISO}'`);
         }
 
+        // Função para escapar strings OData
+        const escapeODataString = (value: string) => value.replace(/'/g, "''");
+
         if (options.categoria) {
-          filters.push(`new_categoriadoproduto eq '${options.categoria}'`);
+          filters.push(`new_categoriadoproduto eq '${escapeODataString(options.categoria)}'`);
         }
 
         if (options.fabricante) {
-          filters.push(`new_nomedofabricante eq '${options.fabricante}'`);
+          filters.push(`new_nomedofabricante eq '${escapeODataString(options.fabricante)}'`);
         }
 
         if (options.vendedor) {
-          filters.push(`new_nomedovendedor eq '${options.vendedor}'`);
+          filters.push(`new_nomedovendedor eq '${escapeODataString(options.vendedor)}'`);
         }
 
         if (options.arquiteto) {
-          filters.push(`new_nomedoarquiteto eq '${options.arquiteto}'`);
+          filters.push(`new_nomedoarquiteto eq '${escapeODataString(options.arquiteto)}'`);
         }
 
         if (options.busca && options.busca.trim()) {
@@ -355,6 +358,7 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
   return {
     loading,
     error,
-    data: analyticsData
+    data: analyticsData,
+    vendas // Retornar vendas para uso em tabelas detalhadas
   };
 }

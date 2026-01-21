@@ -2,6 +2,27 @@ import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { tokens } from '@fluentui/react-components';
 import { ChartDataPoint } from '../../types';
 
+// Componente customizado para activeDot com suporte a onClick
+const CustomActiveDot = (props: any) => {
+  const { cx, cy, stroke, fill, r, payload, onClick } = props;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={r || 6}
+      stroke={stroke}
+      fill={fill}
+      style={{ cursor: 'pointer' }}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (onClick && payload) {
+          onClick(payload);
+        }
+      }}
+    />
+  );
+};
+
 interface LineChartProps {
   data: ChartDataPoint[];
   lines: {
@@ -12,9 +33,10 @@ interface LineChartProps {
   xAxisKey?: string;
   height?: number;
   valueFormatter?: (value: number) => string;
+  onPointClick?: (data: ChartDataPoint) => void;
 }
 
-export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueFormatter }: LineChartProps) {
+export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueFormatter, onPointClick }: LineChartProps) {
   const defaultColors = [
     tokens.colorBrandBackground,
     tokens.colorPaletteBlueForeground2,
@@ -32,7 +54,10 @@ export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueF
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsLineChart data={data} margin={{ top: 10, right: 30, left: 80, bottom: 0 }}>
+      <RechartsLineChart 
+        data={data} 
+        margin={{ top: 10, right: 30, left: 80, bottom: 0 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
         <XAxis
           dataKey={xAxisKey}
@@ -67,7 +92,12 @@ export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueF
             stroke={line.color || defaultColors[index % defaultColors.length]}
             strokeWidth={2}
             dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
+            activeDot={(props: any) => (
+              <CustomActiveDot 
+                {...props} 
+                onClick={onPointClick}
+              />
+            )}
           />
         ))}
       </RechartsLineChart>

@@ -10,9 +10,10 @@ interface BarChartProps {
   horizontal?: boolean;
   colors?: string[];
   valueFormatter?: (value: number) => string;
+  onBarClick?: (data: ChartDataPoint) => void;
 }
 
-export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horizontal = false, colors, valueFormatter }: BarChartProps) {
+export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horizontal = false, colors, valueFormatter, onBarClick }: BarChartProps) {
   const defaultColors = [
     tokens.colorBrandBackground,
     tokens.colorPaletteBlueForeground2,
@@ -76,7 +77,16 @@ export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horiz
           }}
           formatter={(value: number) => formatValue(value)}
         />
-        <Bar dataKey={dataKey} radius={[4, 4, 0, 0]}>
+        <Bar 
+          dataKey={dataKey} 
+          radius={[4, 4, 0, 0]}
+          style={{ cursor: onBarClick ? 'pointer' : 'default' }}
+          onClick={(data: ChartDataPoint, index: number, event: any) => {
+            if (onBarClick && data) {
+              onBarClick(data);
+            }
+          }}
+        >
           {data.map((_, index) => (
             <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
           ))}
