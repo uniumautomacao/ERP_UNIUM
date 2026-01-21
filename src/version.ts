@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.91';
+export const APP_VERSION = '0.0.93';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.93',
+    date: '2026-01-21',
+    changes: 'Implementada criação de solicitação de ajuste via Dataverse. O app apenas cria a solicitação; o Power Automate processa e atualiza a contagem para "Ajustada".',
+  },
+  {
+    version: '0.0.92',
+    date: '2026-01-21',
+    changes: 'Implementada criação de solicitação de ajuste via tabela Dataverse (substituindo chamada HTTP ao Power Automate). Removido código MSAL e autenticação OAuth.',
+  },
   {
     version: '0.0.91',
     date: '2026-01-21',

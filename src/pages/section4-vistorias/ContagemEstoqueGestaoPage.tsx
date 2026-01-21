@@ -11,7 +11,6 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { ArrowSync24Regular, Filter24Regular } from '@fluentui/react-icons';
-import { InteractionRequiredAuthError, PublicClientApplication } from '@azure/msal-browser';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
@@ -23,6 +22,7 @@ import {
   NewAjustedeEstoqueService,
   NewAppPreferenceService,
   NewContagemEstoqueService,
+  NewSolicitacaodeAjustedeEstoqueService,
 } from '../../generated';
 import type { ChartDataPoint } from '../../types';
 
@@ -61,6 +61,14 @@ type PreferenceRecord = {
 const SITUACAO_CONTAGEM = {
   Pendente: 100000000,
   Validada: 100000001,
+  Ajustada: 100000002,
+};
+
+const STATUS_PROCESSAMENTO = {
+  Pendente: 100000000,
+  Processando: 100000001,
+  Concluido: 100000002,
+  Erro: 100000003,
 };
 
 const TAB_OPTIONS = [
@@ -144,102 +152,6 @@ const toLocalDateKey = (iso: string) => {
   return `${year}-${month}-${day}`;
 };
 
-const FLOW_TRIGGER_URL =
-  'https://b52cf2e94b61e3d68faec290205ed8.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/127bb6f0-095e-4563-88c9-85cfbe7c508f/triggers/manual/paths/invoke?api-version=1';
-const FLOW_TENANT_ID = 'e3d20045-1678-4bd0-96bb-4195baba23a6';
-const FLOW_CLIENT_ID = '46f2a64f-f3ef-4585-aa24-2d3182c6429b';
-// Delegated permission required in Entra ID (App Registration):
-// API Permissions -> Power Automate -> Delegated -> User (user_impersonation)
-const FLOW_SCOPES = ['https://service.flow.microsoft.com/.default'];
-
-const msalInstance = new PublicClientApplication({
-  auth: {
-    clientId: FLOW_CLIENT_ID,
-    authority: `https://login.microsoftonline.com/${FLOW_TENANT_ID}`,
-    redirectUri: window.location.origin,
-  },
-  cache: {
-    cacheLocation: 'localStorage',
-  },
-});
-const msalInitPromise = msalInstance.initialize();
-const isInIframe = window.self !== window.top;
-
-const getFlowAccessToken = async () => {
-  await msalInitPromise;
-  await msalInstance.handleRedirectPromise();
-  const accounts = msalInstance.getAllAccounts();
-  let account = accounts[0];
-  if (!account) {
-    try {
-      const login = await msalInstance.loginPopup({ scopes: FLOW_SCOPES });
-      account = login.account || undefined;
-    } catch (error: any) {
-      if (error?.errorCode === 'timed_out' || error?.errorCode === 'popup_window_error') {
-        const reason = isInIframe
-          ? 'Popup bloqueado no Power Apps. Permita popups e tente novamente.'
-          : 'Popup expirou. Tente novamente.';
-        throw new Error(reason);
-      }
-      throw error;
-    }
-  }
-  try {
-    const result = await msalInstance.acquireTokenSilent({
-      account,
-      scopes: FLOW_SCOPES,
-    });
-    return result.accessToken;
-  } catch (error: any) {
-    if (error instanceof InteractionRequiredAuthError) {
-      try {
-        const result = await msalInstance.acquireTokenPopup({ scopes: FLOW_SCOPES });
-        return result.accessToken;
-      } catch (popupError: any) {
-        if (popupError?.errorCode === 'timed_out' || popupError?.errorCode === 'popup_window_error') {
-          const reason = isInIframe
-            ? 'Popup bloqueado no Power Apps. Permita popups e tente novamente.'
-            : 'Popup expirou. Tente novamente.';
-          throw new Error(reason);
-        }
-        throw popupError;
-      }
-    }
-    throw error;
-  }
-};
-
-const runAjusteFlow = async (payload: {
-  contagemId: string;
-  itemEstoqueId: string;
-  saldoAnterior: number;
-  saldoNovo: number;
-  justificativa?: string;
-  usuarioAjusteId: string;
-}) => {
-  const token = await getFlowAccessToken();
-  if (!token) return;
-  const response = await fetch(FLOW_TRIGGER_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-  const text = await response.text();
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = null;
-  }
-  if (!response.ok) {
-    const message = data?.message || data?.error || text || `HTTP ${response.status}`;
-    throw new Error(message);
-  }
-  return data;
-};
 
 export function ContagemEstoqueGestaoPage() {
   const styles = useStyles();
@@ -682,14 +594,27 @@ export function ContagemEstoqueGestaoPage() {
       });
       const saldoAnterior = (itemResult.data as { new_quantidade?: number } | undefined)?.new_quantidade ?? 0;
 
-      await runAjusteFlow({
-        contagemId: ajusteTarget.new_contagemestoqueid,
-        itemEstoqueId: itemId,
-        saldoAnterior,
-        saldoNovo,
-        justificativa: ajusteJustificativa || undefined,
-        usuarioAjusteId: systemUserId,
-      });
+      // Cria a solicitação de ajuste no Dataverse
+      // O fluxo Power Automate será acionado automaticamente quando o registro for criado
+      const solicitacaoPayload: Record<string, any> = {
+        new_name: `Ajuste ${ajusteTarget.new_sku || 'SKU'} - ${new Date().toLocaleString('pt-BR')}`,
+        new_saldoanterior: saldoAnterior,
+        new_saldonovo: saldoNovo,
+        new_statusdoprocessamento: STATUS_PROCESSAMENTO.Pendente,
+      };
+
+      // Adiciona lookups com binding OData
+      solicitacaoPayload['new_contagem@odata.bind'] = `/new_contagemestoques(${ajusteTarget.new_contagemestoqueid})`;
+      solicitacaoPayload['new_itemdeestoque@odata.bind'] = `/cr22f_estoquefromsharepointlists(${itemId})`;
+      solicitacaoPayload['new_usuariosolicitante@odata.bind'] = `/systemusers(${systemUserId})`;
+
+      if (ajusteJustificativa) {
+        solicitacaoPayload.new_justificativa = ajusteJustificativa;
+      }
+
+      await NewSolicitacaodeAjustedeEstoqueService.create(solicitacaoPayload);
+
+      console.info('[GestaoContagem] Solicitação de ajuste criada com sucesso. O Power Automate irá processar e atualizar a contagem.');
 
       setAjusteTarget(null);
       setAjusteSaldoNovo('');
@@ -697,8 +622,8 @@ export function ContagemEstoqueGestaoPage() {
       void loadDivergencias();
       void loadAjustes();
     } catch (err) {
-      console.error('[GestaoContagem] erro ao ajustar', err);
-      const message = err instanceof Error ? err.message : 'Erro ao chamar fluxo de ajuste.';
+      console.error('[GestaoContagem] erro ao criar solicitação de ajuste', err);
+      const message = err instanceof Error ? err.message : 'Erro ao criar solicitação de ajuste.';
       setDivergenciasError(message);
     } finally {
       setAjusteLoading(false);
