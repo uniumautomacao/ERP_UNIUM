@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.93';
+export const APP_VERSION = '0.0.94';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.94',
+    date: '2026-01-21',
+    changes: 'Corrigido casing dos campos OData binding na criação de solicitação de ajuste (new_Contagem, new_ItemdeEstoque, new_UsuarioSolicitante com PascalCase).',
+  },
   {
     version: '0.0.93',
     date: '2026-01-21',

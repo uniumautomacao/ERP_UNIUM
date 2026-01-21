@@ -601,16 +601,17 @@ export function ContagemEstoqueGestaoPage() {
         new_saldoanterior: saldoAnterior,
         new_saldonovo: saldoNovo,
         new_statusdoprocessamento: STATUS_PROCESSAMENTO.Pendente,
+        // Adiciona lookups com binding OData (IMPORTANTE: PascalCase depois do underscore)
+        'new_Contagem@odata.bind': `/new_contagemestoques(${ajusteTarget.new_contagemestoqueid})`,
+        'new_ItemdeEstoque@odata.bind': `/cr22f_estoquefromsharepointlists(${itemId})`,
+        'new_UsuarioSolicitante@odata.bind': `/systemusers(${systemUserId})`,
       };
-
-      // Adiciona lookups com binding OData
-      solicitacaoPayload['new_contagem@odata.bind'] = `/new_contagemestoques(${ajusteTarget.new_contagemestoqueid})`;
-      solicitacaoPayload['new_itemdeestoque@odata.bind'] = `/cr22f_estoquefromsharepointlists(${itemId})`;
-      solicitacaoPayload['new_usuariosolicitante@odata.bind'] = `/systemusers(${systemUserId})`;
 
       if (ajusteJustificativa) {
         solicitacaoPayload.new_justificativa = ajusteJustificativa;
       }
+
+      console.log('[GestaoContagem] Criando solicitação de ajuste:', solicitacaoPayload);
 
       await NewSolicitacaodeAjustedeEstoqueService.create(solicitacaoPayload);
 
