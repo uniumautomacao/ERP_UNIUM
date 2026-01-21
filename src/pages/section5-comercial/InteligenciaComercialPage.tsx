@@ -171,7 +171,11 @@ export function InteligenciaComercialPage() {
   
   // Estados para modal de detalhes
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalData, setModalData] = useState<{ type: 'fabricante' | 'vendedor' | 'arquiteto' | 'categoria' | 'produto-vs-servico' | 'evolucao' | 'produto' | 'cliente'; value: string } | null>(null);
+  const [modalData, setModalData] = useState<{ 
+    type: 'fabricante' | 'vendedor' | 'arquiteto' | 'categoria' | 'produto-vs-servico' | 'evolucao' | 'produto' | 'cliente'; 
+    value: string;
+    anoClicado?: 'base' | 'comparacao'; // Para identificar qual ano foi clicado na aba de comparação
+  } | null>(null);
   
   // Função para calcular datas baseado no período
   const calcularDatas = useCallback((periodo: PeriodoFiltro): { dataInicio?: Date; dataFim?: Date } => {
@@ -613,7 +617,13 @@ export function InteligenciaComercialPage() {
             ]}
             height={300}
             onPointClick={(item) => {
-              setModalData({ type: 'evolucao', value: item.date });
+              // Determinar qual ano foi clicado baseado nas chaves do item
+              // Se o item tem valor para anoBase, foi clicado no ano base
+              // Se tem valor para anoComparacao, foi clicado no ano de comparação
+              const anoClicado = item[anoBase.toString()] !== undefined && item[anoBase.toString()] !== null 
+                ? 'base' 
+                : 'comparacao';
+              setModalData({ type: 'evolucao', value: item.date, anoClicado });
               setModalOpen(true);
             }}
           />
@@ -630,7 +640,7 @@ export function InteligenciaComercialPage() {
                 data={dataAnoBase.vendasPorCategoria} 
                 height={250}
                 onSegmentClick={(item) => {
-                  setModalData({ type: 'categoria', value: item.name });
+                  setModalData({ type: 'categoria', value: item.name, anoClicado: 'base' });
                   setModalOpen(true);
                 }}
               />
@@ -648,7 +658,7 @@ export function InteligenciaComercialPage() {
                 data={dataAnoComparacao.vendasPorCategoria} 
                 height={250}
                 onSegmentClick={(item) => {
-                  setModalData({ type: 'categoria', value: item.name });
+                  setModalData({ type: 'categoria', value: item.name, anoClicado: 'comparacao' });
                   setModalOpen(true);
                 }}
               />
@@ -669,7 +679,7 @@ export function InteligenciaComercialPage() {
                 data={dataAnoBase.produtoVsServico} 
                 height={250}
                 onSegmentClick={(item) => {
-                  setModalData({ type: 'produto-vs-servico', value: item.name });
+                  setModalData({ type: 'produto-vs-servico', value: item.name, anoClicado: 'base' });
                   setModalOpen(true);
                 }}
               />
@@ -687,7 +697,7 @@ export function InteligenciaComercialPage() {
                 data={dataAnoComparacao.produtoVsServico} 
                 height={250}
                 onSegmentClick={(item) => {
-                  setModalData({ type: 'produto-vs-servico', value: item.name });
+                  setModalData({ type: 'produto-vs-servico', value: item.name, anoClicado: 'comparacao' });
                   setModalOpen(true);
                 }}
               />
@@ -710,7 +720,7 @@ export function InteligenciaComercialPage() {
                 height={300} 
                 horizontal
                 onBarClick={(item) => {
-                  setModalData({ type: 'fabricante', value: item.date });
+                  setModalData({ type: 'fabricante', value: item.date, anoClicado: 'base' });
                   setModalOpen(true);
                 }}
               />
@@ -730,7 +740,7 @@ export function InteligenciaComercialPage() {
                 height={300} 
                 horizontal
                 onBarClick={(item) => {
-                  setModalData({ type: 'fabricante', value: item.date });
+                  setModalData({ type: 'fabricante', value: item.date, anoClicado: 'comparacao' });
                   setModalOpen(true);
                 }}
               />
@@ -1192,7 +1202,9 @@ export function InteligenciaComercialPage() {
             filterValue={modalData.value}
             periodo={
               selectedTab === 'comparacao'
-                ? { dataInicio: datasAnoBase.dataInicio, dataFim: datasAnoBase.dataFim }
+                ? modalData?.anoClicado === 'comparacao'
+                  ? { dataInicio: datasAnoComparacao.dataInicio, dataFim: datasAnoComparacao.dataFim }
+                  : { dataInicio: datasAnoBase.dataInicio, dataFim: datasAnoBase.dataFim }
                 : { dataInicio, dataFim }
             }
           />
