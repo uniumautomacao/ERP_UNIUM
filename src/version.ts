@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.0.123';
+export const APP_VERSION = '0.0.126';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.126',
+    date: '2026-01-21',
+    changes: 'Melhorado layout responsivo dos filtros na Inteligência Comercial: ajustado wrap e larguras máximas. Busca agora dispara apenas ao pressionar Enter.',
+  },
+  {
+    version: '0.0.125',
+    date: '2026-01-21',
+    changes: 'Adicionada opção "Todos os tempos" no filtro de período da Inteligência Comercial para visualizar vendas sem restrição de data.',
+  },
+  {
+    version: '0.0.124',
+    date: '2026-01-21',
+    changes: 'Adicionado filtro por arquiteto e campo de busca global delegável (cliente, produto, fabricante, vendedor, arquiteto, referência, ID) na Inteligência Comercial.',
+  },
   {
     version: '0.0.123',
     date: '2026-01-21',

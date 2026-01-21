@@ -30,6 +30,7 @@ interface UseVendasAnalyticsOptions {
   fabricante?: string;
   vendedor?: string;
   arquiteto?: string;
+  busca?: string;
 }
 
 interface VendasAnalyticsData {
@@ -91,6 +92,22 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
           filters.push(`new_nomedoarquiteto eq '${options.arquiteto}'`);
         }
 
+        if (options.busca && options.busca.trim()) {
+          const searchTerm = options.busca.trim();
+          // Busca delegável em múltiplos campos usando contains
+          const searchFilters = [
+            `contains(new_nomedocliente, '${searchTerm}')`,
+            `contains(new_descricaodoproduto, '${searchTerm}')`,
+            `contains(new_categoriadoproduto, '${searchTerm}')`,
+            `contains(new_nomedofabricante, '${searchTerm}')`,
+            `contains(new_referenciadoprodutomodelo, '${searchTerm}')`,
+            `contains(new_nomedovendedor, '${searchTerm}')`,
+            `contains(new_nomedoarquiteto, '${searchTerm}')`,
+            `contains(new_id, '${searchTerm}')`,
+          ];
+          filters.push(`(${searchFilters.join(' or ')})`);
+        }
+
         const filterString = filters.join(' and ');
 
         console.log('[useVendasAnalytics] Filtro OData:', filterString);
@@ -131,7 +148,7 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
     };
 
     fetchVendas();
-  }, [options.dataInicio, options.dataFim, options.categoria, options.fabricante, options.vendedor, options.arquiteto]);
+  }, [options.dataInicio, options.dataFim, options.categoria, options.fabricante, options.vendedor, options.arquiteto, options.busca]);
 
   const analyticsData: VendasAnalyticsData = useMemo(() => {
     if (vendas.length === 0) {

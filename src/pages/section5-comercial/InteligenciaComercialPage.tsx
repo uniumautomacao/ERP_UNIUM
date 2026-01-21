@@ -25,6 +25,7 @@ import {
   ArrowSync24Regular,
   ArrowExport24Regular,
   Calendar24Regular,
+  Search24Regular,
 } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -46,26 +47,35 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     borderRadius: '8px',
     border: `1px solid ${tokens.colorNeutralStroke1}`,
+    alignItems: 'flex-start',
   },
   filterItem: {
-    minWidth: '200px',
-    flex: '1',
+    minWidth: '180px',
+    flex: '1 1 180px',
   },
   dateFilterItem: {
-    minWidth: '250px',
-    flex: '1',
+    minWidth: '200px',
+    flex: '1 1 200px',
   },
   customDateContainer: {
     display: 'flex',
     gap: '12px',
     flexWrap: 'wrap',
+    flexBasis: '100%',
     width: '100%',
   },
   customDateField: {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
-    minWidth: '200px',
+    minWidth: '180px',
+    flex: '1 1 180px',
+  },
+  searchField: {
+    minWidth: '250px',
+    flex: '1 1 250px',
+    flexBasis: '100%',
+    width: '100%',
   },
   kpiGrid: {
     display: 'grid',
@@ -111,18 +121,21 @@ interface TopCliente {
   lucro: number;
 }
 
-type PeriodoFiltro = 'ano-atual' | 'ultimos-30-dias' | 'ultimos-12-meses' | 'semestre-atual' | 'personalizado';
+type PeriodoFiltro = 'todos-os-tempos' | 'ano-atual' | 'ultimos-30-dias' | 'ultimos-12-meses' | 'semestre-atual' | 'personalizado';
 
 export function InteligenciaComercialPage() {
   const styles = useStyles();
   
   // Função para calcular datas baseado no período
-  const calcularDatas = useCallback((periodo: PeriodoFiltro): { dataInicio: Date; dataFim: Date } => {
+  const calcularDatas = useCallback((periodo: PeriodoFiltro): { dataInicio?: Date; dataFim?: Date } => {
     const hoje = new Date();
     const dataFim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59, 999);
-    let dataInicio: Date;
+    let dataInicio: Date | undefined;
 
     switch (periodo) {
+      case 'todos-os-tempos':
+        // Sem filtro de data - retorna undefined para não filtrar por data
+        return { dataInicio: undefined, dataFim: undefined };
       case 'ano-atual':
         dataInicio = new Date(hoje.getFullYear(), 0, 1, 0, 0, 0, 0);
         break;
@@ -156,11 +169,14 @@ export function InteligenciaComercialPage() {
   const [periodoSelecionado, setPeriodoSelecionado] = useState<PeriodoFiltro>('ano-atual');
   const [dataInicioPersonalizada, setDataInicioPersonalizada] = useState<string>('');
   const [dataFimPersonalizada, setDataFimPersonalizada] = useState<string>('');
+  const [busca, setBusca] = useState<string>('');
+  const [buscaInput, setBuscaInput] = useState<string>('');
   
   const [filtros, setFiltros] = useState({
     categoria: undefined as string | undefined,
     fabricante: undefined as string | undefined,
     vendedor: undefined as string | undefined,
+    arquiteto: undefined as string | undefined,
   });
 
   // Calcular datas baseado no período selecionado
@@ -182,6 +198,7 @@ export function InteligenciaComercialPage() {
     ...filtros,
     dataInicio,
     dataFim,
+    busca,
   });
 
   const commandBarActions = [
@@ -231,6 +248,9 @@ export function InteligenciaComercialPage() {
 
   // Gerar subtítulo com o período
   const subtitle = useMemo(() => {
+    if (!dataInicio || !dataFim) {
+      return 'Período: Todos os tempos';
+    }
     return `Período: ${formatDate(dataInicio)} - ${formatDate(dataFim)}`;
   }, [dataInicio, dataFim]);
 
@@ -354,9 +374,25 @@ export function InteligenciaComercialPage() {
       <PageContainer>
         {/* Filtros */}
         <div className={styles.filterSection}>
+          {/* Campo de Busca */}
+          <div className={styles.searchField}>
+            <Input
+              placeholder="Buscar por cliente, produto, fabricante, vendedor, arquiteto..."
+              value={buscaInput}
+              onChange={(_, data) => setBuscaInput(data.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  setBusca(buscaInput.trim());
+                }
+              }}
+              contentBefore={<Search24Regular />}
+            />
+          </div>
+
           <div className={styles.dateFilterItem}>
             <Dropdown
               value={
+                periodoSelecionado === 'todos-os-tempos' ? 'Todos os tempos' :
                 periodoSelecionado === 'ano-atual' ? 'Este ano' :
                 periodoSelecionado === 'ultimos-30-dias' ? 'Últimos 30 dias' :
                 periodoSelecionado === 'ultimos-12-meses' ? 'Últimos 12 meses' :
@@ -376,6 +412,7 @@ export function InteligenciaComercialPage() {
                 }
               }}
             >
+              <Option value="todos-os-tempos">Todos os tempos</Option>
               <Option value="ano-atual">Este ano</Option>
               <Option value="ultimos-30-dias">Últimos 30 dias</Option>
               <Option value="ultimos-12-meses">Últimos 12 meses</Option>
@@ -452,6 +489,21 @@ export function InteligenciaComercialPage() {
               {data.topVendedores.map((vend) => (
                 <Option key={vend.date} value={vend.date}>
                   {vend.date}
+                </Option>
+              ))}
+            </Dropdown>
+          </div>
+          <div className={styles.filterItem}>
+            <Dropdown
+              placeholder="Todos os arquitetos"
+              onOptionSelect={(_, data) => {
+                setFiltros({ ...filtros, arquiteto: data.optionValue as string });
+              }}
+            >
+              <Option value="">Todos os arquitetos</Option>
+              {data.topArquitetos.map((arq) => (
+                <Option key={arq.date} value={arq.date}>
+                  {arq.date}
                 </Option>
               ))}
             </Dropdown>
