@@ -54,7 +54,7 @@ const useStyles = makeStyles({
 interface VendasDetalhesModalProps {
   open: boolean;
   onClose: () => void;
-  filterType: 'fabricante' | 'vendedor' | 'arquiteto' | 'categoria' | 'produto-vs-servico' | 'evolucao';
+  filterType: 'fabricante' | 'vendedor' | 'arquiteto' | 'categoria' | 'produto-vs-servico' | 'evolucao' | 'produto' | 'cliente';
   filterValue: string;
   periodo: { dataInicio?: Date; dataFim?: Date };
 }
@@ -83,6 +83,10 @@ export function VendasDetalhesModal({
       baseOptions.arquiteto = filterValue.trim();
     } else if (filterType === 'categoria' && filterValue) {
       baseOptions.categoria = filterValue.trim();
+    } else if (filterType === 'produto' && filterValue) {
+      baseOptions.produto = filterValue.trim();
+    } else if (filterType === 'cliente' && filterValue) {
+      baseOptions.cliente = filterValue.trim();
     } else if (filterType === 'evolucao' && filterValue) {
       // Para evolução, filtrar por data específica (formato MM/YYYY)
       const [mes, ano] = filterValue.split('/');
@@ -176,6 +180,8 @@ export function VendasDetalhesModal({
       vendedor: 'Vendedor',
       arquiteto: 'Arquiteto',
       categoria: 'Categoria',
+      produto: 'Produto',
+      cliente: 'Cliente',
       'produto-vs-servico': 'Produto vs Serviço',
       evolucao: 'Período',
     };

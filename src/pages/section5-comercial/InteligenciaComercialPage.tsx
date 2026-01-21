@@ -171,7 +171,7 @@ export function InteligenciaComercialPage() {
   
   // Estados para modal de detalhes
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalData, setModalData] = useState<{ type: 'fabricante' | 'vendedor' | 'arquiteto' | 'categoria' | 'produto-vs-servico' | 'evolucao'; value: string } | null>(null);
+  const [modalData, setModalData] = useState<{ type: 'fabricante' | 'vendedor' | 'arquiteto' | 'categoria' | 'produto-vs-servico' | 'evolucao' | 'produto' | 'cliente'; value: string } | null>(null);
   
   // Função para calcular datas baseado no período
   const calcularDatas = useCallback((periodo: PeriodoFiltro): { dataInicio?: Date; dataFim?: Date } => {
@@ -1118,7 +1118,14 @@ export function InteligenciaComercialPage() {
                 </DataGridHeader>
                 <DataGridBody<TopProduto>>
                   {({ item, rowId }) => (
-                    <DataGridRow<TopProduto> key={rowId}>
+                    <DataGridRow<TopProduto> 
+                      key={rowId}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        setModalData({ type: 'produto', value: item.descricao });
+                        setModalOpen(true);
+                      }}
+                    >
                       {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
                     </DataGridRow>
                   )}
@@ -1149,7 +1156,14 @@ export function InteligenciaComercialPage() {
                 </DataGridHeader>
                 <DataGridBody<TopCliente>>
                   {({ item, rowId }) => (
-                    <DataGridRow<TopCliente> key={rowId}>
+                    <DataGridRow<TopCliente> 
+                      key={rowId}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        setModalData({ type: 'cliente', value: item.nome });
+                        setModalOpen(true);
+                      }}
+                    >
                       {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
                     </DataGridRow>
                   )}

@@ -30,6 +30,8 @@ interface UseVendasAnalyticsOptions {
   fabricante?: string;
   vendedor?: string;
   arquiteto?: string;
+  produto?: string;
+  cliente?: string;
   busca?: string;
 }
 
@@ -95,6 +97,14 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
           filters.push(`new_nomedoarquiteto eq '${escapeODataString(options.arquiteto)}'`);
         }
 
+        if (options.produto) {
+          filters.push(`new_descricaodoproduto eq '${escapeODataString(options.produto)}'`);
+        }
+
+        if (options.cliente) {
+          filters.push(`new_nomedocliente eq '${escapeODataString(options.cliente)}'`);
+        }
+
         if (options.busca && options.busca.trim()) {
           const searchTerm = options.busca.trim();
           // Busca delegável em múltiplos campos usando contains
@@ -151,7 +161,7 @@ export function useVendasAnalytics(options: UseVendasAnalyticsOptions = {}) {
     };
 
     fetchVendas();
-  }, [options.dataInicio, options.dataFim, options.categoria, options.fabricante, options.vendedor, options.arquiteto, options.busca]);
+  }, [options.dataInicio, options.dataFim, options.categoria, options.fabricante, options.vendedor, options.arquiteto, options.produto, options.cliente, options.busca]);
 
   const analyticsData: VendasAnalyticsData = useMemo(() => {
     if (vendas.length === 0) {
