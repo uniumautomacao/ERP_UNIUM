@@ -50,6 +50,7 @@ export const navigation: NavSection[] = [
         label: 'Contagem de Estoque',
         icon: <QrCode24Regular />,
         path: '/vistorias/contagem',
+        exact: true,
       },
       {
         id: 'contagem-gestao',

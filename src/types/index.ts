@@ -151,6 +151,7 @@ export interface NavItem {
   label: string;
   icon: ReactNode;
   path: string;
+  exact?: boolean;
 }
 
 export interface NavSection {

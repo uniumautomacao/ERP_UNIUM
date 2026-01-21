@@ -6,13 +6,14 @@ interface SidebarItemProps {
   icon: ReactNode;
   label: string;
   path: string;
+  exact?: boolean;
   isCollapsed: boolean;
   onClick?: () => void;
 }
 
-export function SidebarItem({ icon, label, path, isCollapsed, onClick }: SidebarItemProps) {
+export function SidebarItem({ icon, label, path, exact, isCollapsed, onClick }: SidebarItemProps) {
   const buttonContent = (
-    <NavLink to={path} style={{ textDecoration: 'none', width: '100%' }} onClick={onClick}>
+    <NavLink to={path} end={exact} style={{ textDecoration: 'none', width: '100%' }} onClick={onClick}>
       {({ isActive }) => {
         const IconElement = icon as React.ReactElement | undefined;
         return (

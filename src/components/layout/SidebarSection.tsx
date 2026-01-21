@@ -36,6 +36,7 @@ export function SidebarSection({ label, items, isCollapsed, onItemClick }: Sideb
             icon={item.icon}
             label={item.label}
             path={item.path}
+            exact={item.exact}
             isCollapsed={isCollapsed}
             onClick={onItemClick}
           />

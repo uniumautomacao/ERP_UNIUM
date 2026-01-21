@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.106';
+export const APP_VERSION = '0.0.107';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.107',
+    date: '2026-01-21',
+    changes: 'Menu de Vistorias: Contagem de Estoque agora só fica ativa na rota exata, evitando destaque simultâneo com Gestão de Contagem.',
+  },
   {
     version: '0.0.106',
     date: '2026-01-21',
