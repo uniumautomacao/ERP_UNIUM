@@ -145,6 +145,9 @@ export interface DeviceIOManufacturer {
   cr22f_title: string;
 }
 
+// Inventory - QR Reader
+export type { EnderecoDeposito, EnderecoParseResult, MercadoriaLida, MercadoriaStatus, ParsedBarcode } from './inventory';
+
 // Navigation
 export interface NavItem {
   id: string;

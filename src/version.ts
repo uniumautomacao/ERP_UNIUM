@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.108';
+export const APP_VERSION = '0.0.109';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.109',
+    date: '2026-01-21',
+    changes: 'Adiciona a página Leitor de Mercadorias com scanner QR/Barcode, ativação em lote e atualização de informações.',
+  },
   {
     version: '0.0.108',
     date: '2026-01-21',

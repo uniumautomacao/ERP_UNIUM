@@ -58,6 +58,12 @@ export const navigation: NavSection[] = [
         icon: <DataBarVertical24Regular />,
         path: '/vistorias/contagem/gestao',
       },
+      {
+        id: 'leitor-mercadorias',
+        label: 'Leitor de Mercadorias',
+        icon: <QrCode24Regular />,
+        path: '/vistorias/leitor-mercadorias',
+      },
     ],
   },
   {
