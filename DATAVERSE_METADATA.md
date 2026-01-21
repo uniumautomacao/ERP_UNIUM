@@ -24,6 +24,7 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Contagem Estoque | `new_contagemestoque` | `new_contagemestoques` | `new_contagemestoqueid` |
 | Ajuste de Estoque | `new_ajustedeestoque` | `new_ajustedeestoques` | `new_ajustedeestoqueid` |
 | Solicitação de Ajuste de Estoque | `new_solicitacaodeajustedeestoque` | `new_solicitacaodeajustedeestoques` | `new_solicitacaodeajustedeestoqueid` |
+| Registro de Leitura de Mercadoria em Estoque | `new_registrodeleiturademercadoriaemestoque` | `new_registrodeleiturademercadoriaemestoques` | `new_registrodeleiturademercadoriaemestoqueid` |
 
 ---
 
@@ -81,6 +82,24 @@ PrimaryKey:                       new_solicitacaodeajustedeestoqueid
 | new_contagem | new_Contagem | new_contagemestoques |
 | new_itemdeestoque | new_ItemdeEstoque | cr22f_estoquefromsharepointlists |
 | new_usuariosolicitante | new_UsuarioSolicitante | systemusers |
+
+---
+
+## 🔵 new_registrodeleiturademercadoriaemestoque (Registro de Leitura de Mercadoria em Estoque)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_registrodeleiturademercadoriaemestoque
+EntityLogicalCollectionName:      new_registrodeleiturademercadoriaemestoques
+EntitySetName:                    new_registrodeleiturademercadoriaemestoques
+PrimaryKey:                       new_registrodeleiturademercadoriaemestoqueid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_mercadoria | new_Mercadoria | cr22f_estoquefromsharepointlists |
+| new_registradopor | new_RegistradoPor | systemusers |
 
 ---
 

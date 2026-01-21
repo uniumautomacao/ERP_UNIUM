@@ -151,5 +151,12 @@ export const dataSourcesInfo = {
     "primaryKey": "new_solicitacaodeajustedeestoqueid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_registrodeleiturademercadoriaemestoques": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_registrodeleiturademercadoriaemestoqueid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

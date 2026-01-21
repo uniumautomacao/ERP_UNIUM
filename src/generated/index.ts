@@ -26,6 +26,7 @@ export * as NewRMAModel from './models/NewRMAModel';
 export * as NewContagemEstoqueModel from './models/NewContagemEstoqueModel';
 export * as NewAjustedeEstoqueModel from './models/NewAjustedeEstoqueModel';
 export * as NewSolicitacaodeAjustedeEstoqueModel from './models/NewSolicitacaodeAjustedeEstoqueModel';
+export * as NewRegistrodeLeituradeMercadoriaemEstoqueModel from './models/NewRegistrodeLeituradeMercadoriaemEstoqueModel';
 
 // Services
 export * from './services/RolesService';
@@ -49,3 +50,4 @@ export * from './services/NewRMAService';
 export * from './services/NewContagemEstoqueService';
 export * from './services/NewAjustedeEstoqueService';
 export * from './services/NewSolicitacaodeAjustedeEstoqueService';
+export * from './services/NewRegistrodeLeituradeMercadoriaemEstoqueService';

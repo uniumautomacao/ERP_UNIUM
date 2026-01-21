@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.107';
+export const APP_VERSION = '0.0.108';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.108',
+    date: '2026-01-21',
+    changes: 'Importada nova tabela do Dataverse: new_registrodeleiturademercadoriaemestoque.',
+  },
   {
     version: '0.0.107',
     date: '2026-01-21',
