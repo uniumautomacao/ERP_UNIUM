@@ -111,15 +111,16 @@ export const useMercadoriaReader = () => {
     if (!parsed.valido || !parsed.endereco) {
       throw new Error(parsed.erro ?? 'Endereço inválido.');
     }
+    const enderecoValido = parsed.endereco; // Garante que enderecoValido não é undefined
     const now = new Date().toISOString();
     await Promise.all(
       ids.map((id) =>
         Cr22fEstoqueFromSharepointListService.update(id, {
-          new_centrodedistribuicao: parsed.endereco.centroDistribuicao,
-          new_deposito: parsed.endereco.deposito,
-          new_rua: parsed.endereco.rua,
-          new_estante: parsed.endereco.estante,
-          new_prateleira: parsed.endereco.prateleira,
+          new_centrodedistribuicao: enderecoValido.centroDistribuicao,
+          new_deposito: enderecoValido.deposito,
+          new_rua: enderecoValido.rua,
+          new_estante: enderecoValido.estante,
+          new_prateleira: enderecoValido.prateleira,
           new_endereco: parsed.codigo,
           new_datadaultimaleitura: now,
         })

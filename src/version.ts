@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.116';
+export const APP_VERSION = '0.0.118';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.118',
+    date: '2026-01-21',
+    changes: 'Corrigido erro de tipagem em useMercadoriaReader para endereco.',
+  },
+  {
+    version: '0.0.117',
+    date: '2026-01-21',
+    changes: 'Republicação incremental solicitada pelo usuário.',
+  },
   {
     version: '0.0.116',
     date: '2026-01-21',
