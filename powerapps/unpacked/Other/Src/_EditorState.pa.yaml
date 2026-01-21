@@ -8,6 +8,4 @@
 # ************************************************************************************************
 EditorState:
   ScreensOrder:
-    - Home Screen
-  ComponentDefinitionsOrder:
-    - SearchBox
+    - Screen1

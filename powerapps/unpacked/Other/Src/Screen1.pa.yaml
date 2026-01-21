@@ -1,0 +1,474 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  Screen1:
+    Properties:
+      Fill: =RGBA(0, 0, 0, 0)
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+    Children:
+      - MainContainer:
+          Control: GroupContainer@1.4.0
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =20
+            PaddingBottom: =10
+            PaddingLeft: =20
+            PaddingRight: =20
+            PaddingTop: =10
+            Width: =Parent.Width
+          Children:
+            - TextCanvas1:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Font: =Font.'Lato Black'
+                  Height: =50
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  Size: =24
+                  Text: ="Leitor de Mercadorias"
+                  VerticalAlign: =VerticalAlign.Middle
+            - MercadoriasGallery:
+                Control: Gallery@2.15.0
+                Variant: BrowseLayout_Flexible_SocialFeed_ver5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Items: =Mercadorias
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  TemplatePadding: =20
+                  TemplateSize: =340+42+42
+                Children:
+                  - Rectangle1:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =RGBA(56, 96, 178, 1)
+                        OnSelect: =Select(Parent)
+                        Visible: =false
+                        X: =40
+                        Y: =40
+                  - Container2:
+                      Control: GroupContainer@1.4.0
+                      Variant: AutoLayout
+                      Properties:
+                        Height: =Parent.TemplateHeight
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =10
+                        PaddingBottom: =20
+                        PaddingLeft: =20
+                        PaddingRight: =20
+                        PaddingTop: =20
+                        Width: =Parent.TemplateWidth
+                      Children:
+                        - CodigoText:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.Lato
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Size: =21
+                              Text: |-
+                                ="Código: " & ThisItem.Etiqueta
+                        - SNText:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.Lato
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Size: =21
+                              Text: |-
+                                ="SN: " & ThisItem.'Número de Série'
+                        - RefText:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.Lato
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Size: =21
+                              Text: |-
+                                ="REF: " & ThisItem.'Referência do Produto'
+                        - QuantidadeText:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.Lato
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Size: =21
+                              Text: |-
+                                ="Quantidade: " & ThisItem.Quantidade
+                        - SituaçãoText:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.Lato
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Size: =21
+                              Text: |-
+                                ="Situação: " & If(
+                                    And(
+                                        ThisItem.Status = 'Status (Estoque From SharepointLists)'.Active,
+                                        ThisItem.TagConfirmadaBool = true
+                                    ),
+                                    ThisItem.Situação,
+                                    "Inativo"
+                                )
+                        - EndereçoText:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.Lato
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Size: =21
+                              Text: |-
+                                ="Endereço: " & ThisItem.Endereço
+                        - ClienteText:
+                            Control: Text@0.0.51
+                            Properties:
+                              Font: =Font.Lato
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Size: =21
+                              Text: |-
+                                ="Cliente: " & ThisItem.'Cliente (Fx)'
+                        - AtivarProdutoButtonCanvas:
+                            Control: Button@0.0.45
+                            Properties:
+                              BasePaletteColor: =RGBA(8, 222, 8, 1)
+                              DisplayMode: =If(ThisItem.Status <> 'Status (Estoque From SharepointLists)'.Active,DisplayMode.Edit,DisplayMode.Disabled)
+                              Font: =Font.Lato
+                              FontSize: =20
+                              Height: =40
+                              Icon: ="Checkmark"
+                              Layout: ='ButtonCanvas.Layout'.TextOnly
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: |-
+                                =ClearCollect(
+                                    MercadoriasParaAtivar,
+                                    Table(ThisItem)
+                                );
+                                Select(AtivarTodosButtonCanvas)
+                                /*Patch(
+                                    'Estoque From SharepointLists',
+                                    {
+                                        'Estoque From SharepointList': ThisItem.'Estoque From SharepointList',
+                                        'Confirmação de Etiqueta': ThisItem._LeituraQRCode,
+                                        Status: 'Status (Estoque From SharepointLists)'.Active,
+                                        'Status Reason': 'Status Reason (Estoque From SharepointLists)'.Active
+                                    }
+                                )*/
+                              Text: ="Ativar Mercadoria"
+                        - AtualizadInfoButtonCanvas:
+                            Control: Button@0.0.45
+                            Properties:
+                              Appearance: ='ButtonCanvas.Appearance'.Secondary
+                              Font: =Font.Lato
+                              FontSize: =20
+                              Height: =40
+                              Icon: ="Checkmark"
+                              Layout: ='ButtonCanvas.Layout'.TextOnly
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: |-
+                                =Set(
+                                    _MercadoriaInformacoesId,
+                                    If(
+                                        IsBlank(_MercadoriaInformacoesId),
+                                        [ThisItem.'Estoque From SharepointList'],
+                                        Blank()
+                                    )
+                                )
+                              Text: ="Atualizar Informações"
+            - AtivarTodosButtonCanvas:
+                Control: Button@0.0.45
+                Properties:
+                  BasePaletteColor: =RGBA(8, 222, 8, 1)
+                  Font: =Font.Lato
+                  FontSize: =20
+                  Height: =40
+                  Icon: ="Checkmark"
+                  Layout: ='ButtonCanvas.Layout'.TextOnly
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  OnSelect: |-
+                    =UpdateContext({SpinCounter:SpinCounter+1});
+                    ForAll(
+                        If(
+                            CountRows(MercadoriasParaAtivar) > 0,
+                            MercadoriasParaAtivar,
+                            Mercadorias
+                        ) As Current,
+                        Patch(
+                            'Estoque From SharepointLists',
+                            {
+                                'Estoque From SharepointList': Current.'Estoque From SharepointList',
+                                'Confirmação de Etiqueta': Current._LeituraQRCode,
+                                Status: 'Status (Estoque From SharepointLists)'.Active,
+                                'Status Reason': 'Status Reason (Estoque From SharepointLists)'.Active
+                            }
+                        )
+                    );
+                    Clear(MercadoriasParaAtivar);
+                    UpdateContext({SpinCounter:SpinCounter-1})
+                  Text: ="Ativar Todas Mercadorias"
+                  Visible: =CountRows(Mercadorias) > 0
+            - AtualizadInfoButtonCanvas_1:
+                Control: Button@0.0.45
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Secondary
+                  Font: =Font.Lato
+                  FontSize: =20
+                  Height: =40
+                  Icon: ="Checkmark"
+                  Layout: ='ButtonCanvas.Layout'.TextOnly
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  OnSelect: |-
+                    =Set(
+                        _MercadoriaInformacoesId,
+                        If(
+                            IsBlank(_MercadoriaInformacoesId),
+                            ForAll(
+                                Mercadorias As M,
+                                M.'Estoque From SharepointList'
+                            ),
+                            Blank()
+                        )
+                    )
+                  Text: ="Atualizar Informações de Todas Mercadorias"
+            - MercadoriaBarcodeReader:
+                Control: BarcodeReader@1.0.25
+                Properties:
+                  Font: =Font.Lato
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  OnScan: |-
+                    =UpdateContext({SpinCounter: SpinCounter + 1});
+                    Set(
+                        _MercadoriaInformacoesId,
+                        Blank()
+                    );
+                    ClearCollect(
+                        MercadoriasIds,
+                        If(
+                            TestMode = true,
+                            ForAll(
+                                LastN(
+                                    SortByColumns(
+                                        Filter(
+                                            'Estoque From SharepointLists' As E,
+                                            E.Status <> Blank()//,E.Etiqueta = 6422
+                                        ),
+                                        "createdon",
+                                        SortOrder.Descending
+                                    ),
+                                    3
+                                ) As E,
+                                {
+                                    BarcodeValue: E.Etiqueta,
+                                    Id: E.'Estoque From SharepointList'
+                                }
+                            ),
+                            With(
+                                {
+                                    Value: Distinct(
+                                        Self.Barcodes As B,
+                                        First(
+                                            Split(
+                                                B.Value,
+                                                "|"
+                                            )
+                                        ).Value
+                                    )
+                                } As Barcodes,
+                                With(
+                                    {
+                                        NumericValues: Filter(
+                                            Distinct(
+                                                Barcodes.Value As B,
+                                                If(
+                                                    IsNumeric(Int(B.Value)),
+                                                    Int(B.Value),
+                                                    Blank()
+                                                )
+                                            ) As Cur,
+                                            !IsBlank(Cur.Value)
+                                        )
+                                    } As Barcode,
+                                    ForAll(
+                                        Filter(
+                                            'Estoque From SharepointLists' As E,
+                                            And(
+                                                !IsBlank(E.Etiqueta),
+                                                Or(
+                                                    E.Etiqueta in Barcode.NumericValues,
+                                                    E.'Número de Série' in Barcodes.Value
+                                                )
+                                            )
+                                        ) As E,
+                                        {
+                                            BarcodeValue: E.Etiqueta,
+                                            Id: E.'Estoque From SharepointList'
+                                        }
+                                    )
+                                )
+                            )
+                        )
+                    );
+                    With(
+                        {
+                            Value: Distinct(
+                                MercadoriasIds As M,
+                                M.Id
+                            )
+                        } As DistinctIds,
+                        UpdateIf(
+                            'Estoque From SharepointLists' As E,
+                            E.'Estoque From SharepointList' in DistinctIds.Value,
+                            {'Data da Última Leitura': Now()}
+                        );
+                        ForAll(
+                            DistinctIds.Value As Id,
+                            Patch(
+                                'Registro de Leitura de Mercadoria em Estoques',
+                                Defaults('Registro de Leitura de Mercadoria em Estoques'),
+                                {
+                                    'Registrado Por': CurrentUser,
+                                    Mercadoria: LookUp(
+                                        'Estoque From SharepointLists' As E,
+                                        E.'Estoque From SharepointList' = Id.Value
+                                    ),
+                                    'Data e Hora': Now()
+                                }
+                            )
+                        )
+                    );
+                    UpdateContext({SpinCounter: SpinCounter - 1})
+                  ScanningMode: ='BarcodeReader.ScanningMode'.ScanMultiple
+                  Text: ="Ler Mercadoria"
+            - TextCanvas2:
+                Control: Text@0.0.51
+                Properties:
+                  Font: =Font.Lato
+                  Height: =24
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  Text: ="V0.6"
+      - Container1:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0.14)
+            Fill: =RGBA(0, 0, 0, 0.2)
+            Height: =Parent.Height
+            Visible: =!IsBlank(_MercadoriaInformacoesId)
+            Width: =Parent.Width
+          Children:
+            - Container3:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =400
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =20
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  RadiusBottomLeft: =20
+                  RadiusBottomRight: =20
+                  RadiusTopLeft: =20
+                  RadiusTopRight: =20
+                  Width: =450
+                  X: =(Parent.Width-Self.Width)/2
+                  Y: =(Parent.Height-Self.Height)/2
+                Children:
+                  - SNBarcodeReader:
+                      Control: BarcodeReader@1.0.25
+                      Properties:
+                        DisplayMode: =If(CountRows(_MercadoriaInformacoesId) = 1,DisplayMode.Edit,DisplayMode.Disabled)
+                        Font: =Font.Lato
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnScan: |-
+                          =UpdateContext({SpinCounter:SpinCounter+1});
+                          ForAll(
+                              Self.Barcodes As B,
+                              Patch(
+                                  'Estoque From SharepointLists',
+                                  {
+                                      'Estoque From SharepointList': First(_MercadoriaInformacoesId).Value,
+                                      'Número de Série': B.Value
+                                  }
+                              );
+                          );
+                          UpdateContext({SpinCounter:SpinCounter-1})
+                        ScanningMode: ='BarcodeReader.ScanningMode'.ScanMultiple
+                        Text: ="Ler Novo Número de Série"
+                        Visible: =!IsBlank(_MercadoriaInformacoesId)
+                        Width: =400
+                        X: =(Parent.Width-Self.Width)/2
+                        Y: =(Parent.Height-Self.Height)/2
+                  - EnderecoBarcodeReader:
+                      Control: BarcodeReader@1.0.25
+                      Properties:
+                        Font: =Font.Lato
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnScan: "=UpdateContext({SpinCounter: SpinCounter + 1});\nForAll(\n    Self.Barcodes As B,\n    With(\n        With(\n            {\n                parts: Split(\n                    B.Value,\n                    \"-\"\n                )\n            },\n            {\n                'Centro de Distribuição': Switch(\n                    First(parts).Value,\n                    \"U1\",\n                    'Centro de Distribuição'.U1\n                ),\n                'Depósito': Switch(\n                    Last(\n                        FirstN(\n                            parts,\n                            2\n                        )\n                    ).Value,\n                    \"A\",\n                    'Depósito'.A,\n                    \"B\",\n                    'Depósito'.B,\n                    \"C\",\n                    'Depósito'.C,\n                    \"D\",\n                    'Depósito'.D,\n                    \"E\",\n                    'Depósito'.E,\n                    \"F\",\n                    'Depósito'.F,\n                    \"G\",\n                    'Depósito'.G,\n                    \"H\",\n                    'Depósito'.H,\n                    \"I\",\n                    'Depósito'.I\n                ),\n                'Rua': Switch(\n                    Last(\n                        FirstN(\n                            parts,\n                            3\n                        )\n                    ).Value,\n                    \"01\",\n                    'Rua (Depósito)'.'01',\n                    \"02\",\n                    'Rua (Depósito)'.'02',\n                    \"03\",\n                    'Rua (Depósito)'.'03',\n                    \"04\",\n                    'Rua (Depósito)'.'04',\n                    \"05\",\n                    'Rua (Depósito)'.'05',\n                    \"06\",\n                    'Rua (Depósito)'.'06',\n                    \"07\",\n                    'Rua (Depósito)'.'07',\n                    \"08\",\n                    'Rua (Depósito)'.'08',\n                    \"09\",\n                    'Rua (Depósito)'.'09',\n                    \"10\",\n                    'Rua (Depósito)'.'10'\n                ),\n                'Estante': Switch(\n                    Last(\n                        FirstN(\n                            parts,\n                            4\n                        )\n                    ).Value,\n                    \"E0\",\n                    'Estante (Depósito)'.E0,\n                    \"E1\",\n                    'Estante (Depósito)'.E1,\n                    \"E2\",\n                    'Estante (Depósito)'.E2,\n                    \"E3\",\n                    'Estante (Depósito)'.E3,\n                    \"E4\",\n                    'Estante (Depósito)'.E4,\n                    \"E5\",\n                    'Estante (Depósito)'.E5,\n                    \"E6\",\n                    'Estante (Depósito)'.E6,\n                    \"E7\",\n                    'Estante (Depósito)'.E7,\n                    \"E8\",\n                    'Estante (Depósito)'.E8,\n                    \"E9\",\n                    'Estante (Depósito)'.E9,\n                    \"E10\",\n                    'Estante (Depósito)'.E10\n                ),\n                'Prateleira': Switch(\n                    Last(parts).Value,\n                    \"P0\",\n                    'Prateleira (Depósito)'.P0,\n                    \"P1\",\n                    'Prateleira (Depósito)'.P1,\n                    \"P2\",\n                    'Prateleira (Depósito)'.P2,\n                    \"P3\",\n                    'Prateleira (Depósito)'.P3,\n                    \"P4\",\n                    'Prateleira (Depósito)'.P4,\n                    \"P5\",\n                    'Prateleira (Depósito)'.P5,\n                    \"P6\",\n                    'Prateleira (Depósito)'.P6,\n                    \"P7\",\n                    'Prateleira (Depósito)'.P7,\n                    \"P8\",\n                    'Prateleira (Depósito)'.P8,\n                    \"P9\",\n                    'Prateleira (Depósito)'.P9,\n                    \"P10\",\n                    'Prateleira (Depósito)'.P10\n                )\n            }\n        ) As Endereco,\n        If(\n            And(\n                !IsBlank(Endereco.'Centro de Distribuição'),\n                !IsBlank(Endereco.Depósito),\n                !IsBlank(Endereco.Rua),\n                !IsBlank(Endereco.Estante),\n                !IsBlank(Endereco.Prateleira),\n                B.Value = Endereco.'Centro de Distribuição' & \"-\" & Endereco.'Depósito' & \"-\" & Endereco.Rua & \"-\" & Endereco.Estante & \"-\" & Endereco.Prateleira\n            ),\n            ForAll(\n                _MercadoriaInformacoesId As M,\n                Patch(\n                    'Estoque From SharepointLists',\n                    {\n                        'Estoque From SharepointList': M.Value,\n                        'Centro de Distribuição': Endereco.'Centro de Distribuição',\n                        Depósito: Endereco.Depósito,\n                        Rua: Endereco.Rua,\n                        Estante: Endereco.Estante,\n                        Prateleira: Endereco.Prateleira\n                    }\n                );\n                Patch(\n                    'Registro de Leitura de Mercadoria em Estoques',\n                    Defaults('Registro de Leitura de Mercadoria em Estoques'),\n                    {\n                        'Registrado Por': CurrentUser,\n                        Mercadoria: LookUp(\n                            'Estoque From SharepointLists' As E,\n                            E.'Estoque From SharepointList' = M.Value\n                        ),\n                        'Data e Hora': Now(),\n                        Endereço: B.Value\n                    }\n                )\n            ),\n            Notify(\n                Endereco.'Centro de Distribuição' & \"-\" & Endereco.'Depósito' & \"-\" & Endereco.Rua & \"-\" & Endereco.Estante & \"-\" & Endereco.Prateleira & \" != \" & B.Value,\n                NotificationType.Error\n            )\n        )\n    );\n    \n);\nUpdateContext({SpinCounter: SpinCounter - 1})"
+                        ScanningMode: ='BarcodeReader.ScanningMode'.SelectToScan
+                        Text: ="Ler Novo Endereço"
+                        Visible: =!IsBlank(_MercadoriaInformacoesId)
+                        Width: =400
+                        X: =(Parent.Width-Self.Width)/2
+                        Y: =(Parent.Height-Self.Height)/2
+                  - ReimprimirEtiquetaInfoButton:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Secondary
+                        Font: =Font.Lato
+                        FontSize: =28
+                        Height: =EnderecoBarcodeReader.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: |-
+                          =UpdateContext({SpinCounter: SpinCounter + 1});
+                          '(Estoque)-ImprimirEtiqueta(PowerApps)'.Run(
+                              Concat(
+                                  _MercadoriaInformacoesId As M,
+                                  M.Value,
+                                  ","
+                              )
+                          );
+                          UpdateContext({SpinCounter: SpinCounter - 1})
+                        Text: ="Reimprimir Etiqueta"
+                        Width: =EnderecoBarcodeReader.Width
+                  - FecharAtualizarInfoButton:
+                      Control: Button@0.0.45
+                      Properties:
+                        Appearance: ='ButtonCanvas.Appearance'.Secondary
+                        Font: =Font.Lato
+                        FontSize: =28
+                        Height: =EnderecoBarcodeReader.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: =Set(_MercadoriaInformacoesId,Blank())
+                        Text: ="Fechar"
+                        Width: =EnderecoBarcodeReader.Width
+      - Spinner1:
+          Control: Spinner@1.4.6
+          Properties:
+            Height: =Parent.Height
+            SpinnerSize: ='Spinner.SpinnerSize'.Huge
+            Visible: =SpinCounter > 0
+            Width: =Parent.Width

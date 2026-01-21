@@ -1,266 +1,42 @@
 {
-  "476dfa58-a1e1-4c67-9da2-38777f5ff0d5": {
-    "appActions": [],
+  "e1a09db7-ae26-43c1-b743-9282f617c118": {
+    "appActions": [
+      "Run"
+    ],
     "connectionRef": {
-      "apiTier": "Premium",
-      "authenticationType": "Oauth",
-      "bypassConsent": true,
-      "displayName": "Microsoft Dataverse",
-      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/releases/v1.0.1789/1.0.1789.4525/commondataserviceforapps/icon.png",
-      "id": "/providers/microsoft.powerapps/apis/shared_commondataserviceforapps",
-      "parameterHints": {},
-      "parameterHintsV2": {}
+      "apiTier": "Standard",
+      "displayName": "Logic flows",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
+      "parameterHints": {
+        "workflowDisplayName": {
+          "value": "(Estoque) - Imprimir Etiqueta (PowerApps)"
+        },
+        "workflowEntityId": {
+          "value": "0cb6ac5c-e4b7-f011-bbd3-000d3ac17330"
+        },
+        "workflowName": {
+          "value": "a053be71-b7b0-a492-e7f8-6d56ed531cab"
+        }
+      },
+      "parameterHintsV2": {
+        "workflowDisplayName": {
+          "value": "(Estoque) - Imprimir Etiqueta (PowerApps)"
+        },
+        "workflowEntityId": {
+          "value": "0cb6ac5c-e4b7-f011-bbd3-000d3ac17330"
+        },
+        "workflowName": {
+          "value": "a053be71-b7b0-a492-e7f8-6d56ed531cab"
+        }
+      }
     },
     "datasets": {},
-    "dataSources": [],
+    "dataSources": [
+      "(Estoque)-ImprimirEtiqueta(PowerApps)"
+    ],
     "dependencies": {},
-    "dependents": [
-      "c3f8987c-129f-4f4e-aaf9-17282acb5afa",
-      "82087cf4-543b-4153-9454-f3ec84a31dc3",
-      "ab6ca66e-eef0-4a7d-8fd1-2c106ec50eb0",
-      "e0eb03db-cd02-44fb-836a-2305b3d6b143",
-      "cfd9ac20-1da0-417d-8670-7a8975461729"
-    ],
-    "id": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-  },
-  "82087cf4-543b-4153-9454-f3ec84a31dc3": {
-    "appActions": [
-      "Run"
-    ],
-    "connectionRef": {
-      "apiTier": "Standard",
-      "displayName": "Logic flows",
-      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
-      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
-      "parameterHints": {
-        "476dfa58-a1e1-4c67-9da2-38777f5ff0d5": {
-          "value": "shared_commondataserviceforapps"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar retorno de produto para manutenção"
-        },
-        "workflowEntityId": {
-          "value": "7277bd83-bece-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "b7d7810d-ba9d-a0aa-7411-451e8bb0ff3f"
-        }
-      },
-      "parameterHintsV2": {
-        "shared_commondataserviceforapps": {
-          "value": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar retorno de produto para manutenção"
-        },
-        "workflowEntityId": {
-          "value": "7277bd83-bece-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "b7d7810d-ba9d-a0aa-7411-451e8bb0ff3f"
-        }
-      }
-    },
-    "datasets": {},
-    "dataSources": [
-      "(Estoque-RMA)-Registrarretornodeprodutoparamanutenção"
-    ],
-    "dependencies": {
-      "shared_commondataserviceforapps": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-    },
     "dependents": [],
-    "id": "82087cf4-543b-4153-9454-f3ec84a31dc3"
-  },
-  "ab6ca66e-eef0-4a7d-8fd1-2c106ec50eb0": {
-    "appActions": [
-      "Run"
-    ],
-    "connectionRef": {
-      "apiTier": "Standard",
-      "displayName": "Logic flows",
-      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
-      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
-      "parameterHints": {
-        "476dfa58-a1e1-4c67-9da2-38777f5ff0d5": {
-          "value": "shared_commondataserviceforapps"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar retorno temporário de produto ao estoque"
-        },
-        "workflowEntityId": {
-          "value": "cd40daea-a1cf-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "f91ca449-8779-eff7-45c8-5fb51127e9bc"
-        }
-      },
-      "parameterHintsV2": {
-        "shared_commondataserviceforapps": {
-          "value": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar retorno temporário de produto ao estoque"
-        },
-        "workflowEntityId": {
-          "value": "cd40daea-a1cf-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "f91ca449-8779-eff7-45c8-5fb51127e9bc"
-        }
-      }
-    },
-    "datasets": {},
-    "dataSources": [
-      "(Estoque-RMA)-Registrarretornotemporáriodeprodutoaoestoque"
-    ],
-    "dependencies": {
-      "shared_commondataserviceforapps": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-    },
-    "dependents": [],
-    "id": "ab6ca66e-eef0-4a7d-8fd1-2c106ec50eb0"
-  },
-  "c3f8987c-129f-4f4e-aaf9-17282acb5afa": {
-    "appActions": [
-      "Run"
-    ],
-    "connectionRef": {
-      "apiTier": "Standard",
-      "displayName": "Logic flows",
-      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
-      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
-      "parameterHints": {
-        "476dfa58-a1e1-4c67-9da2-38777f5ff0d5": {
-          "value": "shared_commondataserviceforapps"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar devolução de empréstimo"
-        },
-        "workflowEntityId": {
-          "value": "7f3cda79-1dcd-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "27f8b4c7-e2e1-252e-c722-43d1ca8c7cc6"
-        }
-      },
-      "parameterHintsV2": {
-        "shared_commondataserviceforapps": {
-          "value": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar devolução de empréstimo"
-        },
-        "workflowEntityId": {
-          "value": "7f3cda79-1dcd-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "27f8b4c7-e2e1-252e-c722-43d1ca8c7cc6"
-        }
-      }
-    },
-    "datasets": {},
-    "dataSources": [
-      "(Estoque-RMA)-Registrardevoluçãodeempréstimo"
-    ],
-    "dependencies": {
-      "shared_commondataserviceforapps": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-    },
-    "dependents": [],
-    "id": "c3f8987c-129f-4f4e-aaf9-17282acb5afa"
-  },
-  "cfd9ac20-1da0-417d-8670-7a8975461729": {
-    "appActions": [
-      "Run"
-    ],
-    "connectionRef": {
-      "apiTier": "Standard",
-      "displayName": "Logic flows",
-      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
-      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
-      "parameterHints": {
-        "476dfa58-a1e1-4c67-9da2-38777f5ff0d5": {
-          "value": "shared_commondataserviceforapps"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar devolução definitiva de produto vendido"
-        },
-        "workflowEntityId": {
-          "value": "0bc44094-e9ce-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "93c3e025-b4f3-a0e8-babd-f6a93bda0ac1"
-        }
-      },
-      "parameterHintsV2": {
-        "shared_commondataserviceforapps": {
-          "value": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar devolução definitiva de produto vendido"
-        },
-        "workflowEntityId": {
-          "value": "0bc44094-e9ce-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "93c3e025-b4f3-a0e8-babd-f6a93bda0ac1"
-        }
-      }
-    },
-    "datasets": {},
-    "dataSources": [
-      "(Estoque-RMA)-Registrardevoluçãodefinitivadeprodutovendido"
-    ],
-    "dependencies": {
-      "shared_commondataserviceforapps": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-    },
-    "dependents": [],
-    "id": "cfd9ac20-1da0-417d-8670-7a8975461729"
-  },
-  "e0eb03db-cd02-44fb-836a-2305b3d6b143": {
-    "appActions": [
-      "Run"
-    ],
-    "connectionRef": {
-      "apiTier": "Standard",
-      "displayName": "Logic flows",
-      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
-      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
-      "parameterHints": {
-        "476dfa58-a1e1-4c67-9da2-38777f5ff0d5": {
-          "value": "shared_commondataserviceforapps"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar retorno para troca de produto"
-        },
-        "workflowEntityId": {
-          "value": "f4e323f3-96d7-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "e7eef63c-3e3d-4d6d-5f48-2d29ead7c812"
-        }
-      },
-      "parameterHintsV2": {
-        "shared_commondataserviceforapps": {
-          "value": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-        },
-        "workflowDisplayName": {
-          "value": "(Estoque-RMA) - Registrar retorno para troca de produto"
-        },
-        "workflowEntityId": {
-          "value": "f4e323f3-96d7-f011-8544-000d3ac17330"
-        },
-        "workflowName": {
-          "value": "e7eef63c-3e3d-4d6d-5f48-2d29ead7c812"
-        }
-      }
-    },
-    "datasets": {},
-    "dataSources": [
-      "(Estoque-RMA)-Registrarretornoparatrocadeproduto"
-    ],
-    "dependencies": {
-      "shared_commondataserviceforapps": "476dfa58-a1e1-4c67-9da2-38777f5ff0d5"
-    },
-    "dependents": [],
-    "id": "e0eb03db-cd02-44fb-836a-2305b3d6b143"
+    "id": "e1a09db7-ae26-43c1-b743-9282f617c118"
   }
 }

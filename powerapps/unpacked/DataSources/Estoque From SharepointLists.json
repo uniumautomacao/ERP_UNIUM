@@ -52,11 +52,14 @@
       "modifiedby": "Modified By",
       "modifiedon": "Modified On",
       "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_ajustedeestoque_ItemEstoque_cr22f_estoquefromsharepointlist": "Ajuste de Estoques",
       "new_centrodedistribuicao": "Centro de Distribuição",
       "new_centrodedistribuicaotexto": "Centro de Distribuição (Texto)",
+      "new_classecriticidade": "Classe Criticidade",
       "new_clientefx": "Cliente (Fx)",
       "new_confirmacaodeetiqueta": "Confirmação de Etiqueta",
       "new_confirmacaodetag": "Confirmação de Tag",
+      "new_contagemestoque_ItemEstoque_cr22f_estoquefromsharepointlist": "Contagem Estoques",
       "new_contemrma": "Contém RMA",
       "new_contemrmaespelho": "Contém RMA (Espelho)",
       "new_cr22f_estoquefromsharepointlist_GrupodeOrigem_cr22f_estoquefromsharepointlist": "Estoque From SharepointLists (new_cr22f_estoquefromsharepointlist_GrupodeOrigem_cr22f_estoquefromsharepointlist)",
@@ -97,6 +100,8 @@
       "new_osfx": "OS# (Fx)",
       "new_prateleira": "Prateleira",
       "new_prateleiratexto": "Prateleira (Texto)",
+      "new_precodecompraatualizado": "Preço de Compra Atualizado",
+      "new_precodecompraatualizado_base": "Preço de Compra Atualizado (Base)",
       "new_ProdutoServico": "Produto-Serviço",
       "new_quantidade": "Quantidade",
       "new_quantidadedevolvidos": "Quantidade Devolvidos",
@@ -114,7 +119,9 @@
       "new_rua": "Rua",
       "new_ruatexto": "Rua (Texto)",
       "new_separado": "Separado",
+      "new_solicitacaodeajustedeestoque_ItemdeEstoque_cr22f_estoquefromsharepointlist": "Solicitação de Ajuste de Estoques",
       "new_tagconfirmadabool": "TagConfirmadaBool",
+      "new_ultimacontagem": "Última Contagem",
       "overriddencreatedon": "Record Created On",
       "owningbusinessunit": "Owning Business Unit",
       "owningteam": "Owning Team",
@@ -208,6 +215,27 @@
     },
     "OptionSetTypeKey": "PicklistType",
     "RelatedColumnInvariantName": "new_centrodedistribuicao",
+    "RelatedEntityName": "Estoque From SharepointLists",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Classe de Produto",
+    "Name": "new_classedeproduto",
+    "OptionSetInfoNameMapping": {
+      "100000000": "A",
+      "100000001": "B",
+      "100000002": "C"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_classecriticidade",
+        "OptionSetReferenceEntityName": "Estoque From SharepointLists"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_classecriticidade",
     "RelatedEntityName": "Estoque From SharepointLists",
     "Type": "OptionSetInfo"
   },

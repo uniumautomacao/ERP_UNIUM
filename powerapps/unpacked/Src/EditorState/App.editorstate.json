@@ -8,14 +8,6 @@
         "ConfirmExit",
         "SizeBreakpoints",
         "BackEnabled",
-        {
-          "AFDDataSourceName": "",
-          "AutoRuleBindingEnabled": false,
-          "AutoRuleBindingString": "",
-          "InvariantPropertyName": "OnStart",
-          "IsLockable": false,
-          "NameMapSourceSchema": "?"
-        },
         "Theme",
         {
           "AFDDataSourceName": "",
@@ -63,11 +55,6 @@
           "Category": "Design",
           "PropertyName": "Theme",
           "RuleProviderType": "Unknown"
-        },
-        {
-          "Category": "Behavior",
-          "PropertyName": "OnStart",
-          "RuleProviderType": "User"
         },
         {
           "Category": "ConstantData",
