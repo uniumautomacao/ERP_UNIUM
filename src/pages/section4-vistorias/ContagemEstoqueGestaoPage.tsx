@@ -145,7 +145,7 @@ const toLocalDateKey = (iso: string) => {
 };
 
 const FLOW_TRIGGER_URL =
-  'https://b52cf2e94b61e3d68faec290205ed8.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9fda300eb402448ba88423989aa78b4b/triggers/manual/paths/invoke?api-version=1';
+  'https://b52cf2e94b61e3d68faec290205ed8.e5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/127bb6f0-095e-4563-88c9-85cfbe7c508f/triggers/manual/paths/invoke?api-version=1';
 const FLOW_TENANT_ID = 'e3d20045-1678-4bd0-96bb-4195baba23a6';
 const FLOW_CLIENT_ID = '46f2a64f-f3ef-4585-aa24-2d3182c6429b';
 // Delegated permission required in Entra ID (App Registration):

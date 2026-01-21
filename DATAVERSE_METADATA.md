@@ -23,6 +23,7 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | RMA | `new_rma` | `new_rmas` | `new_rmaid` |
 | Contagem Estoque | `new_contagemestoque` | `new_contagemestoques` | `new_contagemestoqueid` |
 | Ajuste de Estoque | `new_ajustedeestoque` | `new_ajustedeestoques` | `new_ajustedeestoqueid` |
+| Solicitação de Ajuste de Estoque | `new_solicitacaodeajustedeestoque` | `new_solicitacaodeajustedeestoques` | `new_solicitacaodeajustedeestoqueid` |
 
 ---
 
@@ -60,6 +61,26 @@ PrimaryKey:                       new_ajustedeestoqueid
 | new_itemestoque | new_ItemEstoque | cr22f_estoquefromsharepointlists |
 | new_usuarioajuste | new_UsuarioAjuste | systemusers |
 | new_contagem | new_Contagem | new_contagemestoques |
+
+---
+
+## 🔵 new_solicitacaodeajustedeestoque (Solicitação de Ajuste de Estoque)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_solicitacaodeajustedeestoque
+EntityLogicalCollectionName:      new_solicitacaodeajustedeestoques
+EntitySetName:                    new_solicitacaodeajustedeestoques
+PrimaryKey:                       new_solicitacaodeajustedeestoqueid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_ajustecriado | new_AjusteCriado | new_ajustedeestoques |
+| new_contagem | new_Contagem | new_contagemestoques |
+| new_itemdeestoque | new_ItemdeEstoque | cr22f_estoquefromsharepointlists |
+| new_usuariosolicitante | new_UsuarioSolicitante | systemusers |
 
 ---
 

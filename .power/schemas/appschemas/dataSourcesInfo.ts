@@ -144,5 +144,12 @@ export const dataSourcesInfo = {
     "primaryKey": "new_ajustedeestoqueid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_solicitacaodeajustedeestoques": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_solicitacaodeajustedeestoqueid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

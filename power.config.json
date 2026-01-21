@@ -112,6 +112,11 @@
           "entitySetName": "new_ajustedeestoques",
           "logicalName": "new_ajustedeestoque",
           "isHidden": false
+        },
+        "new_solicitacaodeajustedeestoques": {
+          "entitySetName": "new_solicitacaodeajustedeestoques",
+          "logicalName": "new_solicitacaodeajustedeestoque",
+          "isHidden": false
         }
       },
       "actions": null

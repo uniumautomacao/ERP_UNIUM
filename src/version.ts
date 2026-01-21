@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.0.88';
-export const APP_BUILD_DATE = '2026-01-20';
+export const APP_VERSION = '0.0.91';
+export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.91',
+    date: '2026-01-21',
+    changes: 'Importada nova tabela do Dataverse: new_solicitacaodeajustedeestoque.',
+  },
+  {
+    version: '0.0.90',
+    date: '2026-01-21',
+    changes: 'Corrigida URL do fluxo Power Automate de ajuste de estoque (workflow ID atualizado).',
+  },
+  {
+    version: '0.0.89',
+    date: '2026-01-20',
+    changes: 'Republicação incremental solicitada pelo usuário.',
+  },
   {
     version: '0.0.88',
     date: '2026-01-20',
