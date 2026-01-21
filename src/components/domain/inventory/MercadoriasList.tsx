@@ -1,6 +1,7 @@
 import { makeStyles, tokens } from '@fluentui/react-components';
 import type { MercadoriaLida } from '../../../types';
 import { MercadoriaCard } from './MercadoriaCard';
+import { isMercadoriaAtiva } from '../../../utils/inventory/statusUtils';
 
 const useStyles = makeStyles({
   grid: {
@@ -25,7 +26,7 @@ export function MercadoriasList({ items, onActivate, onUpdateInfo }: Mercadorias
         <MercadoriaCard
           key={item.id}
           item={item}
-          isActive={item.status === 0}
+          isActive={isMercadoriaAtiva(item)}
           onActivate={onActivate}
           onUpdateInfo={onUpdateInfo}
         />

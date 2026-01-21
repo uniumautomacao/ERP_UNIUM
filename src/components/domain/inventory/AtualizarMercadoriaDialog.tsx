@@ -71,10 +71,19 @@ export function AtualizarMercadoriaDialog({
   onReprint,
 }: AtualizarMercadoriaDialogProps) {
   const styles = useStyles();
+  const isBulk = selectedIds.length > 1;
   const [selectedTab, setSelectedTab] = useState<'serial' | 'endereco'>('serial');
   const [serialValue, setSerialValue] = useState('');
   const [enderecoValue, setEnderecoValue] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isBulk) {
+      setSelectedTab('endereco');
+    } else {
+      setSelectedTab('serial');
+    }
+  }, [isBulk, open]);
 
   const scanner = useMultiBarcodeScanner({
     onScan: (codes) => {
@@ -136,7 +145,7 @@ export function AtualizarMercadoriaDialog({
             </Text>
 
             <TabList selectedValue={selectedTab} onTabSelect={(_, data) => setSelectedTab(data.value as 'serial' | 'endereco')}>
-              <Tab value="serial">Número de série</Tab>
+              {!isBulk && <Tab value="serial">Número de série</Tab>}
               <Tab value="endereco">Endereço</Tab>
             </TabList>
 

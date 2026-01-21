@@ -8,6 +8,7 @@ import {
   Delete24Regular,
   Keyboard24Regular,
   Dismiss24Regular,
+  CheckmarkSquare24Regular,
 } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -19,16 +20,10 @@ import { ScannerOverlay } from '../../components/domain/inventory/ScannerOverlay
 import { useMultiBarcodeScanner } from '../../hooks/inventory/useMultiBarcodeScanner';
 import { useMercadoriaReader } from '../../hooks/inventory/useMercadoriaReader';
 import { imprimirEtiquetas } from '../../services/powerAutomate/printLabelFlow';
+import { getMercadoriaSituacaoTexto } from '../../utils/inventory/statusUtils';
 import type { MercadoriaLida } from '../../types';
 
 type MessageState = { intent: 'info' | 'error' | 'success'; text: string } | null;
-
-const buildSituacao = (item: MercadoriaLida) => {
-  if (item.status === 0 && item.tagConfirmadaBool) {
-    return item.situacao ?? 'Ativo';
-  }
-  return 'Inativo';
-};
 
 export function LeitorMercadoriasPage() {
   const scanner = useMultiBarcodeScanner();
@@ -39,11 +34,8 @@ export function LeitorMercadoriasPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<MessageState>(null);
-  const [manualCode, setManualCode] = useState('');
   const [bluetoothValue, setBluetoothValue] = useState('');
   const bluetoothInputRef = useRef<HTMLInputElement | null>(null);
-
-  const isTestMode = import.meta.env.DEV;
 
   const handleProcessCodes = useCallback(async () => {
     if (scanner.parsedCodes.length === 0) return;
@@ -73,7 +65,7 @@ export function LeitorMercadoriasPage() {
 
       const merged = items.map((item) => ({
         ...item,
-        situacao: buildSituacao(item),
+        situacao: getMercadoriaSituacaoTexto(item),
         leituraCodigo: item.etiqueta && numericMap.has(item.etiqueta)
           ? numericMap.get(item.etiqueta)
           : item.numeroSerie && textMap.has(item.numeroSerie)
@@ -117,7 +109,7 @@ export function LeitorMercadoriasPage() {
 
     try {
       await ativarMercadorias(mercadorias);
-      setMercadorias((prev) => prev.map((record) => ({ ...record, status: 0 })));
+      setMercadorias((prev) => prev.map((record) => ({ ...record, status: 0, tagConfirmadaBool: true, situacao: 'Ativo' })));
       setMessage({ intent: 'success', text: 'Todas as mercadorias foram ativadas.' });
     } catch (err: any) {
       console.error('[LeitorMercadorias] erro ao ativar em lote:', err);
@@ -126,6 +118,50 @@ export function LeitorMercadoriasPage() {
       setIsProcessing(false);
     }
   }, [mercadorias, ativarMercadorias]);
+
+  const handleRefresh = useCallback(async () => {
+    if (mercadorias.length === 0) return;
+    setIsProcessing(true);
+    setMessage(null);
+
+    try {
+      // Cria uma lista de códigos baseada no que está na tela para re-buscar
+      const codes = mercadorias.map(m => ({
+        value: m.leituraCodigo || (m.etiqueta ? String(m.etiqueta) : m.numeroSerie || ''),
+        isNumeric: !!m.etiqueta && !isNaN(Number(m.leituraCodigo))
+      })).filter(c => c.value);
+
+      const items = await fetchMercadorias(codes as any);
+      
+      const numericMap = new Map<number, string>();
+      const textMap = new Map<string, string>();
+      codes.forEach((code) => {
+        if (code.isNumeric) {
+          numericMap.set(Number(code.value), code.value);
+        } else {
+          textMap.set(code.value, code.value);
+        }
+      });
+
+      const merged = items.map((item) => ({
+        ...item,
+        situacao: getMercadoriaSituacaoTexto(item),
+        leituraCodigo: item.etiqueta && numericMap.has(item.etiqueta)
+          ? numericMap.get(item.etiqueta)
+          : item.numeroSerie && textMap.has(item.numeroSerie)
+            ? textMap.get(item.numeroSerie)
+            : undefined,
+      }));
+
+      setMercadorias(merged);
+      setMessage({ intent: 'success', text: 'Dados atualizados.' });
+    } catch (err: any) {
+      console.error('[LeitorMercadorias] erro ao dar refresh:', err);
+      setMessage({ intent: 'error', text: 'Erro ao atualizar dados.' });
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [mercadorias, fetchMercadorias]);
 
   const handleOpenUpdateDialog = useCallback((ids: string[]) => {
     setSelectedIds(ids);
@@ -205,8 +241,15 @@ export function LeitorMercadoriasPage() {
     {
       id: 'ativar-todas',
       label: 'Ativar todas',
-      icon: <ArrowSync24Regular />,
+      icon: <CheckmarkSquare24Regular />,
       onClick: handleActivateAll,
+      disabled: mercadorias.length === 0 || isProcessing,
+    },
+    {
+      id: 'refresh',
+      label: 'Atualizar dados',
+      icon: <ArrowSync24Regular />,
+      onClick: handleRefresh,
       disabled: mercadorias.length === 0 || isProcessing,
     },
     {
@@ -258,7 +301,7 @@ export function LeitorMercadoriasPage() {
         />
 
         <div style={{ marginTop: tokens.spacingVerticalM }}>
-          <Field label="Leitor Bluetooth (modo teclado)">
+          <Field label="Leitor Bluetooth">
             <Text size={200} style={{ color: tokens.colorNeutralForeground3, display: 'block', marginBottom: tokens.spacingVerticalXS }}>
               Foque no campo abaixo e leia os códigos. O leitor enviará Enter automaticamente.
             </Text>
@@ -326,26 +369,6 @@ export function LeitorMercadoriasPage() {
             </div>
           )}
         </div>
-
-        {isTestMode && (
-          <div style={{ marginTop: tokens.spacingVerticalM }}>
-            <Field label="Simular leitura (modo DEV)">
-              <div className="flex flex-wrap gap-2">
-                <Input value={manualCode} onChange={(_, data) => setManualCode(data.value)} placeholder="Ex: 1234 ou SN-001" />
-                <Button
-                  appearance="secondary"
-                  onClick={() => {
-                    scanner.addCode(manualCode.trim());
-                    setManualCode('');
-                  }}
-                  disabled={!manualCode.trim()}
-                >
-                  Adicionar código
-                </Button>
-              </div>
-            </Field>
-          </div>
-        )}
 
         <div style={{ marginTop: tokens.spacingVerticalL }}>
           {mercadorias.length === 0 ? (

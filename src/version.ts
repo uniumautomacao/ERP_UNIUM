@@ -1,6 +1,31 @@
-export const APP_VERSION = '0.0.111';
+export const APP_VERSION = '0.0.116';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.116',
+    date: '2026-01-21',
+    changes: 'Oculta aba de número de série em atualizações em lote (apenas endereço permitido).',
+  },
+  {
+    version: '0.0.115',
+    date: '2026-01-21',
+    changes: 'Adiciona botão de refresh e altera ícone de ativação em lote para evitar confusão.',
+  },
+  {
+    version: '0.0.114',
+    date: '2026-01-21',
+    changes: 'Centraliza lógica de status ativo/inativo (Status + Tag Confirmada).',
+  },
+  {
+    version: '0.0.113',
+    date: '2026-01-21',
+    changes: 'Renomeia rótulo do leitor bluetooth.',
+  },
+  {
+    version: '0.0.112',
+    date: '2026-01-21',
+    changes: 'Remove simulador de leitura modo DEV da página de Leitor de Mercadorias.',
+  },
   {
     version: '0.0.111',
     date: '2026-01-21',
