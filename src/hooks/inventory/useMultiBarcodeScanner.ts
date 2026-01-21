@@ -30,6 +30,10 @@ export const useMultiBarcodeScanner = ({ onScan }: UseMultiBarcodeScannerProps =
     if (!value) return;
     setRawCodes((prev) => (prev.includes(value) ? prev : [...prev, value]));
   }, []);
+  const removeCode = useCallback((value: string) => {
+    if (!value) return;
+    setRawCodes((prev) => prev.filter((code) => code !== value));
+  }, []);
 
   const startScan = useCallback(async () => {
     if (isScanning) return;
@@ -96,5 +100,6 @@ export const useMultiBarcodeScanner = ({ onScan }: UseMultiBarcodeScannerProps =
     stopScan,
     clearCodes,
     addCode,
+    removeCode,
   };
 };

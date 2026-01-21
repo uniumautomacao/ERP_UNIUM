@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.110';
+export const APP_VERSION = '0.0.111';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.111',
+    date: '2026-01-21',
+    changes: 'Adiciona suporte ao leitor Bluetooth e lista para remover códigos antes do processamento.',
+  },
   {
     version: '0.0.110',
     date: '2026-01-21',

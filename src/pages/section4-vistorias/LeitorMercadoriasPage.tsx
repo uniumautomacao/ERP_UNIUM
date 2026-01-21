@@ -1,6 +1,14 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Button, Field, Input, MessageBar, tokens } from '@fluentui/react-components';
-import { ArrowSync24Regular, Checkmark24Regular, QrCode24Regular, Edit24Regular, Delete24Regular } from '@fluentui/react-icons';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Button, Field, Input, MessageBar, Text, tokens } from '@fluentui/react-components';
+import {
+  ArrowSync24Regular,
+  Checkmark24Regular,
+  QrCode24Regular,
+  Edit24Regular,
+  Delete24Regular,
+  Keyboard24Regular,
+  Dismiss24Regular,
+} from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
@@ -32,6 +40,8 @@ export function LeitorMercadoriasPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<MessageState>(null);
   const [manualCode, setManualCode] = useState('');
+  const [bluetoothValue, setBluetoothValue] = useState('');
+  const bluetoothInputRef = useRef<HTMLInputElement | null>(null);
 
   const isTestMode = import.meta.env.DEV;
 
@@ -215,6 +225,13 @@ export function LeitorMercadoriasPage() {
     },
   ]), [mercadorias, handleActivateAll, handleOpenUpdateDialog, isProcessing]);
 
+  const handleBluetoothSubmit = useCallback(() => {
+    const value = bluetoothValue.trim();
+    if (!value) return;
+    scanner.addCode(value);
+    setBluetoothValue('');
+  }, [bluetoothValue, scanner]);
+
   return (
     <>
       <CommandBar primaryActions={commandBarActions} secondaryActions={secondaryActions} />
@@ -239,6 +256,76 @@ export function LeitorMercadoriasPage() {
           onClear={scanner.clearCodes}
           onProcess={handleProcessCodes}
         />
+
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Field label="Leitor Bluetooth (modo teclado)">
+            <Text size={200} style={{ color: tokens.colorNeutralForeground3, display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+              Foque no campo abaixo e leia os códigos. O leitor enviará Enter automaticamente.
+            </Text>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                ref={bluetoothInputRef}
+                value={bluetoothValue}
+                onChange={(_, data) => setBluetoothValue(data.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleBluetoothSubmit();
+                  }
+                }}
+                placeholder="Leia um código com o leitor Bluetooth"
+              />
+              <Button
+                appearance="secondary"
+                icon={<Keyboard24Regular />}
+                onClick={() => bluetoothInputRef.current?.focus()}
+              >
+                Ativar leitor
+              </Button>
+              <Button
+                appearance="primary"
+                onClick={handleBluetoothSubmit}
+                disabled={!bluetoothValue.trim()}
+              >
+                Adicionar
+              </Button>
+            </div>
+          </Field>
+        </div>
+
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Text weight="semibold" block>
+            Códigos lidos ({scanner.parsedCodes.length})
+          </Text>
+          {scanner.parsedCodes.length === 0 ? (
+            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+              Nenhum código lido ainda.
+            </Text>
+          ) : (
+            <div className="flex flex-col gap-2" style={{ marginTop: tokens.spacingVerticalS }}>
+              {scanner.parsedCodes.map((code) => (
+                <div
+                  key={code.value}
+                  className="flex items-center justify-between gap-2"
+                  style={{
+                    padding: '8px 12px',
+                    border: `1px solid ${tokens.colorNeutralStroke2}`,
+                    borderRadius: 6,
+                    background: tokens.colorNeutralBackground1,
+                  }}
+                >
+                  <Text size={200}>{code.value}</Text>
+                  <Button
+                    appearance="subtle"
+                    icon={<Dismiss24Regular />}
+                    aria-label={`Remover código ${code.value}`}
+                    onClick={() => scanner.removeCode(code.value)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {isTestMode && (
           <div style={{ marginTop: tokens.spacingVerticalM }}>
