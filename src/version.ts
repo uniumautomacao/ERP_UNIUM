@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.99';
+export const APP_VERSION = '0.0.100';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.100',
+    date: '2026-01-21',
+    changes: 'Histórico de ajustes agora exibe o nome da contagem (new_name) e o nome do usuário (fullname) em vez de GUIDs.',
+  },
   {
     version: '0.0.99',
     date: '2026-01-21',
@@ -8,6 +13,9 @@ export const VERSION_HISTORY = [
   },
   {
     version: '0.0.98',
+    date: '2026-01-21',
+    changes: 'Normalização robusta do status de processamento (number/string/object), evitando badge "Desconhecido" durante processamento.',
+  },
   {
     version: '0.0.97',
     date: '2026-01-21',

@@ -25,6 +25,7 @@ import {
   NewAppPreferenceService,
   NewContagemEstoqueService,
   NewSolicitacaodeAjustedeEstoqueService,
+  SystemusersService,
 } from '../../generated';
 import type { ChartDataPoint } from '../../types';
 
@@ -59,6 +60,8 @@ type AjusteRecord = {
   _new_contagem_value?: string;
   _new_itemestoque_value?: string;
   _new_usuarioajuste_value?: string;
+  _contagem_nome?: string;
+  _usuario_nome?: string;
 };
 
 type PreferenceRecord = {
@@ -345,12 +348,12 @@ export function ContagemEstoqueGestaoPage() {
       createTableColumn<AjusteRecord>({
         columnId: 'contagem',
         renderHeaderCell: () => 'Contagem',
-        renderCell: (item) => formatShortId(item._new_contagem_value),
+        renderCell: (item) => item._contagem_nome || formatShortId(item._new_contagem_value),
       }),
       createTableColumn<AjusteRecord>({
         columnId: 'usuario',
         renderHeaderCell: () => 'Usuário',
-        renderCell: (item) => formatShortId(item._new_usuarioajuste_value),
+        renderCell: (item) => item._usuario_nome || formatShortId(item._new_usuarioajuste_value),
       }),
     ],
     []
@@ -650,7 +653,57 @@ export function ContagemEstoqueGestaoPage() {
         ],
         top: 200,
       });
-      setAjustes((result.data ?? []) as AjusteRecord[]);
+      const ajustesData = (result.data ?? []) as AjusteRecord[];
+
+      const contagemIds = Array.from(
+        new Set(ajustesData.map((item) => item._new_contagem_value).filter(Boolean))
+      ) as string[];
+      const usuarioIds = Array.from(
+        new Set(ajustesData.map((item) => item._new_usuarioajuste_value).filter(Boolean))
+      ) as string[];
+
+      const contagemMap = new Map<string, string>();
+      const usuarioMap = new Map<string, string>();
+
+      if (contagemIds.length > 0) {
+        const contagemFilter = contagemIds.map((id) => `new_contagemestoqueid eq '${id}'`).join(' or ');
+        const contagemResult = await NewContagemEstoqueService.getAll({
+          filter: contagemFilter,
+          select: ['new_contagemestoqueid', 'new_name'],
+          top: contagemIds.length,
+        });
+        (contagemResult.data ?? []).forEach((item: any) => {
+          if (item.new_contagemestoqueid && item.new_name) {
+            contagemMap.set(item.new_contagemestoqueid, item.new_name);
+          }
+        });
+      }
+
+      if (usuarioIds.length > 0) {
+        const usuarioFilter = usuarioIds.map((id) => `systemuserid eq '${id}'`).join(' or ');
+        const usuarioResult = await SystemusersService.getAll({
+          filter: usuarioFilter,
+          select: ['systemuserid', 'fullname'],
+          top: usuarioIds.length,
+        });
+        (usuarioResult.data ?? []).forEach((item: any) => {
+          if (item.systemuserid && item.fullname) {
+            usuarioMap.set(item.systemuserid, item.fullname);
+          }
+        });
+      }
+
+      const ajustesEnriquecidos = ajustesData.map((item) => ({
+        ...item,
+        _contagem_nome: item._new_contagem_value
+          ? contagemMap.get(item._new_contagem_value)
+          : undefined,
+        _usuario_nome: item._new_usuarioajuste_value
+          ? usuarioMap.get(item._new_usuarioajuste_value)
+          : undefined,
+      }));
+
+      setAjustes(ajustesEnriquecidos);
     } catch (err: any) {
       console.error('[GestaoContagem] erro ajustes', err);
       setAjustesError(err.message || 'Erro ao carregar ajustes.');
@@ -1271,10 +1324,10 @@ export function ContagemEstoqueGestaoPage() {
                   <Text size={200}>Saldo anterior: {item.new_saldoanterior ?? 0}</Text>
                   <Text size={200}>Saldo novo: {item.new_saldonovo ?? 0}</Text>
                   <Text size={200} className={styles.infoText}>
-                    Contagem: {formatShortId(item._new_contagem_value)}
+                    Contagem: {item._contagem_nome || formatShortId(item._new_contagem_value)}
                   </Text>
                   <Text size={200} className={styles.infoText}>
-                    Usuário: {formatShortId(item._new_usuarioajuste_value)}
+                    Usuário: {item._usuario_nome || formatShortId(item._new_usuarioajuste_value)}
                   </Text>
                 </div>
               </Card>
