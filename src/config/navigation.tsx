@@ -30,6 +30,7 @@ import { SuperAdminPageAccessPage } from '../pages/section3-super-admin/SuperAdm
 import { SuperAdminUserRolesPage } from '../pages/section3-super-admin/SuperAdminUserRolesPage';
 import { DevPage } from '../pages/section3-dev/DevPage';
 import { QrCodeScannerPage } from '../pages/section3-dev/QrCodeScannerPage';
+import { InteligenciaComercialPage } from '../pages/section5-comercial/InteligenciaComercialPage';
 
 export const navigation: NavSection[] = [
   {
@@ -100,6 +101,20 @@ export const navigation: NavSection[] = [
         path: '/rmas',
         component: RMAsKanbanPage,
       }
+    ],
+  },
+  {
+    id: 'comercial',
+    label: 'Comercial',
+    description: 'Análise e inteligência comercial de vendas',
+    items: [
+      {
+        id: 'inteligencia-comercial',
+        label: 'Inteligência Comercial',
+        icon: <ChartMultiple24Regular />,
+        path: '/comercial/inteligencia',
+        component: InteligenciaComercialPage,
+      },
     ],
   },
   {

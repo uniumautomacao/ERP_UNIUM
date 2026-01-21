@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.120';
+export const APP_VERSION = '0.0.121';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.121',
+    date: '2026-01-21',
+    changes: 'Adicionada seção Comercial com página Inteligência Comercial: dashboards, gráficos e análises de vendas da tabela new_registrodevenda.',
+  },
   {
     version: '0.0.120',
     date: '2026-01-21',
