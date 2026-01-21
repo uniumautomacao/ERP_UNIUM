@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.101';
+export const APP_VERSION = '0.0.103';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.103',
+    date: '2026-01-21',
+    changes: 'Reordenadas abas da gestão de contagem: Configurações movida para última posição (Dashboard > Divergências > Ajustes > Relatórios > Configurações).',
+  },
+  {
+    version: '0.0.102',
+    date: '2026-01-21',
+    changes: 'Filtros padrão de Ajustes e Relatórios agora mostram últimos 7 dias + hoje.',
+  },
   {
     version: '0.0.101',
     date: '2026-01-21',

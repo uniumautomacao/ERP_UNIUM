@@ -122,8 +122,8 @@ const TAB_OPTIONS = [
   { value: 'dashboard', label: 'Dashboard' },
   { value: 'divergencias', label: 'Divergências' },
   { value: 'ajustes', label: 'Ajustes' },
-  { value: 'config', label: 'Configurações' },
   { value: 'relatorios', label: 'Relatórios' },
+  { value: 'config', label: 'Configurações' },
 ];
 
 const useStyles = makeStyles({
@@ -232,7 +232,11 @@ export function ContagemEstoqueGestaoPage() {
   const [ajustesLoading, setAjustesLoading] = useState(false);
   const [ajustesError, setAjustesError] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<AjusteRecord[]>([]);
-  const [ajustesStart, setAjustesStart] = useState(() => new Date().toISOString().slice(0, 10));
+  const [ajustesStart, setAjustesStart] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 7);
+    return date.toISOString().slice(0, 10);
+  });
   const [ajustesEnd, setAjustesEnd] = useState(() => new Date().toISOString().slice(0, 10));
 
   const [configLoading, setConfigLoading] = useState(false);
@@ -243,7 +247,11 @@ export function ContagemEstoqueGestaoPage() {
   const [thresholdC, setThresholdC] = useState('60');
   const [configPrefs, setConfigPrefs] = useState<Record<string, PreferenceRecord>>({});
 
-  const [reportStart, setReportStart] = useState(() => new Date().toISOString().slice(0, 10));
+  const [reportStart, setReportStart] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 7);
+    return date.toISOString().slice(0, 10);
+  });
   const [reportEnd, setReportEnd] = useState(() => new Date().toISOString().slice(0, 10));
   const [reportSituacao, setReportSituacao] = useState('all');
   const [reportPage, setReportPage] = useState(0);
