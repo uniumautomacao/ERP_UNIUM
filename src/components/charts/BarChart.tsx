@@ -9,9 +9,10 @@ interface BarChartProps {
   height?: number;
   horizontal?: boolean;
   colors?: string[];
+  valueFormatter?: (value: number) => string;
 }
 
-export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horizontal = false, colors }: BarChartProps) {
+export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horizontal = false, colors, valueFormatter }: BarChartProps) {
   const defaultColors = [
     tokens.colorBrandBackground,
     tokens.colorPaletteBlueForeground2,
@@ -21,13 +22,21 @@ export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horiz
   ];
 
   const chartColors = colors || defaultColors;
+  
+  // Formatação padrão de moeda brasileira se não fornecida
+  const formatValue = valueFormatter || ((value: number) => 
+    new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value)
+  );
 
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBarChart
         data={data}
         layout={horizontal ? 'vertical' : 'horizontal'}
-        margin={{ top: 10, right: 30, left: horizontal ? 100 : 0, bottom: 0 }}
+        margin={{ top: 10, right: 30, left: horizontal ? 100 : 80, bottom: 0 }}
       >
         <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
         {horizontal ? (
@@ -36,6 +45,7 @@ export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horiz
               type="number"
               stroke={tokens.colorNeutralForeground3}
               style={{ fontSize: '12px' }}
+              tickFormatter={formatValue}
             />
             <YAxis
               type="category"
@@ -54,6 +64,7 @@ export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horiz
             <YAxis
               stroke={tokens.colorNeutralForeground3}
               style={{ fontSize: '12px' }}
+              tickFormatter={formatValue}
             />
           </>
         )}
@@ -63,6 +74,7 @@ export function BarChart({ data, dataKey, xAxisKey = 'date', height = 300, horiz
             border: `1px solid ${tokens.colorNeutralStroke2}`,
             borderRadius: '4px',
           }}
+          formatter={(value: number) => formatValue(value)}
         />
         <Bar dataKey={dataKey} radius={[4, 4, 0, 0]}>
           {data.map((_, index) => (

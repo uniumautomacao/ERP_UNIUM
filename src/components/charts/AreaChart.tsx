@@ -8,14 +8,23 @@ interface AreaChartProps {
   xAxisKey?: string;
   height?: number;
   color?: string;
+  valueFormatter?: (value: number) => string;
 }
 
-export function AreaChart({ data, dataKey, xAxisKey = 'date', height = 300, color }: AreaChartProps) {
+export function AreaChart({ data, dataKey, xAxisKey = 'date', height = 300, color, valueFormatter }: AreaChartProps) {
   const chartColor = color || tokens.colorBrandBackground;
+  
+  // Formatação padrão de moeda brasileira se não fornecida
+  const formatValue = valueFormatter || ((value: number) => 
+    new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value)
+  );
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsAreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <RechartsAreaChart data={data} margin={{ top: 10, right: 30, left: 80, bottom: 0 }}>
         <defs>
           <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor={chartColor} stopOpacity={0.8} />
@@ -31,6 +40,7 @@ export function AreaChart({ data, dataKey, xAxisKey = 'date', height = 300, colo
         <YAxis 
           stroke={tokens.colorNeutralForeground3}
           style={{ fontSize: '12px' }}
+          tickFormatter={formatValue}
         />
         <Tooltip
           contentStyle={{
@@ -38,6 +48,7 @@ export function AreaChart({ data, dataKey, xAxisKey = 'date', height = 300, colo
             border: `1px solid ${tokens.colorNeutralStroke2}`,
             borderRadius: '4px',
           }}
+          formatter={(value: number) => formatValue(value)}
         />
         <Area
           type="monotone"

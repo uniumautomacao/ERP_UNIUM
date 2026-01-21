@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.0.126';
+export const APP_VERSION = '0.0.129';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.129',
+    date: '2026-01-21',
+    changes: 'Corrigida margem esquerda dos gráficos na Inteligência Comercial: valores monetários no eixo Y não são mais cortados, com margem de 80px para acomodar valores formatados (R$).',
+  },
+  {
+    version: '0.0.128',
+    date: '2026-01-21',
+    changes: 'Ajustada formatação de valores monetários nos gráficos da Inteligência Comercial: todos os valores monetários agora são exibidos no padrão brasileiro (R$) nos tooltips e eixos dos gráficos.',
+  },
+  {
+    version: '0.0.127',
+    date: '2026-01-21',
+    changes: 'Adicionada aba de Comparação Ano a Ano na Inteligência Comercial: permite comparar métricas entre dois anos selecionados com KPIs comparativos, evolução mensal e gráficos lado a lado.',
+  },
   {
     version: '0.0.126',
     date: '2026-01-21',

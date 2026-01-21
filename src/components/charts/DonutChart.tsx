@@ -12,6 +12,7 @@ interface DonutChartProps {
   height?: number;
   innerRadius?: number;
   outerRadius?: number;
+  valueFormatter?: (value: number) => string;
 }
 
 const DEFAULT_COLORS = [
@@ -22,7 +23,15 @@ const DEFAULT_COLORS = [
   tokens.colorPaletteMagentaForeground2,
 ];
 
-export function DonutChart({ data, height = 300, innerRadius = 60, outerRadius = 100 }: DonutChartProps) {
+export function DonutChart({ data, height = 300, innerRadius = 60, outerRadius = 100, valueFormatter }: DonutChartProps) {
+  // Formatação padrão de moeda brasileira se não fornecida
+  const formatValue = valueFormatter || ((value: number) => 
+    new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value)
+  );
+  
   return (
     <ResponsiveContainer width="100%" height={height}>
       <PieChart>
@@ -49,6 +58,7 @@ export function DonutChart({ data, height = 300, innerRadius = 60, outerRadius =
             border: `1px solid ${tokens.colorNeutralStroke2}`,
             borderRadius: '4px',
           }}
+          formatter={(value: number) => formatValue(value)}
         />
         <Legend
           verticalAlign="bottom"

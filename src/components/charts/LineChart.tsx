@@ -11,19 +11,28 @@ interface LineChartProps {
   }[];
   xAxisKey?: string;
   height?: number;
+  valueFormatter?: (value: number) => string;
 }
 
-export function LineChart({ data, lines, xAxisKey = 'date', height = 300 }: LineChartProps) {
+export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueFormatter }: LineChartProps) {
   const defaultColors = [
     tokens.colorBrandBackground,
     tokens.colorPaletteBlueForeground2,
     tokens.colorPalettePurpleForeground2,
     tokens.colorPaletteTealForeground2,
   ];
+  
+  // Formatação padrão de moeda brasileira se não fornecida
+  const formatValue = valueFormatter || ((value: number) => 
+    new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value)
+  );
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsLineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <RechartsLineChart data={data} margin={{ top: 10, right: 30, left: 80, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
         <XAxis
           dataKey={xAxisKey}
@@ -33,6 +42,7 @@ export function LineChart({ data, lines, xAxisKey = 'date', height = 300 }: Line
         <YAxis
           stroke={tokens.colorNeutralForeground3}
           style={{ fontSize: '12px' }}
+          tickFormatter={formatValue}
         />
         <Tooltip
           contentStyle={{
@@ -40,6 +50,7 @@ export function LineChart({ data, lines, xAxisKey = 'date', height = 300 }: Line
             border: `1px solid ${tokens.colorNeutralStroke2}`,
             borderRadius: '4px',
           }}
+          formatter={(value: number) => formatValue(value)}
         />
         <Legend
           wrapperStyle={{

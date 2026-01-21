@@ -20,6 +20,8 @@ import {
   TableColumnDefinition,
   Input,
   Label,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
 import {
   ArrowSync24Regular,
@@ -104,6 +106,39 @@ const useStyles = makeStyles({
     alignItems: 'center',
     minHeight: '400px',
   },
+  tabContainer: {
+    marginBottom: '24px',
+  },
+  yearSelectorContainer: {
+    display: 'flex',
+    gap: '16px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+    padding: '16px',
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: '8px',
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
+  },
+  yearSelector: {
+    minWidth: '180px',
+    flex: '1 1 180px',
+  },
+  comparisonKpiCard: {
+    padding: '16px',
+    minWidth: '280px',
+  },
+  comparisonValue: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: '8px',
+  },
+  comparisonGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '16px',
+    marginBottom: '24px',
+  },
 });
 
 interface TopProduto {
@@ -125,6 +160,13 @@ type PeriodoFiltro = 'todos-os-tempos' | 'ano-atual' | 'ultimos-30-dias' | 'ulti
 
 export function InteligenciaComercialPage() {
   const styles = useStyles();
+  
+  // Estado das abas
+  const [selectedTab, setSelectedTab] = useState<'analise' | 'comparacao'>('analise');
+  
+  // Estados para comparação de anos
+  const [anoBase, setAnoBase] = useState(new Date().getFullYear());
+  const [anoComparacao, setAnoComparacao] = useState(new Date().getFullYear() - 1);
   
   // Função para calcular datas baseado no período
   const calcularDatas = useCallback((periodo: PeriodoFiltro): { dataInicio?: Date; dataFim?: Date } => {
@@ -166,6 +208,21 @@ export function InteligenciaComercialPage() {
     return { dataInicio, dataFim };
   }, []);
 
+  // Função para calcular datas de um ano específico (para comparação)
+  const calcularDatasAno = useCallback((ano: number): { dataInicio: Date; dataFim: Date } => {
+    const hoje = new Date();
+    const anoAtual = hoje.getFullYear();
+    
+    const dataInicio = new Date(ano, 0, 1, 0, 0, 0, 0);
+    
+    // Usar o mesmo período relativo em ambos os anos para comparação justa
+    const dataFim = ano === anoAtual
+      ? new Date(ano, hoje.getMonth(), hoje.getDate(), 23, 59, 59, 999)
+      : new Date(ano, hoje.getMonth(), Math.min(hoje.getDate(), new Date(ano, hoje.getMonth() + 1, 0).getDate()), 23, 59, 59, 999);
+    
+    return { dataInicio, dataFim };
+  }, []);
+
   const [periodoSelecionado, setPeriodoSelecionado] = useState<PeriodoFiltro>('ano-atual');
   const [dataInicioPersonalizada, setDataInicioPersonalizada] = useState<string>('');
   const [dataFimPersonalizada, setDataFimPersonalizada] = useState<string>('');
@@ -194,11 +251,26 @@ export function InteligenciaComercialPage() {
     return calcularDatas(periodoSelecionado);
   }, [periodoSelecionado, dataInicioPersonalizada, dataFimPersonalizada, calcularDatas]);
 
+  // Hook para aba de análise
   const { loading, error, data } = useVendasAnalytics({
     ...filtros,
     dataInicio,
     dataFim,
     busca,
+  });
+
+  // Hooks para aba de comparação
+  const datasAnoBase = useMemo(() => calcularDatasAno(anoBase), [anoBase, calcularDatasAno]);
+  const datasAnoComparacao = useMemo(() => calcularDatasAno(anoComparacao), [anoComparacao, calcularDatasAno]);
+
+  const { loading: loadingAnoBase, data: dataAnoBase } = useVendasAnalytics({
+    dataInicio: datasAnoBase.dataInicio,
+    dataFim: datasAnoBase.dataFim,
+  });
+
+  const { loading: loadingAnoComparacao, data: dataAnoComparacao } = useVendasAnalytics({
+    dataInicio: datasAnoComparacao.dataInicio,
+    dataFim: datasAnoComparacao.dataFim,
   });
 
   const commandBarActions = [
@@ -248,11 +320,30 @@ export function InteligenciaComercialPage() {
 
   // Gerar subtítulo com o período
   const subtitle = useMemo(() => {
+    if (selectedTab === 'comparacao') {
+      return `Comparando ${anoBase} vs ${anoComparacao} (${formatDate(datasAnoBase.dataInicio)} - ${formatDate(datasAnoBase.dataFim)})`;
+    }
     if (!dataInicio || !dataFim) {
       return 'Período: Todos os tempos';
     }
     return `Período: ${formatDate(dataInicio)} - ${formatDate(dataFim)}`;
-  }, [dataInicio, dataFim]);
+  }, [selectedTab, dataInicio, dataFim, anoBase, anoComparacao, datasAnoBase]);
+
+  // Calcular variação percentual
+  const calcularVariacao = useCallback((valorAtual: number, valorAnterior: number): number => {
+    if (valorAnterior === 0) return valorAtual > 0 ? 100 : 0;
+    return ((valorAtual - valorAnterior) / valorAnterior) * 100;
+  }, []);
+
+  // Gerar lista de anos disponíveis (últimos 10 anos)
+  const anosDisponiveis = useMemo(() => {
+    const anoAtual = new Date().getFullYear();
+    const anos: number[] = [];
+    for (let i = 0; i < 10; i++) {
+      anos.push(anoAtual - i);
+    }
+    return anos;
+  }, []);
 
   // Colunas para tabela de Top Produtos
   const produtosColumns: TableColumnDefinition<TopProduto>[] = [
@@ -298,6 +389,71 @@ export function InteligenciaComercialPage() {
     }),
   ];
 
+  // Componente de KPI Comparativo
+  const KPIComparativo = ({ label, valorBase, valorComparacao, formato = 'currency' }: {
+    label: string;
+    valorBase: number;
+    valorComparacao: number;
+    formato?: 'currency' | 'percent' | 'number';
+  }) => {
+    const variacao = calcularVariacao(valorBase, valorComparacao);
+    const variacaoPositiva = variacao >= 0;
+
+    const formatarValor = (valor: number) => {
+      if (formato === 'currency') return formatCurrency(valor);
+      if (formato === 'percent') return formatPercent(valor);
+      return valor.toFixed(0);
+    };
+
+    return (
+      <Card className={styles.comparisonKpiCard}>
+        <Text
+          size={200}
+          weight="medium"
+          style={{
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            color: tokens.colorNeutralForeground3,
+            display: 'block',
+          }}
+        >
+          {label}
+        </Text>
+
+        <div className={styles.comparisonValue}>
+          <div>
+            <Text size={300} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
+              {anoBase}
+            </Text>
+            <Text size={600} weight="bold" block>
+              {formatarValor(valorBase)}
+            </Text>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <Text size={300} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
+              {anoComparacao}
+            </Text>
+            <Text size={600} weight="bold" block>
+              {formatarValor(valorComparacao)}
+            </Text>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '12px', textAlign: 'center' }}>
+          <Text
+            size={400}
+            weight="semibold"
+            style={{
+              color: variacaoPositiva ? tokens.colorPaletteGreenForeground1 : tokens.colorPaletteRedForeground1,
+            }}
+          >
+            {variacaoPositiva ? '+' : ''}{variacao.toFixed(2)}%
+          </Text>
+        </div>
+      </Card>
+    );
+  };
+
   // Colunas para tabela de Top Clientes
   const clientesColumns: TableColumnDefinition<TopCliente>[] = [
     createTableColumn<TopCliente>({
@@ -339,6 +495,199 @@ export function InteligenciaComercialPage() {
     }),
   ];
 
+  // Função para renderizar a aba de comparação
+  const renderComparacao = () => {
+    if (loadingAnoBase || loadingAnoComparacao) {
+      return (
+        <div className={styles.loadingContainer}>
+          <Spinner size="extra-large" label="Carregando dados para comparação..." />
+        </div>
+      );
+    }
+
+    // Preparar dados de evolução mensal comparativa
+    const mesesDoAno = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const evolucaoComparativa: ChartDataPoint[] = mesesDoAno.map((mes, index) => {
+      const mesNum = index + 1;
+      
+      // Buscar valor do ano base
+      const dadoAnoBase = dataAnoBase.evolucaoVendas.find(ev => {
+        const [m] = ev.date.split('/');
+        return Number(m) === mesNum;
+      });
+      
+      // Buscar valor do ano de comparação
+      const dadoAnoComp = dataAnoComparacao.evolucaoVendas.find(ev => {
+        const [m] = ev.date.split('/');
+        return Number(m) === mesNum;
+      });
+      
+      return {
+        date: mes,
+        [anoBase.toString()]: dadoAnoBase?.value || 0,
+        [anoComparacao.toString()]: dadoAnoComp?.value || 0,
+      };
+    });
+
+    return (
+      <>
+        {/* Seletor de Anos */}
+        <div className={styles.yearSelectorContainer}>
+          <div className={styles.yearSelector}>
+            <Label>Ano Base</Label>
+            <Dropdown
+              value={anoBase.toString()}
+              onOptionSelect={(_, data) => setAnoBase(Number(data.optionValue))}
+            >
+              {anosDisponiveis.map(ano => (
+                <Option key={ano} value={ano.toString()}>
+                  {ano}
+                </Option>
+              ))}
+            </Dropdown>
+          </div>
+          <div className={styles.yearSelector}>
+            <Label>Comparar com</Label>
+            <Dropdown
+              value={anoComparacao.toString()}
+              onOptionSelect={(_, data) => setAnoComparacao(Number(data.optionValue))}
+            >
+              {anosDisponiveis.map(ano => (
+                <Option key={ano} value={ano.toString()}>
+                  {ano}
+                </Option>
+              ))}
+            </Dropdown>
+          </div>
+        </div>
+
+        {/* KPIs Comparativos */}
+        <div className={styles.comparisonGrid}>
+          <KPIComparativo
+            label="Faturamento Total"
+            valorBase={dataAnoBase.kpis.faturamentoTotal}
+            valorComparacao={dataAnoComparacao.kpis.faturamentoTotal}
+            formato="currency"
+          />
+          <KPIComparativo
+            label="Lucro Bruto Total"
+            valorBase={dataAnoBase.kpis.lucroBrutoTotal}
+            valorComparacao={dataAnoComparacao.kpis.lucroBrutoTotal}
+            formato="currency"
+          />
+          <KPIComparativo
+            label="Margem Média"
+            valorBase={dataAnoBase.kpis.margemMedia}
+            valorComparacao={dataAnoComparacao.kpis.margemMedia}
+            formato="percent"
+          />
+          <KPIComparativo
+            label="Ticket Médio"
+            valorBase={dataAnoBase.kpis.ticketMedio}
+            valorComparacao={dataAnoComparacao.kpis.ticketMedio}
+            formato="currency"
+          />
+          <KPIComparativo
+            label="Total de Vendas"
+            valorBase={dataAnoBase.kpis.totalVendas}
+            valorComparacao={dataAnoComparacao.kpis.totalVendas}
+            formato="number"
+          />
+        </div>
+
+        {/* Gráfico de Evolução Mensal Comparativa */}
+        <Card className={styles.chartCard} style={{ marginBottom: '24px' }}>
+          <Text size={500} weight="semibold" className={styles.chartTitle}>
+            Evolução Mensal Comparativa
+          </Text>
+          <LineChart
+            data={evolucaoComparativa}
+            lines={[
+              { dataKey: anoBase.toString(), name: `${anoBase}`, color: tokens.colorBrandBackground },
+              { dataKey: anoComparacao.toString(), name: `${anoComparacao}`, color: tokens.colorPaletteBlueForeground2 },
+            ]}
+            height={300}
+          />
+        </Card>
+
+        {/* Gráficos Comparativos Row */}
+        <div className={styles.chartsRow}>
+          <Card className={styles.chartCard}>
+            <Text size={500} weight="semibold" className={styles.chartTitle}>
+              Vendas por Categoria - {anoBase}
+            </Text>
+            {dataAnoBase.vendasPorCategoria.length > 0 ? (
+              <DonutChart data={dataAnoBase.vendasPorCategoria} height={250} />
+            ) : (
+              <Text>Sem dados para {anoBase}</Text>
+            )}
+          </Card>
+
+          <Card className={styles.chartCard}>
+            <Text size={500} weight="semibold" className={styles.chartTitle}>
+              Vendas por Categoria - {anoComparacao}
+            </Text>
+            {dataAnoComparacao.vendasPorCategoria.length > 0 ? (
+              <DonutChart data={dataAnoComparacao.vendasPorCategoria} height={250} />
+            ) : (
+              <Text>Sem dados para {anoComparacao}</Text>
+            )}
+          </Card>
+        </div>
+
+        {/* Produto vs Serviço Comparativo */}
+        <div className={styles.chartsRow}>
+          <Card className={styles.chartCard}>
+            <Text size={500} weight="semibold" className={styles.chartTitle}>
+              Produto vs Serviço - {anoBase}
+            </Text>
+            {dataAnoBase.produtoVsServico.length > 0 ? (
+              <DonutChart data={dataAnoBase.produtoVsServico} height={250} />
+            ) : (
+              <Text>Sem dados para {anoBase}</Text>
+            )}
+          </Card>
+
+          <Card className={styles.chartCard}>
+            <Text size={500} weight="semibold" className={styles.chartTitle}>
+              Produto vs Serviço - {anoComparacao}
+            </Text>
+            {dataAnoComparacao.produtoVsServico.length > 0 ? (
+              <DonutChart data={dataAnoComparacao.produtoVsServico} height={250} />
+            ) : (
+              <Text>Sem dados para {anoComparacao}</Text>
+            )}
+          </Card>
+        </div>
+
+        {/* Top Fabricantes Comparativo */}
+        <div className={styles.chartsRow}>
+          <Card className={styles.chartCard}>
+            <Text size={500} weight="semibold" className={styles.chartTitle}>
+              Top 10 Fabricantes - {anoBase}
+            </Text>
+            {dataAnoBase.topFabricantes.length > 0 ? (
+              <BarChart data={dataAnoBase.topFabricantes} dataKey="value" height={300} horizontal />
+            ) : (
+              <Text>Sem dados para {anoBase}</Text>
+            )}
+          </Card>
+
+          <Card className={styles.chartCard}>
+            <Text size={500} weight="semibold" className={styles.chartTitle}>
+              Top 10 Fabricantes - {anoComparacao}
+            </Text>
+            {dataAnoComparacao.topFabricantes.length > 0 ? (
+              <BarChart data={dataAnoComparacao.topFabricantes} dataKey="value" height={300} horizontal />
+            ) : (
+              <Text>Sem dados para {anoComparacao}</Text>
+            )}
+          </Card>
+        </div>
+      </>
+    );
+  };
+
   if (loading) {
     return (
       <>
@@ -372,8 +721,19 @@ export function InteligenciaComercialPage() {
       <CommandBar primaryActions={commandBarActions} />
       <PageHeader title="Inteligência Comercial" subtitle={subtitle} />
       <PageContainer>
-        {/* Filtros */}
-        <div className={styles.filterSection}>
+        {/* Abas */}
+        <div className={styles.tabContainer}>
+          <TabList selectedValue={selectedTab} onTabSelect={(_, data) => setSelectedTab(data.value as 'analise' | 'comparacao')}>
+            <Tab value="analise">Análise</Tab>
+            <Tab value="comparacao">Comparação Ano a Ano</Tab>
+          </TabList>
+        </div>
+
+        {/* Conteúdo da aba de Análise */}
+        {selectedTab === 'analise' && (
+          <>
+            {/* Filtros */}
+            <div className={styles.filterSection}>
           {/* Campo de Busca */}
           <div className={styles.searchField}>
             <Input
@@ -620,7 +980,12 @@ export function InteligenciaComercialPage() {
               Margem de Lucro por Categoria (%)
             </Text>
             {data.margemPorCategoria.length > 0 ? (
-              <BarChart data={data.margemPorCategoria} dataKey="value" height={300} />
+              <BarChart 
+                data={data.margemPorCategoria} 
+                dataKey="value" 
+                height={300}
+                valueFormatter={(value: number) => `${value.toFixed(2)}%`}
+              />
             ) : (
               <Text>Sem dados para exibir</Text>
             )}
@@ -691,6 +1056,11 @@ export function InteligenciaComercialPage() {
             )}
           </Card>
         </div>
+          </>
+        )}
+
+        {/* Conteúdo da aba de Comparação */}
+        {selectedTab === 'comparacao' && renderComparacao()}
       </PageContainer>
     </>
   );
