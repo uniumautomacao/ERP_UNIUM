@@ -199,6 +199,10 @@ export function SuperAdminPageAccessPage() {
       grouped.get(p.section)!.push(p);
     });
 
+    console.log('[DEBUG] Total de páginas encontradas:', pages.length);
+    console.log('[DEBUG] Páginas por seção:', Array.from(grouped.entries()).map(([s, p]) => `${s}: ${p.length}`));
+    console.log('[DEBUG] Todas as páginas:', pages);
+
     return {
       allPages: pages,
       bySection: Array.from(grouped.entries())
