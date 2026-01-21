@@ -1085,6 +1085,10 @@ export function InteligenciaComercialPage() {
                 dataKey="value" 
                 height={300}
                 valueFormatter={(value: number) => `${value.toFixed(2)}%`}
+                onBarClick={(item) => {
+                  setModalData({ type: 'categoria', value: item.date });
+                  setModalOpen(true);
+                }}
               />
             ) : (
               <Text>Sem dados para exibir</Text>
