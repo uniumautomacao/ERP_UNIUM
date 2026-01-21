@@ -122,6 +122,11 @@
           "entitySetName": "new_registrodeleiturademercadoriaemestoques",
           "logicalName": "new_registrodeleiturademercadoriaemestoque",
           "isHidden": false
+        },
+        "new_registrodevendas": {
+          "entitySetName": "new_registrodevendas",
+          "logicalName": "new_registrodevenda",
+          "isHidden": false
         }
       },
       "actions": null

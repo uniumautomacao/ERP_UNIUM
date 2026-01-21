@@ -158,5 +158,12 @@ export const dataSourcesInfo = {
     "primaryKey": "new_registrodeleiturademercadoriaemestoqueid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_registrodevendas": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_registrodevendaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

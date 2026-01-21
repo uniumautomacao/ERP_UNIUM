@@ -25,6 +25,7 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Ajuste de Estoque | `new_ajustedeestoque` | `new_ajustedeestoques` | `new_ajustedeestoqueid` |
 | Solicitação de Ajuste de Estoque | `new_solicitacaodeajustedeestoque` | `new_solicitacaodeajustedeestoques` | `new_solicitacaodeajustedeestoqueid` |
 | Registro de Leitura de Mercadoria em Estoque | `new_registrodeleiturademercadoriaemestoque` | `new_registrodeleiturademercadoriaemestoques` | `new_registrodeleiturademercadoriaemestoqueid` |
+| Registro de Venda | `new_registrodevenda` | `new_registrodevendas` | `new_registrodevendaid` |
 
 ---
 
@@ -100,6 +101,27 @@ PrimaryKey:                       new_registrodeleiturademercadoriaemestoqueid
 |------------------------------|---------------------|------------------|
 | new_mercadoria | new_Mercadoria | cr22f_estoquefromsharepointlists |
 | new_registradopor | new_RegistradoPor | systemusers |
+
+---
+
+## 🔵 new_registrodevenda (Registro de Venda)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_registrodevenda
+EntityLogicalCollectionName:      new_registrodevendas
+EntitySetName:                    new_registrodevendas
+PrimaryKey:                       new_registrodevendaid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_itemdeorcamento | new_ItemdeOrcamento | new_orcamentoitems |
+| new_orcamento | new_Orcamento | new_orcamentos |
+| new_precodeproduto | new_PrecodeProduto | new_precodeprodutos |
+| new_produto | new_Produto | products |
+| new_projeto | new_Projeto | cr22f_projetos |
 
 ---
 
