@@ -130,9 +130,14 @@ const useStyles = makeStyles({
   },
   comparisonValue: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: '8px',
+    flexDirection: 'column',
+    gap: '12px',
+    marginTop: '12px',
+  },
+  comparisonYearRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
   },
   comparisonGrid: {
     display: 'grid',
@@ -430,20 +435,20 @@ export function InteligenciaComercialPage() {
         </Text>
 
         <div className={styles.comparisonValue}>
-          <div>
-            <Text size={300} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
-              {anoBase}
-            </Text>
-            <Text size={600} weight="bold" block>
-              {formatarValor(valorBase)}
-            </Text>
-          </div>
-          <div style={{ textAlign: 'right' }}>
+          <div className={styles.comparisonYearRow}>
             <Text size={300} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
               {anoComparacao}
             </Text>
             <Text size={600} weight="bold" block>
               {formatarValor(valorComparacao)}
+            </Text>
+          </div>
+          <div className={styles.comparisonYearRow}>
+            <Text size={300} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
+              {anoBase}
+            </Text>
+            <Text size={600} weight="bold" block>
+              {formatarValor(valorBase)}
             </Text>
           </div>
         </div>
