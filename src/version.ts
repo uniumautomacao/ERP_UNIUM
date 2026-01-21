@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.0.109';
+export const APP_VERSION = '0.0.110';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.110',
+    date: '2026-01-21',
+    changes: 'Ignora erros transitórios do scanner (checksum/format) para evitar mensagens falsas.',
+  },
   {
     version: '0.0.109',
     date: '2026-01-21',

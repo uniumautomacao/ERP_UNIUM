@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
-import { NotFoundException } from '@zxing/library';
+import { NotFoundException, ChecksumException, FormatException } from '@zxing/library';
 import { parseBarcodes } from '../../utils/inventory/barcodeParser';
 import type { ParsedBarcode } from '../../types';
 
@@ -58,8 +58,14 @@ export const useMultiBarcodeScanner = ({ onScan }: UseMultiBarcodeScannerProps =
         if (result) {
           const value = result.getText();
             addCode(value);
-        } else if (err && !(err instanceof NotFoundException)) {
-          setError('Erro ao ler o QR Code. Tente novamente.');
+        } else if (err) {
+          const shouldIgnore =
+            err instanceof NotFoundException ||
+            err instanceof ChecksumException ||
+            err instanceof FormatException;
+          if (!shouldIgnore) {
+            setError('Erro ao ler o QR Code. Tente novamente.');
+          }
         }
       });
 

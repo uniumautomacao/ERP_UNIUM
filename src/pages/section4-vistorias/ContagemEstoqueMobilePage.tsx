@@ -301,7 +301,7 @@ export function ContagemEstoqueMobilePage() {
     try {
       const now = new Date();
       const result = await Cr22fEstoqueFromSharepointListService.getAll({
-        filter: "cr22f_querytag eq 36514",//buildListaDoDiaFilter(now, search),
+        filter: buildListaDoDiaFilter(now, search),
         select: [
           'cr22f_estoquefromsharepointlistid',
           'new_referenciadoproduto',
