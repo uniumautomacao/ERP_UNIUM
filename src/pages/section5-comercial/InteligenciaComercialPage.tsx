@@ -41,6 +41,7 @@ import { LineChart } from '../../components/charts/LineChart';
 import { useVendasAnalytics } from '../../hooks/comercial/useVendasAnalytics';
 import { VendasDetalhesModal } from '../../components/comercial/VendasDetalhesModal';
 import { useAnaliseABC, ABCItem } from '../../hooks/comercial/useAnaliseABC';
+import type { ChartDataPoint } from '../../types';
 
 const useStyles = makeStyles({
   filterSection: {
@@ -848,6 +849,7 @@ export function InteligenciaComercialPage() {
       return {
         date: mes,
         monthNumber: mesNum,
+        value: dadoAnoBase?.value || 0,
         [anoBase.toString()]: dadoAnoBase?.value || 0,
         [anoComparacao.toString()]: dadoAnoComp?.value || 0,
       };
@@ -863,8 +865,8 @@ export function InteligenciaComercialPage() {
               value={anoBase.toString()}
               onOptionSelect={(_, data) => setAnoBase(Number(data.optionValue))}
             >
-              {anosDisponiveis.map(ano => (
-                <Option key={ano} value={ano.toString()}>
+              {anosDisponiveis.map((ano) => (
+                <Option key={ano} value={ano.toString()} text={ano.toString()}>
                   {ano}
                 </Option>
               ))}
@@ -876,8 +878,8 @@ export function InteligenciaComercialPage() {
               value={anoComparacao.toString()}
               onOptionSelect={(_, data) => setAnoComparacao(Number(data.optionValue))}
             >
-              {anosDisponiveis.map(ano => (
-                <Option key={ano} value={ano.toString()}>
+              {anosDisponiveis.map((ano) => (
+                <Option key={ano} value={ano.toString()} text={ano.toString()}>
                   {ano}
                 </Option>
               ))}

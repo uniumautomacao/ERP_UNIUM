@@ -144,8 +144,8 @@ export function useAnaliseABC(options: UseAnaliseABCOptions) {
     // 2. Converter para array e ordenar por valor desc
     const produtosOrdenados = Array.from(produtosMap.entries())
       .map(([modelo, dados]) => ({
-        modelo,
-        ...dados
+        ...dados,
+        modelo: dados.modelo ?? modelo
       }))
       .sort((a, b) => b.valor - a.valor);
 

@@ -6,9 +6,10 @@ interface KPICardProps {
   value: string | number;
   trend?: number;
   trendLabel?: string;
+  subtitle?: string;
 }
 
-export function KPICard({ label, value, trend, trendLabel }: KPICardProps) {
+export function KPICard({ label, value, trend, trendLabel, subtitle }: KPICardProps) {
   const getTrendColor = () => {
     if (trend === undefined) return tokens.colorNeutralForeground3;
     if (trend > 0) return tokens.colorPaletteGreenForeground1;
@@ -41,6 +42,12 @@ export function KPICard({ label, value, trend, trendLabel }: KPICardProps) {
       <Text size={800} weight="bold" block style={{ marginTop: 8 }}>
         {value}
       </Text>
+
+      {subtitle && (
+        <Text size={300} style={{ marginTop: 4, color: tokens.colorNeutralForeground3 }}>
+          {subtitle}
+        </Text>
+      )}
 
       {trend !== undefined && (
         <div className="flex items-center gap-1" style={{ marginTop: 8 }}>
