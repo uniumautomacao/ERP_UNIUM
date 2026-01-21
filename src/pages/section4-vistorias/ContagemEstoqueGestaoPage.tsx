@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Badge,
   Button,
   Card,
   Field,
   Input,
+  MessageBar,
   Spinner,
   Text,
   Textarea,
@@ -40,6 +42,12 @@ type ContagemRecord = {
     cr22f_querytag?: number;
     cr22f_serialnumber?: string;
   };
+  _solicitacao?: {
+    new_solicitacaodeajustedeestoqueid?: string;
+    new_statusdoprocessamento?: number;
+    new_mensagemdeerro?: string;
+    new_datahoraprocessamento?: string;
+  };
 };
 
 type AjusteRecord = {
@@ -67,8 +75,44 @@ const SITUACAO_CONTAGEM = {
 const STATUS_PROCESSAMENTO = {
   Pendente: 100000000,
   Processando: 100000001,
-  Concluido: 100000002,
+  Concludo: 100000002, // Typo no Dataverse: "Concludo" em vez de "Concluído"
   Erro: 100000003,
+};
+
+const normalizeStatusProcessamento = (value?: number | string | null | Record<string, any>) => {
+  if (value === null || value === undefined) return null;
+
+  if (typeof value === 'number') return value;
+
+  if (typeof value === 'object') {
+    const possible =
+      value.value ??
+      value.Value ??
+      value.option ??
+      value.Option ??
+      value.id ??
+      value.Id;
+    if (typeof possible === 'number') return possible;
+    if (typeof possible === 'string') return normalizeStatusProcessamento(possible);
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    const digits = trimmed.match(/\d+/);
+    if (digits) {
+      const parsed = Number(digits[0]);
+      if (!Number.isNaN(parsed)) return parsed;
+    }
+    const lower = trimmed.toLowerCase();
+    if (lower === 'pendente' || lower === 'pending') return STATUS_PROCESSAMENTO.Pendente;
+    if (lower === 'processando' || lower === 'processing') return STATUS_PROCESSAMENTO.Processando;
+    if (lower === 'concluido' || lower === 'concludo' || lower === 'completed') {
+      return STATUS_PROCESSAMENTO.Concludo;
+    }
+    if (lower === 'erro' || lower === 'error') return STATUS_PROCESSAMENTO.Erro;
+  }
+
+  return null;
 };
 
 const TAB_OPTIONS = [
@@ -469,8 +513,81 @@ export function ContagemEstoqueGestaoPage() {
     setDivergenciasLoading(true);
     setDivergenciasError(null);
     try {
+      // 1. Buscar solicitações dos últimos 30 dias (todas as contagens que tiveram solicitação recentemente)
+      const trintaDiasAtras = new Date();
+      trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+      const dataFiltro = trintaDiasAtras.toISOString().split('T')[0] + 'T00:00:00Z';
+      const fimDia = new Date().toISOString().split('T')[0] + 'T23:59:59Z';
+
+      const solicitacoesResult = await NewSolicitacaodeAjustedeEstoqueService.getAll({
+        filter: `statecode eq 0 and createdon ge ${dataFiltro} and createdon le ${fimDia}`,
+        orderBy: ['createdon desc'],
+        select: [
+          'new_solicitacaodeajustedeestoqueid',
+          '_new_contagem_value',
+          'new_statusdoprocessamento',
+          'new_mensagemdeerro',
+          'new_datahoraprocessamento',
+        ],
+      });
+
+      const solicitacoes = solicitacoesResult.data ?? [];
+      
+      if (solicitacoes.length === 0) {
+        // Se não há solicitações do dia, buscar apenas contagens pendentes sem solicitação
+        const result = await NewContagemEstoqueService.getAll({
+          filter: `statecode eq 0 and new_situacao eq ${SITUACAO_CONTAGEM.Pendente}`,
+          orderBy: ['new_datacontagem desc'],
+          select: [
+            'new_contagemestoqueid',
+            'new_datacontagem',
+            'new_sku',
+            'new_enderecocompleto',
+            'new_quantidadecontada',
+            'new_quantidadeesperada',
+            'new_situacao',
+            '_new_itemestoque_value',
+            '_new_usuario_value',
+          ],
+          top: 200,
+        });
+        setDivergencias((result.data ?? []) as ContagemRecord[]);
+        return;
+      }
+
+      // 2. Mapear última solicitação por contagem
+      const solicitacaoMap = new Map<string, any>();
+      const contagemIdsSet = new Set<string>();
+      
+      (solicitacoes as any[]).forEach((sol: any) => {
+        const contagemId = sol._new_contagem_value;
+        if (contagemId) {
+          contagemIdsSet.add(contagemId);
+          if (!solicitacaoMap.has(contagemId)) {
+            // Log para debug de status
+            console.debug(`[GestaoContagem] Status recebido para contagem ${contagemId}:`, {
+              original: sol.new_statusdoprocessamento,
+              type: typeof sol.new_statusdoprocessamento,
+              normalized: normalizeStatusProcessamento(sol.new_statusdoprocessamento)
+            });
+
+            solicitacaoMap.set(contagemId, {
+              new_solicitacaodeajustedeestoqueid: sol.new_solicitacaodeajustedeestoqueid,
+              new_statusdoprocessamento: sol.new_statusdoprocessamento,
+              new_mensagemdeerro: sol.new_mensagemdeerro,
+              new_datahoraprocessamento: sol.new_datahoraprocessamento,
+            });
+          }
+        }
+      });
+
+      // 3. Buscar contagens (pendentes + ajustadas que têm solicitação)
+      const contagemIds = Array.from(contagemIdsSet);
+      const filterParts = contagemIds.map((id) => `new_contagemestoqueid eq '${id}'`);
+      const contagensComSolicitacao = filterParts.join(' or ');
+
       const result = await NewContagemEstoqueService.getAll({
-        filter: `statecode eq 0 and new_situacao eq ${SITUACAO_CONTAGEM.Pendente}`,
+        filter: `statecode eq 0 and (new_situacao eq ${SITUACAO_CONTAGEM.Pendente} or (${contagensComSolicitacao}))`,
         orderBy: ['new_datacontagem desc'],
         select: [
           'new_contagemestoqueid',
@@ -485,7 +602,25 @@ export function ContagemEstoqueGestaoPage() {
         ],
         top: 200,
       });
-      setDivergencias((result.data ?? []) as ContagemRecord[]);
+
+      const contagens = (result.data ?? []) as ContagemRecord[];
+
+      // 4. Enriquecer contagens com dados da solicitação
+      const enrichedContagens = contagens.map((contagem) => ({
+        ...contagem,
+        _solicitacao: solicitacaoMap.get(contagem.new_contagemestoqueid),
+      }));
+
+      console.info('[GestaoContagem] Contagens enriquecidas:', {
+        total: enrichedContagens.length,
+        comSolicitacao: enrichedContagens.filter((c) => c._solicitacao).length,
+        pendentes: enrichedContagens.filter((c) => !c._solicitacao || c._solicitacao.new_statusdoprocessamento === STATUS_PROCESSAMENTO.Pendente).length,
+        processando: enrichedContagens.filter((c) => c._solicitacao?.new_statusdoprocessamento === STATUS_PROCESSAMENTO.Processando).length,
+        concluidas: enrichedContagens.filter((c) => c._solicitacao?.new_statusdoprocessamento === STATUS_PROCESSAMENTO.Concludo).length,
+        erro: enrichedContagens.filter((c) => c._solicitacao?.new_statusdoprocessamento === STATUS_PROCESSAMENTO.Erro).length,
+      });
+
+      setDivergencias(enrichedContagens);
     } catch (err: any) {
       console.error('[GestaoContagem] erro divergencias', err);
       setDivergenciasError(err.message || 'Erro ao carregar divergências.');
@@ -558,15 +693,66 @@ export function ContagemEstoqueGestaoPage() {
         renderCell: (item) => item.new_quantidadeesperada ?? 0,
       }),
       createTableColumn<ContagemRecord>({
+        columnId: 'status',
+        renderHeaderCell: () => 'Status',
+        renderCell: (item) => {
+          const status = normalizeStatusProcessamento(item._solicitacao?.new_statusdoprocessamento);
+          if (!status) {
+            return <Badge color="warning">Pendente</Badge>;
+          }
+          if (status === STATUS_PROCESSAMENTO.Processando) {
+            return (
+              <Badge color="informative">
+                <Spinner size="tiny" style={{ marginRight: '4px' }} />
+                Processando
+              </Badge>
+            );
+          }
+          if (status === STATUS_PROCESSAMENTO.Concludo) {
+            return <Badge color="success">Ajustada</Badge>;
+          }
+          if (status === STATUS_PROCESSAMENTO.Erro) {
+            return <Badge color="danger">Erro</Badge>;
+          }
+          return <Badge>Desconhecido</Badge>;
+        },
+      }),
+      createTableColumn<ContagemRecord>({
         columnId: 'acoes',
         renderHeaderCell: () => 'Ações',
-        renderCell: (item) => (
-          <div className={styles.actionsRow}>
-            <Button appearance="primary" size="small" onClick={() => handleOpenAjuste(item)}>
-              Gerar ajuste
-            </Button>
-          </div>
-        ),
+        renderCell: (item) => {
+          const status = normalizeStatusProcessamento(item._solicitacao?.new_statusdoprocessamento);
+          const hasSolicitacao = status !== null;
+          const isProcessando = status === STATUS_PROCESSAMENTO.Processando;
+          const isPendente = status === STATUS_PROCESSAMENTO.Pendente;
+          const isConcluido = status === STATUS_PROCESSAMENTO.Concludo;
+          const hasError = status === STATUS_PROCESSAMENTO.Erro;
+          const shouldDisable = hasSolicitacao && !hasError && !isConcluido;
+          
+          return (
+            <div className={styles.actionsRow}>
+              {hasError && item._solicitacao?.new_mensagemdeerro && (
+                <MessageBar intent="error" style={{ marginBottom: '8px', maxWidth: '400px' }}>
+                  {item._solicitacao.new_mensagemdeerro}
+                </MessageBar>
+              )}
+              {isConcluido ? (
+                <Text size={200} className={styles.infoText}>
+                  Ajuste concluído
+                </Text>
+              ) : (
+                <Button
+                  appearance="primary"
+                  size="small"
+                  onClick={() => handleOpenAjuste(item)}
+                  disabled={shouldDisable}
+                >
+                  {isProcessando || isPendente ? 'Processando...' : hasError ? 'Tentar novamente' : 'Gerar ajuste'}
+                </Button>
+              )}
+            </div>
+          );
+        },
       }),
     ],
     [handleOpenAjuste, styles.actionsRow]
@@ -944,25 +1130,67 @@ export function ContagemEstoqueGestaoPage() {
             <DataGrid items={divergencias} columns={divergenciasColumns} />
           </div>
           <div className={styles.cardList}>
-            {divergencias.map((item) => (
-              <Card key={item.new_contagemestoqueid}>
-                <div className="flex flex-col gap-2 p-3">
-                  <Text weight="semibold">{item.new_sku || 'SKU'}</Text>
-                  <Text size={200}>{item.new_enderecocompleto || 'Endereço não informado'}</Text>
-                  <Text size={200}>
-                    Contada: {item.new_quantidadecontada ?? 0} | Esperada: {item.new_quantidadeesperada ?? 0}
-                  </Text>
-                  <Text size={200} className={styles.infoText}>
-                    {formatDate(item.new_datacontagem)}
-                  </Text>
-                  <div className={styles.actionsRow}>
-                    <Button appearance="primary" onClick={() => handleOpenAjuste(item)}>
-                      Gerar ajuste
-                    </Button>
+            {divergencias.map((item) => {
+              const status = normalizeStatusProcessamento(item._solicitacao?.new_statusdoprocessamento);
+              const hasSolicitacao = status !== null;
+              const isProcessando = status === STATUS_PROCESSAMENTO.Processando;
+              const isPendente = status === STATUS_PROCESSAMENTO.Pendente;
+              const isConcluido = status === STATUS_PROCESSAMENTO.Concludo;
+              const hasError = status === STATUS_PROCESSAMENTO.Erro;
+              const shouldDisable = hasSolicitacao && !hasError && !isConcluido;
+              
+              let statusBadge = <Badge color="warning">Pendente</Badge>;
+              if (status === STATUS_PROCESSAMENTO.Processando) {
+                statusBadge = (
+                  <Badge color="informative">
+                    <Spinner size="tiny" style={{ marginRight: '4px' }} />
+                    Processando
+                  </Badge>
+                );
+              } else if (status === STATUS_PROCESSAMENTO.Concludo) {
+                statusBadge = <Badge color="success">Ajustada</Badge>;
+              } else if (status === STATUS_PROCESSAMENTO.Erro) {
+                statusBadge = <Badge color="danger">Erro</Badge>;
+              }
+              
+              return (
+                <Card key={item.new_contagemestoqueid}>
+                  <div className="flex flex-col gap-2 p-3">
+                    <div className="flex items-center justify-between">
+                      <Text weight="semibold">{item.new_sku || 'SKU'}</Text>
+                      {statusBadge}
+                    </div>
+                    <Text size={200}>{item.new_enderecocompleto || 'Endereço não informado'}</Text>
+                    <Text size={200}>
+                      Contada: {item.new_quantidadecontada ?? 0} | Esperada: {item.new_quantidadeesperada ?? 0}
+                    </Text>
+                    <Text size={200} className={styles.infoText}>
+                      {formatDate(item.new_datacontagem)}
+                    </Text>
+                    {hasError && item._solicitacao?.new_mensagemdeerro && (
+                      <MessageBar intent="error">
+                        {item._solicitacao.new_mensagemdeerro}
+                      </MessageBar>
+                    )}
+                    <div className={styles.actionsRow}>
+                      {isConcluido ? (
+                        <Text size={200} className={styles.infoText}>
+                          Ajuste concluído
+                        </Text>
+                      ) : (
+                        <Button
+                          appearance="primary"
+                          onClick={() => handleOpenAjuste(item)}
+                          disabled={shouldDisable}
+                        >
+                          {isProcessando || isPendente ? 'Processando...' : hasError ? 'Tentar novamente' : 'Gerar ajuste'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </div>
       </Card>
@@ -1176,6 +1404,40 @@ export function ContagemEstoqueGestaoPage() {
   useEffect(() => {
     void loadDashboard();
   }, [loadDashboard]);
+
+  // Polling inteligente com intervalo gradativo
+  useEffect(() => {
+    if (selectedTab !== 'divergencias') return;
+
+    // Verificar se há contagens pendentes ou em processamento
+    const hasPendentes = divergencias.some(
+      (d) => !d._solicitacao || 
+             d._solicitacao.new_statusdoprocessamento === STATUS_PROCESSAMENTO.Pendente ||
+             d._solicitacao.new_statusdoprocessamento === STATUS_PROCESSAMENTO.Processando
+    );
+
+    if (!hasPendentes) {
+      console.info('[GestaoContagem] Nenhuma contagem pendente/processando. Polling desativado.');
+      return;
+    }
+
+    // Calcular intervalo baseado no número de tentativas (intervalo gradativo)
+    // Começa com 5s, depois 10s, 15s, 20s (máximo 30s)
+    const tentativas = divergencias.filter(
+      (d) => d._solicitacao?.new_statusdoprocessamento === STATUS_PROCESSAMENTO.Processando
+    ).length;
+    
+    const intervalo = Math.min(5000 + tentativas * 5000, 30000);
+
+    console.info('[GestaoContagem] Polling ativo com intervalo de', intervalo / 1000, 'segundos');
+
+    const interval = setInterval(() => {
+      console.info('[GestaoContagem] Polling: atualizando divergências...');
+      void loadDivergencias();
+    }, intervalo);
+
+    return () => clearInterval(interval);
+  }, [selectedTab, divergencias, loadDivergencias]);
 
   return (
     <>

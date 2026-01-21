@@ -1,6 +1,28 @@
-export const APP_VERSION = '0.0.94';
+export const APP_VERSION = '0.0.99';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.99',
+    date: '2026-01-21',
+    changes: 'Aumentado período de exibição de solicitações de ajuste de 1 para 30 dias na aba de Divergências.',
+  },
+  {
+    version: '0.0.98',
+  {
+    version: '0.0.97',
+    date: '2026-01-21',
+    changes: 'Normaliza status de processamento (number/string) para evitar badge "Desconhecido" durante processamento.',
+  },
+  {
+    version: '0.0.96',
+    date: '2026-01-21',
+    changes: 'Correções no feedback de ajustes: corrigido status "Desconhecido" (Concludo vs Concluido), contagens ajustadas permanecem visíveis o dia todo, polling inteligente com intervalo gradativo (5s-30s), polling para apenas quando não há pendentes/processando, botão desabilitado para Pendente E Processando, contagens concluídas mostram "Ajuste concluído" em vez do botão.',
+  },
+  {
+    version: '0.0.95',
+    date: '2026-01-21',
+    changes: 'Implementado feedback visual em tempo real para ajustes: badges de status (Pendente/Processando/Ajustada/Erro), polling automático a cada 5s, exibição de mensagens de erro, desabilitação do botão durante processamento, e remoção automática de contagens ajustadas após 5s.',
+  },
   {
     version: '0.0.94',
     date: '2026-01-21',
