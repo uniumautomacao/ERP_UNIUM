@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.0.121';
+export const APP_VERSION = '0.0.123';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.0.123',
+    date: '2026-01-21',
+    changes: 'Adicionada opção de período personalizado na Inteligência Comercial com seleção de data inicial e final.',
+  },
+  {
+    version: '0.0.122',
+    date: '2026-01-21',
+    changes: 'Adicionado filtro de período na Inteligência Comercial com opções: Este ano (padrão), Últimos 30 dias, Últimos 12 meses e Este semestre.',
+  },
   {
     version: '0.0.121',
     date: '2026-01-21',

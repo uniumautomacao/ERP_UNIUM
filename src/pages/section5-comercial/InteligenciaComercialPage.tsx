@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Card,
   Text,
@@ -18,11 +18,13 @@ import {
   TableCellLayout,
   createTableColumn,
   TableColumnDefinition,
+  Input,
+  Label,
 } from '@fluentui/react-components';
 import {
   ArrowSync24Regular,
   ArrowExport24Regular,
-  Filter24Regular,
+  Calendar24Regular,
 } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -48,6 +50,22 @@ const useStyles = makeStyles({
   filterItem: {
     minWidth: '200px',
     flex: '1',
+  },
+  dateFilterItem: {
+    minWidth: '250px',
+    flex: '1',
+  },
+  customDateContainer: {
+    display: 'flex',
+    gap: '12px',
+    flexWrap: 'wrap',
+    width: '100%',
+  },
+  customDateField: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    minWidth: '200px',
   },
   kpiGrid: {
     display: 'grid',
@@ -93,15 +111,78 @@ interface TopCliente {
   lucro: number;
 }
 
+type PeriodoFiltro = 'ano-atual' | 'ultimos-30-dias' | 'ultimos-12-meses' | 'semestre-atual' | 'personalizado';
+
 export function InteligenciaComercialPage() {
   const styles = useStyles();
+  
+  // Função para calcular datas baseado no período
+  const calcularDatas = useCallback((periodo: PeriodoFiltro): { dataInicio: Date; dataFim: Date } => {
+    const hoje = new Date();
+    const dataFim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59, 999);
+    let dataInicio: Date;
+
+    switch (periodo) {
+      case 'ano-atual':
+        dataInicio = new Date(hoje.getFullYear(), 0, 1, 0, 0, 0, 0);
+        break;
+      case 'ultimos-30-dias':
+        dataInicio = new Date(hoje);
+        dataInicio.setDate(dataInicio.getDate() - 30);
+        dataInicio.setHours(0, 0, 0, 0);
+        break;
+      case 'ultimos-12-meses':
+        dataInicio = new Date(hoje);
+        dataInicio.setMonth(dataInicio.getMonth() - 12);
+        dataInicio.setHours(0, 0, 0, 0);
+        break;
+      case 'semestre-atual':
+        // Semestre 1: Jan-Jun (0-5), Semestre 2: Jul-Dez (6-11)
+        const mesAtual = hoje.getMonth();
+        const mesInicioSemestre = mesAtual < 6 ? 0 : 6;
+        dataInicio = new Date(hoje.getFullYear(), mesInicioSemestre, 1, 0, 0, 0, 0);
+        break;
+      case 'personalizado':
+        // Será controlado por dataInicioPersonalizada e dataFimPersonalizada
+        dataInicio = new Date(hoje.getFullYear(), 0, 1, 0, 0, 0, 0);
+        break;
+      default:
+        dataInicio = new Date(hoje.getFullYear(), 0, 1, 0, 0, 0, 0);
+    }
+
+    return { dataInicio, dataFim };
+  }, []);
+
+  const [periodoSelecionado, setPeriodoSelecionado] = useState<PeriodoFiltro>('ano-atual');
+  const [dataInicioPersonalizada, setDataInicioPersonalizada] = useState<string>('');
+  const [dataFimPersonalizada, setDataFimPersonalizada] = useState<string>('');
+  
   const [filtros, setFiltros] = useState({
     categoria: undefined as string | undefined,
     fabricante: undefined as string | undefined,
     vendedor: undefined as string | undefined,
   });
 
-  const { loading, error, data } = useVendasAnalytics(filtros);
+  // Calcular datas baseado no período selecionado
+  const { dataInicio, dataFim } = useMemo(() => {
+    if (periodoSelecionado === 'personalizado') {
+      // Usar datas personalizadas
+      const inicio = dataInicioPersonalizada
+        ? new Date(dataInicioPersonalizada + 'T00:00:00')
+        : new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0);
+      const fim = dataFimPersonalizada
+        ? new Date(dataFimPersonalizada + 'T23:59:59')
+        : new Date();
+      return { dataInicio: inicio, dataFim: fim };
+    }
+    return calcularDatas(periodoSelecionado);
+  }, [periodoSelecionado, dataInicioPersonalizada, dataFimPersonalizada, calcularDatas]);
+
+  const { loading, error, data } = useVendasAnalytics({
+    ...filtros,
+    dataInicio,
+    dataFim,
+  });
 
   const commandBarActions = [
     {
@@ -130,6 +211,28 @@ export function InteligenciaComercialPage() {
   const formatPercent = (value: number) => {
     return `${value.toFixed(2)}%`;
   };
+
+  // Formatar data
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(date);
+  };
+
+  // Formatar data para input HTML (yyyy-mm-dd)
+  const formatDateForInput = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Gerar subtítulo com o período
+  const subtitle = useMemo(() => {
+    return `Período: ${formatDate(dataInicio)} - ${formatDate(dataFim)}`;
+  }, [dataInicio, dataFim]);
 
   // Colunas para tabela de Top Produtos
   const produtosColumns: TableColumnDefinition<TopProduto>[] = [
@@ -220,7 +323,7 @@ export function InteligenciaComercialPage() {
     return (
       <>
         <CommandBar primaryActions={commandBarActions} />
-        <PageHeader title="Inteligência Comercial" subtitle="Análise de vendas e performance comercial" />
+        <PageHeader title="Inteligência Comercial" subtitle={subtitle} />
         <PageContainer>
           <div className={styles.loadingContainer}>
             <Spinner size="extra-large" label="Carregando dados de vendas..." />
@@ -234,7 +337,7 @@ export function InteligenciaComercialPage() {
     return (
       <>
         <CommandBar primaryActions={commandBarActions} />
-        <PageHeader title="Inteligência Comercial" subtitle="Análise de vendas e performance comercial" />
+        <PageHeader title="Inteligência Comercial" subtitle={subtitle} />
         <PageContainer>
           <MessageBar intent="error">
             <MessageBarBody>{error}</MessageBarBody>
@@ -247,10 +350,67 @@ export function InteligenciaComercialPage() {
   return (
     <>
       <CommandBar primaryActions={commandBarActions} />
-      <PageHeader title="Inteligência Comercial" subtitle="Análise de vendas e performance comercial" />
+      <PageHeader title="Inteligência Comercial" subtitle={subtitle} />
       <PageContainer>
         {/* Filtros */}
         <div className={styles.filterSection}>
+          <div className={styles.dateFilterItem}>
+            <Dropdown
+              value={
+                periodoSelecionado === 'ano-atual' ? 'Este ano' :
+                periodoSelecionado === 'ultimos-30-dias' ? 'Últimos 30 dias' :
+                periodoSelecionado === 'ultimos-12-meses' ? 'Últimos 12 meses' :
+                periodoSelecionado === 'semestre-atual' ? 'Este semestre' :
+                'Período personalizado'
+              }
+              onOptionSelect={(_, data) => {
+                const novoPeriodo = data.optionValue as PeriodoFiltro;
+                setPeriodoSelecionado(novoPeriodo);
+                
+                // Inicializar datas personalizadas se necessário
+                if (novoPeriodo === 'personalizado') {
+                  const hoje = new Date();
+                  const inicioPadrao = new Date(hoje.getFullYear(), 0, 1);
+                  setDataInicioPersonalizada(formatDateForInput(inicioPadrao));
+                  setDataFimPersonalizada(formatDateForInput(hoje));
+                }
+              }}
+            >
+              <Option value="ano-atual">Este ano</Option>
+              <Option value="ultimos-30-dias">Últimos 30 dias</Option>
+              <Option value="ultimos-12-meses">Últimos 12 meses</Option>
+              <Option value="semestre-atual">Este semestre</Option>
+              <Option value="personalizado">Período personalizado</Option>
+            </Dropdown>
+          </div>
+          
+          {/* Campos de data personalizada */}
+          {periodoSelecionado === 'personalizado' && (
+            <div className={styles.customDateContainer}>
+              <div className={styles.customDateField}>
+                <Label htmlFor="data-inicio" size="small">
+                  Data Inicial
+                </Label>
+                <Input
+                  id="data-inicio"
+                  type="date"
+                  value={dataInicioPersonalizada}
+                  onChange={(_, data) => setDataInicioPersonalizada(data.value)}
+                />
+              </div>
+              <div className={styles.customDateField}>
+                <Label htmlFor="data-fim" size="small">
+                  Data Final
+                </Label>
+                <Input
+                  id="data-fim"
+                  type="date"
+                  value={dataFimPersonalizada}
+                  onChange={(_, data) => setDataFimPersonalizada(data.value)}
+                />
+              </div>
+            </div>
+          )}
           <div className={styles.filterItem}>
             <Dropdown
               placeholder="Todas as categorias"
