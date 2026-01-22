@@ -35,29 +35,6 @@ export const UniversalPhotoGrid = forwardRef<HTMLDivElement, UniversalPhotoGridP
     }
   };
 
-  if (loading && photos.length === 0) {
-    return (
-      <div className="flex items-center gap-2">
-        <Spinner size="tiny" />
-        <Text size={300}>Carregando fotos...</Text>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Text size={300} style={{ color: tokens.colorPaletteRedForeground2 }}>
-        Erro: {error}
-      </Text>
-    );
-  }
-
-  if (!loading && photos.length === 0) {
-    return (
-      <Text size={300}>Nenhuma foto encontrada na busca universal.</Text>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
@@ -75,6 +52,23 @@ export const UniversalPhotoGrid = forwardRef<HTMLDivElement, UniversalPhotoGridP
         </Field>
         <Button onClick={handleSearch}>Buscar</Button>
       </div>
+
+      {loading && photos.length === 0 && (
+        <div className="flex items-center gap-2">
+          <Spinner size="tiny" />
+          <Text size={300}>Carregando fotos...</Text>
+        </div>
+      )}
+
+      {error && (
+        <Text size={300} style={{ color: tokens.colorPaletteRedForeground2 }}>
+          Erro: {error}
+        </Text>
+      )}
+
+      {!loading && !error && photos.length === 0 && (
+        <Text size={300}>Nenhuma foto encontrada na busca universal.</Text>
+      )}
 
       {photos.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
