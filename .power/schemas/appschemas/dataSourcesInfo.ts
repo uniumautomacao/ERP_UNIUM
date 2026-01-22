@@ -172,5 +172,33 @@ export const dataSourcesInfo = {
     "primaryKey": "new_s3objectsid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_precodeprodutos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_precodeprodutoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "cr22f_fornecedoresfromsharepointlists": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "cr22f_fornecedoresfromsharepointlistid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_tiposervicoprecodeprodutos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_tiposervicoprecodeprodutoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_tipodeservicos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_tipodeservicoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

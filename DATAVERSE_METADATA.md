@@ -27,6 +27,10 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Registro de Leitura de Mercadoria em Estoque | `new_registrodeleiturademercadoriaemestoque` | `new_registrodeleiturademercadoriaemestoques` | `new_registrodeleiturademercadoriaemestoqueid` |
 | Registro de Venda | `new_registrodevenda` | `new_registrodevendas` | `new_registrodevendaid` |
 | S3 Objects | `new_s3objects` | `new_s3objectses` | `new_s3objectsid` |
+| Preço de Produto | `new_precodeproduto` | `new_precodeprodutos` | `new_precodeprodutoid` |
+| Fornecedores From Sharepoint List | `cr22f_fornecedoresfromsharepointlist` | `cr22f_fornecedoresfromsharepointlists` | `cr22f_fornecedoresfromsharepointlistid` |
+| TipoServiço-PreçodeProduto | `new_tiposervicoprecodeproduto` | `new_tiposervicoprecodeprodutos` | `new_tiposervicoprecodeprodutoid` |
+| Tipo de Serviço | `new_tipodeservico` | `new_tipodeservicos` | `new_tipodeservicoid` |
 
 ---
 
@@ -145,6 +149,79 @@ PrimaryKey:                       new_s3objectsid
 | new_rma | new_RMA | new_rmas |
 | new_userlocation | new_UserLocation | new_userlocations |
 | new_wazzupmessage | new_WazzupMessage | new_wazzupmessages |
+
+---
+
+## 🔵 new_precodeproduto (Preço de Produto)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_precodeproduto
+EntityLogicalCollectionName:      new_precodeprodutos
+EntitySetName:                    new_precodeprodutos
+PrimaryKey:                       new_precodeprodutoid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_atividadedecopiadeproduto | new_AtividadedeCopiadeProduto | new_atividades |
+| new_atividadedetrocadeitemdekit | new_AtividadedeTrocadeItemdeKit | new_atividades |
+| new_atividadetrocadepalavras | new_AtividadeTrocadePalavras | new_atividades |
+| new_cotacaotemporaria | new_CotacaoTemporaria | new_cotacoestemporarias |
+| new_fornecedor | new_Fornecedor | cr22f_fornecedoresfromsharepointlists |
+| new_modelodeproduto | new_ModelodeProduto | cr22f_modelosdeprodutofromsharepointlists |
+| new_produtodesigner | new_ProdutoDesigner | products |
+| new_promocao | new_Promocao | new_promocoes |
+| new_servicoparaadicionardev | new_ServicoparaadicionarDEV | new_tipodeservicos |
+
+---
+
+## 🔵 cr22f_fornecedoresfromsharepointlist (Fornecedores From Sharepoint List)
+
+### Informações Básicas
+```
+EntityLogicalName:                cr22f_fornecedoresfromsharepointlist
+EntityLogicalCollectionName:      cr22f_fornecedoresfromsharepointlists
+EntitySetName:                    cr22f_fornecedoresfromsharepointlists
+PrimaryKey:                       cr22f_fornecedoresfromsharepointlistid
+```
+
+---
+
+## 🔵 new_tiposervicoprecodeproduto (TipoServiço-PreçodeProduto)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_tiposervicoprecodeproduto
+EntityLogicalCollectionName:      new_tiposervicoprecodeprodutos
+EntitySetName:                    new_tiposervicoprecodeprodutos
+PrimaryKey:                       new_tiposervicoprecodeprodutoid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_orcamento | new_Orcamento | new_orcamentos |
+| new_precodeproduto | new_PrecodeProduto | new_precodeprodutos |
+| new_tipodeservico | new_TipodeServico | new_tipodeservicos |
+
+---
+
+## 🔵 new_tipodeservico (Tipo de Serviço)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_tipodeservico
+EntityLogicalCollectionName:      new_tipodeservicos
+EntitySetName:                    new_tipodeservicos
+PrimaryKey:                       new_tipodeservicoid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_master | new_Master | new_tipodeservicos |
 
 ---
 

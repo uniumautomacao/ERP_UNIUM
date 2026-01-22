@@ -29,6 +29,10 @@ export * as NewSolicitacaodeAjustedeEstoqueModel from './models/NewSolicitacaode
 export * as NewRegistrodeLeituradeMercadoriaemEstoqueModel from './models/NewRegistrodeLeituradeMercadoriaemEstoqueModel';
 export * as NewRegistrodevendaModel from './models/NewRegistrodevendaModel';
 export * as NewS3objectsModel from './models/NewS3objectsModel';
+export * as NewPrecodeProdutoModel from './models/NewPrecodeProdutoModel';
+export * as Cr22fFornecedoresFromSharepointListModel from './models/Cr22fFornecedoresFromSharepointListModel';
+export * as NewTiposervicoprecodeprodutoModel from './models/NewTiposervicoprecodeprodutoModel';
+export * as NewTipodeservicoModel from './models/NewTipodeservicoModel';
 
 // Services
 export * from './services/RolesService';
@@ -55,3 +59,7 @@ export * from './services/NewSolicitacaodeAjustedeEstoqueService';
 export * from './services/NewRegistrodeLeituradeMercadoriaemEstoqueService';
 export * from './services/NewRegistrodevendaService';
 export * from './services/NewS3objectsService';
+export * from './services/NewPrecodeProdutoService';
+export * from './services/Cr22fFornecedoresFromSharepointListService';
+export * from './services/NewTiposervicoprecodeprodutoService';
+export * from './services/NewTipodeservicoService';

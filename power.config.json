@@ -132,6 +132,26 @@
           "entitySetName": "new_s3objectses",
           "logicalName": "new_s3objects",
           "isHidden": false
+        },
+        "new_precodeprodutos": {
+          "entitySetName": "new_precodeprodutos",
+          "logicalName": "new_precodeproduto",
+          "isHidden": false
+        },
+        "cr22f_fornecedoresfromsharepointlists": {
+          "entitySetName": "cr22f_fornecedoresfromsharepointlists",
+          "logicalName": "cr22f_fornecedoresfromsharepointlist",
+          "isHidden": false
+        },
+        "new_tiposervicoprecodeprodutos": {
+          "entitySetName": "new_tiposervicoprecodeprodutos",
+          "logicalName": "new_tiposervicoprecodeproduto",
+          "isHidden": false
+        },
+        "new_tipodeservicos": {
+          "entitySetName": "new_tipodeservicos",
+          "logicalName": "new_tipodeservico",
+          "isHidden": false
         }
       },
       "actions": null
