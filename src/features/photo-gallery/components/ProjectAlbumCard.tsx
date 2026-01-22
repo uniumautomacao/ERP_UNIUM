@@ -14,9 +14,26 @@ export const ProjectAlbumCard = forwardRef<HTMLDivElement, ProjectAlbumCardProps
   preview,
   onOpen,
 }, ref) => {
-  const previewState = preview ?? { url: null, loading: true };
+  const previewState = preview ?? { url: null, loading: true, hasContent: false };
   const title = project.cr22f_apelido ?? "Sem apelido";
   const year = project.cr22f_ano ?? "Sem ano";
+  const hasContent = previewState.hasContent === true;
+  const mediaLabel =
+    previewState.mediaType === "video"
+      ? "Video disponivel"
+      : previewState.mediaType === "pdf"
+        ? "PDF disponivel"
+        : previewState.mediaType === "file"
+          ? "Arquivo disponivel"
+          : "Conteudo disponivel";
+  const mediaIcon =
+    previewState.mediaType === "video"
+      ? "🎬"
+      : previewState.mediaType === "pdf"
+        ? "📄"
+        : previewState.mediaType === "file"
+          ? "📁"
+          : "✅";
 
   const handleOpen = () => onOpen(project);
 
@@ -57,9 +74,16 @@ export const ProjectAlbumCard = forwardRef<HTMLDivElement, ProjectAlbumCardProps
               alt={`Foto do album ${title}`}
               className="h-full w-full object-cover"
             />
+          ) : hasContent ? (
+            <div className="flex flex-col items-center gap-2">
+              <div style={{ fontSize: "20px" }}>{mediaIcon}</div>
+              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                {mediaLabel}
+              </Text>
+            </div>
           ) : (
             <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-              Sem fotos
+              Sem conteudo
             </Text>
           )}
         </div>

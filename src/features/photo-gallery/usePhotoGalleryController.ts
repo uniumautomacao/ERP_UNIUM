@@ -6,12 +6,12 @@ import { NewOrdemdeServicoFieldControlService } from "../../generated/services/N
 import { NewS3objectsService } from "../../generated/services/NewS3objectsService";
 import {
   buildAlbumMediaSearchFilter,
-  buildLastPhotoFilter,
   buildProjectSearchFilter,
   buildS3ObjectsByWorkOrdersFilter,
   buildUniversalPhotoSearchFilter,
   buildWorkOrdersByProjectFilter,
 } from "./utils/dataverseFilters";
+import { getMediaType } from "./utils/mediaUtils";
 import type { AlbumPreviewState } from "./types";
 
 const PAGE_SIZE = 12;
@@ -72,10 +72,10 @@ export function usePhotoGalleryController() {
         .map((os) => os.new_ordemdeservicofieldcontrolid)
         .filter((id): id is string => !!id);
 
-      const photoFilter = buildLastPhotoFilter(osIds);
+      const mediaFilter = buildS3ObjectsByWorkOrdersFilter(osIds);
       const photoResult = await NewS3objectsService.getAll({
-        select: ["new_s3objectsid", "new_remoteurl"],
-        filter: photoFilter,
+        select: ["new_s3objectsid", "new_remoteurl", "new_isimage"],
+        filter: mediaFilter,
         orderBy: ["new_datetime desc"],
         top: 1,
       });
@@ -89,18 +89,24 @@ export function usePhotoGalleryController() {
       }
 
       if (photoResult.data && photoResult.data.length > 0) {
-        const lastPhoto = photoResult.data[0];
+        const lastMedia = photoResult.data[0];
+        const remoteUrl = lastMedia.new_remoteurl ?? "";
+        const mediaType = getMediaType(lastMedia.new_isimage, remoteUrl);
+        const isImage = mediaType === "image" && !!remoteUrl;
+
         setPreviews((prev) => ({
           ...prev,
           [projectId]: {
-            url: lastPhoto.new_remoteurl ?? null,
+            url: isImage ? remoteUrl : null,
             loading: false,
+            hasContent: true,
+            mediaType,
           },
         }));
       } else {
         setPreviews((prev) => ({
           ...prev,
-          [projectId]: { url: null, loading: false },
+          [projectId]: { url: null, loading: false, hasContent: false },
         }));
       }
     } catch (err) {
