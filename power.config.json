@@ -127,6 +127,11 @@
           "entitySetName": "new_registrodevendas",
           "logicalName": "new_registrodevenda",
           "isHidden": false
+        },
+        "new_s3objectses": {
+          "entitySetName": "new_s3objectses",
+          "logicalName": "new_s3objects",
+          "isHidden": false
         }
       },
       "actions": null

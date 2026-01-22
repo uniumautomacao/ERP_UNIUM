@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.3';
+export const APP_VERSION = '0.1.4';
 export const APP_BUILD_DATE = '2026-01-21';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.4',
+    date: '2026-01-21',
+    changes: 'Importada nova tabela do Dataverse: new_s3objects.',
+  },
   {
     version: '0.1.3',
     date: '2026-01-21',

@@ -28,6 +28,7 @@ export * as NewAjustedeEstoqueModel from './models/NewAjustedeEstoqueModel';
 export * as NewSolicitacaodeAjustedeEstoqueModel from './models/NewSolicitacaodeAjustedeEstoqueModel';
 export * as NewRegistrodeLeituradeMercadoriaemEstoqueModel from './models/NewRegistrodeLeituradeMercadoriaemEstoqueModel';
 export * as NewRegistrodevendaModel from './models/NewRegistrodevendaModel';
+export * as NewS3objectsModel from './models/NewS3objectsModel';
 
 // Services
 export * from './services/RolesService';
@@ -53,3 +54,4 @@ export * from './services/NewAjustedeEstoqueService';
 export * from './services/NewSolicitacaodeAjustedeEstoqueService';
 export * from './services/NewRegistrodeLeituradeMercadoriaemEstoqueService';
 export * from './services/NewRegistrodevendaService';
+export * from './services/NewS3objectsService';

@@ -26,6 +26,7 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Solicitação de Ajuste de Estoque | `new_solicitacaodeajustedeestoque` | `new_solicitacaodeajustedeestoques` | `new_solicitacaodeajustedeestoqueid` |
 | Registro de Leitura de Mercadoria em Estoque | `new_registrodeleiturademercadoriaemestoque` | `new_registrodeleiturademercadoriaemestoques` | `new_registrodeleiturademercadoriaemestoqueid` |
 | Registro de Venda | `new_registrodevenda` | `new_registrodevendas` | `new_registrodevendaid` |
+| S3 Objects | `new_s3objects` | `new_s3objectses` | `new_s3objectsid` |
 
 ---
 
@@ -122,6 +123,28 @@ PrimaryKey:                       new_registrodevendaid
 | new_precodeproduto | new_PrecodeProduto | new_precodeprodutos |
 | new_produto | new_Produto | products |
 | new_projeto | new_Projeto | cr22f_projetos |
+
+---
+
+## 🔵 new_s3objects (S3 Objects)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_s3objects
+EntityLogicalCollectionName:      new_s3objectses
+EntitySetName:                    new_s3objectses
+PrimaryKey:                       new_s3objectsid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_componentedescricaoitemcatalogoverificacao | new_ComponenteDescricaoItemCatalogoVerificacao | catalogitems |
+| new_feedbackdocolaborador | new_FeedbackdoColaborador | new_feedbackdocolaboradores |
+| new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
+| new_rma | new_RMA | new_rmas |
+| new_userlocation | new_UserLocation | new_userlocations |
+| new_wazzupmessage | new_WazzupMessage | new_wazzupmessages |
 
 ---
 

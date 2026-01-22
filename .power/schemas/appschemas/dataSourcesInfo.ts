@@ -165,5 +165,12 @@ export const dataSourcesInfo = {
     "primaryKey": "new_registrodevendaid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_s3objectses": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_s3objectsid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };
