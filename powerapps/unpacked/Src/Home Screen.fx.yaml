@@ -1,0 +1,2037 @@
+"'Home Screen' As screen":
+    LoadingSpinnerColor: =RGBA(0, 120, 212, 1)
+    OnVisible: |-
+        =If(
+            IsBlank(SpinCounter),
+            UpdateContext({SpinCounter: 0})
+        )
+
+    RootLayoutContainer_HS As groupContainer.verticalAutoLayoutContainer:
+        Fill: =RGBA(250, 250, 250, 1)
+        Height: =App.Height
+        LayoutAlignItems: =LayoutAlignItems.Stretch
+        LayoutDirection: =LayoutDirection.Vertical
+        LayoutGridColumns: =6
+        LayoutGridRows: =6
+        LayoutMode: =LayoutMode.Auto
+        LayoutOverflowY: =LayoutOverflow.Scroll
+        Width: =App.Width
+        ZIndex: =1
+
+        CommandContainer_HS As groupContainer.horizontalAutoLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            FillPortions: =0
+            Height: =44
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutGridColumns: =6
+            LayoutGridRows: =6
+            LayoutMaxHeight: =
+            LayoutMaxWidth: =
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            LayoutMode: =LayoutMode.Auto
+            ZIndex: =3
+
+            "CommandBar1 As 'Fluent Command Bar (1.1.29)'.pcfdataset":
+                DisplayMode: =DisplayMode.Edit
+                FillPortions: =1
+                Height: =200
+                Items: |-
+                    =Table(
+                        {
+                            ItemKey: "Refresh",
+                            ItemIconName: "Refresh",
+                            ItemDisplayName: "Atualizar"
+                        }
+                    )
+                LayoutMaxHeight: =
+                LayoutMaxWidth: =
+                LayoutMinHeight: =200
+                LayoutMinWidth: =200
+                OnSelect: =
+                Theme: =AppThemeJson
+                Width: =600 
+                X: =0
+                Y: =0
+                ZIndex: =1
+
+            VersionText As Text:
+                Align: ='TextCanvas.Align'.Center
+                BorderColor: =
+                DisplayMode: =DisplayMode.Edit
+                Fill: =
+                FontColor: =
+                Height: =32
+                LayoutMaxHeight: =
+                LayoutMaxWidth: =
+                LayoutMinHeight: =32
+                LayoutMinWidth: =96
+                Text: ="V0.1"
+                VerticalAlign: =VerticalAlign.Middle
+                Width: =96
+                X: =0
+                Y: =0
+                ZIndex: =2
+
+        SubheaderContainer_HS As groupContainer.horizontalAutoLayoutContainer:
+            FillPortions: =0
+            Height: =70
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutGridColumns: =6
+            LayoutGridRows: =6
+            LayoutMaxHeight: =
+            LayoutMaxWidth: =
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            LayoutMode: =LayoutMode.Auto
+            PaddingLeft: =10
+            PaddingRight: =10
+            ZIndex: =4
+
+            lbTitleCodeReview As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =2
+                Color: =RGBA(20, 0, 0, 1)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                FillPortions: =1
+                FocusedBorderThickness: =4
+                Font: =Font.Lato
+                FontWeight: =FontWeight.Semibold
+                Height: =70
+                LayoutMaxHeight: =
+                LayoutMaxWidth: =
+                PaddingLeft: =20
+                Text: ="Cadastro Rápido de Produto"
+                Width: =240
+                Y: =241
+                ZIndex: =1
+
+            SearchBox_1 As SearchBox:
+                LayoutMaxHeight: =
+                LayoutMaxWidth: =
+                LayoutMinHeight: =640
+                LayoutMinWidth: =640
+                Styles: |-
+                    =Table({Name: "PrimaryColor1Value", Value: "#ffffff"},
+                    {Name: "PrimaryColor1TextValue", Value: "#292929"},
+                    {Name: "PrimaryColor2Value", Value: "#0078d4"},
+                    {Name: "PrimaryColor2TextValue", Value: "#ffffff"},
+                    {Name: "PrimaryColor3Value", Value: "#303030"},
+                    {Name: "PrimaryColor3TextValue", Value: "#080808"},
+                    {Name: "PrimaryColor4Value", Value: "#006e7d"},
+                    {Name: "defaultLabelColorValue", Value: "#333333"},
+                    {Name: "RadiusValue", Value: "0"},
+                    {Name: "TextBodyFontFaceValue", Value: "Segoe UI" },
+                    {Name: "PaddingValue", Value: "8"},
+                    {Name: "TextEmphasisFontSizeValue", Value: "16"},
+                    {Name: "TextEmphasisFontSizePhoneValue", Value: "24"},
+                    {Name: "TextBodyFontSizeValue", Value: "12"},
+                    {Name: "TextBodyFontSizePhoneValue", Value: "21"},
+                    {Name: "BackgroundColorValue", Value: "#ffffff"},
+                    {Name: "BorderThicknessValue", Value: "0"},
+                    {Name: "BorderColorValue", Value: "#FFFFFF"},
+                    {Name: "FocusedBorderThicknessValue", Value: "0"},
+                    {Name: "BackgroundColorValue", Value :"#FFFFFF"}
+                    )
+                ZIndex: =2
+
+        ContentContainer_HS As groupContainer.verticalAutoLayoutContainer:
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGridColumns: =6
+            LayoutGridRows: =6
+            LayoutMaxHeight: =
+            LayoutMaxWidth: =
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            LayoutMode: =LayoutMode.Auto
+            ZIndex: =5
+
+            BodyContainer As groupContainer.verticalAutoLayoutContainer:
+                DropShadow: =DropShadow.Light
+                LayoutAlignItems: =LayoutAlignItems.Stretch
+                LayoutGap: =10
+                LayoutGridColumns: =6
+                LayoutGridRows: =6
+                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                LayoutMaxHeight: =
+                LayoutMaxWidth: =
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                LayoutMode: =LayoutMode.Auto
+                PaddingBottom: =10
+                PaddingLeft: =10
+                PaddingRight: =10
+                PaddingTop: =10
+                RadiusBottomLeft: =4
+                RadiusBottomRight: =4
+                RadiusTopLeft: =4
+                RadiusTopRight: =4
+                ZIndex: =2
+
+                TemplatesContainer As groupContainer.horizontalAutoLayoutContainer:
+                    DropShadow: =DropShadow.Light
+                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                    LayoutDirection: =LayoutDirection.Vertical
+                    LayoutGridColumns: =6
+                    LayoutGridRows: =6
+                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                    LayoutMaxHeight: =
+                    LayoutMaxWidth: =
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    LayoutMode: =LayoutMode.Auto
+                    PaddingBottom: =10
+                    PaddingLeft: =20
+                    PaddingRight: =20
+                    PaddingTop: =10
+                    RadiusBottomLeft: =4
+                    RadiusBottomRight: =4
+                    RadiusTopLeft: =4
+                    RadiusTopRight: =4
+                    ZIndex: =1
+
+                    TemplateHeaderText As Text:
+                        Align: ='TextCanvas.Align'.Start
+                        BorderColor: =
+                        DisplayMode: =DisplayMode.Edit
+                        Fill: =
+                        Font: =Font.'Lato Black'
+                        FontColor: =
+                        Height: =32
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =32
+                        LayoutMinWidth: =96
+                        Text: ="Selecione um produto existente que mais se assemelha"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Width: =96
+                        X: =0
+                        Y: =0
+                        ZIndex: =1
+
+                    TemplatesTable As Table.pcfdataset:
+                        DateOnlyFormat: ='PowerAppsOneGrid.DateOnlyFormat'.ShortDate
+                        DateTimeFormat: ='PowerAppsOneGrid.DateTimeFormat'.ShortDateTime
+                        DisplayMode: =DisplayMode.Edit
+                        EnableRangeSelection: ='PowerAppsOneGrid.EnableRangeSelection'.Disable
+                        FillPortions: =1
+                        Height: =If(Self.Y + 500 > Parent.Height, Parent.Height - Self.Y, 500)
+                        Items: |-
+                            =SortByColumns(
+                                Search(
+                                    Filter(
+                                        'Modelos de Produto From Sharepoint Lists' As M,
+                                        M.Status = 'Status (Modelos de Produto From Sharepoint Lists)'.Active
+                                    ),
+                                    SearchBox_1.SearchText,
+                                    Descrição,
+                                    Referência,
+                                    QueryCategoria,
+                                    'Nome do Fabricante'
+                                ),
+                                "cr22f_title",
+                                SortOrder.Ascending
+                            )
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =
+                        LayoutMinWidth: =
+                        onCellValueChange: =false
+                        onFilter: =false
+                        onNavigate: =false
+                        onRowSelect: =false
+                        onSave: =false
+                        OnSelect: |-
+                            =With(
+                                Self.Selected As SelectedItem,
+                                Set(
+                                    TemplateItem,
+                                    SelectedItem/*Patch(
+                                        Defaults('Modelos de Produto From Sharepoint Lists'),
+                                        {
+                                            Referência: SelectedItem.Referência,
+                                            Fabricante: LookUp(
+                                                'Fabricantes From Sharpoint Lists' As F,
+                                                F.'Fabricantes From Sharpoint List' = SelectedItem.Fabricante.'Fabricantes From Sharpoint List'
+                                            ),
+                                            QueryCategoria: SelectedItem.QueryCategoria,
+                                            'Tipo de Sistema Padrão': SelectedItem.'Tipo de Sistema Padrão',
+                                            'Controla S/N': SelectedItem.'Controla S/N',
+                                            'Controla Etiqueta': SelectedItem.'Controla Etiqueta',
+                                            'Requer Configuração': SelectedItem.'Requer Configuração',
+                                            'Requer Cabeamento': SelectedItem.'Requer Cabeamento',
+                                            'Requer Engraving': SelectedItem.'Requer Engraving',
+                                            'Reserva de Produto Livre': SelectedItem.'Reserva de Produto Livre',
+                                            'Device IO Template (JSON)': SelectedItem.'Device IO Template (JSON)',
+                                            'Horas Agregadas': SelectedItem.'Horas Agregadas'
+                                        }
+                                    )*/
+                                )
+                            )
+                        Width: =If(Self.X + 800 > Parent.Width, Parent.Width - Self.X, 800)
+                        X: =0
+                        Y: =0
+                        ZIndex: =2
+
+                        Referência2 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Referência"
+                            FieldName: ="cr22f_title"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =1
+                            Width: =0
+                            ZIndex: =1
+
+                        Descrição1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Descrição"
+                            FieldName: ="new_descricao"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =2
+                            Width: =0
+                            ZIndex: =2
+
+                        "'Nome do Fabricante2' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Nome do Fabricante"
+                            FieldName: ="new_nomedofabricante"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =3
+                            Width: =0
+                            ZIndex: =3
+
+                NewItemContainer As groupContainer.horizontalAutoLayoutContainer:
+                    DropShadow: =DropShadow.Light
+                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                    LayoutDirection: =LayoutDirection.Vertical
+                    LayoutGridColumns: =6
+                    LayoutGridRows: =6
+                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                    LayoutMaxHeight: =
+                    LayoutMaxWidth: =
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    LayoutMode: =LayoutMode.Auto
+                    PaddingBottom: =10
+                    PaddingLeft: =20
+                    PaddingRight: =20
+                    PaddingTop: =10
+                    RadiusBottomLeft: =4
+                    RadiusBottomRight: =4
+                    RadiusTopLeft: =4
+                    RadiusTopRight: =4
+                    ZIndex: =2
+
+                    NewItemHeaderText As Text:
+                        Align: ='TextCanvas.Align'.Start
+                        AutoHeight: =false
+                        BorderColor: =
+                        BorderStyle: =""
+                        ContentLanguage: =""
+                        DisplayMode: =DisplayMode.Edit
+                        Fill: =
+                        Font: =Font.'Lato Black'
+                        FontColor: =
+                        FontItalic: =false
+                        FontStrikethrough: =false
+                        FontUnderline: =false
+                        Height: =32
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =32
+                        LayoutMinWidth: =96
+                        Size: =14
+                        TabIndex: =0
+                        Text: ="Ajuste as informações do produto"
+                        Tooltip: =""
+                        VerticalAlign: =VerticalAlign.Middle
+                        Visible: =true
+                        Weight: ="Regular"
+                        Width: =96
+                        Wrap: =true
+                        X: =0
+                        Y: =0
+                        ZIndex: =1
+
+                    Form1 As form.PowerApps_CoreControls_Form:
+                        BorderColor: =RGBA(166, 166, 166, 1)
+                        DataSource: ='Modelos de Produto From Sharepoint Lists'
+                        Item: =TemplateItem
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =250
+                        LayoutMinWidth: =0
+                        UseFluentV9Cards: =true
+                        ZIndex: =2
+
+                        Fabricante_DataCard1 As typedDataCard.fluentV9ComboBoxEditCard:
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_Fabricante"
+                            Default: =ThisItem.Fabricante
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,Fabricante)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =false
+                            Update: =DataCardValue18.Selected
+                            Width: =214
+                            X: =1
+                            Y: =0
+                            ZIndex: =1
+
+                            DataCardKey18 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue18 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices([@'Modelos de Produto From Sharepoint Lists'].Fabricante)
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey18.Y + DataCardKey18.Height + 4
+                                ZIndex: =2
+
+                                Title1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                    FieldDisplayName: ="Title"
+                                    FieldName: ="cr22f_title"
+                                    FieldType: ="s"
+                                    FieldVariantName: ="textualColumn"
+                                    Order: =1
+                                    ZIndex: =1
+
+                                ID1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                    FieldDisplayName: ="ID"
+                                    FieldName: ="cr22f_id"
+                                    FieldType: ="s"
+                                    FieldVariantName: ="textualColumn"
+                                    Order: =2
+                                    ZIndex: =2
+
+                            ErrorMessage18 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue18.Y + DataCardValue18.Height
+                                ZIndex: =3
+
+                            StarVisible18 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey18.Y
+                                ZIndex: =4
+
+                        QueryCategoria_DataCard2 As typedDataCard.fluentV9TextualEditCard:
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="cr22f_querycategoria"
+                            Default: =ThisItem.QueryCategoria
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,QueryCategoria)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            MaxLength: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'], DataSourceInfo.MaxLength, QueryCategoria)
+                            Required: =true
+                            Update: =DataCardValue19.Value
+                            Width: =214
+                            X: =2
+                            Y: =0
+                            ZIndex: =1
+
+                            DataCardKey19 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue19 As 'Text input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                FontColor: =
+                                Height: =32
+                                Mode: ="'TextInputCanvas.Mode'.TextInputModeSingleLine"
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey19.Y + DataCardKey19.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage19 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue19.Y + DataCardValue19.Height
+                                ZIndex: =3
+
+                            StarVisible19 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey19.Y
+                                ZIndex: =4
+
+                        "'Tipo de Sistema Padrão_DataCard2' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_tipodesistemapadrao"
+                            Default: =ThisItem.'Tipo de Sistema Padrão'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Tipo de Sistema Padrão')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =DataCardValue20.Selected.Value
+                            Width: =214
+                            X: =0
+                            Y: =1
+                            ZIndex: =1
+
+                            DataCardKey20 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue20 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Tipo de Sistema')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey20.Y + DataCardKey20.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage20 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue20.Y + DataCardValue20.Height
+                                ZIndex: =3
+
+                            StarVisible20 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey20.Y
+                                ZIndex: =4
+
+                        "'Controla S/N_DataCard2' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_controlasn"
+                            Default: =ThisItem.'Controla S/N'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Controla S/N')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =DataCardValue21.Selected.Value
+                            Width: =214
+                            X: =1
+                            Y: =1
+                            ZIndex: =1
+
+                            DataCardKey21 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue21 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Controla S/N (Modelos de Produto From Sharepoint Lists)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey21.Y + DataCardKey21.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage21 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue21.Y + DataCardValue21.Height
+                                ZIndex: =3
+
+                            StarVisible21 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey21.Y
+                                ZIndex: =4
+
+                        "'Controla Etiqueta_DataCard2' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_controlaetiqueta"
+                            Default: =ThisItem.'Controla Etiqueta'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Controla Etiqueta')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =DataCardValue22.Selected.Value
+                            Width: =214
+                            X: =2
+                            Y: =1
+                            ZIndex: =1
+
+                            DataCardKey22 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue22 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Controla Etiqueta (Modelos de Produto From Sharepoint Lists)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey22.Y + DataCardKey22.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage22 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue22.Y + DataCardValue22.Height
+                                ZIndex: =3
+
+                            StarVisible22 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey22.Y
+                                ZIndex: =4
+
+                        "'Requer Configuração_DataCard2' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_requerconfiguracao"
+                            Default: =ThisItem.'Requer Configuração'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Requer Configuração')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =DataCardValue23.Selected.Value
+                            Width: =214
+                            X: =0
+                            Y: =2
+                            ZIndex: =1
+
+                            DataCardKey23 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue23 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Requer Configuração (Modelos de Produto From Sharepoint Lists)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey23.Y + DataCardKey23.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage23 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue23.Y + DataCardValue23.Height
+                                ZIndex: =3
+
+                            StarVisible23 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey23.Y
+                                ZIndex: =4
+
+                        "'Requer Cabeamento_DataCard2' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_requercabeamento"
+                            Default: =ThisItem.'Requer Cabeamento'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Requer Cabeamento')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =DataCardValue24.Selected.Value
+                            Width: =214
+                            X: =1
+                            Y: =2
+                            ZIndex: =1
+
+                            DataCardKey24 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue24 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Requer Cabeamento (Modelos de Produto From Sharepoint Lists)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey24.Y + DataCardKey24.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage24 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue24.Y + DataCardValue24.Height
+                                ZIndex: =3
+
+                            StarVisible24 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey24.Y
+                                ZIndex: =4
+
+                        "'Requer Engraving_DataCard1' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_requerengraving"
+                            Default: =ThisItem.'Requer Engraving'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Requer Engraving')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =false
+                            Update: =DataCardValue25.Selected.Value
+                            Width: =214
+                            X: =2
+                            Y: =2
+                            ZIndex: =1
+
+                            DataCardKey25 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue25 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Requer Engraving (Modelos de Produto From Sharepoint Lists)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey25.Y + DataCardKey25.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage25 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue25.Y + DataCardValue25.Height
+                                ZIndex: =3
+
+                            StarVisible25 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey25.Y
+                                ZIndex: =4
+
+                        "'Reserva de Produto Livre_DataCard1' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_reservadeprodutolivre"
+                            Default: =ThisItem.'Reserva de Produto Livre'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Reserva de Produto Livre')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =false
+                            Update: =DataCardValue26.Selected.Value
+                            Width: =214
+                            X: =0
+                            Y: =3
+                            ZIndex: =1
+
+                            DataCardKey26 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue26 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Reserva de Produto Livre (Modelos de Produto From Sharepoint Lists)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey26.Y + DataCardKey26.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage26 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue26.Y + DataCardValue26.Height
+                                ZIndex: =3
+
+                            StarVisible26 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey26.Y
+                                ZIndex: =4
+
+                        "'Device IO Template (JSON)_DataCard1' As typedDataCard.fluentV9TextualMultiLineEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_deviceiotemplatejson"
+                            Default: =ThisItem.'Device IO Template (JSON)'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Device IO Template (JSON)')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =166
+                            Required: =false
+                            Update: =DataCardValue27.Value
+                            Width: =214
+                            X: =1
+                            Y: =3
+                            ZIndex: =1
+
+                            DataCardKey27 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue27 As 'Text input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                FontColor: =
+                                Height: =144
+                                Mode: ='TextInputCanvas.Mode'.Multiline
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey27.Y + DataCardKey27.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage27 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue27.Y + DataCardValue27.Height
+                                ZIndex: =3
+
+                            StarVisible27 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey27.Y
+                                ZIndex: =4
+
+                        "'Horas Agregadas_DataCard2' As typedDataCard.fluentV9TextualEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="cr22f_horasagregadas"
+                            Default: =ThisItem.'Horas Agregadas'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,'Horas Agregadas')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            MaxLength: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'], DataSourceInfo.MaxLength, 'Horas Agregadas')
+                            Required: =true
+                            Update: =DataCardValue28.Value
+                            Width: =214
+                            X: =2
+                            Y: =3
+                            ZIndex: =1
+
+                            DataCardKey28 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue28 As 'Text input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                FontColor: =
+                                Height: =32
+                                Mode: ="'TextInputCanvas.Mode'.TextInputModeSingleLine"
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey28.Y + DataCardKey28.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage28 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue28.Y + DataCardValue28.Height
+                                ZIndex: =3
+
+                            StarVisible28 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey28.Y
+                                ZIndex: =4
+
+                        Referência_DataCard1 As typedDataCard.fluentV9TextualEditCard:
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="cr22f_title"
+                            Default: =ThisItem.Referência
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'],DataSourceInfo.DisplayName,Referência)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            MaxLength: =DataSourceInfo([@'Modelos de Produto From Sharepoint Lists'], DataSourceInfo.MaxLength, Referência)
+                            Required: =false
+                            Update: =DataCardValue3.Value
+                            Width: =214
+                            X: =0
+                            Y: =0
+                            ZIndex: =3
+
+                            DataCardKey3 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue3 As 'Text input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                FontColor: =
+                                Height: =32
+                                Mode: ="'TextInputCanvas.Mode'.TextInputModeSingleLine"
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey3.Y + DataCardKey3.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage3 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue3.Y + DataCardValue3.Height
+                                ZIndex: =3
+
+                            StarVisible3 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey3.Y
+                                ZIndex: =4
+
+                    PrecoProdutoTable As Table.pcfdataset:
+                        AccessibleLabel: =""
+                        ContentLanguage: =""
+                        ContextualLookupColumnFilters: ="yes"
+                        DateOnlyFormat: ='PowerAppsOneGrid.DateOnlyFormat'.ShortDate
+                        DateTimeFormat: ='PowerAppsOneGrid.DateTimeFormat'.ShortDateTime
+                        DisableChildItemsEditing: ="no"
+                        DisableStatusColumn: =""
+                        DisableStatusColumnSavingIcons: =""
+                        DisplayMode: =DisplayMode.Edit
+                        EnableAggregation: ="no"
+                        EnableColumnMoving: ="no"
+                        EnableDropdownColor: ="no"
+                        EnableEditing: ="no"
+                        EnableFiltering: ="no"
+                        EnableGrouping: ="no"
+                        EnableJumpBar: ="no"
+                        EnableMultipleSelection: ="no"
+                        EnablePagination: ="no"
+                        EnableRangeSelection: ="yes"
+                        EnableSorting: ="yes"
+                        EnableStatusColumn: ="yes"
+                        EnableStatusIcons: ="no"
+                        EnableTypeIcons: ="no"
+                        FillPortions: =1
+                        Font: =""
+                        FontSize: =0
+                        FontWeight: =""
+                        GridCustomizerControlFullName: =""
+                        HeaderFont: =""
+                        HeaderFontSize: =0
+                        HeaderFontWeight: =""
+                        Height: =If(Self.Y + 500 > Parent.Height, Parent.Height - Self.Y, 500)
+                        Items: =TemplateItem.'Preços de Produtos'
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =
+                        LayoutMinWidth: =
+                        LookupFilterBeginsWith: ="no"
+                        NavigationTypesAllowed: ="none"
+                        NoDataText: =""
+                        onCellValueChange: =false
+                        onFilter: =false
+                        onNavigate: =false
+                        onRowSelect: =false
+                        onSave: =false
+                        OnSelect: =false
+                        ReflowBehavior: ="Reflow"
+                        ShowAvatar: ="yes"
+                        ShowColumnHeaders: ="yes"
+                        ShowFooter: ="yes"
+                        TabIndex: =0
+                        Tooltip: =""
+                        Visible: =true
+                        Width: =If(Self.X + 800 > Parent.Width, Parent.Width - Self.X, 800)
+                        X: =40
+                        Y: =40
+                        ZIndex: =3
+
+                        Descrição2 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Descrição"
+                            FieldName: ="new_descricao"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =1
+                            Width: =0
+                            ZIndex: =1
+
+                        "'Referência do Produto1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Referência do Produto"
+                            FieldName: ="new_referenciadoproduto"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =2
+                            Width: =0
+                            ZIndex: =2
+
+                        "'Preço de Venda1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Preço de Venda"
+                            FieldName: ="new_precodevenda"
+                            FieldType: ="$"
+                            FieldVariantName: ="textualColumn"
+                            Order: =5
+                            Width: =0
+                            ZIndex: =5
+
+                        "'Preço com Instalação1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Preço com Instalação"
+                            FieldName: ="new_precocominstalacao"
+                            FieldType: ="$"
+                            FieldVariantName: ="textualColumn"
+                            Order: =6
+                            Width: =0
+                            ZIndex: =6
+
+                        "'Preço Base1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Preço Base"
+                            FieldName: ="new_precobase"
+                            FieldType: ="$"
+                            FieldVariantName: ="textualColumn"
+                            Order: =7
+                            Width: =0
+                            ZIndex: =7
+
+                        "'Desconto Percentual de Compra1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Desconto Percentual de Compra"
+                            FieldName: ="new_descontopercentualdecompra"
+                            FieldType: ="n"
+                            FieldVariantName: ="textualColumn"
+                            Order: =8
+                            Width: =0
+                            ZIndex: =8
+
+                        Markup1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Markup"
+                            FieldName: ="new_markup"
+                            FieldType: ="n"
+                            FieldVariantName: ="textualColumn"
+                            Order: =9
+                            Width: =0
+                            ZIndex: =9
+
+                        "'Preço de Compra1' As PowerAppsOneGridTemplate_dataField.textualColumn":
+                            FieldDisplayName: ="Preço de Compra"
+                            FieldName: ="new_precodecompra"
+                            FieldType: ="$"
+                            FieldVariantName: ="textualColumn"
+                            Order: =10
+                            Width: =0
+                            ZIndex: =10
+
+                    Form3 As form.PowerApps_CoreControls_Form:
+                        AcceptsFocus: =false
+                        BorderColor: =RGBA(166, 166, 166, 1)
+                        DataSource: ='Preços de Produtos'
+                        Item: =LookUp('Preços de Produtos' As P, P.'Preço de Produto' = PrecoProdutoTable.Selected.'Preço de Produto')
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        UseFluentV9Cards: =true
+                        X: =40
+                        Y: =40
+                        ZIndex: =4
+
+                        Descrição_DataCard1 As typedDataCard.fluentV9TextualEditCard:
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_descricao"
+                            Default: =ThisItem.Descrição
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Preços de Produtos'],DataSourceInfo.DisplayName,Descrição)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            MaxLength: =DataSourceInfo([@'Preços de Produtos'], DataSourceInfo.MaxLength, Descrição)
+                            Required: =false
+                            Update: =DataCardValue1.Value
+                            Width: =209
+                            X: =0
+                            Y: =0
+                            ZIndex: =1
+
+                            DataCardKey1 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue1 As 'Text input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                FontColor: =
+                                Height: =32
+                                Mode: ="'TextInputCanvas.Mode'.TextInputModeSingleLine"
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey1.Y + DataCardKey1.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage1 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue1.Y + DataCardValue1.Height
+                                ZIndex: =3
+
+                            StarVisible1 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey1.Y
+                                ZIndex: =4
+
+                        Fornecedor_DataCard1 As typedDataCard.fluentV9ComboBoxEditCard:
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_Fornecedor"
+                            Default: =ThisItem.Fornecedor
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Preços de Produtos'],DataSourceInfo.DisplayName,Fornecedor)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =false
+                            Update: =DataCardValue2.Selected
+                            Width: =209
+                            X: =1
+                            Y: =0
+                            ZIndex: =1
+
+                            DataCardKey2 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue2 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices([@'Preços de Produtos'].Fornecedor)
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey2.Y + DataCardKey2.Height + 4
+                                ZIndex: =2
+
+                                NomeFantasia1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                    FieldDisplayName: ="NomeFantasia"
+                                    FieldName: ="cr22f_nomefantasia"
+                                    FieldType: ="s"
+                                    FieldVariantName: ="textualColumn"
+                                    Order: =1
+                                    ZIndex: =1
+
+                                RazãoSocial1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                                    FieldDisplayName: ="RazãoSocial"
+                                    FieldName: ="cr22f_razosocial"
+                                    FieldType: ="s"
+                                    FieldVariantName: ="textualColumn"
+                                    Order: =2
+                                    ZIndex: =2
+
+                            ErrorMessage2 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue2.Y + DataCardValue2.Height
+                                ZIndex: =3
+
+                            StarVisible2 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey2.Y
+                                ZIndex: =4
+
+                        "'Preço Base_DataCard1' As typedDataCard.fluentV9CurrencyEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_precobase"
+                            Default: =ThisItem.'Preço Base'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Preços de Produtos'],DataSourceInfo.DisplayName,'Preço Base')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =false
+                            Update: =Value(DataCardValue4.Value)
+                            Width: =209
+                            X: =2
+                            Y: =0
+                            ZIndex: =1
+
+                            DataCardKey4 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue4 As 'Text input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                FontColor: =
+                                Height: =32
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey4.Y + DataCardKey4.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage4 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue4.Y + DataCardValue4.Height
+                                ZIndex: =3
+
+                            StarVisible4 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey4.Y
+                                ZIndex: =4
+
+                        "'Desconto Percentual de Compra_DataCard1' As typedDataCard.fluentV9NumberEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_descontopercentualdecompra"
+                            Default: =ThisItem.'Desconto Percentual de Compra'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Preços de Produtos'],DataSourceInfo.DisplayName,'Desconto Percentual de Compra')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =false
+                            Update: =Value(DataCardValue5.Value)
+                            Width: =209
+                            X: =0
+                            Y: =1
+                            ZIndex: =1
+
+                            DataCardKey5 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue5 As 'Number input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                Height: =32
+                                Max: =Blank()
+                                Min: =Blank()
+                                Step: =1
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey5.Y + DataCardKey5.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage5 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue5.Y + DataCardValue5.Height
+                                ZIndex: =3
+
+                            StarVisible5 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey5.Y
+                                ZIndex: =4
+
+                        "'Requer Instalação_DataCard1' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_requerinstalacao"
+                            Default: =ThisItem.'Requer Instalação'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Preços de Produtos'],DataSourceInfo.DisplayName,'Requer Instalação')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =DataCardValue6.Selected.Value
+                            Width: =209
+                            X: =1
+                            Y: =1
+                            ZIndex: =1
+
+                            DataCardKey6 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue6 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Requer Instalação (Preços de Produtos)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey6.Y + DataCardKey6.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage6 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue6.Y + DataCardValue6.Height
+                                ZIndex: =3
+
+                            StarVisible6 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey6.Y
+                                ZIndex: =4
+
+                        Markup_DataCard1 As typedDataCard.fluentV9NumberEditCard:
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_markup"
+                            Default: =ThisItem.Markup
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Preços de Produtos'],DataSourceInfo.DisplayName,Markup)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =Value(DataCardValue7.Value)
+                            Width: =209
+                            X: =2
+                            Y: =1
+                            ZIndex: =1
+
+                            DataCardKey7 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            "DataCardValue7 As 'Number input'":
+                                AccessibleLabel: =Parent.DisplayName
+                                BasePaletteColor: =
+                                BorderColor: =
+                                DisplayMode: =Parent.DisplayMode
+                                Fill: =
+                                Height: =32
+                                Max: =Blank()
+                                Min: =Blank()
+                                Step: =1
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Value: =Parent.Default
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey7.Y + DataCardKey7.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage7 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue7.Y + DataCardValue7.Height
+                                ZIndex: =3
+
+                            StarVisible7 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey7.Y
+                                ZIndex: =4
+
+                        "'Aceita Desconto_DataCard1' As typedDataCard.fluentV9ComboBoxOptionSetSingleEditCard":
+                            BorderColor: =RGBA(166, 166, 166, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            DataField: ="new_aceitadesconto"
+                            Default: =ThisItem.'Aceita Desconto'
+                            DisplayMode: =Parent.DisplayMode
+                            DisplayName: =DataSourceInfo([@'Preços de Produtos'],DataSourceInfo.DisplayName,'Aceita Desconto')
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =70
+                            Required: =true
+                            Update: =DataCardValue8.Selected.Value
+                            Width: =209
+                            X: =0
+                            Y: =2
+                            ZIndex: =1
+
+                            DataCardKey8 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =22
+                                Text: =Parent.DisplayName
+                                Weight: ='TextCanvas.Weight'.Semibold
+                                Width: =Parent.Width - 48
+                                Wrap: =false
+                                X: =24
+                                Y: =10
+                                ZIndex: =1
+
+                            DataCardValue8 As Combobox.pcfdataset:
+                                AccessibleLabel: =Parent.DisplayName
+                                DefaultSelectedItems: =[Parent.Default]
+                                DisplayMode: =Parent.DisplayMode
+                                Height: =32
+                                Items: =Choices('Aceita Desconto (Preços de Produtos)')
+                                Required: =Parent.Required
+                                ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
+                                Width: =Parent.Width - 48
+                                X: =24
+                                Y: =DataCardKey8.Y + DataCardKey8.Height + 4
+                                ZIndex: =2
+
+                            ErrorMessage8 As Text:
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =30
+                                Text: =Parent.Error
+                                Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =Parent.Width - 48
+                                Wrap: =true
+                                X: =24
+                                Y: =DataCardValue8.Y + DataCardValue8.Height
+                                ZIndex: =3
+
+                            StarVisible8 As Text:
+                                Align: ='TextCanvas.Align'.Center
+                                BorderColor: =
+                                DisplayMode: =DisplayMode.Edit
+                                Fill: =
+                                FontColor: =
+                                Height: =20
+                                Text: ="*"
+                                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                Width: =30
+                                X: =0
+                                Y: =DataCardKey8.Y
+                                ZIndex: =4
+
+                    ButtonCanvas1 As Button:
+                        BasePaletteColor: =
+                        BorderColor: =
+                        DisplayMode: =DisplayMode.Edit
+                        FontColor: =
+                        Height: =32
+                        Icon: ="Add"
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =32
+                        LayoutMinWidth: =96
+                        OnSelect: |-
+                            =UpdateContext({SpinCounter: SpinCounter + 1});
+                            With(
+                                LookUp(
+                                    'Preços de Produtos' As P,
+                                    P.'Preço de Produto' = PrecoProdutoTable.Selected.'Preço de Produto'
+                                ) As PrecoProdutoOriginal,
+                                With(
+                                    Patch(
+                                        'Modelos de Produto From Sharepoint Lists',
+                                        Defaults('Modelos de Produto From Sharepoint Lists'),
+                                        Form1.Updates,
+                                        {ID: Text(GUID())}
+                                    ) As NovoModelo,
+                                    With(
+                                        Patch(
+                                            'Preços de Produtos',
+                                            Defaults('Preços de Produtos'),
+                                            Form3.Updates,
+                                            {
+                                                'Modelo de Produto': NovoModelo
+                                            }
+                                        ) As NewPreco,
+                                        With(
+                                            {
+                                                Value: Filter(
+                                                    'TipoServiço-PreçodeProdutos' As TP,
+                                                    !IsBlank(TP.'Preço de Produto'),
+                                                    TP.Status = 'Status (TipoServiço-PreçodeProdutos)'.Active,
+                                                    TP.'Preço de Produto'.'Preço de Produto' = PrecoProdutoOriginal.'Preço de Produto'
+                                                )
+                                            } As Sevicos,
+                                            ForAll(
+                                                Sevicos.Value As TP,
+                                                Patch(
+                                                    'TipoServiço-PreçodeProdutos',
+                                                    Defaults('TipoServiço-PreçodeProdutos'),
+                                                    {
+                                                        'Tipo de Serviço': TP.'Tipo de Serviço',
+                                                        'Preço de Produto': NewPreco
+                                                    }
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            );
+                            UpdateContext({SpinCounter: SpinCounter - 1})
+                            /*{
+                                    Referência: DataCardValue3.Value,
+                                    Fabricante: LookUp(
+                                        'Fabricantes From Sharpoint Lists' As F,
+                                        F.'Fabricantes From Sharpoint List' = DataCardValue18.Selected.'Fabricantes From Sharpoint List'
+                                    ),
+                                    QueryCategoria: DataCardValue19.Value,
+                                    'Tipo de Sistema Padrão': DataCardValue20.Selected.Value,
+                                    'Controla S/N': DataCardValue21.Selected.Value,
+                                    'Controla Etiqueta': DataCardValue22.Selected.Value,
+                                    'Requer Configuração': Coalesce(
+                                        DataCardValue23.Selected.Value,
+                                        false
+                                    ),
+                                    'Requer Cabeamento': Coalesce(
+                                        DataCardValue24.Selected.Value,
+                                        false
+                                    ),
+                                    'Requer Engraving': Coalesce(
+                                        DataCardValue25.Selected.Value,
+                                        false
+                                    ),
+                                    'Reserva de Produto Livre': Coalesce(
+                                        DataCardValue26.Selected.Value,
+                                        false
+                                    ),
+                                    'Device IO Template (JSON)': DataCardValue27.Value,
+                                    'Horas Agregadas': DataCardValue28.Value
+                                }*/
+                        Text: ="Criar Novo Item"
+                        Width: =96
+                        X: =0
+                        Y: =0
+                        ZIndex: =5
+
+    "Spinner1 As 'Fluent Spinner (1.1.29) Preview'":
+        BackgroundColor: |-
+            ="#00000050"
+        DisplayMode: =DisplayMode.Edit
+        Height: =Parent.Height
+        Label: ="Carregando..."
+        SpinnerSize: ='PowerCAT.Spinner.SpinnerSize'.Large
+        Theme: =AppThemeJson
+        Visible: =SpinCounter > 0
+        Width: =Parent.Width
+        X: =0
+        Y: =0
+        ZIndex: =2
+

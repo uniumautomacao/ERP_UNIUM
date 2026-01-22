@@ -1,0 +1,146 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_tiposervicoprecodeprodutos",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_tiposervicoprecodeproduto",
+    "Name": "TipoServiço-PreçodeProdutos",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_descricaodoservico": "Descrição do Serviço",
+      "new_id": "Id",
+      "new_incluirnoorcamento": "Incluir no Orçamento",
+      "new_Orcamento": "Orçamento",
+      "new_PrecodeProduto": "Preço de Produto",
+      "new_remocaopermitida": "Remoção Permitida",
+      "new_taxadeservicopercentualfinalfx": "Taxa de Serviço Percentual Final (Fx)",
+      "new_taxafixafx": "Taxa Fixa (Fx)",
+      "new_taxapercentualemcimadoservicofx": "Taxa Percentual em Cima do Serviço (Fx)",
+      "new_TipodeServico": "Tipo de Serviço",
+      "new_tiposervicoprecodeproduto_AsyncOperations": "System Jobs",
+      "new_tiposervicoprecodeproduto_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_tiposervicoprecodeproduto_DuplicateBaseRecord": "Duplicate Records (new_tiposervicoprecodeproduto_DuplicateBaseRecord)",
+      "new_tiposervicoprecodeproduto_DuplicateMatchingRecord": "Duplicate Records (new_tiposervicoprecodeproduto_DuplicateMatchingRecord)",
+      "new_tiposervicoprecodeproduto_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_tiposervicoprecodeproduto_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_tiposervicoprecodeproduto_ProcessSession": "Process Sessions",
+      "new_tiposervicoprecodeproduto_SyncErrors": "Sync Errors",
+      "new_tiposervicoprecodeprodutoid": "TipoServiço-PreçodeProduto",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "TipoServiço-PreçodeProdutos",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "TipoServiço-PreçodeProdutos (Views)",
+    "Name": "_new_tiposervicoprecodeproduto_views",
+    "RelatedEntityName": "TipoServiço-PreçodeProdutos",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "40008683-c663-4fa1-8ffc-590a243e1391": "TipoServiço-PreçodeProduto Advanced Find View",
+      "449cd51e-3808-4af5-a3ef-9f704662a95d": "TipoServiço-PreçodeProduto Associated View",
+      "a13da8e1-d62a-4663-bb34-2d27f0ebc4d7": "TipoServiço-PreçodeProduto Lookup View",
+      "cb56eda3-f298-ed11-aad1-000d3ac190e8": "Relacionamentos",
+      "d2a1a4b1-c213-46d9-9f67-58acb28e3422": "Serviços Ativos",
+      "e9ca319f-df13-48d3-8978-745489a97afa": "Inactive TipoServiço-PreçodeProdutos"
+    }
+  },
+  {
+    "DisplayName": "Incluir no Orçamento (TipoServiço-PreçodeProdutos)",
+    "Name": "new_tiposervicoprecodeproduto_new_incluirnoorcamento",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_incluirnoorcamento",
+        "OptionSetReferenceEntityName": "TipoServiço-PreçodeProdutos"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_incluirnoorcamento",
+    "RelatedEntityName": "TipoServiço-PreçodeProdutos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Remoção Permitida (TipoServiço-PreçodeProdutos)",
+    "Name": "new_tiposervicoprecodeproduto_new_remocaopermitida",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_remocaopermitida",
+        "OptionSetReferenceEntityName": "TipoServiço-PreçodeProdutos"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_remocaopermitida",
+    "RelatedEntityName": "TipoServiço-PreçodeProdutos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (TipoServiço-PreçodeProdutos)",
+    "Name": "new_tiposervicoprecodeproduto_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "TipoServiço-PreçodeProdutos"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "TipoServiço-PreçodeProdutos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (TipoServiço-PreçodeProdutos)",
+    "Name": "new_tiposervicoprecodeproduto_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "TipoServiço-PreçodeProdutos"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "TipoServiço-PreçodeProdutos",
+    "Type": "OptionSetInfo"
+  }
+]
