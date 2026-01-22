@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.21';
+export const APP_VERSION = '0.1.22';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.22',
+    date: '2026-01-22',
+    changes: 'Adicionado destaque visual nos campos alterados do modal de comparação do modelo.',
+  },
   {
     version: '0.1.21',
     date: '2026-01-22',

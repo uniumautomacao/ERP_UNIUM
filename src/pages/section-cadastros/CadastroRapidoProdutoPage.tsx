@@ -1630,13 +1630,28 @@ export function CadastroRapidoProdutoPage() {
                       <Text weight="semibold">Existente</Text>
                       <Text weight="semibold">Atualizado</Text>
                     </div>
-                    {existingComparison.map((item) => (
-                      <div key={item.label} className="grid grid-cols-3 gap-3">
-                        <Text>{item.label}</Text>
-                        <Text>{item.existing}</Text>
-                        <Text>{item.updated}</Text>
-                      </div>
-                    ))}
+                    {existingComparison.map((item) => {
+                      const changed = item.existing !== item.updated;
+                      return (
+                        <div
+                          key={item.label}
+                          className="grid grid-cols-3 gap-3"
+                          style={
+                            changed
+                              ? {
+                                  backgroundColor: tokens.colorPaletteYellowBackground2,
+                                  borderRadius: 6,
+                                  padding: 6,
+                                }
+                              : undefined
+                          }
+                        >
+                          <Text>{item.label}</Text>
+                          <Text>{item.existing}</Text>
+                          <Text>{item.updated}</Text>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </DialogContent>
