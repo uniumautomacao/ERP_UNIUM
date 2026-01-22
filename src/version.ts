@@ -1,6 +1,28 @@
-export const APP_VERSION = '0.1.16';
+export const APP_VERSION = '0.1.20';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.20',
+    date: '2026-01-22',
+    changes: 'Ajustado tratamento do campo validade ao copiar regimes de cotação temporária.',
+  },
+  {
+    version: '0.1.19',
+    date: '2026-01-22',
+    changes:
+      'Adicionada edição de descrição, markup, validade e desconto nos regimes de cotação temporária copiados.',
+  },
+  {
+    version: '0.1.18',
+    date: '2026-01-22',
+    changes: 'Corrigida ordem de inicialização do carregamento de regimes na página Cadastro Rápido de Produto.',
+  },
+  {
+    version: '0.1.17',
+    date: '2026-01-22',
+    changes:
+      'Adicionada opção de copiar regimes de cotação temporária e serviços do regime na página Cadastro Rápido de Produto.',
+  },
   {
     version: '0.1.16',
     date: '2026-01-22',

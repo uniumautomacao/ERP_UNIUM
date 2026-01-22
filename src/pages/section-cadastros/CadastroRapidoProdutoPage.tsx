@@ -27,6 +27,8 @@ import {
   Cr22fFornecedoresFromSharepointListService,
   Cr22fModelosdeProdutoFromSharepointListService,
   NewPrecodeProdutoService,
+  NewRegimedecotacaotemporariaService,
+  NewTipodeservicoregimedecotacaotemporariaService,
   NewTiposervicoprecodeprodutoService,
 } from '../../generated';
 
@@ -61,6 +63,22 @@ type PrecoProduto = {
   new_requerinstalacao?: boolean;
   new_aceitadesconto?: boolean;
   _new_fornecedor_value?: string;
+};
+
+type RegimeTemporario = {
+  new_regimedecotacaotemporariaid: string;
+  new_name?: string;
+  new_referenciadoproduto?: string;
+  new_validade?: string;
+  new_markup?: number;
+  new_descontopercentualdecompra?: number;
+};
+
+type RegimeEdit = {
+  name: string;
+  markup: string;
+  desconto: string;
+  validade: string;
 };
 
 type LookupOption = {
@@ -160,28 +178,20 @@ export function CadastroRapidoProdutoPage() {
   const [selectedPreco, setSelectedPreco] = useState<PrecoProduto | null>(null);
   const [priceForm, setPriceForm] = useState<PriceFormState>(emptyPriceForm());
 
+  const [regimes, setRegimes] = useState<RegimeTemporario[]>([]);
+  const [regimesLoading, setRegimesLoading] = useState(false);
+  const [regimesError, setRegimesError] = useState<string | null>(null);
+  const [selectedRegimeIds, setSelectedRegimeIds] = useState<string[]>([]);
+  const [regimeEdits, setRegimeEdits] = useState<Record<string, RegimeEdit>>({});
+
   const [fabricantes, setFabricantes] = useState<LookupOption[]>([]);
   const [fornecedores, setFornecedores] = useState<LookupOption[]>([]);
 
+  const [copyPreco, setCopyPreco] = useState(true);
+  const [copyRegimes, setCopyRegimes] = useState(false);
+
   const [actionBusy, setActionBusy] = useState(false);
   const [message, setMessage] = useState<{ intent: 'success' | 'error' | 'warning'; title: string; body?: string } | null>(null);
-
-  const primaryActions = useMemo(
-    () => [
-      {
-        id: 'refresh',
-        label: 'Atualizar',
-        icon: <ArrowSync24Regular />,
-        onClick: () => {
-          void loadTemplates(templateSearch);
-          if (selectedTemplate?.cr22f_modelosdeprodutofromsharepointlistid) {
-            void loadPrecos(selectedTemplate.cr22f_modelosdeprodutofromsharepointlistid);
-          }
-        },
-      },
-    ],
-    [selectedTemplate, templateSearch]
-  );
 
   const loadTemplates = useCallback(async (searchTerm: string) => {
     setTemplatesLoading(true);
@@ -301,6 +311,38 @@ export function CadastroRapidoProdutoPage() {
     }
   }, []);
 
+  const loadRegimes = useCallback(async (modeloId: string) => {
+    setRegimesLoading(true);
+    setRegimesError(null);
+
+    try {
+      const result = await NewRegimedecotacaotemporariaService.getAll({
+        select: [
+          'new_regimedecotacaotemporariaid',
+          'new_name',
+          'new_referenciadoproduto',
+          'new_validade',
+          'new_markup',
+          'new_descontopercentualdecompra',
+        ],
+        filter: `_new_modelodeproduto_value eq '${modeloId}' and statecode eq 0`,
+        orderBy: ['new_name asc'],
+      });
+
+      if (!result.success) {
+        throw result.error || new Error('Falha ao buscar regimes de cotação temporária.');
+      }
+
+      setRegimes((result.data || []) as RegimeTemporario[]);
+    } catch (error) {
+      const messageText = error instanceof Error ? error.message : String(error);
+      setRegimesError(messageText);
+      setRegimes([]);
+    } finally {
+      setRegimesLoading(false);
+    }
+  }, []);
+
   const loadLookups = useCallback(async () => {
     try {
       const [fabricantesResult, fornecedoresResult] = await Promise.all([
@@ -340,6 +382,24 @@ export function CadastroRapidoProdutoPage() {
     }
   }, []);
 
+  const primaryActions = useMemo(
+    () => [
+      {
+        id: 'refresh',
+        label: 'Atualizar',
+        icon: <ArrowSync24Regular />,
+        onClick: () => {
+          void loadTemplates(templateSearch);
+          if (selectedTemplate?.cr22f_modelosdeprodutofromsharepointlistid) {
+            void loadPrecos(selectedTemplate.cr22f_modelosdeprodutofromsharepointlistid);
+            void loadRegimes(selectedTemplate.cr22f_modelosdeprodutofromsharepointlistid);
+          }
+        },
+      },
+    ],
+    [loadRegimes, loadPrecos, loadTemplates, selectedTemplate, templateSearch]
+  );
+
   useEffect(() => {
     void loadTemplates('');
     void loadLookups();
@@ -358,6 +418,9 @@ export function CadastroRapidoProdutoPage() {
       setPrecos([]);
       setSelectedPreco(null);
       setPriceForm(emptyPriceForm());
+      setRegimes([]);
+      setSelectedRegimeIds([]);
+      setRegimeEdits({});
       return;
     }
 
@@ -377,7 +440,8 @@ export function CadastroRapidoProdutoPage() {
     });
 
     void loadPrecos(selectedTemplate.cr22f_modelosdeprodutofromsharepointlistid);
-  }, [loadPrecos, selectedTemplate]);
+    void loadRegimes(selectedTemplate.cr22f_modelosdeprodutofromsharepointlistid);
+  }, [loadPrecos, loadRegimes, selectedTemplate]);
 
   useEffect(() => {
     if (!selectedPreco) {
@@ -396,21 +460,110 @@ export function CadastroRapidoProdutoPage() {
     });
   }, [selectedPreco]);
 
+  const selectedRegimes = useMemo(
+    () => regimes.filter((regime) => selectedRegimeIds.includes(regime.new_regimedecotacaotemporariaid)),
+    [regimes, selectedRegimeIds]
+  );
+
+  const buildRegimeEdit = useCallback((regime: RegimeTemporario): RegimeEdit => {
+    return {
+      name: regime.new_name || '',
+      markup: regime.new_markup?.toString() || '',
+      desconto: regime.new_descontopercentualdecompra?.toString() || '',
+      validade: regime.new_validade ? String(regime.new_validade) : '',
+    };
+  }, []);
+
+  const toggleRegimeSelection = useCallback((regime: RegimeTemporario) => {
+    const regimeId = regime.new_regimedecotacaotemporariaid;
+    setSelectedRegimeIds((prev) => {
+      if (prev.includes(regimeId)) {
+        return prev.filter((id) => id !== regimeId);
+      }
+      return [...prev, regimeId];
+    });
+    setRegimeEdits((prev) => {
+      if (prev[regimeId]) {
+        const { [regimeId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [regimeId]: buildRegimeEdit(regime) };
+    });
+  }, [buildRegimeEdit]);
+
+  const handleRegimeEditChange = useCallback((regimeId: string, field: keyof RegimeEdit, value: string) => {
+    setRegimeEdits((prev) => ({
+      ...prev,
+      [regimeId]: {
+        ...prev[regimeId],
+        [field]: value,
+      },
+    }));
+  }, []);
+
   const handleCreate = useCallback(async () => {
     console.log('[CadastroRapidoProduto] handleCreate iniciado');
     console.log('[CadastroRapidoProduto] selectedTemplate:', selectedTemplate);
     console.log('[CadastroRapidoProduto] selectedPreco:', selectedPreco);
+    console.log('[CadastroRapidoProduto] selectedRegimeIds:', selectedRegimeIds);
+    console.log('[CadastroRapidoProduto] copyPreco:', copyPreco);
+    console.log('[CadastroRapidoProduto] copyRegimes:', copyRegimes);
     console.log('[CadastroRapidoProduto] modelForm:', modelForm);
     console.log('[CadastroRapidoProduto] priceForm:', priceForm);
 
-    if (!selectedTemplate || !selectedPreco) {
-      console.warn('[CadastroRapidoProduto] Validação falhou: template ou preço não selecionado');
+    if (!selectedTemplate) {
+      console.warn('[CadastroRapidoProduto] Validação falhou: template não selecionado');
       setMessage({
         intent: 'warning',
-        title: 'Selecione um modelo e um preço',
-        body: 'Escolha um template e um preço base antes de criar o novo item.',
+        title: 'Selecione um modelo',
+        body: 'Escolha um template de produto antes de criar o novo item.',
       });
       return;
+    }
+
+    if (!copyPreco && !copyRegimes) {
+      console.warn('[CadastroRapidoProduto] Validação falhou: nenhuma opção de cópia selecionada');
+      setMessage({
+        intent: 'warning',
+        title: 'Selecione o que deseja copiar',
+        body: 'Marque ao menos uma opção: preço ou regimes temporários.',
+      });
+      return;
+    }
+
+    if (copyPreco && !selectedPreco) {
+      console.warn('[CadastroRapidoProduto] Validação falhou: preço não selecionado');
+      setMessage({
+        intent: 'warning',
+        title: 'Selecione um preço',
+        body: 'Escolha um preço base para copiar.',
+      });
+      return;
+    }
+
+    if (copyRegimes) {
+      if (selectedRegimes.length === 0) {
+        console.warn('[CadastroRapidoProduto] Validação falhou: nenhum regime selecionado');
+        setMessage({
+          intent: 'warning',
+          title: 'Selecione pelo menos um regime',
+          body: 'Escolha os regimes de cotação temporária que deseja copiar.',
+        });
+        return;
+      }
+
+      const regimeSemNome = selectedRegimes.find(
+        (regime) => !regimeEdits[regime.new_regimedecotacaotemporariaid]?.name?.trim()
+      );
+      if (regimeSemNome) {
+        console.warn('[CadastroRapidoProduto] Validação falhou: nome do regime não informado');
+        setMessage({
+          intent: 'warning',
+          title: 'Informe o nome do regime',
+          body: 'Preencha a descrição de todos os regimes selecionados.',
+        });
+        return;
+      }
     }
 
     setActionBusy(true);
@@ -460,82 +613,163 @@ export function CadastroRapidoProdutoPage() {
         throw new Error('Não foi possível recuperar o ID do novo modelo.');
       }
 
-      console.log('[CadastroRapidoProduto] === CRIANDO NOVO PREÇO ===');
-      const pricePayload: Record<string, any> = {
-        new_descricao: priceForm.descricao.trim(),
-        new_precobase: priceForm.precoBase ? Number(priceForm.precoBase) : undefined,
-        new_descontopercentualdecompra: priceForm.descontoCompra ? Number(priceForm.descontoCompra) : undefined,
-        new_markup: priceForm.markup ? Number(priceForm.markup) : undefined,
-        new_requerinstalacao: priceForm.requerInstalacao,
-        new_aceitadesconto: priceForm.aceitaDesconto,
-        'new_ModelodeProduto@odata.bind': `/cr22f_modelosdeprodutofromsharepointlists(${novoModeloId})`,
-      };
+      let novoPrecoId: string | null = null;
+      if (copyPreco) {
+        console.log('[CadastroRapidoProduto] === CRIANDO NOVO PREÇO ===');
+        const pricePayload: Record<string, any> = {
+          new_descricao: priceForm.descricao.trim(),
+          new_precobase: priceForm.precoBase ? Number(priceForm.precoBase) : undefined,
+          new_descontopercentualdecompra: priceForm.descontoCompra ? Number(priceForm.descontoCompra) : undefined,
+          new_markup: priceForm.markup ? Number(priceForm.markup) : undefined,
+          new_requerinstalacao: priceForm.requerInstalacao,
+          new_aceitadesconto: priceForm.aceitaDesconto,
+          'new_ModelodeProduto@odata.bind': `/cr22f_modelosdeprodutofromsharepointlists(${novoModeloId})`,
+        };
 
-      if (priceForm.fornecedorId) {
-        pricePayload['new_Fornecedor@odata.bind'] = `/cr22f_fornecedoresfromsharepointlists(${priceForm.fornecedorId})`;
-      }
-
-      console.log('[CadastroRapidoProduto] Payload do preço:', JSON.stringify(pricePayload, null, 2));
-      const priceResult = await NewPrecodeProdutoService.create(pricePayload);
-      console.log('[CadastroRapidoProduto] Resultado da criação do preço:', {
-        success: priceResult.success,
-        data: priceResult.data,
-        error: priceResult.error,
-      });
-
-      if (!priceResult.success || !priceResult.data) {
-        console.error('[CadastroRapidoProduto] Erro ao criar preço:', priceResult.error);
-        throw priceResult.error || new Error('Falha ao criar o novo preço.');
-      }
-
-      const novoPrecoId = (priceResult.data as any).new_precodeprodutoid;
-      console.log('[CadastroRapidoProduto] ID do novo preço:', novoPrecoId);
-      if (!novoPrecoId) {
-        console.error('[CadastroRapidoProduto] Preço criado mas sem ID. Dados completos:', priceResult.data);
-        throw new Error('Não foi possível recuperar o ID do novo preço.');
-      }
-
-      console.log('[CadastroRapidoProduto] === COPIANDO VÍNCULOS DE SERVIÇO ===');
-      console.log('[CadastroRapidoProduto] Buscando vínculos do preço original:', selectedPreco.new_precodeprodutoid);
-      const vinculosResult = await NewTiposervicoprecodeprodutoService.getAll({
-        select: ['_new_tipodeservico_value', 'new_tiposervicoprecodeprodutoid'],
-        filter: `_new_precodeproduto_value eq '${selectedPreco.new_precodeprodutoid}' and statecode eq 0`,
-      });
-      console.log('[CadastroRapidoProduto] Resultado da busca de vínculos:', {
-        success: vinculosResult.success,
-        count: vinculosResult.data?.length || 0,
-        data: vinculosResult.data,
-        error: vinculosResult.error,
-      });
-
-      if (vinculosResult.success && vinculosResult.data && vinculosResult.data.length > 0) {
-        console.log('[CadastroRapidoProduto] Criando', vinculosResult.data.length, 'vínculos de serviço...');
-        const vinculosResults = await Promise.all(
-          vinculosResult.data.map((item: any, index: number) => {
-            console.log(`[CadastroRapidoProduto] Criando vínculo ${index + 1}/${vinculosResult.data.length}:`, {
-              tipodeservico: item._new_tipodeservico_value,
-              precodeproduto: novoPrecoId,
-            });
-            return NewTiposervicoprecodeprodutoService.create({
-              'new_TipodeServico@odata.bind': `/new_tipodeservicos(${item._new_tipodeservico_value})`,
-              'new_PrecodeProduto@odata.bind': `/new_precodeprodutos(${novoPrecoId})`,
-            });
-          })
-        );
-        console.log('[CadastroRapidoProduto] Resultados da criação de vínculos:', vinculosResults);
-        const vinculosErrors = vinculosResults.filter((r) => !r.success);
-        if (vinculosErrors.length > 0) {
-          console.warn('[CadastroRapidoProduto] Alguns vínculos falharam:', vinculosErrors);
+        if (priceForm.fornecedorId) {
+          pricePayload['new_Fornecedor@odata.bind'] = `/cr22f_fornecedoresfromsharepointlists(${priceForm.fornecedorId})`;
         }
-      } else {
-        console.log('[CadastroRapidoProduto] Nenhum vínculo encontrado para copiar');
+
+        console.log('[CadastroRapidoProduto] Payload do preço:', JSON.stringify(pricePayload, null, 2));
+        const priceResult = await NewPrecodeProdutoService.create(pricePayload);
+        console.log('[CadastroRapidoProduto] Resultado da criação do preço:', {
+          success: priceResult.success,
+          data: priceResult.data,
+          error: priceResult.error,
+        });
+
+        if (!priceResult.success || !priceResult.data) {
+          console.error('[CadastroRapidoProduto] Erro ao criar preço:', priceResult.error);
+          throw priceResult.error || new Error('Falha ao criar o novo preço.');
+        }
+
+        novoPrecoId = (priceResult.data as any).new_precodeprodutoid;
+        console.log('[CadastroRapidoProduto] ID do novo preço:', novoPrecoId);
+        if (!novoPrecoId) {
+          console.error('[CadastroRapidoProduto] Preço criado mas sem ID. Dados completos:', priceResult.data);
+          throw new Error('Não foi possível recuperar o ID do novo preço.');
+        }
+
+        console.log('[CadastroRapidoProduto] === COPIANDO VÍNCULOS DE SERVIÇO ===');
+        console.log('[CadastroRapidoProduto] Buscando vínculos do preço original:', selectedPreco?.new_precodeprodutoid);
+        const vinculosResult = await NewTiposervicoprecodeprodutoService.getAll({
+          select: ['_new_tipodeservico_value', 'new_tiposervicoprecodeprodutoid'],
+          filter: `_new_precodeproduto_value eq '${selectedPreco?.new_precodeprodutoid}' and statecode eq 0`,
+        });
+        console.log('[CadastroRapidoProduto] Resultado da busca de vínculos:', {
+          success: vinculosResult.success,
+          count: vinculosResult.data?.length || 0,
+          data: vinculosResult.data,
+          error: vinculosResult.error,
+        });
+
+        if (vinculosResult.success && vinculosResult.data && vinculosResult.data.length > 0) {
+          console.log('[CadastroRapidoProduto] Criando', vinculosResult.data.length, 'vínculos de serviço...');
+          const vinculosResults = await Promise.all(
+            vinculosResult.data.map((item: any, index: number) => {
+              console.log(`[CadastroRapidoProduto] Criando vínculo ${index + 1}/${vinculosResult.data.length}:`, {
+                tipodeservico: item._new_tipodeservico_value,
+                precodeproduto: novoPrecoId,
+              });
+              return NewTiposervicoprecodeprodutoService.create({
+                'new_TipodeServico@odata.bind': `/new_tipodeservicos(${item._new_tipodeservico_value})`,
+                'new_PrecodeProduto@odata.bind': `/new_precodeprodutos(${novoPrecoId})`,
+              });
+            })
+          );
+          console.log('[CadastroRapidoProduto] Resultados da criação de vínculos:', vinculosResults);
+          const vinculosErrors = vinculosResults.filter((r) => !r.success);
+          if (vinculosErrors.length > 0) {
+            console.warn('[CadastroRapidoProduto] Alguns vínculos falharam:', vinculosErrors);
+          }
+        } else {
+          console.log('[CadastroRapidoProduto] Nenhum vínculo encontrado para copiar');
+        }
+      }
+
+      if (copyRegimes) {
+        console.log('[CadastroRapidoProduto] === COPIANDO REGIMES ===');
+        for (const regime of selectedRegimes) {
+          const regimeId = regime.new_regimedecotacaotemporariaid;
+          const regimeEdit = regimeEdits[regimeId];
+          const regimeName = regimeEdit?.name?.trim() || '';
+          console.log('[CadastroRapidoProduto] Criando regime:', { regimeId, regimeName });
+
+          const regimePayload: Record<string, any> = {
+            new_name: regimeName,
+            new_referenciadoproduto: modelForm.referencia.trim(),
+            new_validade: regimeEdit?.validade ? String(regimeEdit.validade).trim() : undefined,
+            new_markup: regimeEdit?.markup?.trim() ? Number(regimeEdit.markup) : undefined,
+            new_descontopercentualdecompra: regimeEdit?.desconto?.trim() ? Number(regimeEdit.desconto) : undefined,
+            'new_ModelodeProduto@odata.bind': `/cr22f_modelosdeprodutofromsharepointlists(${novoModeloId})`,
+          };
+
+          console.log('[CadastroRapidoProduto] Payload do regime:', JSON.stringify(regimePayload, null, 2));
+          const regimeResult = await NewRegimedecotacaotemporariaService.create(regimePayload);
+          console.log('[CadastroRapidoProduto] Resultado da criação do regime:', {
+            success: regimeResult.success,
+            data: regimeResult.data,
+            error: regimeResult.error,
+          });
+
+          if (!regimeResult.success || !regimeResult.data) {
+            console.error('[CadastroRapidoProduto] Erro ao criar regime:', regimeResult.error);
+            throw regimeResult.error || new Error('Falha ao criar regime de cotação temporária.');
+          }
+
+          const novoRegimeId = (regimeResult.data as any).new_regimedecotacaotemporariaid;
+          if (!novoRegimeId) {
+            console.error('[CadastroRapidoProduto] Regime criado mas sem ID. Dados completos:', regimeResult.data);
+            throw new Error('Não foi possível recuperar o ID do novo regime.');
+          }
+
+          console.log('[CadastroRapidoProduto] Buscando serviços do regime original:', regimeId);
+          const servicosResult = await NewTipodeservicoregimedecotacaotemporariaService.getAll({
+            select: ['_new_tipodeservico_value', 'new_descricao', 'new_tipodeservicoregimedecotacaotemporariaid'],
+            filter: `_new_regime_value eq '${regimeId}' and statecode eq 0`,
+          });
+          console.log('[CadastroRapidoProduto] Resultado da busca de serviços do regime:', {
+            success: servicosResult.success,
+            count: servicosResult.data?.length || 0,
+            data: servicosResult.data,
+            error: servicosResult.error,
+          });
+
+          if (servicosResult.success && servicosResult.data && servicosResult.data.length > 0) {
+            console.log('[CadastroRapidoProduto] Criando', servicosResult.data.length, 'serviços para o regime...');
+            const servicosCriados = await Promise.all(
+              servicosResult.data.map((item: any, index: number) => {
+                console.log(`[CadastroRapidoProduto] Criando serviço ${index + 1}/${servicosResult.data.length}:`, {
+                  tipodeservico: item._new_tipodeservico_value,
+                  regime: novoRegimeId,
+                });
+                return NewTipodeservicoregimedecotacaotemporariaService.create({
+                  new_descricao: item.new_descricao,
+                  'new_Regime@odata.bind': `/new_regimedecotacaotemporarias(${novoRegimeId})`,
+                  'new_TipodeServico@odata.bind': `/new_tipodeservicos(${item._new_tipodeservico_value})`,
+                });
+              })
+            );
+            console.log('[CadastroRapidoProduto] Resultados da criação de serviços do regime:', servicosCriados);
+            const servicosErrors = servicosCriados.filter((r) => !r.success);
+            if (servicosErrors.length > 0) {
+              console.warn('[CadastroRapidoProduto] Alguns serviços do regime falharam:', servicosErrors);
+            }
+          } else {
+            console.log('[CadastroRapidoProduto] Nenhum serviço encontrado para copiar');
+          }
+        }
       }
 
       console.log('[CadastroRapidoProduto] === SUCESSO ===');
+      const successParts: string[] = [];
+      if (copyPreco) successParts.push('preço e serviços');
+      if (copyRegimes) successParts.push('regimes temporários e serviços do regime');
+
       setMessage({
         intent: 'success',
         title: 'Novo item criado com sucesso',
-        body: 'O modelo, preço e vínculos de serviço foram copiados.',
+        body: `O modelo e ${successParts.join(' + ')} foram copiados.`,
       });
 
       setSelectedTemplate(null);
@@ -573,7 +807,18 @@ export function CadastroRapidoProdutoPage() {
       setActionBusy(false);
       console.log('[CadastroRapidoProduto] handleCreate finalizado');
     }
-  }, [loadTemplates, modelForm, priceForm, selectedPreco, selectedTemplate]);
+  }, [
+    copyPreco,
+    copyRegimes,
+    loadTemplates,
+    modelForm,
+    priceForm,
+    regimeEdits,
+    selectedPreco,
+    selectedRegimes,
+    selectedRegimeIds,
+    selectedTemplate,
+  ]);
 
   const templatesColumns = useMemo(
     () => [
@@ -645,6 +890,56 @@ export function CadastroRapidoProdutoPage() {
     ],
     [selectedPreco]
   );
+
+  const regimesColumns = useMemo(
+    () => [
+      createTableColumn<RegimeTemporario>({
+        columnId: 'nome',
+        renderHeaderCell: () => 'Nome do Regime',
+        renderCell: (item) => item.new_name || '-',
+      }),
+      createTableColumn<RegimeTemporario>({
+        columnId: 'referencia',
+        renderHeaderCell: () => 'Referência',
+        renderCell: (item) => item.new_referenciadoproduto || '-',
+      }),
+      createTableColumn<RegimeTemporario>({
+        columnId: 'validade',
+        renderHeaderCell: () => 'Validade',
+        renderCell: (item) => item.new_validade || '-',
+      }),
+      createTableColumn<RegimeTemporario>({
+        columnId: 'markup',
+        renderHeaderCell: () => 'Markup',
+        renderCell: (item) => formatNumber(item.new_markup),
+      }),
+      createTableColumn<RegimeTemporario>({
+        columnId: 'desconto',
+        renderHeaderCell: () => 'Desconto',
+        renderCell: (item) => formatNumber(item.new_descontopercentualdecompra),
+      }),
+      createTableColumn<RegimeTemporario>({
+        columnId: 'selecao',
+        renderHeaderCell: () => 'Selecionar',
+        renderCell: (item) => (
+          <Checkbox
+            checked={selectedRegimeIds.includes(item.new_regimedecotacaotemporariaid)}
+            onChange={() => toggleRegimeSelection(item)}
+            label={selectedRegimeIds.includes(item.new_regimedecotacaotemporariaid) ? 'Selecionado' : 'Selecionar'}
+          />
+        ),
+      }),
+    ],
+    [selectedRegimeIds, toggleRegimeSelection]
+  );
+
+  const canSubmit =
+    Boolean(selectedTemplate) &&
+    (copyPreco || copyRegimes) &&
+    (!copyPreco || Boolean(selectedPreco)) &&
+    (!copyRegimes ||
+      (selectedRegimes.length > 0 &&
+        selectedRegimes.every((regime) => regimeEdits[regime.new_regimedecotacaotemporariaid]?.name?.trim())));
 
   return (
     <>
@@ -965,21 +1260,128 @@ export function CadastroRapidoProdutoPage() {
                     </div>
                   </div>
                 )}
+
+                {copyRegimes && (
+                  <div className="mt-6">
+                    <Text size={500} weight="semibold" block style={{ marginBottom: 16 }}>
+                      Regimes de Cotação Temporária
+                    </Text>
+
+                    {regimesLoading && <LoadingState label="Carregando regimes..." />}
+                    {!regimesLoading && regimesError && (
+                      <Text size={300} style={{ color: tokens.colorPaletteRedForeground1 }}>
+                        {regimesError}
+                      </Text>
+                    )}
+                    {!regimesLoading && !regimesError && regimes.length === 0 && (
+                      <EmptyState
+                        title="Nenhum regime encontrado"
+                        description="Selecione outro modelo ou atualize a lista."
+                      />
+                    )}
+                    {!regimesLoading && !regimesError && regimes.length > 0 && (
+                      <div className="mb-4">
+                        <DataGrid
+                          items={regimes}
+                          columns={regimesColumns}
+                          getRowId={(item) => item.new_regimedecotacaotemporariaid}
+                        />
+                      </div>
+                    )}
+
+                    {selectedRegimes.length > 0 && (
+                      <div className="grid grid-cols-1 gap-4">
+                        {selectedRegimes.map((regime) => {
+                          const regimeId = regime.new_regimedecotacaotemporariaid;
+                          const edit = regimeEdits[regimeId];
+                          const placeholder = regime.new_name ? `${regime.new_name} (cópia)` : 'Descrição do regime';
+                          return (
+                            <div key={regimeId} className="flex flex-col gap-2">
+                              <Label htmlFor={`regime-name-${regimeId}`}>Descrição do Regime</Label>
+                              <Input
+                                id={`regime-name-${regimeId}`}
+                                value={edit?.name || ''}
+                                onChange={(_, data) => handleRegimeEditChange(regimeId, 'name', data.value)}
+                                placeholder={placeholder}
+                              />
+                              <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-2">
+                                  <Label htmlFor={`regime-markup-${regimeId}`}>Markup</Label>
+                                  <Input
+                                    id={`regime-markup-${regimeId}`}
+                                    type="number"
+                                    value={edit?.markup || ''}
+                                    onChange={(_, data) => handleRegimeEditChange(regimeId, 'markup', data.value)}
+                                    placeholder={regime.new_markup?.toString() || 'Markup'}
+                                  />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Label htmlFor={`regime-desconto-${regimeId}`}>Desconto Percentual de Compra</Label>
+                                  <Input
+                                    id={`regime-desconto-${regimeId}`}
+                                    type="number"
+                                    value={edit?.desconto || ''}
+                                    onChange={(_, data) => handleRegimeEditChange(regimeId, 'desconto', data.value)}
+                                    placeholder={regime.new_descontopercentualdecompra?.toString() || 'Desconto'}
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Label htmlFor={`regime-validade-${regimeId}`}>Validade</Label>
+                                <Input
+                                  id={`regime-validade-${regimeId}`}
+                                  value={edit?.validade || ''}
+                                  onChange={(_, data) => handleRegimeEditChange(regimeId, 'validade', data.value)}
+                                  placeholder={regime.new_validade || 'Validade'}
+                                />
+                              </div>
+                              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                                Original: {regime.new_name || '-'}
+                              </Text>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </Card>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-6">
-          <Button
-            appearance="primary"
-            icon={<Add24Regular />}
-            onClick={handleCreate}
-            disabled={actionBusy || !selectedTemplate || !selectedPreco}
-            size="large"
-          >
-            Criar Novo Item
-          </Button>
+        <div className="mt-6 flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
+            <Label>O que copiar</Label>
+            <Checkbox
+              checked={copyPreco}
+              onChange={(_, data) => setCopyPreco(Boolean(data.checked))}
+              label="Copiar preço e serviços do preço"
+            />
+            <Checkbox
+              checked={copyRegimes}
+              onChange={(_, data) => {
+                const checked = Boolean(data.checked);
+                setCopyRegimes(checked);
+                if (!checked) {
+                  setSelectedRegimeIds([]);
+                  setRegimeEdits({});
+                }
+              }}
+              label="Copiar regimes temporários e serviços do regime"
+            />
+          </div>
+          <div className="flex items-center justify-end gap-3">
+            <Button
+              appearance="primary"
+              icon={<Add24Regular />}
+              onClick={handleCreate}
+              disabled={actionBusy || !canSubmit}
+              size="large"
+            >
+              Criar Novo Item
+            </Button>
+          </div>
         </div>
       </PageContainer>
 
