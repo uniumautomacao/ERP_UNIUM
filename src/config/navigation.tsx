@@ -18,6 +18,7 @@ import { HomePage } from '../pages/HomePage';
 import { TimelinePage } from '../pages/section0-installations/TimelinePage';
 import { GaleriaFotosPage } from '../pages/section0-installations/GaleriaFotosPage';
 import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
+import { CadastroRapidoProdutoPage } from '../pages/section-cadastros/CadastroRapidoProdutoPage';
 import { DashboardPage } from '../pages/section1-analytics/DashboardPage';
 import { AnalyticsPage } from '../pages/section1-analytics/AnalyticsPage';
 import { ReportsPage } from '../pages/section1-analytics/ReportsPage';
@@ -137,6 +138,13 @@ export const navigation: NavSection[] = [
         icon: <DeveloperBoard24Regular />,
         path: '/dispositivos-io',
         component: DispositivosIOPage,
+      },
+      {
+        id: 'cadastro-rapido-produto',
+        label: 'Cadastro Rápido de Produto',
+        icon: <Box24Regular />,
+        path: '/cadastros/cadastro-rapido-produto',
+        component: CadastroRapidoProdutoPage,
       },
     ],
   },

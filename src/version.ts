@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.10';
+export const APP_VERSION = '0.1.11';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.11',
+    date: '2026-01-22',
+    changes: 'Adicionada a página Cadastro Rápido de Produto com clonagem de modelos, preços e vínculos de serviços.',
+  },
   {
     version: '0.1.10',
     date: '2026-01-22',
