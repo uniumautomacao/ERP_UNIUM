@@ -5,6 +5,7 @@ import {
   Checkbox,
   Dropdown,
   Input,
+  Label,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
@@ -228,10 +229,10 @@ export function CadastroRapidoProdutoPage() {
 
       const escaped = escapeOData(normalized);
       const filters = [
-        `statecode eq 0 and startswith(cr22f_title, '${escaped}')`,
-        `statecode eq 0 and startswith(new_descricao, '${escaped}')`,
-        `statecode eq 0 and startswith(cr22f_querycategoria, '${escaped}')`,
-        `statecode eq 0 and startswith(new_nomedofabricante, '${escaped}')`,
+        `statecode eq 0 and contains(cr22f_title, '${escaped}')`,
+        `statecode eq 0 and contains(new_descricao, '${escaped}')`,
+        `statecode eq 0 and contains(cr22f_querycategoria, '${escaped}')`,
+        `statecode eq 0 and contains(new_nomedofabricante, '${escaped}')`,
       ];
 
       const responses = await Promise.all(
@@ -396,7 +397,14 @@ export function CadastroRapidoProdutoPage() {
   }, [selectedPreco]);
 
   const handleCreate = useCallback(async () => {
+    console.log('[CadastroRapidoProduto] handleCreate iniciado');
+    console.log('[CadastroRapidoProduto] selectedTemplate:', selectedTemplate);
+    console.log('[CadastroRapidoProduto] selectedPreco:', selectedPreco);
+    console.log('[CadastroRapidoProduto] modelForm:', modelForm);
+    console.log('[CadastroRapidoProduto] priceForm:', priceForm);
+
     if (!selectedTemplate || !selectedPreco) {
+      console.warn('[CadastroRapidoProduto] Validação falhou: template ou preço não selecionado');
       setMessage({
         intent: 'warning',
         title: 'Selecione um modelo e um preço',
@@ -409,6 +417,7 @@ export function CadastroRapidoProdutoPage() {
     setMessage(null);
 
     try {
+      console.log('[CadastroRapidoProduto] === CRIANDO NOVO MODELO ===');
       const modelPayload: Record<string, any> = {
         cr22f_id: crypto.randomUUID(),
         cr22f_title: modelForm.referencia.trim(),
@@ -424,23 +433,34 @@ export function CadastroRapidoProdutoPage() {
       };
 
       if (modelForm.horasAgregadas.trim()) {
-        modelPayload.cr22f_horasagregadas = Number(modelForm.horasAgregadas);
+        modelPayload.cr22f_horasagregadas = modelForm.horasAgregadas.trim();
       }
 
       if (modelForm.fabricanteId) {
         modelPayload['new_Fabricante@odata.bind'] = `/cr22f_fabricantesfromsharpointlists(${modelForm.fabricanteId})`;
       }
 
+      console.log('[CadastroRapidoProduto] Payload do modelo:', JSON.stringify(modelPayload, null, 2));
       const modelResult = await Cr22fModelosdeProdutoFromSharepointListService.create(modelPayload);
+      console.log('[CadastroRapidoProduto] Resultado da criação do modelo:', {
+        success: modelResult.success,
+        data: modelResult.data,
+        error: modelResult.error,
+      });
+
       if (!modelResult.success || !modelResult.data) {
+        console.error('[CadastroRapidoProduto] Erro ao criar modelo:', modelResult.error);
         throw modelResult.error || new Error('Falha ao criar o novo modelo.');
       }
 
       const novoModeloId = (modelResult.data as any).cr22f_modelosdeprodutofromsharepointlistid;
+      console.log('[CadastroRapidoProduto] ID do novo modelo:', novoModeloId);
       if (!novoModeloId) {
+        console.error('[CadastroRapidoProduto] Modelo criado mas sem ID. Dados completos:', modelResult.data);
         throw new Error('Não foi possível recuperar o ID do novo modelo.');
       }
 
+      console.log('[CadastroRapidoProduto] === CRIANDO NOVO PREÇO ===');
       const pricePayload: Record<string, any> = {
         new_descricao: priceForm.descricao.trim(),
         new_precobase: priceForm.precoBase ? Number(priceForm.precoBase) : undefined,
@@ -455,32 +475,63 @@ export function CadastroRapidoProdutoPage() {
         pricePayload['new_Fornecedor@odata.bind'] = `/cr22f_fornecedoresfromsharepointlists(${priceForm.fornecedorId})`;
       }
 
+      console.log('[CadastroRapidoProduto] Payload do preço:', JSON.stringify(pricePayload, null, 2));
       const priceResult = await NewPrecodeProdutoService.create(pricePayload);
+      console.log('[CadastroRapidoProduto] Resultado da criação do preço:', {
+        success: priceResult.success,
+        data: priceResult.data,
+        error: priceResult.error,
+      });
+
       if (!priceResult.success || !priceResult.data) {
+        console.error('[CadastroRapidoProduto] Erro ao criar preço:', priceResult.error);
         throw priceResult.error || new Error('Falha ao criar o novo preço.');
       }
 
       const novoPrecoId = (priceResult.data as any).new_precodeprodutoid;
+      console.log('[CadastroRapidoProduto] ID do novo preço:', novoPrecoId);
       if (!novoPrecoId) {
+        console.error('[CadastroRapidoProduto] Preço criado mas sem ID. Dados completos:', priceResult.data);
         throw new Error('Não foi possível recuperar o ID do novo preço.');
       }
 
+      console.log('[CadastroRapidoProduto] === COPIANDO VÍNCULOS DE SERVIÇO ===');
+      console.log('[CadastroRapidoProduto] Buscando vínculos do preço original:', selectedPreco.new_precodeprodutoid);
       const vinculosResult = await NewTiposervicoprecodeprodutoService.getAll({
         select: ['_new_tipodeservico_value', 'new_tiposervicoprecodeprodutoid'],
         filter: `_new_precodeproduto_value eq '${selectedPreco.new_precodeprodutoid}' and statecode eq 0`,
       });
+      console.log('[CadastroRapidoProduto] Resultado da busca de vínculos:', {
+        success: vinculosResult.success,
+        count: vinculosResult.data?.length || 0,
+        data: vinculosResult.data,
+        error: vinculosResult.error,
+      });
 
       if (vinculosResult.success && vinculosResult.data && vinculosResult.data.length > 0) {
-        await Promise.all(
-          vinculosResult.data.map((item: any) =>
-            NewTiposervicoprecodeprodutoService.create({
+        console.log('[CadastroRapidoProduto] Criando', vinculosResult.data.length, 'vínculos de serviço...');
+        const vinculosResults = await Promise.all(
+          vinculosResult.data.map((item: any, index: number) => {
+            console.log(`[CadastroRapidoProduto] Criando vínculo ${index + 1}/${vinculosResult.data.length}:`, {
+              tipodeservico: item._new_tipodeservico_value,
+              precodeproduto: novoPrecoId,
+            });
+            return NewTiposervicoprecodeprodutoService.create({
               'new_TipodeServico@odata.bind': `/new_tipodeservicos(${item._new_tipodeservico_value})`,
               'new_PrecodeProduto@odata.bind': `/new_precodeprodutos(${novoPrecoId})`,
-            })
-          )
+            });
+          })
         );
+        console.log('[CadastroRapidoProduto] Resultados da criação de vínculos:', vinculosResults);
+        const vinculosErrors = vinculosResults.filter((r) => !r.success);
+        if (vinculosErrors.length > 0) {
+          console.warn('[CadastroRapidoProduto] Alguns vínculos falharam:', vinculosErrors);
+        }
+      } else {
+        console.log('[CadastroRapidoProduto] Nenhum vínculo encontrado para copiar');
       }
 
+      console.log('[CadastroRapidoProduto] === SUCESSO ===');
       setMessage({
         intent: 'success',
         title: 'Novo item criado com sucesso',
@@ -492,7 +543,27 @@ export function CadastroRapidoProdutoPage() {
       setTemplateSearch('');
       await loadTemplates('');
     } catch (error) {
-      const messageText = error instanceof Error ? error.message : String(error);
+      console.error('[CadastroRapidoProduto] === ERRO ===');
+      console.error('[CadastroRapidoProduto] Tipo do erro:', typeof error);
+      console.error('[CadastroRapidoProduto] Erro completo:', error);
+      console.error('[CadastroRapidoProduto] Stack trace:', error instanceof Error ? error.stack : 'N/A');
+      if (error && typeof error === 'object') {
+        console.error('[CadastroRapidoProduto] Propriedades do erro:', Object.keys(error));
+        console.error('[CadastroRapidoProduto] Erro stringificado:', JSON.stringify(error, null, 2));
+      }
+
+      let messageText: string;
+      if (error instanceof Error) {
+        messageText = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        messageText = String((error as any).message);
+      } else if (error && typeof error === 'object' && 'error' in error) {
+        messageText = String((error as any).error);
+      } else {
+        messageText = String(error);
+      }
+
+      console.error('[CadastroRapidoProduto] Mensagem de erro final:', messageText);
       setMessage({
         intent: 'error',
         title: 'Falha ao criar novo item',
@@ -500,6 +571,7 @@ export function CadastroRapidoProdutoPage() {
       });
     } finally {
       setActionBusy(false);
+      console.log('[CadastroRapidoProduto] handleCreate finalizado');
     }
   }, [loadTemplates, modelForm, priceForm, selectedPreco, selectedTemplate]);
 
@@ -593,9 +665,9 @@ export function CadastroRapidoProdutoPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 mb-6">
-          <Card style={{ padding: 16 }}>
-            <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="grid grid-cols-1 gap-6 mb-6">
+          <Card style={{ padding: 20 }}>
+            <div className="flex items-center justify-between gap-3 mb-5">
               <Text size={500} weight="semibold">
                 Templates de Produto
               </Text>
@@ -604,7 +676,7 @@ export function CadastroRapidoProdutoPage() {
               </Button>
             </div>
 
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-5">
               <Input
                 contentBefore={<Search24Regular />}
                 placeholder="Buscar por referência, descrição, categoria ou fabricante"
@@ -639,9 +711,9 @@ export function CadastroRapidoProdutoPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 desktop:grid-cols-2 gap-4 mb-6">
-          <Card style={{ padding: 16 }}>
-            <Text size={500} weight="semibold" block style={{ marginBottom: 12 }}>
+        <div className="grid grid-cols-1 desktop:grid-cols-2 gap-6 mb-6">
+          <Card style={{ padding: 20 }}>
+            <Text size={500} weight="semibold" block style={{ marginBottom: 20 }}>
               Ajustar informações do novo modelo
             </Text>
 
@@ -653,110 +725,138 @@ export function CadastroRapidoProdutoPage() {
             )}
 
             {selectedTemplate && (
-              <div className="grid grid-cols-1 gap-4">
-                <Input
-                  value={modelForm.referencia}
-                  onChange={(_, data) => setModelForm((prev) => ({ ...prev, referencia: data.value }))}
-                  placeholder="Referência"
-                />
-                <Input
-                  value={modelForm.queryCategoria}
-                  onChange={(_, data) => setModelForm((prev) => ({ ...prev, queryCategoria: data.value }))}
-                  placeholder="Categoria"
-                />
-                <Dropdown
-                  placeholder="Fabricante"
-                  value={fabricantes.find((item) => item.id === modelForm.fabricanteId)?.label || ''}
-                  onOptionSelect={(_, data) =>
-                    setModelForm((prev) => ({ ...prev, fabricanteId: (data.optionValue as string) || '' }))
-                  }
-                >
-                  {fabricantes.map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.label}
-                    </Option>
-                  ))}
-                </Dropdown>
-                <Dropdown
-                  placeholder="Tipo de Sistema"
-                  value={
-                    modelForm.tipoSistema !== null
-                      ? TIPO_SISTEMA_OPTIONS.find((option) => option.value === modelForm.tipoSistema)?.label || ''
-                      : ''
-                  }
-                  onOptionSelect={(_, data) =>
-                    setModelForm((prev) => ({
-                      ...prev,
-                      tipoSistema: data.optionValue ? Number(data.optionValue) : null,
-                    }))
-                  }
-                >
-                  {TIPO_SISTEMA_OPTIONS.map((option) => (
-                    <Option key={option.value} value={option.value.toString()}>
-                      {option.label}
-                    </Option>
-                  ))}
-                </Dropdown>
-                <div className="grid grid-cols-1 tablet:grid-cols-2 gap-2">
-                  <Checkbox
-                    checked={modelForm.controlaSn}
-                    onChange={(_, data) => setModelForm((prev) => ({ ...prev, controlaSn: Boolean(data.checked) }))}
-                    label="Controla S/N"
-                  />
-                  <Checkbox
-                    checked={modelForm.controlaEtiqueta}
-                    onChange={(_, data) =>
-                      setModelForm((prev) => ({ ...prev, controlaEtiqueta: Boolean(data.checked) }))
-                    }
-                    label="Controla Etiqueta"
-                  />
-                  <Checkbox
-                    checked={modelForm.requerConfiguracao}
-                    onChange={(_, data) =>
-                      setModelForm((prev) => ({ ...prev, requerConfiguracao: Boolean(data.checked) }))
-                    }
-                    label="Requer Configuração"
-                  />
-                  <Checkbox
-                    checked={modelForm.requerCabeamento}
-                    onChange={(_, data) =>
-                      setModelForm((prev) => ({ ...prev, requerCabeamento: Boolean(data.checked) }))
-                    }
-                    label="Requer Cabeamento"
-                  />
-                  <Checkbox
-                    checked={modelForm.requerEngraving}
-                    onChange={(_, data) =>
-                      setModelForm((prev) => ({ ...prev, requerEngraving: Boolean(data.checked) }))
-                    }
-                    label="Requer Engraving"
-                  />
-                  <Checkbox
-                    checked={modelForm.reservaProdutoLivre}
-                    onChange={(_, data) =>
-                      setModelForm((prev) => ({ ...prev, reservaProdutoLivre: Boolean(data.checked) }))
-                    }
-                    label="Reserva de Produto Livre"
+              <div className="grid grid-cols-1 gap-5">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="referencia">Referência</Label>
+                  <Input
+                    id="referencia"
+                    value={modelForm.referencia}
+                    onChange={(_, data) => setModelForm((prev) => ({ ...prev, referencia: data.value }))}
+                    placeholder="Referência"
                   />
                 </div>
-                <Textarea
-                  value={modelForm.deviceTemplateJson}
-                  onChange={(_, data) => setModelForm((prev) => ({ ...prev, deviceTemplateJson: data.value }))}
-                  placeholder="Device IO Template (JSON)"
-                  resize="vertical"
-                />
-                <Input
-                  type="number"
-                  value={modelForm.horasAgregadas}
-                  onChange={(_, data) => setModelForm((prev) => ({ ...prev, horasAgregadas: data.value }))}
-                  placeholder="Horas Agregadas"
-                />
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="querycategoria">QueryCategoria</Label>
+                  <Input
+                    id="querycategoria"
+                    value={modelForm.queryCategoria}
+                    onChange={(_, data) => setModelForm((prev) => ({ ...prev, queryCategoria: data.value }))}
+                    placeholder="QueryCategoria"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="fabricante">Fabricante</Label>
+                  <Dropdown
+                    id="fabricante"
+                    placeholder="Selecione um fabricante"
+                    value={fabricantes.find((item) => item.id === modelForm.fabricanteId)?.label || ''}
+                    onOptionSelect={(_, data) =>
+                      setModelForm((prev) => ({ ...prev, fabricanteId: (data.optionValue as string) || '' }))
+                    }
+                  >
+                    {fabricantes.map((item) => (
+                      <Option key={item.id} value={item.id}>
+                        {item.label}
+                      </Option>
+                    ))}
+                  </Dropdown>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="tiposistema">Tipo de Sistema Padrão</Label>
+                  <Dropdown
+                    id="tiposistema"
+                    placeholder="Selecione um tipo de sistema"
+                    value={
+                      modelForm.tipoSistema !== null
+                        ? TIPO_SISTEMA_OPTIONS.find((option) => option.value === modelForm.tipoSistema)?.label || ''
+                        : ''
+                    }
+                    onOptionSelect={(_, data) =>
+                      setModelForm((prev) => ({
+                        ...prev,
+                        tipoSistema: data.optionValue ? Number(data.optionValue) : null,
+                      }))
+                    }
+                  >
+                    {TIPO_SISTEMA_OPTIONS.map((option) => (
+                      <Option key={option.value} value={option.value.toString()}>
+                        {option.label}
+                      </Option>
+                    ))}
+                  </Dropdown>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Label>Opções</Label>
+                  <div className="grid grid-cols-1 tablet:grid-cols-2 gap-3">
+                    <Checkbox
+                      checked={modelForm.controlaSn}
+                      onChange={(_, data) => setModelForm((prev) => ({ ...prev, controlaSn: Boolean(data.checked) }))}
+                      label="Controla S/N"
+                    />
+                    <Checkbox
+                      checked={modelForm.controlaEtiqueta}
+                      onChange={(_, data) =>
+                        setModelForm((prev) => ({ ...prev, controlaEtiqueta: Boolean(data.checked) }))
+                      }
+                      label="Controla Etiqueta"
+                    />
+                    <Checkbox
+                      checked={modelForm.requerConfiguracao}
+                      onChange={(_, data) =>
+                        setModelForm((prev) => ({ ...prev, requerConfiguracao: Boolean(data.checked) }))
+                      }
+                      label="Requer Configuração"
+                    />
+                    <Checkbox
+                      checked={modelForm.requerCabeamento}
+                      onChange={(_, data) =>
+                        setModelForm((prev) => ({ ...prev, requerCabeamento: Boolean(data.checked) }))
+                      }
+                      label="Requer Cabeamento"
+                    />
+                    <Checkbox
+                      checked={modelForm.requerEngraving}
+                      onChange={(_, data) =>
+                        setModelForm((prev) => ({ ...prev, requerEngraving: Boolean(data.checked) }))
+                      }
+                      label="Requer Engraving"
+                    />
+                    <Checkbox
+                      checked={modelForm.reservaProdutoLivre}
+                      onChange={(_, data) =>
+                        setModelForm((prev) => ({ ...prev, reservaProdutoLivre: Boolean(data.checked) }))
+                      }
+                      label="Reserva de Produto Livre"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="deviceiotemplatejson">Device IO Template (JSON)</Label>
+                  <Textarea
+                    id="deviceiotemplatejson"
+                    value={modelForm.deviceTemplateJson}
+                    onChange={(_, data) => setModelForm((prev) => ({ ...prev, deviceTemplateJson: data.value }))}
+                    placeholder="Device IO Template (JSON)"
+                    resize="vertical"
+                    style={{ minHeight: '100px' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="horasagregadas">Horas Agregadas</Label>
+                  <Input
+                    id="horasagregadas"
+                    type="number"
+                    value={modelForm.horasAgregadas}
+                    onChange={(_, data) => setModelForm((prev) => ({ ...prev, horasAgregadas: data.value }))}
+                    placeholder="Horas Agregadas"
+                  />
+                </div>
               </div>
             )}
           </Card>
 
-          <Card style={{ padding: 16 }}>
-            <Text size={500} weight="semibold" block style={{ marginBottom: 12 }}>
+          <Card style={{ padding: 20 }}>
+            <Text size={500} weight="semibold" block style={{ marginBottom: 20 }}>
               Ajustar informações do novo preço
             </Text>
 
@@ -785,60 +885,83 @@ export function CadastroRapidoProdutoPage() {
                 )}
 
                 {selectedPreco && (
-                  <div className="grid grid-cols-1 gap-4">
-                    <Input
-                      value={priceForm.descricao}
-                      onChange={(_, data) => setPriceForm((prev) => ({ ...prev, descricao: data.value }))}
-                      placeholder="Descrição"
-                    />
-                    <Dropdown
-                      placeholder="Fornecedor"
-                      value={fornecedores.find((item) => item.id === priceForm.fornecedorId)?.label || ''}
-                      onOptionSelect={(_, data) =>
-                        setPriceForm((prev) => ({ ...prev, fornecedorId: (data.optionValue as string) || '' }))
-                      }
-                    >
-                      {fornecedores.map((item) => (
-                        <Option key={item.id} value={item.id}>
-                          {item.label}
-                        </Option>
-                      ))}
-                    </Dropdown>
-                    <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-5">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="descricao-preco">Descrição</Label>
                       <Input
-                        type="number"
-                        value={priceForm.precoBase}
-                        onChange={(_, data) => setPriceForm((prev) => ({ ...prev, precoBase: data.value }))}
-                        placeholder="Preço Base"
-                      />
-                      <Input
-                        type="number"
-                        value={priceForm.descontoCompra}
-                        onChange={(_, data) => setPriceForm((prev) => ({ ...prev, descontoCompra: data.value }))}
-                        placeholder="Desconto Percentual de Compra"
-                      />
-                      <Input
-                        type="number"
-                        value={priceForm.markup}
-                        onChange={(_, data) => setPriceForm((prev) => ({ ...prev, markup: data.value }))}
-                        placeholder="Markup"
+                        id="descricao-preco"
+                        value={priceForm.descricao}
+                        onChange={(_, data) => setPriceForm((prev) => ({ ...prev, descricao: data.value }))}
+                        placeholder="Descrição"
                       />
                     </div>
-                    <div className="grid grid-cols-1 tablet:grid-cols-2 gap-2">
-                      <Checkbox
-                        checked={priceForm.requerInstalacao}
-                        onChange={(_, data) =>
-                          setPriceForm((prev) => ({ ...prev, requerInstalacao: Boolean(data.checked) }))
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="fornecedor">Fornecedor</Label>
+                      <Dropdown
+                        id="fornecedor"
+                        placeholder="Selecione um fornecedor"
+                        value={fornecedores.find((item) => item.id === priceForm.fornecedorId)?.label || ''}
+                        onOptionSelect={(_, data) =>
+                          setPriceForm((prev) => ({ ...prev, fornecedorId: (data.optionValue as string) || '' }))
                         }
-                        label="Requer Instalação"
-                      />
-                      <Checkbox
-                        checked={priceForm.aceitaDesconto}
-                        onChange={(_, data) =>
-                          setPriceForm((prev) => ({ ...prev, aceitaDesconto: Boolean(data.checked) }))
-                        }
-                        label="Aceita Desconto"
-                      />
+                      >
+                        {fornecedores.map((item) => (
+                          <Option key={item.id} value={item.id}>
+                            {item.label}
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </div>
+                    <div className="grid grid-cols-1 tablet:grid-cols-2 gap-5">
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="precobase">Preço Base</Label>
+                        <Input
+                          id="precobase"
+                          type="number"
+                          value={priceForm.precoBase}
+                          onChange={(_, data) => setPriceForm((prev) => ({ ...prev, precoBase: data.value }))}
+                          placeholder="Preço Base"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="descontocompra">Desconto Percentual de Compra</Label>
+                        <Input
+                          id="descontocompra"
+                          type="number"
+                          value={priceForm.descontoCompra}
+                          onChange={(_, data) => setPriceForm((prev) => ({ ...prev, descontoCompra: data.value }))}
+                          placeholder="Desconto Percentual de Compra"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="markup">Markup</Label>
+                        <Input
+                          id="markup"
+                          type="number"
+                          value={priceForm.markup}
+                          onChange={(_, data) => setPriceForm((prev) => ({ ...prev, markup: data.value }))}
+                          placeholder="Markup"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <Label>Opções</Label>
+                      <div className="grid grid-cols-1 tablet:grid-cols-2 gap-3">
+                        <Checkbox
+                          checked={priceForm.requerInstalacao}
+                          onChange={(_, data) =>
+                            setPriceForm((prev) => ({ ...prev, requerInstalacao: Boolean(data.checked) }))
+                          }
+                          label="Requer Instalação"
+                        />
+                        <Checkbox
+                          checked={priceForm.aceitaDesconto}
+                          onChange={(_, data) =>
+                            setPriceForm((prev) => ({ ...prev, aceitaDesconto: Boolean(data.checked) }))
+                          }
+                          label="Aceita Desconto"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -847,12 +970,13 @@ export function CadastroRapidoProdutoPage() {
           </Card>
         </div>
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 mt-6">
           <Button
             appearance="primary"
             icon={<Add24Regular />}
             onClick={handleCreate}
             disabled={actionBusy || !selectedTemplate || !selectedPreco}
+            size="large"
           >
             Criar Novo Item
           </Button>

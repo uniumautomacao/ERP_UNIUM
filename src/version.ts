@@ -1,6 +1,31 @@
-export const APP_VERSION = '0.1.11';
+export const APP_VERSION = '0.1.16';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.16',
+    date: '2026-01-22',
+    changes: 'Alterada busca de templates de produto para usar contains (delegável) em vez de startswith na página Cadastro Rápido de Produto.',
+  },
+  {
+    version: '0.1.15',
+    date: '2026-01-22',
+    changes: 'Corrigido tipo do campo cr22f_horasagregadas (string em vez de number) na criação de modelos de produto.',
+  },
+  {
+    version: '0.1.14',
+    date: '2026-01-22',
+    changes: 'Adicionados logs detalhados na função de criação de novo item na página Cadastro Rápido de Produto para facilitar debug de erros.',
+  },
+  {
+    version: '0.1.13',
+    date: '2026-01-22',
+    changes: 'Melhorado layout dos formulários na página Cadastro Rápido de Produto: labels acima dos campos, espaçamentos otimizados e UI mais limpa.',
+  },
+  {
+    version: '0.1.12',
+    date: '2026-01-22',
+    changes: 'Adicionados labels com Display Names nos campos dos formulários da página Cadastro Rápido de Produto.',
+  },
   {
     version: '0.1.11',
     date: '2026-01-22',
