@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.1.5';
+export const APP_VERSION = '0.1.8';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.8',
+    date: '2026-01-22',
+    changes: 'Lista do dia agora combina duas consultas: itens contados hoje têm prioridade e são mesclados com pendentes, mantendo o total máximo de 200 registros.',
+  },
+  {
+    version: '0.1.7',
+    date: '2026-01-22',
+    changes: 'Novo fluxo de Contagem de Estoque: suporte a leitor Bluetooth, bipagem sequencial de produtos sem modal (quantidade=1 assume automaticamente, >1 abre modal), armazenamento local temporário até bipar endereço que confirma e persiste todas as contagens, atualização de endereço se diferente, registro de leituras em new_registrodeleiturademercadoriaemestoque, filtro para mostrar apenas pendentes, itens contados hoje permanecem visíveis com status OK.',
+  },
+  {
+    version: '0.1.6',
+    date: '2026-01-22',
+    changes: 'Reformulada a Lista do Dia na Contagem de Estoque Mobile: agora usa Accordion para agrupar itens por endereço, ordenados por prioridade (mais atrasados primeiro), com badges de status, botão Expandir/Recolher Todos e melhor navegação para estoquistas.',
+  },
   {
     version: '0.1.5',
     date: '2026-01-22',
