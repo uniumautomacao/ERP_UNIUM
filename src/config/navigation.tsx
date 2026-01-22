@@ -6,6 +6,7 @@ import {
   Box24Regular,
   CalendarLtr24Regular,
   People24Regular,
+  ImageMultiple24Regular,
   ShieldLock24Regular,
   PeopleCheckmark24Regular,
   DeveloperBoard24Regular,
@@ -15,6 +16,7 @@ import {
 import { NavSection } from '../types';
 import { HomePage } from '../pages/HomePage';
 import { TimelinePage } from '../pages/section0-installations/TimelinePage';
+import { GaleriaFotosPage } from '../pages/section0-installations/GaleriaFotosPage';
 import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
 import { DashboardPage } from '../pages/section1-analytics/DashboardPage';
 import { AnalyticsPage } from '../pages/section1-analytics/AnalyticsPage';
@@ -57,6 +59,13 @@ export const navigation: NavSection[] = [
         icon: <CalendarLtr24Regular />,
         path: '/timeline',
         component: TimelinePage,
+      },
+      {
+        id: 'galeria-fotos',
+        label: 'Galeria de Fotos',
+        icon: <ImageMultiple24Regular />,
+        path: '/instalacoes/galeria-fotos',
+        component: GaleriaFotosPage,
       },
     ],
   },

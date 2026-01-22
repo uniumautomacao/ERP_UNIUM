@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.4';
-export const APP_BUILD_DATE = '2026-01-21';
+export const APP_VERSION = '0.1.5';
+export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.5',
+    date: '2026-01-22',
+    changes: 'Importada a pagina Galeria de Fotos em Instalações, mantendo a logica do app e adaptando a UI ao template.',
+  },
   {
     version: '0.1.4',
     date: '2026-01-21',
