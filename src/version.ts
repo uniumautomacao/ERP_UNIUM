@@ -1,6 +1,12 @@
-export const APP_VERSION = '0.1.20';
+export const APP_VERSION = '0.1.21';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.21',
+    date: '2026-01-22',
+    changes:
+      'Adicionado modal para detectar referência existente e permitir atualização do modelo com comparação de campos.',
+  },
   {
     version: '0.1.20',
     date: '2026-01-22',

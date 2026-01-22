@@ -3,6 +3,12 @@ import {
   Button,
   Card,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
   Dropdown,
   Input,
   Label,
@@ -189,6 +195,10 @@ export function CadastroRapidoProdutoPage() {
 
   const [copyPreco, setCopyPreco] = useState(true);
   const [copyRegimes, setCopyRegimes] = useState(false);
+
+  const [existingModel, setExistingModel] = useState<ModeloTemplate | null>(null);
+  const [pendingModelPayload, setPendingModelPayload] = useState<Record<string, any> | null>(null);
+  const [confirmUpdateOpen, setConfirmUpdateOpen] = useState(false);
 
   const [actionBusy, setActionBusy] = useState(false);
   const [message, setMessage] = useState<{ intent: 'success' | 'error' | 'warning'; title: string; body?: string } | null>(null);
@@ -474,6 +484,20 @@ export function CadastroRapidoProdutoPage() {
     };
   }, []);
 
+  const formatBoolean = useCallback((value?: boolean) => (value ? 'Sim' : 'Não'), []);
+
+  const fabricantesById = useMemo(() => {
+    return fabricantes.reduce<Record<string, string>>((acc, item) => {
+      acc[item.id] = item.label;
+      return acc;
+    }, {});
+  }, [fabricantes]);
+
+  const getTipoSistemaLabel = useCallback((value?: number | null) => {
+    if (value === null || value === undefined) return '-';
+    return TIPO_SISTEMA_OPTIONS.find((option) => option.value === value)?.label || String(value);
+  }, []);
+
   const toggleRegimeSelection = useCallback((regime: RegimeTemporario) => {
     const regimeId = regime.new_regimedecotacaotemporariaid;
     setSelectedRegimeIds((prev) => {
@@ -501,78 +525,9 @@ export function CadastroRapidoProdutoPage() {
     }));
   }, []);
 
-  const handleCreate = useCallback(async () => {
-    console.log('[CadastroRapidoProduto] handleCreate iniciado');
-    console.log('[CadastroRapidoProduto] selectedTemplate:', selectedTemplate);
-    console.log('[CadastroRapidoProduto] selectedPreco:', selectedPreco);
-    console.log('[CadastroRapidoProduto] selectedRegimeIds:', selectedRegimeIds);
-    console.log('[CadastroRapidoProduto] copyPreco:', copyPreco);
-    console.log('[CadastroRapidoProduto] copyRegimes:', copyRegimes);
-    console.log('[CadastroRapidoProduto] modelForm:', modelForm);
-    console.log('[CadastroRapidoProduto] priceForm:', priceForm);
-
-    if (!selectedTemplate) {
-      console.warn('[CadastroRapidoProduto] Validação falhou: template não selecionado');
-      setMessage({
-        intent: 'warning',
-        title: 'Selecione um modelo',
-        body: 'Escolha um template de produto antes de criar o novo item.',
-      });
-      return;
-    }
-
-    if (!copyPreco && !copyRegimes) {
-      console.warn('[CadastroRapidoProduto] Validação falhou: nenhuma opção de cópia selecionada');
-      setMessage({
-        intent: 'warning',
-        title: 'Selecione o que deseja copiar',
-        body: 'Marque ao menos uma opção: preço ou regimes temporários.',
-      });
-      return;
-    }
-
-    if (copyPreco && !selectedPreco) {
-      console.warn('[CadastroRapidoProduto] Validação falhou: preço não selecionado');
-      setMessage({
-        intent: 'warning',
-        title: 'Selecione um preço',
-        body: 'Escolha um preço base para copiar.',
-      });
-      return;
-    }
-
-    if (copyRegimes) {
-      if (selectedRegimes.length === 0) {
-        console.warn('[CadastroRapidoProduto] Validação falhou: nenhum regime selecionado');
-        setMessage({
-          intent: 'warning',
-          title: 'Selecione pelo menos um regime',
-          body: 'Escolha os regimes de cotação temporária que deseja copiar.',
-        });
-        return;
-      }
-
-      const regimeSemNome = selectedRegimes.find(
-        (regime) => !regimeEdits[regime.new_regimedecotacaotemporariaid]?.name?.trim()
-      );
-      if (regimeSemNome) {
-        console.warn('[CadastroRapidoProduto] Validação falhou: nome do regime não informado');
-        setMessage({
-          intent: 'warning',
-          title: 'Informe o nome do regime',
-          body: 'Preencha a descrição de todos os regimes selecionados.',
-        });
-        return;
-      }
-    }
-
-    setActionBusy(true);
-    setMessage(null);
-
-    try {
-      console.log('[CadastroRapidoProduto] === CRIANDO NOVO MODELO ===');
-      const modelPayload: Record<string, any> = {
-        cr22f_id: crypto.randomUUID(),
+  const buildModelPayload = useCallback(
+    (includeId: boolean) => {
+      const payload: Record<string, any> = {
         cr22f_title: modelForm.referencia.trim(),
         cr22f_querycategoria: modelForm.queryCategoria.trim(),
         new_tipodesistemapadrao: modelForm.tipoSistema ?? undefined,
@@ -585,34 +540,25 @@ export function CadastroRapidoProdutoPage() {
         new_deviceiotemplatejson: modelForm.deviceTemplateJson.trim(),
       };
 
+      if (includeId) {
+        payload.cr22f_id = crypto.randomUUID();
+      }
+
       if (modelForm.horasAgregadas.trim()) {
-        modelPayload.cr22f_horasagregadas = modelForm.horasAgregadas.trim();
+        payload.cr22f_horasagregadas = modelForm.horasAgregadas.trim();
       }
 
       if (modelForm.fabricanteId) {
-        modelPayload['new_Fabricante@odata.bind'] = `/cr22f_fabricantesfromsharpointlists(${modelForm.fabricanteId})`;
+        payload['new_Fabricante@odata.bind'] = `/cr22f_fabricantesfromsharpointlists(${modelForm.fabricanteId})`;
       }
 
-      console.log('[CadastroRapidoProduto] Payload do modelo:', JSON.stringify(modelPayload, null, 2));
-      const modelResult = await Cr22fModelosdeProdutoFromSharepointListService.create(modelPayload);
-      console.log('[CadastroRapidoProduto] Resultado da criação do modelo:', {
-        success: modelResult.success,
-        data: modelResult.data,
-        error: modelResult.error,
-      });
+      return payload;
+    },
+    [modelForm]
+  );
 
-      if (!modelResult.success || !modelResult.data) {
-        console.error('[CadastroRapidoProduto] Erro ao criar modelo:', modelResult.error);
-        throw modelResult.error || new Error('Falha ao criar o novo modelo.');
-      }
-
-      const novoModeloId = (modelResult.data as any).cr22f_modelosdeprodutofromsharepointlistid;
-      console.log('[CadastroRapidoProduto] ID do novo modelo:', novoModeloId);
-      if (!novoModeloId) {
-        console.error('[CadastroRapidoProduto] Modelo criado mas sem ID. Dados completos:', modelResult.data);
-        throw new Error('Não foi possível recuperar o ID do novo modelo.');
-      }
-
+  const createRelatedRecords = useCallback(
+    async (novoModeloId: string, modelActionLabel: string) => {
       let novoPrecoId: string | null = null;
       if (copyPreco) {
         console.log('[CadastroRapidoProduto] === CRIANDO NOVO PREÇO ===');
@@ -769,13 +715,148 @@ export function CadastroRapidoProdutoPage() {
       setMessage({
         intent: 'success',
         title: 'Novo item criado com sucesso',
-        body: `O modelo e ${successParts.join(' + ')} foram copiados.`,
+        body: `${modelActionLabel} e ${successParts.join(' + ')} foram copiados.`,
       });
 
       setSelectedTemplate(null);
       setSelectedPreco(null);
       setTemplateSearch('');
       await loadTemplates('');
+    },
+    [
+      copyPreco,
+      copyRegimes,
+      loadTemplates,
+      modelForm.referencia,
+      priceForm,
+      regimeEdits,
+      selectedPreco,
+      selectedRegimes,
+    ]
+  );
+
+  const handleCreate = useCallback(async () => {
+    console.log('[CadastroRapidoProduto] handleCreate iniciado');
+    console.log('[CadastroRapidoProduto] selectedTemplate:', selectedTemplate);
+    console.log('[CadastroRapidoProduto] selectedPreco:', selectedPreco);
+    console.log('[CadastroRapidoProduto] selectedRegimeIds:', selectedRegimeIds);
+    console.log('[CadastroRapidoProduto] copyPreco:', copyPreco);
+    console.log('[CadastroRapidoProduto] copyRegimes:', copyRegimes);
+    console.log('[CadastroRapidoProduto] modelForm:', modelForm);
+    console.log('[CadastroRapidoProduto] priceForm:', priceForm);
+
+    if (!selectedTemplate) {
+      console.warn('[CadastroRapidoProduto] Validação falhou: template não selecionado');
+      setMessage({
+        intent: 'warning',
+        title: 'Selecione um modelo',
+        body: 'Escolha um template de produto antes de criar o novo item.',
+      });
+      return;
+    }
+
+    if (!copyPreco && !copyRegimes) {
+      console.warn('[CadastroRapidoProduto] Validação falhou: nenhuma opção de cópia selecionada');
+      setMessage({
+        intent: 'warning',
+        title: 'Selecione o que deseja copiar',
+        body: 'Marque ao menos uma opção: preço ou regimes temporários.',
+      });
+      return;
+    }
+
+    if (copyPreco && !selectedPreco) {
+      console.warn('[CadastroRapidoProduto] Validação falhou: preço não selecionado');
+      setMessage({
+        intent: 'warning',
+        title: 'Selecione um preço',
+        body: 'Escolha um preço base para copiar.',
+      });
+      return;
+    }
+
+    if (copyRegimes) {
+      if (selectedRegimes.length === 0) {
+        console.warn('[CadastroRapidoProduto] Validação falhou: nenhum regime selecionado');
+        setMessage({
+          intent: 'warning',
+          title: 'Selecione pelo menos um regime',
+          body: 'Escolha os regimes de cotação temporária que deseja copiar.',
+        });
+        return;
+      }
+
+      const regimeSemNome = selectedRegimes.find(
+        (regime) => !regimeEdits[regime.new_regimedecotacaotemporariaid]?.name?.trim()
+      );
+      if (regimeSemNome) {
+        console.warn('[CadastroRapidoProduto] Validação falhou: nome do regime não informado');
+        setMessage({
+          intent: 'warning',
+          title: 'Informe o nome do regime',
+          body: 'Preencha a descrição de todos os regimes selecionados.',
+        });
+        return;
+      }
+    }
+
+    setActionBusy(true);
+    setMessage(null);
+
+    try {
+      console.log('[CadastroRapidoProduto] === CRIANDO NOVO MODELO ===');
+      const modelPayload = buildModelPayload(true);
+      console.log('[CadastroRapidoProduto] Payload do modelo:', JSON.stringify(modelPayload, null, 2));
+
+      const reference = modelForm.referencia.trim();
+      const escapedRef = escapeOData(reference);
+      const existingResult = await Cr22fModelosdeProdutoFromSharepointListService.getAll({
+        select: [
+          'cr22f_modelosdeprodutofromsharepointlistid',
+          'cr22f_title',
+          'cr22f_querycategoria',
+          'new_tipodesistemapadrao',
+          'new_controlasn',
+          'new_controlaetiqueta',
+          'new_requerconfiguracao',
+          'new_requercabeamento',
+          'new_requerengraving',
+          'new_reservadeprodutolivre',
+          'new_deviceiotemplatejson',
+          'cr22f_horasagregadas',
+          '_new_fabricante_value',
+        ],
+        filter: `cr22f_title eq '${escapedRef}' and statecode eq 0`,
+        top: 1,
+      });
+
+      if (existingResult.success && existingResult.data && existingResult.data.length > 0) {
+        console.warn('[CadastroRapidoProduto] Modelo existente encontrado para a referência informada.');
+        setExistingModel(existingResult.data[0] as ModeloTemplate);
+        setPendingModelPayload(modelPayload);
+        setConfirmUpdateOpen(true);
+        return;
+      }
+
+      const modelResult = await Cr22fModelosdeProdutoFromSharepointListService.create(modelPayload);
+      console.log('[CadastroRapidoProduto] Resultado da criação do modelo:', {
+        success: modelResult.success,
+        data: modelResult.data,
+        error: modelResult.error,
+      });
+
+      if (!modelResult.success || !modelResult.data) {
+        console.error('[CadastroRapidoProduto] Erro ao criar modelo:', modelResult.error);
+        throw modelResult.error || new Error('Falha ao criar o novo modelo.');
+      }
+
+      const novoModeloId = (modelResult.data as any).cr22f_modelosdeprodutofromsharepointlistid;
+      console.log('[CadastroRapidoProduto] ID do novo modelo:', novoModeloId);
+      if (!novoModeloId) {
+        console.error('[CadastroRapidoProduto] Modelo criado mas sem ID. Dados completos:', modelResult.data);
+        throw new Error('Não foi possível recuperar o ID do novo modelo.');
+      }
+      await createRelatedRecords(novoModeloId, 'O modelo foi criado');
     } catch (error) {
       console.error('[CadastroRapidoProduto] === ERRO ===');
       console.error('[CadastroRapidoProduto] Tipo do erro:', typeof error);
@@ -818,7 +899,82 @@ export function CadastroRapidoProdutoPage() {
     selectedRegimes,
     selectedRegimeIds,
     selectedTemplate,
+    buildModelPayload,
+    createRelatedRecords,
   ]);
+
+  const handleConfirmUpdateExisting = useCallback(async () => {
+    if (!existingModel || !pendingModelPayload) {
+      setConfirmUpdateOpen(false);
+      return;
+    }
+
+    setConfirmUpdateOpen(false);
+    setActionBusy(true);
+    setMessage(null);
+
+    try {
+      const updatePayload = { ...pendingModelPayload };
+      delete updatePayload.cr22f_id;
+
+      console.log('[CadastroRapidoProduto] Atualizando modelo existente:', existingModel.cr22f_modelosdeprodutofromsharepointlistid);
+      console.log('[CadastroRapidoProduto] Payload de atualização:', JSON.stringify(updatePayload, null, 2));
+
+      const updateResult = await Cr22fModelosdeProdutoFromSharepointListService.update(
+        existingModel.cr22f_modelosdeprodutofromsharepointlistid,
+        updatePayload
+      );
+
+      console.log('[CadastroRapidoProduto] Resultado da atualização do modelo:', {
+        success: updateResult.success,
+        data: updateResult.data,
+        error: updateResult.error,
+      });
+
+      if (!updateResult.success) {
+        throw updateResult.error || new Error('Falha ao atualizar o modelo existente.');
+      }
+
+      await createRelatedRecords(existingModel.cr22f_modelosdeprodutofromsharepointlistid, 'O modelo existente foi atualizado');
+    } catch (error) {
+      console.error('[CadastroRapidoProduto] === ERRO ===');
+      console.error('[CadastroRapidoProduto] Tipo do erro:', typeof error);
+      console.error('[CadastroRapidoProduto] Erro completo:', error);
+      console.error('[CadastroRapidoProduto] Stack trace:', error instanceof Error ? error.stack : 'N/A');
+      if (error && typeof error === 'object') {
+        console.error('[CadastroRapidoProduto] Propriedades do erro:', Object.keys(error));
+        console.error('[CadastroRapidoProduto] Erro stringificado:', JSON.stringify(error, null, 2));
+      }
+
+      let messageText: string;
+      if (error instanceof Error) {
+        messageText = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        messageText = String((error as any).message);
+      } else if (error && typeof error === 'object' && 'error' in error) {
+        messageText = String((error as any).error);
+      } else {
+        messageText = String(error);
+      }
+
+      console.error('[CadastroRapidoProduto] Mensagem de erro final:', messageText);
+      setMessage({
+        intent: 'error',
+        title: 'Falha ao atualizar modelo',
+        body: messageText,
+      });
+    } finally {
+      setActionBusy(false);
+      setExistingModel(null);
+      setPendingModelPayload(null);
+    }
+  }, [createRelatedRecords, existingModel, pendingModelPayload]);
+
+  const handleCancelUpdateExisting = useCallback(() => {
+    setConfirmUpdateOpen(false);
+    setExistingModel(null);
+    setPendingModelPayload(null);
+  }, []);
 
   const templatesColumns = useMemo(
     () => [
@@ -940,6 +1096,80 @@ export function CadastroRapidoProdutoPage() {
     (!copyRegimes ||
       (selectedRegimes.length > 0 &&
         selectedRegimes.every((regime) => regimeEdits[regime.new_regimedecotacaotemporariaid]?.name?.trim())));
+
+  const existingComparison = useMemo(() => {
+    if (!existingModel) return [];
+    return [
+      {
+        label: 'Referência',
+        existing: existingModel.cr22f_title || '-',
+        updated: modelForm.referencia || '-',
+      },
+      {
+        label: 'QueryCategoria',
+        existing: existingModel.cr22f_querycategoria || '-',
+        updated: modelForm.queryCategoria || '-',
+      },
+      {
+        label: 'Fabricante',
+        existing: existingModel._new_fabricante_value
+          ? fabricantesById[existingModel._new_fabricante_value] || existingModel._new_fabricante_value
+          : '-',
+        updated: modelForm.fabricanteId ? fabricantesById[modelForm.fabricanteId] || modelForm.fabricanteId : '-',
+      },
+      {
+        label: 'Tipo de Sistema Padrão',
+        existing: getTipoSistemaLabel(existingModel.new_tipodesistemapadrao ?? null),
+        updated: getTipoSistemaLabel(modelForm.tipoSistema),
+      },
+      {
+        label: 'Controla S/N',
+        existing: formatBoolean(existingModel.new_controlasn),
+        updated: formatBoolean(modelForm.controlaSn),
+      },
+      {
+        label: 'Controla Etiqueta',
+        existing: formatBoolean(existingModel.new_controlaetiqueta),
+        updated: formatBoolean(modelForm.controlaEtiqueta),
+      },
+      {
+        label: 'Requer Configuração',
+        existing: formatBoolean(existingModel.new_requerconfiguracao),
+        updated: formatBoolean(modelForm.requerConfiguracao),
+      },
+      {
+        label: 'Requer Cabeamento',
+        existing: formatBoolean(existingModel.new_requercabeamento),
+        updated: formatBoolean(modelForm.requerCabeamento),
+      },
+      {
+        label: 'Requer Engraving',
+        existing: formatBoolean(existingModel.new_requerengraving),
+        updated: formatBoolean(modelForm.requerEngraving),
+      },
+      {
+        label: 'Reserva de Produto Livre',
+        existing: formatBoolean(existingModel.new_reservadeprodutolivre),
+        updated: formatBoolean(modelForm.reservaProdutoLivre),
+      },
+      {
+        label: 'Device IO Template (JSON)',
+        existing: existingModel.new_deviceiotemplatejson || '-',
+        updated: modelForm.deviceTemplateJson || '-',
+      },
+      {
+        label: 'Horas Agregadas',
+        existing: existingModel.cr22f_horasagregadas?.toString() || '-',
+        updated: modelForm.horasAgregadas || '-',
+      },
+    ];
+  }, [
+    existingModel,
+    fabricantesById,
+    formatBoolean,
+    getTipoSistemaLabel,
+    modelForm,
+  ]);
 
   return (
     <>
@@ -1383,6 +1613,44 @@ export function CadastroRapidoProdutoPage() {
             </Button>
           </div>
         </div>
+
+        <Dialog open={confirmUpdateOpen} onOpenChange={(_, data) => !data.open && handleCancelUpdateExisting()}>
+          <DialogSurface style={{ maxWidth: 900, width: '90vw' }}>
+            <DialogBody>
+              <DialogTitle>Modelo já existente</DialogTitle>
+              <DialogContent>
+                <Text block>
+                  Já existe um modelo com esta referência. Deseja atualizar o modelo existente com os novos valores?
+                </Text>
+
+                {existingComparison.length > 0 && (
+                  <div className="mt-4 grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-3 gap-3">
+                      <Text weight="semibold">Campo</Text>
+                      <Text weight="semibold">Existente</Text>
+                      <Text weight="semibold">Atualizado</Text>
+                    </div>
+                    {existingComparison.map((item) => (
+                      <div key={item.label} className="grid grid-cols-3 gap-3">
+                        <Text>{item.label}</Text>
+                        <Text>{item.existing}</Text>
+                        <Text>{item.updated}</Text>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCancelUpdateExisting} appearance="secondary">
+                  Cancelar
+                </Button>
+                <Button onClick={handleConfirmUpdateExisting} appearance="primary">
+                  Atualizar modelo existente
+                </Button>
+              </DialogActions>
+            </DialogBody>
+          </DialogSurface>
+        </Dialog>
       </PageContainer>
 
       {actionBusy && (
