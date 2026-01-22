@@ -690,6 +690,11 @@ export function ContagemEstoqueMobilePage() {
     setQuantityDialogOpen(false);
     setQuantityDialogItem(null);
     setQuantityDialogValue('');
+    
+    // Foca no leitor Bluetooth após fechar o modal
+    setTimeout(() => {
+      bluetoothInputRef.current?.focus();
+    }, 100);
   }, [quantityDialogItem, quantityDialogValue]);
 
   // Cancela modal de quantidade
@@ -697,6 +702,11 @@ export function ContagemEstoqueMobilePage() {
     setQuantityDialogOpen(false);
     setQuantityDialogItem(null);
     setQuantityDialogValue('');
+    
+    // Foca no leitor Bluetooth após fechar o modal
+    setTimeout(() => {
+      bluetoothInputRef.current?.focus();
+    }, 100);
   }, []);
 
   // Remove item da lista de pendentes
