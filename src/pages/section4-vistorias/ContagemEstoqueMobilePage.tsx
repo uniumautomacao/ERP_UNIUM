@@ -187,12 +187,12 @@ const buildListaDoDiaFilter = (now: Date, search?: string) => {
   const limitC = getDueLimitDate(now, 100000002).toISOString();
   let filter = [
     'statecode eq 0',
-    'and new_tagconfirmadabool eq true and new_entregue ne true and (',
+    'and new_tagconfirmadabool eq true and cr22f_status ne \'Entregue\' and new_separado ne true and (',
     'new_ultimacontagem eq null',
     `or (new_classecriticidade eq 100000000 and new_ultimacontagem le ${limitA})`,
     `or (new_classecriticidade eq 100000001 and new_ultimacontagem le ${limitB})`,
     `or (new_classecriticidade eq 100000002 and new_ultimacontagem le ${limitC})`,
-    ')',
+    ')'
   ].join(' ');
 
   if (search) {
