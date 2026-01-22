@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.22';
+export const APP_VERSION = '0.1.23';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.23',
+    date: '2026-01-22',
+    changes: 'Ajustada busca de templates para executar apenas ao pressionar Enter, removendo busca automática durante digitação.',
+  },
   {
     version: '0.1.22',
     date: '2026-01-22',

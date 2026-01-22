@@ -415,12 +415,15 @@ export function CadastroRapidoProdutoPage() {
     void loadLookups();
   }, [loadLookups, loadTemplates]);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void loadTemplates(templateSearch);
-    }, 300);
-    return () => window.clearTimeout(timer);
-  }, [loadTemplates, templateSearch]);
+  const handleSearchKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        void loadTemplates(templateSearch);
+      }
+    },
+    [loadTemplates, templateSearch]
+  );
 
   useEffect(() => {
     if (!selectedTemplate) {
@@ -1207,6 +1210,7 @@ export function CadastroRapidoProdutoPage() {
                 placeholder="Buscar por referência, descrição, categoria ou fabricante"
                 value={templateSearch}
                 onChange={(_, data) => setTemplateSearch(data.value)}
+                onKeyDown={handleSearchKeyDown}
                 style={{ flexGrow: 1 }}
               />
               <Text size={300} style={{ color: tokens.colorNeutralForeground3 }}>
