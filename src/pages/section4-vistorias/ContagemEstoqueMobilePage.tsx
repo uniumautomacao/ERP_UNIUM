@@ -66,6 +66,7 @@ type EstoqueItem = {
   new_estantetexto?: string;
   new_prateleiratexto?: string;
   new_etiquetaemtextocalculated?: string;
+  new_datadaultimaleitura?: string;
 };
 
 type PendingItem = {
@@ -427,6 +428,7 @@ export function ContagemEstoqueMobilePage() {
         'new_estantetexto',
         'new_prateleiratexto',
         'new_etiquetaemtextocalculated',
+        'new_datadaultimaleitura',
       ];
 
       const countedTodayFilter = `${baseFilter} and new_ultimacontagem ge ${todayStartISO} and new_ultimacontagem le ${todayEndISO}${buildSearchClause(search)}`;
@@ -505,6 +507,7 @@ export function ContagemEstoqueMobilePage() {
           'new_estantetexto',
           'new_prateleiratexto',
           'new_etiquetaemtextocalculated',
+          'new_datadaultimaleitura',
         ],
         top: 1,
       });
@@ -1327,6 +1330,17 @@ export function ContagemEstoqueMobilePage() {
                                       <Text size={200}>{status.label}</Text>
                                     </div>
                                   </div>
+                                  {item.new_datadaultimaleitura && (
+                                    <Text size={100} style={{ color: tokens.colorNeutralForeground3 }}>
+                                      Última leitura: {new Date(item.new_datadaultimaleitura).toLocaleString('pt-BR', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </Text>
+                                  )}
                                   <div className="flex flex-col gap-0">
                                     <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
                                       Tag: {item.cr22f_querytag || '---'} | Qtd esperada: {item.new_quantidade ?? 1}
