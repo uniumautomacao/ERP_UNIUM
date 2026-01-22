@@ -200,5 +200,26 @@ export const dataSourcesInfo = {
     "primaryKey": "new_tipodeservicoid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_cotacaotemporariadeprodutos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_cotacaotemporariadeprodutoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_regimedecotacaotemporarias": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_regimedecotacaotemporariaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_tipodeservicoregimedecotacaotemporarias": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_tipodeservicoregimedecotacaotemporariaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

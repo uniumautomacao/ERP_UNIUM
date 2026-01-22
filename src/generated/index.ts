@@ -33,6 +33,9 @@ export * as NewPrecodeProdutoModel from './models/NewPrecodeProdutoModel';
 export * as Cr22fFornecedoresFromSharepointListModel from './models/Cr22fFornecedoresFromSharepointListModel';
 export * as NewTiposervicoprecodeprodutoModel from './models/NewTiposervicoprecodeprodutoModel';
 export * as NewTipodeservicoModel from './models/NewTipodeservicoModel';
+export * as NewCotacaotemporariadeprodutoModel from './models/NewCotacaotemporariadeprodutoModel';
+export * as NewRegimedecotacaotemporariaModel from './models/NewRegimedecotacaotemporariaModel';
+export * as NewTipodeservicoregimedecotacaotemporariaModel from './models/NewTipodeservicoregimedecotacaotemporariaModel';
 
 // Services
 export * from './services/RolesService';
@@ -63,3 +66,6 @@ export * from './services/NewPrecodeProdutoService';
 export * from './services/Cr22fFornecedoresFromSharepointListService';
 export * from './services/NewTiposervicoprecodeprodutoService';
 export * from './services/NewTipodeservicoService';
+export * from './services/NewCotacaotemporariadeprodutoService';
+export * from './services/NewRegimedecotacaotemporariaService';
+export * from './services/NewTipodeservicoregimedecotacaotemporariaService';

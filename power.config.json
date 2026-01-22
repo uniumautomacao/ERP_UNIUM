@@ -152,6 +152,21 @@
           "entitySetName": "new_tipodeservicos",
           "logicalName": "new_tipodeservico",
           "isHidden": false
+        },
+        "new_cotacaotemporariadeprodutos": {
+          "entitySetName": "new_cotacaotemporariadeprodutos",
+          "logicalName": "new_cotacaotemporariadeproduto",
+          "isHidden": false
+        },
+        "new_regimedecotacaotemporarias": {
+          "entitySetName": "new_regimedecotacaotemporarias",
+          "logicalName": "new_regimedecotacaotemporaria",
+          "isHidden": false
+        },
+        "new_tipodeservicoregimedecotacaotemporarias": {
+          "entitySetName": "new_tipodeservicoregimedecotacaotemporarias",
+          "logicalName": "new_tipodeservicoregimedecotacaotemporaria",
+          "isHidden": false
         }
       },
       "actions": null

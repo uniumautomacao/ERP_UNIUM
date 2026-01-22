@@ -31,6 +31,9 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Fornecedores From Sharepoint List | `cr22f_fornecedoresfromsharepointlist` | `cr22f_fornecedoresfromsharepointlists` | `cr22f_fornecedoresfromsharepointlistid` |
 | TipoServiço-PreçodeProduto | `new_tiposervicoprecodeproduto` | `new_tiposervicoprecodeprodutos` | `new_tiposervicoprecodeprodutoid` |
 | Tipo de Serviço | `new_tipodeservico` | `new_tipodeservicos` | `new_tipodeservicoid` |
+| Cotação Temporária de Produto | `new_cotacaotemporariadeproduto` | `new_cotacaotemporariadeprodutos` | `new_cotacaotemporariadeprodutoid` |
+| Regime de Cotação Temporária | `new_regimedecotacaotemporaria` | `new_regimedecotacaotemporarias` | `new_regimedecotacaotemporariaid` |
+| Tipo de Serviço Regime de Cotação Temporária | `new_tipodeservicoregimedecotacaotemporaria` | `new_tipodeservicoregimedecotacaotemporarias` | `new_tipodeservicoregimedecotacaotemporariaid` |
 
 ---
 
@@ -222,6 +225,59 @@ PrimaryKey:                       new_tipodeservicoid
 | Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
 |------------------------------|---------------------|------------------|
 | new_master | new_Master | new_tipodeservicos |
+
+---
+
+## 🔵 new_cotacaotemporariadeproduto (Cotação Temporária de Produto)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_cotacaotemporariadeproduto
+EntityLogicalCollectionName:      new_cotacaotemporariadeprodutos
+EntitySetName:                    new_cotacaotemporariadeprodutos
+PrimaryKey:                       new_cotacaotemporariadeprodutoid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_fornecedor | new_Fornecedor | cr22f_fornecedoresfromsharepointlists |
+| new_regime | new_Regime | new_regimedecotacaotemporarias |
+
+---
+
+## 🔵 new_regimedecotacaotemporaria (Regime de Cotação Temporária)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_regimedecotacaotemporaria
+EntityLogicalCollectionName:      new_regimedecotacaotemporarias
+EntitySetName:                    new_regimedecotacaotemporarias
+PrimaryKey:                       new_regimedecotacaotemporariaid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_modelodeproduto | new_ModelodeProduto | cr22f_modelosdeprodutofromsharepointlists |
+
+---
+
+## 🔵 new_tipodeservicoregimedecotacaotemporaria (Tipo de Serviço Regime de Cotação Temporária)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_tipodeservicoregimedecotacaotemporaria
+EntityLogicalCollectionName:      new_tipodeservicoregimedecotacaotemporarias
+EntitySetName:                    new_tipodeservicoregimedecotacaotemporarias
+PrimaryKey:                       new_tipodeservicoregimedecotacaotemporariaid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_regime | new_Regime | new_regimedecotacaotemporarias |
+| new_tipodeservico | new_TipodeServico | new_tipodeservicos |
 
 ---
 

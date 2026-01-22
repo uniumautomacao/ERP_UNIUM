@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.9';
+export const APP_VERSION = '0.1.10';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.10',
+    date: '2026-01-22',
+    changes: 'Importadas tabelas do Dataverse: new_cotacaotemporariadeproduto, new_regimedecotacaotemporaria e new_tipodeservicoregimedecotacaotemporaria.',
+  },
   {
     version: '0.1.9',
     date: '2026-01-22',
