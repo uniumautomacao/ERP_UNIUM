@@ -19,6 +19,7 @@ import {
   Add24Regular,
   ArrowSync24Regular,
   ClipboardTask24Regular,
+  Delete24Regular,
   DocumentBulletList24Regular,
   Flowchart24Regular,
   LineHorizontal120Regular,
@@ -31,6 +32,9 @@ import { DataGrid, createTableColumn } from '../../components/shared/DataGrid';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { LoadingState } from '../../components/shared/LoadingState';
 import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
+import { DeviceDetailDialog } from '../../components/domain/guia-conexoes/DeviceDetailDialog';
+import { GerarPendenciasDialog } from '../../components/domain/guia-conexoes/GerarPendenciasDialog';
+import { NovoEquipamentoDialog } from '../../components/domain/guia-conexoes/NovoEquipamentoDialog';
 import { NewDeviceIOService } from '../../generated';
 import { useGuiaConexoesData } from '../../hooks/guia-conexoes/useGuiaConexoesData';
 import type {
@@ -39,8 +43,16 @@ import type {
   GuiaModeloProduto,
   GuiaProdutoServico,
 } from '../../types/guiaConexoes';
+import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
+import { deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
+import {
+  buildCsvConexoes,
+  buildCsvEquipamentos,
+  buildMermaidDiagram,
+  buildReportHtml,
+} from '../../utils/guia-conexoes/exports';
 import { Cr22fProjetoService } from '../../generated/services/Cr22fProjetoService';
 
 const useStyles = makeStyles({
@@ -62,6 +74,15 @@ const useStyles = makeStyles({
     display: 'none',
     '@media (min-width: 900px)': {
       display: 'block',
+    },
+    '& .fui-DataGridHeaderCell': {
+      padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalL}`,
+    },
+    '& .fui-DataGridCell': {
+      padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalL}`,
+    },
+    '& .fui-DataGridRow': {
+      minHeight: '52px',
     },
   },
   cardList: {
@@ -106,6 +127,12 @@ type DeviceRow = {
   completedConnections: number;
 };
 
+type ProjectSearchRecord = {
+  cr22f_projetoid: string;
+  cr22f_apelido?: string | null;
+  cr22f_ano?: string | null;
+};
+
 const GROUP_BY_OPTIONS: { value: GroupByMode; label: string }[] = [
   { value: 'system', label: 'Agrupar por Sistema' },
   { value: 'location', label: 'Agrupar por Localização' },
@@ -115,7 +142,7 @@ const GROUP_BY_OPTIONS: { value: GroupByMode; label: string }[] = [
 
 const EMPTY_LOCATION = 'Sem Localização';
 
-const formatProjectLabel = (project: any) => {
+const formatProjectLabel = (project: ProjectSearchRecord) => {
   const parts = [project.cr22f_apelido, project.cr22f_ano].filter(Boolean);
   return parts.join(' · ') || 'Projeto';
 };
@@ -128,9 +155,16 @@ export function GuiaConexoesPage() {
   const [groupBy, setGroupBy] = useState<GroupByMode>('system');
   const [selectedTab, setSelectedTab] = useState<string>('all');
   const [toggleBusyId, setToggleBusyId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [detailDeviceId, setDetailDeviceId] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [novoOpen, setNovoOpen] = useState(false);
+  const [pendenciasOpen, setPendenciasOpen] = useState(false);
+  const [selectedDeviceRows, setSelectedDeviceRows] = useState<DeviceRow[]>([]);
 
-  const { devices, connections, produtos, modelos, loading, error, reload } =
+  const { devices, connections, produtos, modelos, loading, error, reload, updateDevice } =
     useGuiaConexoesData(selectedProjectId, searchTerm);
 
   const modelosMap = useMemo(() => {
@@ -291,6 +325,20 @@ export function GuiaConexoesPage() {
     });
   }, [connectionsByDevice, modelosMap, produtosMap, visibleDevices]);
 
+  const visibleDeviceIds = useMemo(
+    () => new Set(visibleDevices.map((device) => device.new_deviceioid)),
+    [visibleDevices]
+  );
+
+  const visibleConnections = useMemo(
+    () =>
+      connections.filter(
+        (connection) =>
+          connection._new_device_value && visibleDeviceIds.has(connection._new_device_value)
+      ),
+    [connections, visibleDeviceIds]
+  );
+
   const handleToggleInstall = useCallback(
     async (deviceId: string, value: boolean) => {
       setToggleBusyId(deviceId);
@@ -301,19 +349,31 @@ export function GuiaConexoesPage() {
         });
 
         if (!result.success) {
-          throw result.error ?? new Error('Falha ao atualizar o status.');
+          throw new Error(
+            resolveErrorMessage(result.error, 'Falha ao atualizar o status.')
+          );
         }
 
-        await reload();
+        // Atualizar apenas o dispositivo local em vez de recarregar tudo
+        updateDevice(deviceId, { new_serainstaladobase: value });
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        setActionError(message);
+        setActionError(resolveErrorMessage(err, 'Falha ao atualizar o status.'));
       } finally {
         setToggleBusyId(null);
       }
     },
-    [reload]
+    [updateDevice]
   );
+
+  const handleOpenDetails = useCallback((deviceId: string) => {
+    setDetailDeviceId(deviceId);
+    setDetailOpen(true);
+  }, []);
+
+  const handleCloseDetails = useCallback(() => {
+    setDetailOpen(false);
+    setDetailDeviceId(null);
+  }, []);
 
   const searchProjects = useCallback(async (term: string) => {
     const normalized = term.trim();
@@ -333,22 +393,112 @@ export function GuiaConexoesPage() {
       return [];
     }
 
-    return result.data
-      .filter((item: any) => item.cr22f_projetoid)
-      .map((item: any) => ({
+    return (result.data as ProjectSearchRecord[])
+      .filter((item) => item.cr22f_projetoid)
+      .map((item) => ({
         id: item.cr22f_projetoid,
         label: formatProjectLabel(item),
       }));
   }, []);
 
+  const downloadText = useCallback((content: string, filename: string, type = 'text/plain') => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleExportCsv = useCallback(() => {
+    const csvConexoes = buildCsvConexoes(
+      visibleDevices,
+      visibleConnections,
+      selectedProjectLabel
+    );
+    const csvEquipamentos = buildCsvEquipamentos(visibleDevices, selectedProjectLabel);
+
+    downloadText(csvConexoes, 'conexoes.csv', 'text/csv');
+    downloadText(csvEquipamentos, 'equipamentos.csv', 'text/csv');
+  }, [downloadText, selectedProjectLabel, visibleConnections, visibleDevices]);
+
+  const handleMermaid = useCallback(async () => {
+    const diagram = buildMermaidDiagram(visibleDevices, visibleConnections);
+    try {
+      await navigator.clipboard.writeText(diagram);
+    } catch (err) {
+      console.warn('Falha ao copiar Mermaid:', err);
+    }
+    const encoded = encodeURIComponent(diagram);
+    window.open(`https://mermaid.live/edit#${encoded}`, '_blank', 'noopener,noreferrer');
+  }, [visibleConnections, visibleDevices]);
+
+  const handleReport = useCallback(() => {
+    const html = buildReportHtml(visibleDevices, visibleConnections, selectedProjectLabel, modelosMap);
+    const reportWindow = window.open('', '_blank', 'noopener,noreferrer');
+    if (!reportWindow) {
+      setActionError('Não foi possível abrir o relatório em uma nova janela.');
+      return;
+    }
+    reportWindow.document.open();
+    reportWindow.document.write(html);
+    reportWindow.document.close();
+    reportWindow.focus();
+    reportWindow.print();
+  }, [modelosMap, selectedProjectLabel, visibleConnections, visibleDevices]);
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!selectedProjectId) return;
+    if (selectedDeviceRows.length === 0) return;
+
+    const confirm = window.confirm(
+      `Deseja apagar ${selectedDeviceRows.length} equipamento(s) selecionado(s) e suas conexões?\n\n` +
+        `Isso também desfaz vínculos das conexões antes de apagar.`
+    );
+    if (!confirm) return;
+
+    setBulkDeleting(true);
+    setBulkStatus(null);
+    setActionError(null);
+    try {
+      const failures: string[] = [];
+      for (let i = 0; i < selectedDeviceRows.length; i += 1) {
+        const row = selectedDeviceRows[i];
+        const id = row.device.new_deviceioid;
+        const label = row.device.new_name || id;
+        setBulkStatus(`Apagando ${i + 1}/${selectedDeviceRows.length}: ${label}`);
+        try {
+          await deleteDeviceWithConnections(id);
+        } catch (err) {
+          failures.push(`${label}: ${resolveErrorMessage(err, 'Erro desconhecido')}`);
+        }
+      }
+
+      if (failures.length > 0) {
+        setActionError(
+          `Falha ao apagar ${failures.length} item(ns): ${failures.join(' | ')}`
+        );
+      }
+
+      setSelectedDeviceRows([]);
+      await reload();
+    } finally {
+      setBulkDeleting(false);
+      setBulkStatus(null);
+    }
+  }, [reload, selectedDeviceRows, selectedProjectId]);
+
   const actionsDisabled = !selectedProjectId || loading;
+  const bulkDeleteDisabled =
+    actionsDisabled || bulkDeleting || selectedDeviceRows.length === 0;
 
   const primaryActions = [
     {
       id: 'novo-device',
       label: 'Novo equipamento',
       icon: <Add24Regular />,
-      onClick: () => {},
+      onClick: () => setNovoOpen(true),
       appearance: 'primary' as const,
       disabled: actionsDisabled,
     },
@@ -356,19 +506,26 @@ export function GuiaConexoesPage() {
       id: 'pendencias',
       label: 'Gerar pendências',
       icon: <ClipboardTask24Regular />,
-      onClick: () => {},
+      onClick: () => setPendenciasOpen(true),
       disabled: actionsDisabled,
     },
     {
       id: 'relatorio',
       label: 'Relatório',
       icon: <DocumentBulletList24Regular />,
-      onClick: () => {},
+      onClick: handleReport,
       disabled: actionsDisabled,
     },
   ];
 
   const secondaryActions = [
+    {
+      id: 'apagar-selecionados',
+      label: `Apagar selecionados (${selectedDeviceRows.length})`,
+      icon: <Delete24Regular />,
+      onClick: handleBulkDelete,
+      disabled: bulkDeleteDisabled,
+    },
     {
       id: 'atualizar',
       label: 'Atualizar',
@@ -380,21 +537,21 @@ export function GuiaConexoesPage() {
       id: 'plotar',
       label: 'Plotar PDF',
       icon: <Print24Regular />,
-      onClick: () => {},
+      onClick: handleReport,
       disabled: actionsDisabled,
     },
     {
       id: 'csv',
       label: 'CSV etiquetas',
       icon: <LineHorizontal120Regular />,
-      onClick: () => {},
+      onClick: handleExportCsv,
       disabled: actionsDisabled,
     },
     {
       id: 'mermaid',
       label: 'Diagrama Mermaid',
       icon: <Flowchart24Regular />,
-      onClick: () => {},
+      onClick: handleMermaid,
       disabled: actionsDisabled,
     },
   ];
@@ -423,13 +580,15 @@ export function GuiaConexoesPage() {
         columnId: 'conexoes',
         renderHeaderCell: () => 'Conexões',
         renderCell: (item) => (
-          <Badge
-            appearance="outline"
-            color="informative"
-            className={styles.statusBadge}
-          >
-            {item.completedConnections}/{item.connections.length}
-          </Badge>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            <Badge
+              appearance="outline"
+              color="informative"
+              className={styles.statusBadge}
+            >
+              {item.completedConnections}/{item.connections.length}
+            </Badge>
+          </div>
         ),
       }),
       createTableColumn<DeviceRow>({
@@ -453,14 +612,18 @@ export function GuiaConexoesPage() {
       createTableColumn<DeviceRow>({
         columnId: 'actions',
         renderHeaderCell: () => '',
-        renderCell: () => (
-          <Button size="small" appearance="subtle">
+        renderCell: (item) => (
+          <Button
+            size="small"
+            appearance="subtle"
+            onClick={() => handleOpenDetails(item.device.new_deviceioid)}
+          >
             Detalhes
           </Button>
         ),
       }),
     ],
-    [handleToggleInstall, styles.dimText, styles.statusBadge, toggleBusyId]
+    [handleOpenDetails, handleToggleInstall, styles.dimText, styles.statusBadge, toggleBusyId]
   );
 
   const renderCards = () => (
@@ -500,7 +663,11 @@ export function GuiaConexoesPage() {
               }
               disabled={toggleBusyId === item.device.new_deviceioid}
             />
-            <Button size="small" appearance="subtle">
+            <Button
+              size="small"
+              appearance="subtle"
+              onClick={() => handleOpenDetails(item.device.new_deviceioid)}
+            >
               Detalhes
             </Button>
           </div>
@@ -592,6 +759,11 @@ export function GuiaConexoesPage() {
               {actionError}
             </Text>
           )}
+          {selectedProjectId && bulkStatus && (
+            <Text size={300} className={styles.dimText}>
+              {bulkStatus}
+            </Text>
+          )}
 
           {showEmptyState && (
             <EmptyState
@@ -607,6 +779,8 @@ export function GuiaConexoesPage() {
                   items={deviceRows}
                   columns={columns}
                   getRowId={(item) => item.device.new_deviceioid}
+                  selectionMode="multiselect"
+                  onSelectionChange={setSelectedDeviceRows}
                 />
               </div>
               {renderCards()}
@@ -614,6 +788,27 @@ export function GuiaConexoesPage() {
           )}
         </div>
       </PageContainer>
+      <DeviceDetailDialog
+        open={detailOpen && !!detailDeviceId}
+        deviceId={detailDeviceId}
+        projectId={selectedProjectId}
+        onClose={handleCloseDetails}
+        onUpdated={reload}
+      />
+      <NovoEquipamentoDialog
+        open={novoOpen}
+        projectId={selectedProjectId}
+        onClose={() => setNovoOpen(false)}
+        onCreated={reload}
+      />
+      <GerarPendenciasDialog
+        open={pendenciasOpen}
+        projectId={selectedProjectId}
+        produtos={produtos}
+        modelos={modelos}
+        onClose={() => setPendenciasOpen(false)}
+        onGenerated={reload}
+      />
     </>
   );
 }

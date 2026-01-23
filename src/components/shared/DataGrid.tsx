@@ -9,7 +9,7 @@ import {
   createTableColumn,
   tokens,
 } from '@fluentui/react-components';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 
 interface DataGridProps<T> {
   items: T[];
@@ -32,13 +32,46 @@ export function DataGrid<T>({
     return <>{emptyState}</>;
   }
 
+  const selectionEnabled = !!selectionMode;
+  const resolvedGetRowId = useMemo(() => {
+    if (getRowId) return getRowId;
+    return (item: T) => String(items.indexOf(item));
+  }, [getRowId, items]);
+
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!selectionEnabled) return;
+    const selectedItems = items.filter((item) => selectedRowIds.has(resolvedGetRowId(item)));
+    onSelectionChange?.(selectedItems);
+  }, [items, onSelectionChange, resolvedGetRowId, selectedRowIds, selectionEnabled]);
+
+  useEffect(() => {
+    if (!selectionEnabled) return;
+    // Quando a lista muda, remove IDs que não existem mais
+    const validIds = new Set(items.map((item) => resolvedGetRowId(item)));
+    setSelectedRowIds((prev) => {
+      const next = new Set<string>();
+      prev.forEach((id) => {
+        if (validIds.has(id)) next.add(id);
+      });
+      return next;
+    });
+  }, [items, resolvedGetRowId, selectionEnabled]);
+
   return (
     <div style={{ border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: '4px', overflow: 'hidden' }}>
       <FluentDataGrid
         items={items}
         columns={columns}
         selectionMode={selectionMode}
-        getRowId={getRowId}
+        getRowId={resolvedGetRowId}
+        selectedItems={selectionEnabled ? selectedRowIds : undefined}
+        onSelectionChange={
+          selectionEnabled
+            ? (_, data) => setSelectedRowIds(data.selectedItems as Set<string>)
+            : undefined
+        }
         sortable
         resizableColumns
         style={{ minWidth: '100%' }}

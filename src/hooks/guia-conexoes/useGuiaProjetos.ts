@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Cr22fProjetoService } from '../../generated/services/Cr22fProjetoService';
 import type { GuiaProjeto } from '../../types/guiaConexoes';
+import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -38,13 +39,14 @@ export const useGuiaProjetos = (searchTerm: string) => {
       });
 
       if (!result.success) {
-        throw result.error ?? new Error('Falha ao carregar projetos.');
+        throw new Error(
+          resolveErrorMessage(result.error, 'Falha ao carregar projetos.')
+        );
       }
 
       setProjects((result.data ?? []) as GuiaProjeto[]);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      setError(message);
+      setError(resolveErrorMessage(err, 'Falha ao carregar projetos.'));
       setProjects([]);
     } finally {
       setLoading(false);

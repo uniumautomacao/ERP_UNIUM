@@ -3,6 +3,14 @@
 Aplicação Power Apps Code Apps com guia de conexões ao Microsoft Dataverse.
 Este projeto demonstra como conectar e consumir dados da tabela systemusers do Dataverse.
 
+## Controle de Acesso por Role
+
+O app usa a tabela `new_codeapppageallowedsecurityrole` para controlar acesso às rotas.
+Para liberar o **Guia de Conexões** (`/instalacoes/guia-conexoes`), cadastre o path
+na tela **Super Admin → Acesso por Role** para as roles que devem utilizá-lo.
+Usuários com role **System Administrator** já têm bypass automático para rotas
+de Super Admin, mas o Guia de Conexões requer configuração explícita.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh

@@ -1,6 +1,112 @@
-export const APP_VERSION = '0.1.29';
-export const APP_BUILD_DATE = '2026-01-22';
+export const APP_VERSION = '0.1.49';
+export const APP_BUILD_DATE = '2026-01-23';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.49',
+    date: '2026-01-23',
+    changes:
+      'Adicionada exclusão em lote de equipamentos no Guia de Conexões (desvincula e apaga conexões).',
+  },
+  {
+    version: '0.1.48',
+    date: '2026-01-23',
+    changes:
+      'Corrige criação de conexões com bindings corretos e validação de falhas.',
+  },
+  {
+    version: '0.1.47',
+    date: '2026-01-23',
+    changes:
+      'Corrigido casing dos bindings @odata.bind em new_deviceio (new_ModelodeProduto/new_Projeto/new_Produto).',
+  },
+  {
+    version: '0.1.46',
+    date: '2026-01-23',
+    changes: 'Ajuste no binding de lookups para usar nomes lógicos sem _value.',
+  },
+  {
+    version: '0.1.45',
+    date: '2026-01-23',
+    changes: 'Corrigido binding de lookups em Gerar Pendências: usar _new_*.value@odata.bind para todos os lookups.',
+  },
+  {
+    version: '0.1.44',
+    date: '2026-01-23',
+    changes: 'Corrigido binding de modelo em Gerar Pendências: usar navigation property new_new_deviceio_ModelodeProduto_cr22f_modelo ao invés de new_modelodeproduto.',
+  },
+  {
+    version: '0.1.43',
+    date: '2026-01-23',
+    changes: 'Adicionados logs detalhados de erro ao criar equipamentos em Gerar Pendências para diagnóstico.',
+  },
+  {
+    version: '0.1.42',
+    date: '2026-01-23',
+    changes: 'Usa lookup _new_produto_value para resolver modelo nas pendências.',
+  },
+  {
+    version: '0.1.41',
+    date: '2026-01-23',
+    changes: 'Resolve modelo por dispositivos existentes ou referência na geração.',
+  },
+  {
+    version: '0.1.40',
+    date: '2026-01-23',
+    changes: 'Fallback do modelo por referencia ao gerar pendências.',
+  },
+  {
+    version: '0.1.39',
+    date: '2026-01-23',
+    changes: 'Usa modelo do produto ao gerar pendências no guia de conexões.',
+  },
+  {
+    version: '0.1.38',
+    date: '2026-01-23',
+    changes: 'Permite selecionar quais pendências gerar no guia de conexões.',
+  },
+  {
+    version: '0.1.37',
+    date: '2026-01-23',
+    changes: 'Exibe referência do produto nas pendências do guia de conexões.',
+  },
+  {
+    version: '0.1.36',
+    date: '2026-01-22',
+    changes: 'Log de erro ao limpar vínculo para diagnóstico.',
+  },
+  {
+    version: '0.1.35',
+    date: '2026-01-22',
+    changes: 'Ajustado limpeza de vínculo usando new_connectedto = null.',
+  },
+  {
+    version: '0.1.34',
+    date: '2026-01-22',
+    changes:
+      'Modal de detalhes ampliado e tipos de conexão exibidos com display name do optionset.',
+  },
+  {
+    version: '0.1.33',
+    date: '2026-01-22',
+    changes: 'Fechamento do modal de detalhes corrigido com render condicional.',
+  },
+  {
+    version: '0.1.32',
+    date: '2026-01-22',
+    changes: 'Ajustado controle de abertura/fechamento do modal de detalhes.',
+  },
+  {
+    version: '0.1.31',
+    date: '2026-01-22',
+    changes:
+      'Reformulado modal de detalhes do equipamento com accordion em árvore, resolução de destinos e vínculo via sub-dialog.',
+  },
+  {
+    version: '0.1.30',
+    date: '2026-01-22',
+    changes:
+      'Implementado Guia de Conexões com rotas, tela principal, detalhes, geração de pendências e exports (CSV/Mermaid/relatório).',
+  },
   {
     version: '0.1.29',
     date: '2026-01-22',

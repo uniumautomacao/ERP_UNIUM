@@ -12,6 +12,7 @@ import type {
   GuiaModeloProduto,
   GuiaProdutoServico,
 } from '../../types/guiaConexoes';
+import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { buildOrFilter, chunkIds, escapeODataValue } from '../../utils/guia-conexoes/odata';
 
 const DEVICE_SELECT = [
@@ -21,9 +22,9 @@ const DEVICE_SELECT = [
   'new_serainstaladobase',
   'new_serainstalado',
   'new_externalid',
-  'new_modelodeproduto',
-  'new_produto',
-  'new_projeto',
+  '_new_modelodeproduto_value',
+  '_new_produto_value',
+  '_new_projeto_value',
 ];
 
 const CONNECTION_SELECT = [
@@ -38,25 +39,22 @@ const CONNECTION_SELECT = [
   'new_localizacao',
   'new_templatejson',
   'new_connectedtomanual',
-  'new_device',
-  'new_connectedto',
-  'new_projeto',
+  '_new_device_value',
+  '_new_connectedto_value',
+  '_new_projeto_value',
 ];
 
 const PRODUTO_SELECT = [
   'new_produtoservicoid',
   'new_name',
-  'new_localizacao',
+  'new_referenciadoproduto',
+  '_new_produto_value',
   'new_quantidade',
-  'new_disponivelparavinculo',
-  'new_tipodesistemacontabilizadoos',
-  'new_modelodeprodutooriginal',
-  'new_produto',
-  'new_projeto',
 ];
 
 const MODELO_SELECT = [
   'cr22f_modelosdeprodutofromsharepointlistid',
+  'cr22f_id',
   'cr22f_title',
   'new_deviceiotemplatejson',
   'new_tipodesistemapadrao',
@@ -115,7 +113,7 @@ export const useGuiaConexoesData = (projectId: string | null, searchTerm: string
     const merged = new Map<string, GuiaModeloProduto>();
     responses.forEach((response) => {
       if (response.success && response.data) {
-        response.data.forEach((item: any) => {
+        (response.data as GuiaModeloProduto[]).forEach((item) => {
           if (item.cr22f_modelosdeprodutofromsharepointlistid) {
             merged.set(item.cr22f_modelosdeprodutofromsharepointlistid, item);
           }
@@ -124,6 +122,52 @@ export const useGuiaConexoesData = (projectId: string | null, searchTerm: string
     });
 
     return Array.from(merged.values());
+  }, []);
+
+  const loadModelosByReference = useCallback(async (references: string[]) => {
+    if (references.length === 0) {
+      return [] as GuiaModeloProduto[];
+    }
+
+    const chunks = chunkIds(references, 25);
+    const responses = await Promise.all(
+      chunks.map((chunk) =>
+        Cr22fModelosdeProdutoFromSharepointListService.getAll({
+          select: MODELO_SELECT,
+          filter: `statecode eq 0 and (${chunk
+            .map(
+              (ref) =>
+                `contains(cr22f_id, '${escapeODataValue(ref)}') or contains(cr22f_title, '${escapeODataValue(
+                  ref
+                )}')`
+            )
+            .join(' or ')})`,
+          maxPageSize: 5000,
+        })
+      )
+    );
+
+    const merged = new Map<string, GuiaModeloProduto>();
+    responses.forEach((response) => {
+      if (response.success && response.data) {
+        (response.data as GuiaModeloProduto[]).forEach((item) => {
+          if (item.cr22f_modelosdeprodutofromsharepointlistid) {
+            merged.set(item.cr22f_modelosdeprodutofromsharepointlistid, item);
+          }
+        });
+      }
+    });
+
+    return Array.from(merged.values());
+  }, []);
+
+  const updateDevice = useCallback((deviceId: string, updates: Partial<GuiaDeviceIO>) => {
+    setData((prevData) => ({
+      ...prevData,
+      devices: prevData.devices.map((device) =>
+        device.new_deviceioid === deviceId ? { ...device, ...updates } : device
+      ),
+    }));
   }, []);
 
   const load = useCallback(async () => {
@@ -161,42 +205,83 @@ export const useGuiaConexoesData = (projectId: string | null, searchTerm: string
       ]);
 
       if (!deviceResult.success) {
-        throw deviceResult.error ?? new Error('Falha ao carregar devices.');
+        throw new Error(
+          resolveErrorMessage(deviceResult.error, 'Falha ao carregar devices.')
+        );
       }
       if (!connectionResult.success) {
-        throw connectionResult.error ?? new Error('Falha ao carregar conexões.');
+        throw new Error(
+          resolveErrorMessage(connectionResult.error, 'Falha ao carregar conexões.')
+        );
       }
       if (!produtoResult.success) {
-        throw produtoResult.error ?? new Error('Falha ao carregar produtos.');
+        throw new Error(
+          resolveErrorMessage(produtoResult.error, 'Falha ao carregar produtos.')
+        );
       }
 
       const devices = (deviceResult.data ?? []) as GuiaDeviceIO[];
       const connections = (connectionResult.data ?? []) as GuiaDeviceIOConnection[];
-      const produtos = (produtoResult.data ?? []) as GuiaProdutoServico[];
+      const produtosRaw = (produtoResult.data ?? []) as any[];
+      
+      console.log('[useGuiaConexoesData] Primeira resposta de produto (raw):', produtosRaw[0]);
+      console.log('[useGuiaConexoesData] Chaves do produto:', Object.keys(produtosRaw[0] ?? {}));
+
+      const produtos = produtosRaw.map((p) => ({
+        new_produtoservicoid: p.new_produtoservicoid,
+        new_name:
+          p.new_name ||
+          p.cr22f_name ||
+          p.displayname ||
+          `Produto ${p.new_produtoservicoid?.substring(0, 8)}`,
+        new_referenciadoproduto: p.new_referenciadoproduto,
+        _new_produto_value: p._new_produto_value,
+        new_quantidade: p.new_quantidade,
+      })) as GuiaProdutoServico[];
+
+      if (produtosRaw.length > 0) {
+        console.log('[useGuiaConexoesData] Primeiro produto raw completo:', produtosRaw[0]);
+        console.log('[useGuiaConexoesData] Campos disponíveis:', Object.keys(produtosRaw[0]));
+        console.log('[useGuiaConexoesData] Produto mapeado:', produtos[0]);
+      }
 
       const modelIds = new Set<string>();
+      const modelReferences = new Set<string>();
       devices.forEach((device) => {
         if (device._new_modelodeproduto_value) {
           modelIds.add(device._new_modelodeproduto_value);
         }
       });
       produtos.forEach((produto) => {
-        if (produto._new_modelodeprodutooriginal_value) {
-          modelIds.add(produto._new_modelodeprodutooriginal_value);
+        if (produto._new_produto_value) {
+          modelIds.add(produto._new_produto_value);
+        } else if (produto.new_referenciadoproduto) {
+          modelReferences.add(produto.new_referenciadoproduto);
         }
       });
 
-      const modelos = await loadModelos(Array.from(modelIds));
+      const [modelosById, modelosByRef] = await Promise.all([
+        loadModelos(Array.from(modelIds)),
+        loadModelosByReference(Array.from(modelReferences)),
+      ]);
+      const modelos = new Map<string, GuiaModeloProduto>();
+      modelosById.forEach((modelo) => {
+        modelos.set(modelo.cr22f_modelosdeprodutofromsharepointlistid, modelo);
+      });
+      modelosByRef.forEach((modelo) => {
+        if (!modelos.has(modelo.cr22f_modelosdeprodutofromsharepointlistid)) {
+          modelos.set(modelo.cr22f_modelosdeprodutofromsharepointlistid, modelo);
+        }
+      });
 
       setData({
         devices,
         connections,
         produtos,
-        modelos,
+        modelos: Array.from(modelos.values()),
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      setError(message);
+      setError(resolveErrorMessage(err, 'Falha ao carregar dados.'));
       setData(emptyData);
     } finally {
       setLoading(false);
@@ -213,7 +298,8 @@ export const useGuiaConexoesData = (projectId: string | null, searchTerm: string
       loading,
       error,
       reload: load,
+      updateDevice,
     }),
-    [data, loading, error, load]
+    [data, loading, error, load, updateDevice]
   );
 };

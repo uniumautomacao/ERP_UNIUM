@@ -37,17 +37,14 @@ export interface GuiaDeviceIOConnection {
 export interface GuiaProdutoServico {
   new_produtoservicoid: string;
   new_name?: string | null;
-  new_localizacao?: string | null;
-  new_quantidade?: number | null;
-  new_disponivelparavinculo?: boolean | null;
-  new_tipodesistemacontabilizadoos?: number | null;
-  _new_modelodeprodutooriginal_value?: string | null;
+  new_referenciadoproduto?: string | null;
   _new_produto_value?: string | null;
-  _new_projeto_value?: string | null;
+  new_quantidade?: number | null;
 }
 
 export interface GuiaModeloProduto {
   cr22f_modelosdeprodutofromsharepointlistid: string;
+  cr22f_id?: string | null;
   cr22f_title?: string | null;
   new_deviceiotemplatejson?: string | null;
   new_tipodesistemapadrao?: number | null;
