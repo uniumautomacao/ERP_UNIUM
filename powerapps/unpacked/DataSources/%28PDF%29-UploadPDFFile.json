@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "312557ed-4919-4f77-bf4b-af06e65843fd",
+    "Name": "(PDF)-UploadPDFFile",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "10b5ff17-549c-ed11-aad1-000d3ac190e8"
+  }
+]

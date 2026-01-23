@@ -6,7 +6,7 @@
     "IsSampleData": false,
     "IsWritable": true,
     "LogicalName": "cr22f_modelosdeprodutofromsharepointlist",
-    "MaxGetRowsCount": 500,
+    "MaxGetRowsCount": 2000,
     "Name": "Modelos de Produto From Sharepoint Lists",
     "NativeCDSDataSourceInfoNameMapping": {
       "_ownerid_value": "Owner",
@@ -359,6 +359,10 @@
       "OptionSetReferenceItem0": {
         "OptionSetReferenceColumnName": "new_tipodeospadrao",
         "OptionSetReferenceEntityName": "Modelos de Produto From Sharepoint Lists"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_tipodeservico",
+        "OptionSetReferenceEntityName": "Ordens de Serviço Field Control"
       }
     },
     "OptionSetTypeKey": "PicklistType",
@@ -389,14 +393,6 @@
       "OptionSetReferenceItem0": {
         "OptionSetReferenceColumnName": "new_tipodesistemapadrao",
         "OptionSetReferenceEntityName": "Modelos de Produto From Sharepoint Lists"
-      },
-      "OptionSetReferenceItem1": {
-        "OptionSetReferenceColumnName": "new_tipodesistema",
-        "OptionSetReferenceEntityName": "Preços de Produtos"
-      },
-      "OptionSetReferenceItem2": {
-        "OptionSetReferenceColumnName": "new_tipodesistema",
-        "OptionSetReferenceEntityName": "Tipos de Serviço"
       }
     },
     "OptionSetTypeKey": "PicklistType",

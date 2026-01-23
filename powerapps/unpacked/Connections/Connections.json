@@ -1,1 +1,242 @@
-{}
+{
+  "3db40fd4-87af-4c12-9799-6ca24fed113a": {
+    "appActions": [
+      "Run"
+    ],
+    "connectionRef": {
+      "apiTier": "Standard",
+      "displayName": "Logic flows",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
+      "parameterHints": {
+        "workflowDisplayName": {
+          "value": "(Impressão de Etiqueta) - Imprimir etiqueta de equipamento"
+        },
+        "workflowEntityId": {
+          "value": "ca618645-e5f2-ef11-be20-002248e045cb"
+        },
+        "workflowName": {
+          "value": "9ac1e84e-7ddf-2a06-6ac0-9161f9452015"
+        }
+      },
+      "parameterHintsV2": {
+        "workflowDisplayName": {
+          "value": "(Impressão de Etiqueta) - Imprimir etiqueta de equipamento"
+        },
+        "workflowEntityId": {
+          "value": "ca618645-e5f2-ef11-be20-002248e045cb"
+        },
+        "workflowName": {
+          "value": "9ac1e84e-7ddf-2a06-6ac0-9161f9452015"
+        }
+      }
+    },
+    "datasets": {},
+    "dataSources": [
+      "(ImpressãodeEtiqueta)-Imprimiretiquetadeequipamento"
+    ],
+    "dependencies": {},
+    "dependents": [],
+    "id": "3db40fd4-87af-4c12-9799-6ca24fed113a"
+  },
+  "665c457c-daf0-41f6-b22d-0fb19796cf0d": {
+    "appActions": [
+      "Run"
+    ],
+    "connectionRef": {
+      "apiTier": "Standard",
+      "displayName": "Logic flows",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
+      "parameterHints": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Merge PDFs"
+        },
+        "workflowEntityId": {
+          "value": "e1f128f5-16af-ee11-a568-00224837ff5e"
+        },
+        "workflowName": {
+          "value": "3f1e80f0-6f89-e481-2dec-ee19f85b7730"
+        }
+      },
+      "parameterHintsV2": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Merge PDFs"
+        },
+        "workflowEntityId": {
+          "value": "e1f128f5-16af-ee11-a568-00224837ff5e"
+        },
+        "workflowName": {
+          "value": "3f1e80f0-6f89-e481-2dec-ee19f85b7730"
+        }
+      }
+    },
+    "datasets": {},
+    "dataSources": [
+      "(PDF)-MergePDFs"
+    ],
+    "dependencies": {},
+    "dependents": [],
+    "id": "665c457c-daf0-41f6-b22d-0fb19796cf0d"
+  },
+  "992ad3b5-21e3-4acc-813e-9a6b9b74c414": {
+    "appActions": [
+      "Run"
+    ],
+    "connectionRef": {
+      "apiTier": "Standard",
+      "displayName": "Logic flows",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
+      "parameterHints": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Upload PDF File"
+        },
+        "workflowEntityId": {
+          "value": "10b5ff17-549c-ed11-aad1-000d3ac190e8"
+        },
+        "workflowName": {
+          "value": "3001318c-1132-6969-331d-dd6851a5d8d4"
+        }
+      },
+      "parameterHintsV2": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Upload PDF File"
+        },
+        "workflowEntityId": {
+          "value": "10b5ff17-549c-ed11-aad1-000d3ac190e8"
+        },
+        "workflowName": {
+          "value": "3001318c-1132-6969-331d-dd6851a5d8d4"
+        }
+      }
+    },
+    "datasets": {},
+    "dataSources": [
+      "(PDF)-UploadPDFFile"
+    ],
+    "dependencies": {},
+    "dependents": [],
+    "id": "992ad3b5-21e3-4acc-813e-9a6b9b74c414"
+  },
+  "bdfd4f3e-82d9-4edc-88ad-efe074fba5c9": {
+    "appActions": [
+      "Run"
+    ],
+    "connectionRef": {
+      "apiTier": "Standard",
+      "displayName": "Logic flows",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
+      "parameterHints": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Merge PDFs and Send To Email Address"
+        },
+        "workflowEntityId": {
+          "value": "23e820f1-6252-ef11-bfe2-002248deeb48"
+        },
+        "workflowName": {
+          "value": "0c5a5209-10f8-2fad-865a-26fc7cba07fd"
+        }
+      },
+      "parameterHintsV2": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Merge PDFs and Send To Email Address"
+        },
+        "workflowEntityId": {
+          "value": "23e820f1-6252-ef11-bfe2-002248deeb48"
+        },
+        "workflowName": {
+          "value": "0c5a5209-10f8-2fad-865a-26fc7cba07fd"
+        }
+      }
+    },
+    "datasets": {},
+    "dataSources": [
+      "(PDF)-MergePDFsandSendToEmailAddress"
+    ],
+    "dependencies": {},
+    "dependents": [],
+    "id": "bdfd4f3e-82d9-4edc-88ad-efe074fba5c9"
+  },
+  "d32ad4ff-47cf-45b6-867c-4140f720c1e9": {
+    "appActions": [
+      "Run"
+    ],
+    "connectionRef": {
+      "apiTier": "Standard",
+      "displayName": "Logic flows",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
+      "parameterHints": {
+        "workflowDisplayName": {
+          "value": "(Impressão de Etiqueta) - Imprimir etiqueta de cabo"
+        },
+        "workflowEntityId": {
+          "value": "a7c3514b-e0f2-ef11-be20-002248e045cb"
+        },
+        "workflowName": {
+          "value": "acf76d9d-58e3-cc05-37eb-740fb8a983fe"
+        }
+      },
+      "parameterHintsV2": {
+        "workflowDisplayName": {
+          "value": "(Impressão de Etiqueta) - Imprimir etiqueta de cabo"
+        },
+        "workflowEntityId": {
+          "value": "a7c3514b-e0f2-ef11-be20-002248e045cb"
+        },
+        "workflowName": {
+          "value": "acf76d9d-58e3-cc05-37eb-740fb8a983fe"
+        }
+      }
+    },
+    "datasets": {},
+    "dataSources": [
+      "(ImpressãodeEtiqueta)-Imprimiretiquetadecabo"
+    ],
+    "dependencies": {},
+    "dependents": [],
+    "id": "d32ad4ff-47cf-45b6-867c-4140f720c1e9"
+  },
+  "ebc8ae7d-bd0e-4ba4-8e59-2d2681ee825e": {
+    "appActions": [
+      "Run"
+    ],
+    "connectionRef": {
+      "apiTier": "Standard",
+      "displayName": "Logic flows",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1774/1.0.1774.4397/logicflows/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_logicflows",
+      "parameterHints": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Plotar Guia de Conexões"
+        },
+        "workflowEntityId": {
+          "value": "4b6ac123-96dd-ef11-8ee9-0022483606ee"
+        },
+        "workflowName": {
+          "value": "e8a8dbc8-5c38-472a-cfca-be0930d6e523"
+        }
+      },
+      "parameterHintsV2": {
+        "workflowDisplayName": {
+          "value": "(PDF) - Plotar Guia de Conexões"
+        },
+        "workflowEntityId": {
+          "value": "4b6ac123-96dd-ef11-8ee9-0022483606ee"
+        },
+        "workflowName": {
+          "value": "e8a8dbc8-5c38-472a-cfca-be0930d6e523"
+        }
+      }
+    },
+    "datasets": {},
+    "dataSources": [
+      "(PDF)-PlotarGuiadeConexões"
+    ],
+    "dependencies": {},
+    "dependents": [],
+    "id": "ebc8ae7d-bd0e-4ba4-8e59-2d2681ee825e"
+  }
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "c87ce33a-d4fd-457b-815a-a3cb3962c4ae",
+    "Name": "(PDF)-MergePDFs",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "e1f128f5-16af-ee11-a568-00224837ff5e"
+  }
+]

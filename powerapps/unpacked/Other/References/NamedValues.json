@@ -332,8 +332,18 @@
     },
     {
       "Kind": "Page",
-      "Name": "Recibos e Emissão de NF Page",
-      "Value": "custompage:new_reciboseemissodenfpage_c16a8"
+      "Name": "Guia de Conexões Page",
+      "Value": "custompage:new_guiadeconexespage_6e45d"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Quadro de Oportunidades",
+      "Value": "custompage:new_quadrodeoportunidades_b10b7"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Recibos Page",
+      "Value": "custompage:new_recibospage_d528f"
     },
     {
       "Kind": "Page",
@@ -347,13 +357,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Quadro de Oportunidades",
-      "Value": "custompage:new_quadrodeoportunidades_b10b7"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Guia de Conexões Page",
-      "Value": "custompage:new_guiadeconexespage_6e45d"
+      "Name": "Tarefas Coordenador",
+      "Value": "custompage:new_tarefascoordenador_9345e"
     },
     {
       "Kind": "Page",
@@ -367,18 +372,13 @@
     },
     {
       "Kind": "Page",
-      "Name": "Recibos Page",
-      "Value": "custompage:new_recibospage_d528f"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Tarefas Coordenador",
-      "Value": "custompage:new_tarefascoordenador_9345e"
-    },
-    {
-      "Kind": "Page",
       "Name": "Speec To Text Playground",
       "Value": "custompage:new_speectotextplayground_fba64"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Ajustes de Localização Page",
+      "Value": "custompage:new_ajustesdelocalizaopage_71983"
     },
     {
       "Kind": "Page",
@@ -397,13 +397,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Compras e Cotações V2 Page",
-      "Value": "custompage:new_comprasecotaesv2page_9fec1"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Conferências de Instalação Pendentes Page",
-      "Value": "custompage:new_confernciasdeinstalaopendentespage_fa954"
+      "Name": "Recibos e Emissão de NF Page",
+      "Value": "custompage:new_reciboseemissodenfpage_c16a8"
     },
     {
       "Kind": "Page",
@@ -412,23 +407,28 @@
     },
     {
       "Kind": "Page",
-      "Name": "Dashboard de Instalações Page",
-      "Value": "custompage:new_dashboarddeinstalaespage_939b5"
+      "Name": "Feedbacks Colaborador",
+      "Value": "custompage:new_feedbackscolaborador_9c42b"
     },
     {
       "Kind": "Page",
-      "Name": "Resultado do Instalador Page",
-      "Value": "custompage:new_resultadodoinstaladorpage_dae5c"
+      "Name": "Operador 3 Page",
+      "Value": "custompage:new_operador3page_27443"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Playground",
+      "Value": "custompage:new_playground_a1347"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Compras e Cotações V2 Page",
+      "Value": "custompage:new_comprasecotaesv2page_9fec1"
     },
     {
       "Kind": "Page",
       "Name": "Lista de Inspeção Page",
       "Value": "custompage:new_listadeinspeopage_0bbcf"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Ajustes de Localização Page",
-      "Value": "custompage:new_ajustesdelocalizaopage_71983"
     },
     {
       "Kind": "Page",
@@ -452,16 +452,6 @@
     },
     {
       "Kind": "Page",
-      "Name": "Feedbacks Colaborador",
-      "Value": "custompage:new_feedbackscolaborador_9c42b"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Operador 3 Page",
-      "Value": "custompage:new_operador3page_27443"
-    },
-    {
-      "Kind": "Page",
       "Name": "Compras Page",
       "Value": "custompage:new_compraspage_cd238"
     },
@@ -469,11 +459,6 @@
       "Kind": "Page",
       "Name": "Linha do Tempo V3",
       "Value": "custompage:new_linhadotempov3_67b27"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Playground",
-      "Value": "custompage:new_playground_a1347"
     },
     {
       "Kind": "Page",
@@ -487,13 +472,23 @@
     },
     {
       "Kind": "Page",
-      "Name": "Movimentações de Mercadoria Page",
-      "Value": "custompage:new_movimentaesdemercadoriapage_0b1a6"
+      "Name": "Aplicativo",
+      "Value": "custompage:new_aplicativo_38686"
     },
     {
       "Kind": "Page",
-      "Name": "Aplicativo",
-      "Value": "custompage:new_aplicativo_38686"
+      "Name": "Conferências de Instalação Pendentes Page",
+      "Value": "custompage:new_confernciasdeinstalaopendentespage_fa954"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Resultado do Instalador Page",
+      "Value": "custompage:new_resultadodoinstaladorpage_dae5c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Movimentações de Mercadoria Page",
+      "Value": "custompage:new_movimentaesdemercadoriapage_0b1a6"
     },
     {
       "Kind": "Page",
@@ -502,18 +497,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Cadastro Rápido de Produto Page",
-      "Value": "custompage:new_cadastrorpidodeprodutopage_25f69"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Desagrupar Itens de Estoque",
-      "Value": "custompage:new_desagruparitensdeestoque_8b90d"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Gerador de Etiquetas de Endereço de Armazém",
-      "Value": "custompage:new_geradordeetiquetasdeendereodearmazm_5799a"
+      "Name": "Dashboard de Instalações Page",
+      "Value": "custompage:new_dashboarddeinstalaespage_939b5"
     },
     {
       "Kind": "Page",
@@ -522,8 +507,13 @@
     },
     {
       "Kind": "Page",
-      "Name": "Tarefas de Desagrupamento Page",
-      "Value": "custompage:new_tarefasdedesagrupamentopage_b831c"
+      "Name": "Cadastro Rápido de Produto Page",
+      "Value": "custompage:new_cadastrorpidodeprodutopage_25f69"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerador de Etiquetas de Endereço de Armazém",
+      "Value": "custompage:new_geradordeetiquetasdeendereodearmazm_5799a"
     },
     {
       "Kind": "Page",
@@ -534,11 +524,6 @@
       "Kind": "Page",
       "Name": "Operador 3_2",
       "Value": "custompage:new_operador32_4fde3"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Gerador de Etiquetas de Endereço V2",
-      "Value": "custompage:new_geradordeetiquetasdeendereov2_e540e"
     },
     {
       "Kind": "Page",
@@ -554,6 +539,21 @@
       "Kind": "Page",
       "Name": "Gerar Créditos de Devolução Page",
       "Value": "custompage:new_gerarcrditosdedevoluopage_7eb88"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Desagrupar Itens de Estoque",
+      "Value": "custompage:new_desagruparitensdeestoque_8b90d"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tarefas de Desagrupamento Page",
+      "Value": "custompage:new_tarefasdedesagrupamentopage_b831c"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Gerador de Etiquetas de Endereço V2",
+      "Value": "custompage:new_geradordeetiquetasdeendereov2_e540e"
     }
   ]
 }

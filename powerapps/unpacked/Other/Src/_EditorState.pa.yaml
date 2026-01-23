@@ -9,5 +9,7 @@
 EditorState:
   ScreensOrder:
     - Home Screen
+    - DeviceScreen
+    - ReportScreen
   ComponentDefinitionsOrder:
     - SearchBox

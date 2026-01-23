@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "27320d50-edae-4422-882d-ed798c5cafca",
+    "Name": "(ImpressãodeEtiqueta)-Imprimiretiquetadecabo",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "a7c3514b-e0f2-ef11-be20-002248e045cb"
+  }
+]

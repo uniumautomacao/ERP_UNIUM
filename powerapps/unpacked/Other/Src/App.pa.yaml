@@ -9,6 +9,388 @@
 App:
   Properties:
     BackEnabled: =false
+    Formulas: |-
+      =DeviceIOs = SortByColumns(
+          Search(
+              Filter(
+                  'Device IO' As D,
+                  D.Projeto.Projeto = CurrentProjeto.Projeto
+              ),
+              SearchBox_1.SearchText,
+              Name,
+              Localização
+          ),
+          "new_localizacao",
+          SortOrder.Ascending,
+          "new_name",
+          SortOrder.Ascending,
+          "createdon",
+          SortOrder.Ascending
+      );
+      PendingProducts = Filter(
+          AddColumns(
+              Filter(
+                  'Produtos-Serviço' As P,
+                  !IsBlank(P.Projeto),
+                  P.Projeto.Projeto = CurrentProjeto.Projeto,
+                  P.Produto.'Tipo de Sistema Padrão' <> 'Tipo de Sistema'.Cabos,
+                  P.Produto.'Tipo de Sistema Padrão' <> 'Tipo de Sistema'.'Acabamentos Elétricos',
+                  P.Produto.'Tipo de Sistema Padrão' <> 'Tipo de Sistema'.Eletrodomésticos,
+                  P.Produto.'Omitir do Guia de Conexões' <> 'Omitir do Guia de Conexões (Modelos de Produto From Sharepoint Lists)'.Yes
+              ) As Prod,
+              IOCount,
+              CountRows(
+                  Filter(
+                      Filter(
+                          'Device IO' As D,
+                          D.Projeto.Projeto = CurrentProjeto.Projeto
+                      ) As D,
+                      D.Produto.'Produto-Serviço' = Prod.'Produto-Serviço'
+                  )
+              )
+          ) As Prod,
+          Prod.IOCount < Prod.Quantidade
+      );
+      EmptyLocationPlaceholder = "Sem Localização";
+      ConnectionTypes = Distinct(
+          Filter(
+              'Device IO Connections' As C,
+              !IsBlank(C.Device),
+              C.Device.Projeto.Projeto = CurrentProjeto.Projeto
+          ) As C,
+          C.'Tipo de Conexão'
+      );
+      DeviceTabs = SortByColumns(
+          Switch(
+              GroupByDropdownSelectedOption,
+              GroupByTypeDropdownOption,
+              With(
+                  {
+                      Value: Distinct(
+                          DeviceIOs As D,
+                          D.'Modelo de Produto'.'Tipo de Sistema Padrão'
+                      )
+                  } As Types,
+                  With(
+                      {
+                          Value: Split(
+                              Concat(
+                                  Types.Value,
+                                  ThisRecord.Value,
+                                  ", "
+                              ),
+                              ", "
+                          )
+                      } As Names,
+                      ForAll(
+                          Sequence(
+                              CountRows(Types.Value),
+                              1,
+                              1
+                          ) As Index,
+                          {
+                              DisplayName: Last(
+                                  FirstN(
+                                      Names.Value,
+                                      Index.Value
+                                  )
+                              ).Value,
+                              Option: Last(
+                                  FirstN(
+                                      Types.Value,
+                                      Index.Value
+                                  )
+                              ).Value,
+                              Option2: Blank()
+                          }
+                      )
+                  )
+              ),
+              GroupByLocalDropdownOption,
+              With(
+                  {
+                      Value: Distinct(
+                          DeviceIOs As D,
+                          If(
+                              Len(TrimEnds(D.Localização)) > 0,
+                              D.Localização,
+                              EmptyLocationPlaceholder
+                          )
+                      )
+                  } As Types,
+                  ForAll(
+                      Types.Value As Type,
+                      {
+                          DisplayName: Type.Value,
+                          Option: Blank(),
+                          Option2: Blank()
+                      }
+                  )
+              ),
+              GroupByConTypeDropdownOption,
+              With(
+                  {Value: ConnectionTypes} As Types,
+                  With(
+                      {
+                          Value: Split(
+                              Concat(
+                                  Types.Value,
+                                  ThisRecord.Value,
+                                  ", "
+                              ),
+                              ", "
+                          )
+                      } As Names,
+                      ForAll(
+                          Sequence(
+                              CountRows(Types.Value),
+                              1,
+                              1
+                          ) As Index,
+                          {
+                              DisplayName: Last(
+                                  FirstN(
+                                      Names.Value,
+                                      Index.Value
+                                  )
+                              ).Value,
+                              Option: Blank(),
+                              Option2: Last(
+                                  FirstN(
+                                      Types.Value,
+                                      Index.Value
+                                  )
+                              ).Value
+                          }
+                      )
+                  )
+              ),
+              Filter(
+                  [
+                      {
+                          DisplayName: "",
+                          Option: Blank(),
+                          Option2: Blank()
+                      }
+                  ],
+                  false
+              )
+          ),
+          "DisplayName",
+          SortOrder.Ascending
+      );
+      SelectedDeviceTab = Coalesce(
+          DeviceTabsPivot.Selected,
+          First(DeviceTabs)
+      );
+      ConnectionsTabs = With(
+          {
+              Value: SortByColumns(
+                  Distinct(
+                      Filter(
+                          'Device IO Connections' As C,
+                          C.Device.DeviceIO = SelectedDevice.DeviceIO
+                      ) As C,
+                      C.'Tipo de Conexão'
+                  ),
+                  "Value",
+                  SortOrder.Ascending
+              )
+          } As Types,
+          With(
+              {
+                  Value: Split(
+                      Concat(
+                          Types.Value,
+                          ThisRecord.Value,
+                          ", "
+                      ),
+                      ", "
+                  )
+              } As Names,
+              ForAll(
+                  Sequence(
+                      CountRows(Types.Value),
+                      1,
+                      1
+                  ) As Index,
+                  {
+                      DisplayName: Last(
+                          FirstN(
+                              Names.Value,
+                              Index.Value
+                          )
+                      ).Value,
+                      Option: Last(
+                          FirstN(
+                              Types.Value,
+                              Index.Value
+                          )
+                      ).Value
+                  }
+              )
+          )
+      );
+      SelectedConnectionTab = Coalesce(
+          ConnectionsTabsPivot.Selected,
+          First(ConnectionsTabs)
+      );
+      GroupByTypeDropdownOption = "Agrupar Por Sistema";
+      GroupByConTypeDropdownOption = "Agrupar Por Conexão";
+      GroupByDefaultDropdownOption = GroupByTypeDropdownOption;
+      GroupByLocalDropdownOption = "Agrupar Por Localização";
+      AllDevicesDropdownOption = "Mostrar Todos os Dispositivos";
+      GroupByDropdownSelectedOption = Coalesce(
+          GroupByDropdownCanvas.Selected.Value,
+          GroupByDefaultDropdownOption
+      );
+      VisibleDevicesList = Switch(
+          GroupByDropdownSelectedOption,
+          GroupByTypeDropdownOption,
+          Filter(
+              DeviceIOs As D,
+              D.'Modelo de Produto'.'Tipo de Sistema Padrão' = SelectedDeviceTab.Option
+          ),
+          GroupByLocalDropdownOption,
+          With(
+              {Value: DeviceIOs} As Ds,
+              Filter(
+                  Ds.Value As D,
+                  Or(
+                      D.Localização = SelectedDeviceTab.DisplayName,
+                      And(
+                          SelectedDeviceTab.DisplayName = EmptyLocationPlaceholder,
+                          Len(TrimEnds(D.Localização)) = 0
+                      )
+                  )
+              )
+          ),
+          GroupByConTypeDropdownOption,
+          Filter(
+              DeviceIOs As D,
+              D.DeviceIO in Distinct(
+                  Filter(
+                      'Device IO Connections' As C,
+                      C.Device.Projeto.Projeto = CurrentProjeto.Projeto,
+                      !IsBlank(C.Device),
+                      C.'Tipo de Conexão' = SelectedDeviceTab.Option2
+                  ) As D,
+                  D.Device.DeviceIO
+              )
+          ),
+          DeviceIOs
+      );
+      ConnectionsForThisProject = ShowColumns(
+          SortByColumns(
+              Filter(
+                  'Device IO Connections' As C,
+                  !IsBlank(C.Device),
+                  C.Device.Projeto.Projeto = CurrentProjeto.Projeto
+              ),
+              "new_localizacao",
+              SortOrder.Ascending,
+              "new_deviceid",
+              SortOrder.Ascending,
+              "new_direcao",
+              SortOrder.Ascending,
+              "createdon",
+              SortOrder.Ascending,
+              "new_name",
+              SortOrder.Ascending
+          ),
+          Localização,
+          'Device Id',
+          Direção,
+          'Created On',
+          Name,
+          'Connected To',
+          Device,
+          'Tipo de Conexão',
+          'Device IO Connection',
+          'Connected To (Manual)'
+      );
+      ConnectionsReport = GroupBy(
+          DropColumns(
+              SortByColumns(
+                  AddColumns(
+                      ConnectionsForThisProject As Con,
+                      ConnectedToDeviceName,
+                      Coalesce(
+                          Con.new_ConnectedTo.Device.Name,
+                          Con.new_connectedtomanual
+                      ),
+                      ConnectedToName,
+                      Con.new_ConnectedTo.Name,
+                      ConnectedToLocation,
+                      Con.new_ConnectedTo.Localização,
+                      DeviceName,
+                      Con.new_Device.Name
+                  ),
+                  "new_localizacao",
+                  SortOrder.Ascending,
+                  "DeviceName",
+                  SortOrder.Ascending,
+                  "createdon",
+                  SortOrder.Ascending
+              ),
+              DeviceName
+          ),
+          new_deviceid,
+          new_localizacao,
+          Connections
+      );
+      ProdutosDisponiveisParaVinculo = AddColumns(
+          With(
+              {
+                  Value: With(
+                      {
+                          Value: Filter(
+                              'Produtos-Serviço' As P,
+                              P.Status = 'Status (Produtos-Serviço)'.Active,
+                              P.Projeto.Projeto = CurrentProjeto.Projeto,
+                              !IsBlank(P.'Ordem de Serviço')
+                          )
+                      } As List,
+                      Filter(
+                          List.Value As P,
+                          CountRows(
+                              Filter(
+                                  'Device IO' As D,
+                                  D.Produto.'Produto-Serviço' = P.'Produto-Serviço'
+                              )
+                          ) < P.Quantidade
+                      )
+                  )
+              } As Prods,
+              ForAll(
+                  Sequence(
+                      CountRows(Prods.Value) + 1,
+                      0,
+                      1
+                  ) As I,
+                  If(
+                      I.Value = 0,
+                      Patch(
+                          Defaults('Produtos-Serviço'),
+                          {'Produto-Serviço': Blank()}
+                      ),
+                      Index(
+                          Prods.Value,
+                          I.Value
+                      )
+                  )
+              )
+          ) As P,
+          Label,
+          If(
+              IsBlank(P.'Produto-Serviço'),
+              "nenhum",
+              P.Quantidade & "x " & P.'Referência do Produto' & " " & If(
+                  Len(TrimEnds(P.Localização)) > 0,
+                  "(" & P.Localização & ")"
+              )
+          )
+      );
     OnStart: |+
       =Set(AppTheme, {
       	palette: {
