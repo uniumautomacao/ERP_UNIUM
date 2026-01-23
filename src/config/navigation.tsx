@@ -36,6 +36,7 @@ import { SuperAdminPageAccessPage } from '../pages/section3-super-admin/SuperAdm
 import { SuperAdminUserRolesPage } from '../pages/section3-super-admin/SuperAdminUserRolesPage';
 import { DevPage } from '../pages/section3-dev/DevPage';
 import { QrCodeScannerPage } from '../pages/section3-dev/QrCodeScannerPage';
+import { MermaidPrototypePage } from '../pages/section3-dev/MermaidPrototypePage';
 import { InteligenciaComercialPage } from '../pages/section5-comercial/InteligenciaComercialPage';
 
 export const navigation: NavSection[] = [
@@ -204,6 +205,13 @@ export const navigation: NavSection[] = [
         icon: <QrCode24Regular />,
         path: '/dev/qrcode',
         component: QrCodeScannerPage,
+      },
+      {
+        id: 'dev-mermaid',
+        label: 'Protótipo Mermaid',
+        icon: <ChartMultiple24Regular />,
+        path: '/dev/mermaid',
+        component: MermaidPrototypePage,
       },
     ],
   },
