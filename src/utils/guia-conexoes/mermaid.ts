@@ -16,7 +16,7 @@ const getModelName = (device: GuiaDeviceIO, modelosMap: Map<string, GuiaModeloPr
 };
 
 const getConnectionPort = (conn: GuiaDeviceIOConnection) =>
-  conn.new_displayname || conn.new_name || 'Porta';
+  conn.new_name;//conn.new_displayname || conn.new_name || 'Porta';
 
 const getConnectionType = (conn: GuiaDeviceIOConnection) =>
   conn.new_tipodeconexaorawtext ||
@@ -59,7 +59,7 @@ export const generateMermaidGraph = (
       const name = getDeviceName(device);
       const model = getModelName(device, modelosMap);
       // Format: ID["Name (Model)"]
-      const label = model ? `${name} ${model}` : name;
+      const label = name;
       lines.push(`        ${id}["${label}"]`);
     });
     lines.push('    end');
@@ -108,14 +108,14 @@ export const generateMermaidGraph = (
 
     const fromName = getDeviceName(fromDevice);
     const fromModel = getModelName(fromDevice, modelosMap);
-    const fromLabel = fromModel ? `${fromName} ${fromModel}` : fromName;
+    const fromLabel = fromName;
 
     const fromPort = getConnectionPort(conn);
     const toPort = targetConn ? getConnectionPort(targetConn) : 'Unknown';
     const type = getConnectionType(conn);
 
     // Label format: "SourceDeviceName (SourceModel) <-> SourcePort-TargetPort (Type)"
-    const edgeLabel = `${fromLabel} <-> ${fromPort}-${toPort} (${type})`;
+    const edgeLabel = `${fromPort} <-> ${toPort}`;
 
     lines.push(`    ${fromId} -- "${edgeLabel}" --- ${toId};`);
   });
