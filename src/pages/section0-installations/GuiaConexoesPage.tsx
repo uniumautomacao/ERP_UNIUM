@@ -213,9 +213,17 @@ export function GuiaConexoesPage() {
       deviceMap.get(key)?.add(deviceId);
 
       if (!labelMap.has(key)) {
+        const typeValue =
+          connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
+            ? Number(connection.new_tipodeconexao)
+            : null;
+
+        const typeLabel = typeValue !== null ? SISTEMA_TIPO_LABELS.get(typeValue) : null;
+
         labelMap.set(
           key,
-          connection.new_tipodeconexaorawtext ||
+          typeLabel ||
+            connection.new_tipodeconexaorawtext ||
             (connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
               ? `Tipo ${connection.new_tipodeconexao}`
               : 'Tipo desconhecido')
