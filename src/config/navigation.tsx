@@ -12,6 +12,7 @@ import {
   DeveloperBoard24Regular,
   Board24Regular,
   QrCode24Regular,
+  Edit24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
 import { HomePage } from '../pages/HomePage';
@@ -19,6 +20,7 @@ import { TimelinePage } from '../pages/section0-installations/TimelinePage';
 import { GaleriaFotosPage } from '../pages/section0-installations/GaleriaFotosPage';
 import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
 import { CadastroRapidoProdutoPage } from '../pages/section-cadastros/CadastroRapidoProdutoPage';
+import { AjustesCadastroProdutosPage } from '../pages/section-cadastros/AjustesCadastroProdutosPage';
 import { DashboardPage } from '../pages/section1-analytics/DashboardPage';
 import { AnalyticsPage } from '../pages/section1-analytics/AnalyticsPage';
 import { ReportsPage } from '../pages/section1-analytics/ReportsPage';
@@ -145,6 +147,13 @@ export const navigation: NavSection[] = [
         icon: <Box24Regular />,
         path: '/cadastros/cadastro-rapido-produto',
         component: CadastroRapidoProdutoPage,
+      },
+      {
+        id: 'ajustes-cadastro-produto',
+        label: 'Ajustes de Cadastro de Produtos',
+        icon: <Edit24Regular />,
+        path: '/cadastros/ajustes-produto',
+        component: AjustesCadastroProdutosPage,
       },
     ],
   },

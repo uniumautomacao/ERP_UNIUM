@@ -1,6 +1,42 @@
-export const APP_VERSION = '0.1.23';
+export const APP_VERSION = '0.1.29';
 export const APP_BUILD_DATE = '2026-01-22';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.29',
+    date: '2026-01-22',
+    changes:
+      'SearchableCombobox agora só busca após digitação; lista vazia até usuário informar termo.',
+  },
+  {
+    version: '0.1.28',
+    date: '2026-01-22',
+    changes:
+      'Corrigido carregamento de rótulos no formulário de Regime de Cotação para o SearchableCombobox de Modelo.',
+  },
+  {
+    version: '0.1.27',
+    date: '2026-01-22',
+    changes:
+      'Corrigido carregamento de rótulos em Modo Editar de Preço de Produto para Modelo e Fornecedor no SearchableCombobox.',
+  },
+  {
+    version: '0.1.26',
+    date: '2026-01-22',
+    changes:
+      'Corrigido SearchableCombobox para permitir digitação livre no campo de busca usando estado interno sincronizado.',
+  },
+  {
+    version: '0.1.25',
+    date: '2026-01-22',
+    changes:
+      'Substituídos Dropdowns estáticos por SearchableCombobox com busca delegável ao Dataverse (contains) para Modelos, Fabricantes e Fornecedores nas abas de Ajustes de Cadastro de Produtos. Listbox limitado a 300px de altura com scroll.',
+  },
+  {
+    version: '0.1.24',
+    date: '2026-01-22',
+    changes:
+      'Nova página Ajustes de Cadastro de Produtos com edição, duplicação e cópia de modelos, preços e regimes em fluxo unificado.',
+  },
   {
     version: '0.1.23',
     date: '2026-01-22',
