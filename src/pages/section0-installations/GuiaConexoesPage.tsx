@@ -417,8 +417,8 @@ export function GuiaConexoesPage() {
   const handleRootSelected = useCallback(
     (rootDeviceId: string) => {
       const diagram = generateMermaidGraph(
-        visibleDevices,
-        visibleConnections,
+        devices,
+        connections,
         modelosMap,
         rootDeviceId
       );

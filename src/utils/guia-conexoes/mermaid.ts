@@ -41,13 +41,11 @@ export const generateMermaidGraph = (
     connectionMap.set(conn.new_deviceioconnectionid, conn)
   );
 
-  // Filter devices to only include those with active connections
+  // Identify all connected devices first (needed for fallback if no root)
   const connectedDeviceIds = new Set<string>();
   connections.forEach((conn) => {
     if (conn._new_connectedto_value && conn._new_device_value) {
       connectedDeviceIds.add(conn._new_device_value);
-      
-      // Also add the connected device if it exists in our device list
       const targetConn = connectionMap.get(conn._new_connectedto_value);
       if (targetConn && targetConn._new_device_value) {
         connectedDeviceIds.add(targetConn._new_device_value);
@@ -55,51 +53,8 @@ export const generateMermaidGraph = (
     }
   });
 
-  // Group devices by location
-  const locations = new Map<string, GuiaDeviceIO[]>();
-  devices.forEach((device) => {
-    // Skip devices without connections
-    if (!connectedDeviceIds.has(device.new_deviceioid)) return;
-
-    const location = device.new_localizacao?.trim() || 'Sem Localização';
-    const list = locations.get(location) ?? [];
-    list.push(device);
-    locations.set(location, list);
-  });
-
-  // Generate Subgraphs
-  locations.forEach((list, location) => {
-    const groupId = sanitizeMermaidId(location);
-    lines.push(`    subgraph ${groupId}["${location}"]`);
-    list.forEach((device) => {
-      const id = sanitizeMermaidId(device.new_deviceioid);
-      const name = getDeviceName(device);
-      const model = getModelName(device, modelosMap);
-      // Format: ID["Name (Model)"]
-      const label = name;
-      lines.push(`        ${id}["${label}"]`);
-    });
-    lines.push('    end');
-  });
-
-  // Generate Edges
-  const processedEdges = new Set<string>();
-
-  // Helper to build adjacency list for BFS
-  const adjacency = new Map<string, string[]>();
-  connections.forEach((conn) => {
-    if (!conn._new_connectedto_value || !conn._new_device_value) return;
-    const targetConn = connectionMap.get(conn._new_connectedto_value);
-    if (!targetConn || !targetConn._new_device_value) return;
-
-    const fromId = conn._new_device_value;
-    const toId = targetConn._new_device_value;
-
-    if (!adjacency.has(fromId)) adjacency.set(fromId, []);
-    adjacency.get(fromId)?.push(toId);
-  });
-
   // BFS to order edges from root
+  const processedEdges = new Set<string>();
   const visited = new Set<string>();
   const queue: string[] = [];
   const orderedEdges: { from: string; to: string; conn: GuiaDeviceIOConnection }[] = [];
@@ -143,17 +98,35 @@ export const generateMermaidGraph = (
     });
   }
 
-  // Process any remaining edges that weren't reached (disconnected components)
-  connections.forEach((conn) => {
-      if (!conn._new_connectedto_value || !conn._new_device_value) return;
-      const edgeKey = [conn.new_deviceioconnectionid, conn._new_connectedto_value].sort().join('-');
-      if (processedEdges.has(edgeKey)) return;
-      
-      const targetConn = connectionMap.get(conn._new_connectedto_value);
-      if (!targetConn || !targetConn._new_device_value) return;
-      
-      processedEdges.add(edgeKey);
-      orderedEdges.push({ from: conn._new_device_value, to: targetConn._new_device_value, conn });
+  // Group reachable devices by location
+  const locations = new Map<string, GuiaDeviceIO[]>();
+  
+  // If root is provided, only include visited devices
+  const devicesToInclude = rootDeviceId ? Array.from(visited) : Array.from(connectedDeviceIds);
+  
+  devicesToInclude.forEach((deviceId) => {
+    const device = deviceMap.get(deviceId);
+    if (!device) return;
+    
+    const location = device.new_localizacao?.trim() || 'Sem Localização';
+    const list = locations.get(location) ?? [];
+    list.push(device);
+    locations.set(location, list);
+  });
+
+  // Generate Subgraphs
+  locations.forEach((list, location) => {
+    const groupId = sanitizeMermaidId(location);
+    lines.push(`    subgraph ${groupId}["${location}"]`);
+    list.forEach((device) => {
+      const id = sanitizeMermaidId(device.new_deviceioid);
+      const name = getDeviceName(device);
+      const model = getModelName(device, modelosMap);
+      // Format: ID["Name (Model)"]
+      const label = name;
+      lines.push(`        ${id}["${label}"]`);
+    });
+    lines.push('    end');
   });
 
   orderedEdges.forEach(({ from, to, conn }) => {
