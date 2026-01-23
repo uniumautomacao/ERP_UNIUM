@@ -93,15 +93,21 @@ export function VincularConexaoDialog({
       if (!connection || !projectId) return [];
 
       const normalized = term.trim();
-      if (!normalized) return [];
+      // Permita busca vazia para mostrar todas as conexões compatíveis
+      // if (!normalized) return [];
 
       const typeFilter =
         connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
           ? `new_tipodeconexao eq ${connection.new_tipodeconexao}`
           : '';
       const directionFilter = buildDirectionFilter(connection.new_direcao);
-      const escapedTerm = escapeODataValue(normalized);
-      const searchFilter = `(contains(new_name, '${escapedTerm}') or contains(new_displayname, '${escapedTerm}') or contains(new_localizacao, '${escapedTerm}'))`;
+      
+      // Só adiciona searchFilter se houver termo
+      let searchFilter = '';
+      if (normalized) {
+        const escapedTerm = escapeODataValue(normalized);
+        searchFilter = `(contains(new_name, '${escapedTerm}') or contains(new_displayname, '${escapedTerm}') or contains(new_localizacao, '${escapedTerm}'))`;
+      }
 
       const filterParts = [
         `statecode eq 0`,
@@ -246,6 +252,7 @@ export function VincularConexaoDialog({
                   setTargetLabel(label);
                 }}
                 onSearch={searchConnections}
+                showAllOnFocus={true}
               />
               <Text className={styles.helper}>
                 Busca por nome/descrição da porta dentro do projeto.

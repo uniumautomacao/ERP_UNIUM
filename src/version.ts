@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.1.49';
+export const APP_VERSION = '0.1.52';
 export const APP_BUILD_DATE = '2026-01-23';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.52',
+    date: '2026-01-23',
+    changes: 'Dropdown de Vincular Conexão agora mostra todas as conexões compatíveis ao clique, sem precisar digitar.',
+  },
+  {
+    version: '0.1.51',
+    date: '2026-01-23',
+    changes: 'Removidos botões Relatório e CSV Etiquetas do CommandBar do Guia de Conexões.',
+  },
+  {
+    version: '0.1.50',
+    date: '2026-01-23',
+    changes: 'Removida coluna Produto-Serviço do grid principal de Guia de Conexões.',
+  },
   {
     version: '0.1.49',
     date: '2026-01-23',

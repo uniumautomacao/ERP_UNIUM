@@ -15,6 +15,7 @@ export interface SearchableComboboxProps {
   onSearch: (term: string) => Promise<SearchableComboboxOption[]>;
   disabled?: boolean;
   required?: boolean;
+  showAllOnFocus?: boolean;
 }
 
 export function SearchableCombobox({
@@ -26,6 +27,7 @@ export function SearchableCombobox({
   onSearch,
   disabled,
   required,
+  showAllOnFocus,
 }: SearchableComboboxProps) {
   const [options, setOptions] = useState<SearchableComboboxOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,7 +64,7 @@ export function SearchableCombobox({
       }
 
       const normalized = term.trim();
-      if (!normalized) {
+      if (!normalized && !showAllOnFocus) {
         setOptions([]);
         setLoading(false);
         return;
@@ -74,8 +76,14 @@ export function SearchableCombobox({
 
       setDebounceTimer(timer);
     },
-    [debounceTimer, performSearch]
+    [debounceTimer, performSearch, showAllOnFocus]
   );
+
+  const handleFocus = useCallback(() => {
+    if (showAllOnFocus && inputValue.trim().length === 0) {
+      void performSearch('');
+    }
+  }, [showAllOnFocus, inputValue, performSearch]);
 
   const handleOptionSelect = useCallback(
     (_: any, data: any) => {
@@ -111,6 +119,7 @@ export function SearchableCombobox({
       selectedOptions={selectedId ? [selectedId] : []}
       onOptionSelect={handleOptionSelect}
       onChange={handleInputChange}
+      onFocus={handleFocus}
       disabled={disabled}
       required={required}
       listbox={{
@@ -138,7 +147,9 @@ export function SearchableCombobox({
             {option.label}
           </Option>
         ))}
-      {!loading && inputValue.trim().length === 0 && (
+      {!loading &&
+        inputValue.trim().length === 0 &&
+        !showAllOnFocus && (
         <div
           style={{
             padding: '12px',

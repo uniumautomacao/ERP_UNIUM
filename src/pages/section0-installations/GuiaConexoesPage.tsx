@@ -20,10 +20,7 @@ import {
   ArrowSync24Regular,
   ClipboardTask24Regular,
   Delete24Regular,
-  DocumentBulletList24Regular,
   Flowchart24Regular,
-  LineHorizontal120Regular,
-  Print24Regular,
 } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -48,10 +45,7 @@ import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
 import {
-  buildCsvConexoes,
-  buildCsvEquipamentos,
   buildMermaidDiagram,
-  buildReportHtml,
 } from '../../utils/guia-conexoes/exports';
 import { Cr22fProjetoService } from '../../generated/services/Cr22fProjetoService';
 
@@ -411,18 +405,6 @@ export function GuiaConexoesPage() {
     URL.revokeObjectURL(url);
   }, []);
 
-  const handleExportCsv = useCallback(() => {
-    const csvConexoes = buildCsvConexoes(
-      visibleDevices,
-      visibleConnections,
-      selectedProjectLabel
-    );
-    const csvEquipamentos = buildCsvEquipamentos(visibleDevices, selectedProjectLabel);
-
-    downloadText(csvConexoes, 'conexoes.csv', 'text/csv');
-    downloadText(csvEquipamentos, 'equipamentos.csv', 'text/csv');
-  }, [downloadText, selectedProjectLabel, visibleConnections, visibleDevices]);
-
   const handleMermaid = useCallback(async () => {
     const diagram = buildMermaidDiagram(visibleDevices, visibleConnections);
     try {
@@ -433,20 +415,6 @@ export function GuiaConexoesPage() {
     const encoded = encodeURIComponent(diagram);
     window.open(`https://mermaid.live/edit#${encoded}`, '_blank', 'noopener,noreferrer');
   }, [visibleConnections, visibleDevices]);
-
-  const handleReport = useCallback(() => {
-    const html = buildReportHtml(visibleDevices, visibleConnections, selectedProjectLabel, modelosMap);
-    const reportWindow = window.open('', '_blank', 'noopener,noreferrer');
-    if (!reportWindow) {
-      setActionError('Não foi possível abrir o relatório em uma nova janela.');
-      return;
-    }
-    reportWindow.document.open();
-    reportWindow.document.write(html);
-    reportWindow.document.close();
-    reportWindow.focus();
-    reportWindow.print();
-  }, [modelosMap, selectedProjectLabel, visibleConnections, visibleDevices]);
 
   const handleBulkDelete = useCallback(async () => {
     if (!selectedProjectId) return;
@@ -509,13 +477,6 @@ export function GuiaConexoesPage() {
       onClick: () => setPendenciasOpen(true),
       disabled: actionsDisabled,
     },
-    {
-      id: 'relatorio',
-      label: 'Relatório',
-      icon: <DocumentBulletList24Regular />,
-      onClick: handleReport,
-      disabled: actionsDisabled,
-    },
   ];
 
   const secondaryActions = [
@@ -532,20 +493,6 @@ export function GuiaConexoesPage() {
       icon: <ArrowSync24Regular />,
       onClick: reload,
       disabled: !selectedProjectId,
-    },
-    {
-      id: 'plotar',
-      label: 'Plotar PDF',
-      icon: <Print24Regular />,
-      onClick: handleReport,
-      disabled: actionsDisabled,
-    },
-    {
-      id: 'csv',
-      label: 'CSV etiquetas',
-      icon: <LineHorizontal120Regular />,
-      onClick: handleExportCsv,
-      disabled: actionsDisabled,
     },
     {
       id: 'mermaid',
@@ -590,11 +537,6 @@ export function GuiaConexoesPage() {
             </Badge>
           </div>
         ),
-      }),
-      createTableColumn<DeviceRow>({
-        columnId: 'produto',
-        renderHeaderCell: () => 'Produto-Serviço',
-        renderCell: (item) => item.produto?.new_name || 'Sem vínculo',
       }),
       createTableColumn<DeviceRow>({
         columnId: 'instalar',
