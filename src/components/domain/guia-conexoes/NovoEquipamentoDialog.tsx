@@ -66,8 +66,8 @@ export function NovoEquipamentoDialog({
   const [quantity, setQuantity] = useState('1');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  type DeviceCreatePayload = Parameters<typeof NewDeviceIOService.create>[1];
-  type ConnectionCreatePayload = Parameters<typeof NewDeviceIOConnectionService.create>[1];
+  type DeviceCreatePayload = Parameters<typeof NewDeviceIOService.create>[0];
+  type ConnectionCreatePayload = Parameters<typeof NewDeviceIOConnectionService.create>[0];
   type ModelSearchRecord = {
     cr22f_modelosdeprodutofromsharepointlistid: string;
     cr22f_title?: string | null;
@@ -166,12 +166,12 @@ export function NovoEquipamentoDialog({
         const sequenceLabel = String(sequence).padStart(2, '0');
         const name = `${model.cr22f_title ?? 'Equipamento'} (${sequenceLabel})`;
 
-        const payload = {
+        const payload: DeviceCreatePayload = {
           new_name: name,
           new_localizacao: location.trim() || null,
           'new_ModelodeProduto@odata.bind': `/cr22f_modelosdeprodutofromsharepointlists(${modelId})`,
           'new_Projeto@odata.bind': `/cr22f_projetos(${projectId})`,
-        } as DeviceCreatePayload;
+        };
 
         const createResult = await NewDeviceIOService.create(payload);
         if (!createResult.success || !createResult.data?.new_deviceioid) {
@@ -182,13 +182,13 @@ export function NovoEquipamentoDialog({
 
         if (template?.Connections?.length) {
           for (const connection of template.Connections) {
-            const connectionPayload = {
+            const connectionPayload: ConnectionCreatePayload = {
               new_name: connection.Name,
               new_tipodeconexao: Number(connection.Type),
               new_direcao: Number(connection.Direction),
               'new_Device@odata.bind': `/new_deviceios(${deviceId})`,
               'new_Projeto@odata.bind': `/cr22f_projetos(${projectId})`,
-            } as ConnectionCreatePayload;
+            };
 
             const connectionResult = await NewDeviceIOConnectionService.create(
               connectionPayload

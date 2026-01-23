@@ -32,7 +32,7 @@ export function SearchableCombobox({
   const [options, setOptions] = useState<SearchableComboboxOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState(value);
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [debounceTimer, setDebounceTimer] = useState<any | null>(null);
 
   useEffect(() => {
     setInputValue(value);

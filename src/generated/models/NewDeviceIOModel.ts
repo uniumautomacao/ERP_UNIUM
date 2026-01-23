@@ -6,9 +6,12 @@
 export interface NewDeviceIOBase {
   new_deviceioid: string;
   new_name?: string;
+  new_localizacao?: string | null;
   new_externalid?: string;
   "new_ModelodeProduto@odata.bind"?: string;
   "new_Projeto@odata.bind"?: string;
+  "new_Produto@odata.bind"?: string;
+  new_serainstaladobase?: boolean | null;
   statecode?: number;
   statuscode?: number;
 }
