@@ -41,9 +41,26 @@ export const generateMermaidGraph = (
     connectionMap.set(conn.new_deviceioconnectionid, conn)
   );
 
+  // Filter devices to only include those with active connections
+  const connectedDeviceIds = new Set<string>();
+  connections.forEach((conn) => {
+    if (conn._new_connectedto_value && conn._new_device_value) {
+      connectedDeviceIds.add(conn._new_device_value);
+      
+      // Also add the connected device if it exists in our device list
+      const targetConn = connectionMap.get(conn._new_connectedto_value);
+      if (targetConn && targetConn._new_device_value) {
+        connectedDeviceIds.add(targetConn._new_device_value);
+      }
+    }
+  });
+
   // Group devices by location
   const locations = new Map<string, GuiaDeviceIO[]>();
   devices.forEach((device) => {
+    // Skip devices without connections
+    if (!connectedDeviceIds.has(device.new_deviceioid)) return;
+
     const location = device.new_localizacao?.trim() || 'Sem Localização';
     const list = locations.get(location) ?? [];
     list.push(device);
@@ -68,56 +85,94 @@ export const generateMermaidGraph = (
   // Generate Edges
   const processedEdges = new Set<string>();
 
+  // Helper to build adjacency list for BFS
+  const adjacency = new Map<string, string[]>();
   connections.forEach((conn) => {
-    // Only process connections that have a target
-    if (!conn._new_connectedto_value) return;
-
-    const fromDevice = conn._new_device_value
-      ? deviceMap.get(conn._new_device_value)
-      : null;
-    
-    // Find the target connection
+    if (!conn._new_connectedto_value || !conn._new_device_value) return;
     const targetConn = connectionMap.get(conn._new_connectedto_value);
-    const toDevice = targetConn?._new_device_value
-      ? deviceMap.get(targetConn._new_device_value)
-      : null;
+    if (!targetConn || !targetConn._new_device_value) return;
 
-    if (!fromDevice || !toDevice) return;
+    const fromId = conn._new_device_value;
+    const toId = targetConn._new_device_value;
 
-    // Ensure we only draw the edge once (A -> B or B -> A)
-    // We sort IDs to create a unique key for the pair
-    const id1 = fromDevice.new_deviceioid;
-    const id2 = toDevice.new_deviceioid;
+    if (!adjacency.has(fromId)) adjacency.set(fromId, []);
+    adjacency.get(fromId)?.push(toId);
+  });
+
+  // BFS to order edges from root
+  const visited = new Set<string>();
+  const queue: string[] = [];
+  const orderedEdges: { from: string; to: string; conn: GuiaDeviceIOConnection }[] = [];
+
+  if (rootDeviceId && deviceMap.has(rootDeviceId)) {
+    visited.add(rootDeviceId);
+    queue.push(rootDeviceId);
+  } else {
+    // If no root or invalid root, just process all connections normally
+    // Add all devices to queue to ensure we process everything even if disconnected
+    devices.forEach(d => {
+        if (connectedDeviceIds.has(d.new_deviceioid)) {
+            queue.push(d.new_deviceioid);
+        }
+    });
+  }
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
     
-    // Create a unique key for this specific connection pair to avoid duplicates
-    // But we need to capture the specific ports used.
-    // If there are multiple cables between same devices, we want multiple lines?
-    // The template shows: 
-    // 119dd... -- "TL-ER605 (01) <-> Eth4-Eth5 (Uplink)"---f3a77...
-    
-    // We'll use the connection ID as part of the uniqueness check if we want to be strict,
-    // but typically we want to avoid processing the "reverse" connection if it's the same physical link.
-    // However, in this data model, the link is represented by two connection records pointing to each other.
-    
-    const edgeKey = [conn.new_deviceioconnectionid, conn._new_connectedto_value].sort().join('-');
-    if (processedEdges.has(edgeKey)) return;
-    processedEdges.add(edgeKey);
+    // Find all connections starting from currentId
+    connections.forEach((conn) => {
+        if (conn._new_device_value !== currentId) return;
+        if (!conn._new_connectedto_value) return;
+
+        const targetConn = connectionMap.get(conn._new_connectedto_value);
+        if (!targetConn || !targetConn._new_device_value) return;
+
+        const targetId = targetConn._new_device_value;
+        const edgeKey = [conn.new_deviceioconnectionid, conn._new_connectedto_value].sort().join('-');
+
+        if (processedEdges.has(edgeKey)) return;
+        processedEdges.add(edgeKey);
+
+        orderedEdges.push({ from: currentId, to: targetId, conn });
+
+        if (!visited.has(targetId)) {
+            visited.add(targetId);
+            queue.push(targetId);
+        }
+    });
+  }
+
+  // Process any remaining edges that weren't reached (disconnected components)
+  connections.forEach((conn) => {
+      if (!conn._new_connectedto_value || !conn._new_device_value) return;
+      const edgeKey = [conn.new_deviceioconnectionid, conn._new_connectedto_value].sort().join('-');
+      if (processedEdges.has(edgeKey)) return;
+      
+      const targetConn = connectionMap.get(conn._new_connectedto_value);
+      if (!targetConn || !targetConn._new_device_value) return;
+      
+      processedEdges.add(edgeKey);
+      orderedEdges.push({ from: conn._new_device_value, to: targetConn._new_device_value, conn });
+  });
+
+  orderedEdges.forEach(({ from, to, conn }) => {
+    const fromDevice = deviceMap.get(from);
+    const toDevice = deviceMap.get(to);
+    const targetConn = connectionMap.get(conn._new_connectedto_value!);
+
+    if (!fromDevice || !toDevice || !targetConn) return;
 
     const fromId = sanitizeMermaidId(fromDevice.new_deviceioid);
     const toId = sanitizeMermaidId(toDevice.new_deviceioid);
 
-    const fromName = getDeviceName(fromDevice);
-    const fromModel = getModelName(fromDevice, modelosMap);
-    const fromLabel = fromName;
-
     const fromPort = getConnectionPort(conn);
-    const toPort = targetConn ? getConnectionPort(targetConn) : 'Unknown';
-    const type = getConnectionType(conn);
-
-    // Label format: "SourceDeviceName (SourceModel) <-> SourcePort-TargetPort (Type)"
+    const toPort = getConnectionPort(targetConn);
+    
     const edgeLabel = `${fromPort} <-> ${toPort}`;
 
-    lines.push(`    ${fromId} -- "${edgeLabel}" --- ${toId};`);
+    // Always draw from -> to based on BFS order to maintain direction
+    lines.push(`    ${fromId} -->|"${edgeLabel}"| ${toId};`);
   });
 
   return lines.join('\n');
