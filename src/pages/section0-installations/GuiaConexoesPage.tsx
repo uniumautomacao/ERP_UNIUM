@@ -45,8 +45,10 @@ import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
 import {
-  buildMermaidDiagram,
-} from '../../utils/guia-conexoes/exports';
+  generateMermaidGraph,
+} from '../../utils/guia-conexoes/mermaid';
+import { RootDeviceSelectionDialog } from '../../components/domain/guia-conexoes/RootDeviceSelectionDialog';
+import { DiagramModal } from '../../components/domain/guia-conexoes/DiagramModal';
 import { Cr22fProjetoService } from '../../generated/services/Cr22fProjetoService';
 
 const useStyles = makeStyles({
@@ -156,6 +158,9 @@ export function GuiaConexoesPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [novoOpen, setNovoOpen] = useState(false);
   const [pendenciasOpen, setPendenciasOpen] = useState(false);
+  const [rootSelectionOpen, setRootSelectionOpen] = useState(false);
+  const [diagramModalOpen, setDiagramModalOpen] = useState(false);
+  const [currentDiagramCode, setCurrentDiagramCode] = useState('');
   const [selectedDeviceRows, setSelectedDeviceRows] = useState<DeviceRow[]>([]);
 
   const { devices, connections, produtos, modelos, loading, error, reload, updateDevice } =
@@ -405,16 +410,23 @@ export function GuiaConexoesPage() {
     URL.revokeObjectURL(url);
   }, []);
 
-  const handleMermaid = useCallback(async () => {
-    const diagram = buildMermaidDiagram(visibleDevices, visibleConnections);
-    try {
-      await navigator.clipboard.writeText(diagram);
-    } catch (err) {
-      console.warn('Falha ao copiar Mermaid:', err);
-    }
-    const encoded = encodeURIComponent(diagram);
-    window.open(`https://mermaid.live/edit#${encoded}`, '_blank', 'noopener,noreferrer');
-  }, [visibleConnections, visibleDevices]);
+  const handleMermaid = useCallback(() => {
+    setRootSelectionOpen(true);
+  }, []);
+
+  const handleRootSelected = useCallback(
+    (rootDeviceId: string) => {
+      const diagram = generateMermaidGraph(
+        visibleDevices,
+        visibleConnections,
+        modelosMap,
+        rootDeviceId
+      );
+      setCurrentDiagramCode(diagram);
+      setDiagramModalOpen(true);
+    },
+    [modelosMap, visibleConnections, visibleDevices]
+  );
 
   const handleBulkDelete = useCallback(async () => {
     if (!selectedProjectId) return;
@@ -750,6 +762,17 @@ export function GuiaConexoesPage() {
         modelos={modelos}
         onClose={() => setPendenciasOpen(false)}
         onGenerated={reload}
+      />
+      <RootDeviceSelectionDialog
+        open={rootSelectionOpen}
+        devices={visibleDevices}
+        onClose={() => setRootSelectionOpen(false)}
+        onSelect={handleRootSelected}
+      />
+      <DiagramModal
+        open={diagramModalOpen}
+        chart={currentDiagramCode}
+        onClose={() => setDiagramModalOpen(false)}
       />
     </>
   );

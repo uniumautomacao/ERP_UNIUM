@@ -162,48 +162,6 @@ export const buildCsvEquipamentos = (devices: GuiaDeviceIO[], projectLabel: stri
   return rows.join('\n');
 };
 
-const sanitizeMermaidId = (value: string) =>
-  value.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^(\d)/, '_$1');
-
-export const buildMermaidDiagram = (
-  devices: GuiaDeviceIO[],
-  connections: GuiaDeviceIOConnection[]
-) => {
-  const lines: string[] = ['flowchart LR'];
-  const deviceMap = new Map<string, GuiaDeviceIO>();
-  devices.forEach((device) => deviceMap.set(device.new_deviceioid, device));
-
-  const locations = new Map<string, GuiaDeviceIO[]>();
-  devices.forEach((device) => {
-    const location = device.new_localizacao?.trim() || 'Sem Localização';
-    const list = locations.get(location) ?? [];
-    list.push(device);
-    locations.set(location, list);
-  });
-
-  locations.forEach((list, location) => {
-    const groupId = sanitizeMermaidId(location);
-    lines.push(`subgraph ${groupId}["${location}"]`);
-    list.forEach((device) => {
-      const id = sanitizeMermaidId(device.new_deviceioid);
-      lines.push(`  ${id}["${getDeviceName(device)}"]`);
-    });
-    lines.push('end');
-  });
-
-  connections.forEach((conn) => {
-    if (!conn._new_connectedto_value) return;
-    const fromDevice = conn._new_device_value ? deviceMap.get(conn._new_device_value) : null;
-    const toConn = connections.find((item) => item.new_deviceioconnectionid === conn._new_connectedto_value);
-    const toDevice = toConn?._new_device_value ? deviceMap.get(toConn._new_device_value) : null;
-    if (!fromDevice || !toDevice) return;
-    const fromId = sanitizeMermaidId(fromDevice.new_deviceioid);
-    const toId = sanitizeMermaidId(toDevice.new_deviceioid);
-    lines.push(`${fromId} --> ${toId}`);
-  });
-
-  return lines.join('\n');
-};
 
 export const buildReportHtml = (
   devices: GuiaDeviceIO[],

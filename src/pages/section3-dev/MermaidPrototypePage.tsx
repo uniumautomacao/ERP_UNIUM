@@ -9,8 +9,9 @@ import {
 } from '@fluentui/react-components';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
-import { MermaidDiagram } from '../../components/MermaidDiagram';
-import { DeveloperBoard24Regular } from '@fluentui/react-icons';
+import { DiagramModal } from '../../components/domain/guia-conexoes/DiagramModal';
+import { DeveloperBoard24Regular, Eye24Regular } from '@fluentui/react-icons';
+import { Button } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
   container: {
@@ -96,6 +97,7 @@ const DEFAULT_CHART = `graph LR
 export const MermaidPrototypePage: React.FC = () => {
   const styles = useStyles();
   const [chartCode, setChartCode] = useState(DEFAULT_CHART);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <>
@@ -121,15 +123,22 @@ export const MermaidPrototypePage: React.FC = () => {
               />
               
               <div style={{ borderTop: `1px solid ${tokens.colorNeutralStroke1}`, paddingTop: tokens.spacingVerticalM }}>
-                <Text weight="semibold" style={{ marginBottom: tokens.spacingVerticalS, display: 'block' }}>
-                  Visualização
-                </Text>
-                <MermaidDiagram chart={chartCode} />
+                <Button 
+                  icon={<Eye24Regular />} 
+                  onClick={() => setModalOpen(true)}
+                >
+                  Visualizar Diagrama
+                </Button>
               </div>
             </div>
           </Card>
         </div>
       </PageContainer>
+      <DiagramModal 
+        open={modalOpen} 
+        chart={chartCode} 
+        onClose={() => setModalOpen(false)} 
+      />
     </>
   );
 };
