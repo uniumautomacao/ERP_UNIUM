@@ -64,7 +64,8 @@ const useStyles = makeStyles({
     alignItems: 'start', // Align to top so large diagrams scroll naturally
   },
   mermaid: {
-    width: '100%',
+    minWidth: '100%',
+    width: 'fit-content',
     textAlign: 'center',
     backgroundColor: 'white',
   },
@@ -136,11 +137,23 @@ export const DiagramModal: React.FC<DiagramModalProps> = ({
     if (!containerRef.current) return;
 
     try {
-      const canvas = await html2canvas(containerRef.current, {
+      const element = containerRef.current;
+      const w = element.scrollWidth;
+      const h = element.scrollHeight;
+
+      const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
         scale: 2,
         logging: false,
         useCORS: true,
+        width: w,
+        height: h,
+        windowWidth: w,
+        windowHeight: h,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
       });
 
       const link = document.createElement('a');
@@ -157,11 +170,23 @@ export const DiagramModal: React.FC<DiagramModalProps> = ({
     if (!containerRef.current) return;
 
     try {
-      const canvas = await html2canvas(containerRef.current, {
+      const element = containerRef.current;
+      const w = element.scrollWidth;
+      const h = element.scrollHeight;
+
+      const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
         scale: 2,
         logging: false,
         useCORS: true,
+        width: w,
+        height: h,
+        windowWidth: w,
+        windowHeight: h,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
       });
 
       const imgData = canvas.toDataURL('image/png');
