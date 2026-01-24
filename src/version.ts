@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.1.58';
+export const APP_VERSION = '0.1.60';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.60',
+    date: '2026-01-24',
+    changes: 'Layout ELK orienta arestas a partir do nó raiz para reorganização correta.',
+  },
+  {
+    version: '0.1.59',
+    date: '2026-01-24',
+    changes: 'Layout ELK agora usa grafo sem subgrupos para respeitar melhor o nó raiz.',
+  },
   {
     version: '0.1.58',
     date: '2026-01-24',

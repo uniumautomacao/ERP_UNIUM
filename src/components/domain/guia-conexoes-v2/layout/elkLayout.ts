@@ -28,6 +28,44 @@ type ElkNode = {
   children?: ElkNode[];
 };
 
+const buildNodeDepths = (nodes: Node[], edges: Edge[], rootDeviceId?: string | null) => {
+  if (!rootDeviceId) return new Map<string, number>();
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  if (!nodeIds.has(rootDeviceId)) return new Map<string, number>();
+
+  const adjacency = new Map<string, Set<string>>();
+  for (const nodeId of nodeIds) {
+    adjacency.set(nodeId, new Set());
+  }
+  edges.forEach((edge) => {
+    const source = edge.source;
+    const target = edge.target;
+    if (!nodeIds.has(source) || !nodeIds.has(target)) return;
+    adjacency.get(source)?.add(target);
+    adjacency.get(target)?.add(source);
+  });
+
+  const depths = new Map<string, number>();
+  const queue: string[] = [rootDeviceId];
+  depths.set(rootDeviceId, 0);
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current) break;
+    const currentDepth = depths.get(current) ?? 0;
+    const neighbors = adjacency.get(current);
+    if (!neighbors) continue;
+    neighbors.forEach((neighbor) => {
+      if (!depths.has(neighbor)) {
+        depths.set(neighbor, currentDepth + 1);
+        queue.push(neighbor);
+      }
+    });
+  }
+
+  return depths;
+};
+
 const collectPositions = (
   node: ElkNode,
   offsetX: number,
@@ -52,67 +90,38 @@ export const applyAutoLayout = async (
 ): Promise<Node[]> => {
   if (nodes.length === 0) return nodes;
 
-  const groups = new Map<string, { id: string; label: string; children: ElkNode[] }>();
-  const groupByNodeId = new Map<string, string>();
-
+  const elkNodes: ElkNode[] = [];
   for (const node of nodes) {
-    const locationLabel =
-      (node.data as { locationLabel?: string; device?: { new_localizacao?: string | null } })
-        ?.locationLabel ??
-      (node.data as { device?: { new_localizacao?: string | null } })?.device?.new_localizacao ??
-      'Sem localização';
-    const locationKey = locationLabel?.trim() ? locationLabel.trim() : 'Sem localização';
-    const groupId = `location:${locationKey}`;
-
-    if (!groups.has(groupId)) {
-      groups.set(groupId, { id: groupId, label: locationKey, children: [] });
-    }
-
     const ports = (node.data as { ports?: unknown[] })?.ports ?? [];
     const portCount = Array.isArray(ports) ? ports.length : 0;
     const { width, height } = getDeviceNodeSize(portCount);
-    groups.get(groupId)?.children.push({
+    elkNodes.push({
       id: node.id,
       width,
       height,
     });
-    groupByNodeId.set(node.id, groupId);
   }
 
-  const orderedGroups = Array.from(groups.values());
-  if (rootDeviceId) {
-    const rootGroupId = groupByNodeId.get(rootDeviceId);
-    if (rootGroupId) {
-      let rootGroupIndex = -1;
-      for (let i = 0; i < orderedGroups.length; i += 1) {
-        if (orderedGroups[i].id === rootGroupId) {
-          rootGroupIndex = i;
-          break;
-        }
-      }
-      if (rootGroupIndex > 0) {
-        const rootGroup = orderedGroups[rootGroupIndex];
-        orderedGroups.splice(rootGroupIndex, 1);
-        orderedGroups.unshift(rootGroup);
-      }
-    }
-  }
+  const nodeDepths = buildNodeDepths(nodes, edges, rootDeviceId);
 
-  for (const group of orderedGroups) {
-    if (!rootDeviceId) continue;
-    let rootIndex = -1;
-    for (let i = 0; i < group.children.length; i += 1) {
-      if (group.children[i].id === rootDeviceId) {
-        rootIndex = i;
-        break;
+  const elkEdges = edges.map((edge) => {
+    const sourceDepth = nodeDepths.get(edge.source);
+    const targetDepth = nodeDepths.get(edge.target);
+    if (sourceDepth !== undefined && targetDepth !== undefined && sourceDepth !== targetDepth) {
+      if (sourceDepth > targetDepth) {
+        return {
+          id: edge.id,
+          sources: [edge.target],
+          targets: [edge.source],
+        };
       }
     }
-    if (rootIndex > 0) {
-      const rootChild = group.children[rootIndex];
-      group.children.splice(rootIndex, 1);
-      group.children.unshift(rootChild);
-    }
-  }
+    return {
+      id: edge.id,
+      sources: [edge.source],
+      targets: [edge.target],
+    };
+  });
 
   const elkGraph = {
     id: 'root',
@@ -130,19 +139,8 @@ export const applyAutoLayout = async (
       'elk.partitioning.activate': 'true',
       ...(rootDeviceId ? { 'elk.layered.rootIds': rootDeviceId } : {}),
     },
-    children: orderedGroups.map((group) => ({
-      id: group.id,
-      children: group.children,
-      layoutOptions: {
-        'elk.padding': '[top=40,left=40,bottom=40,right=40]',
-        'elk.spacing.nodeNode': '60',
-      },
-    })),
-    edges: edges.map((edge) => ({
-      id: edge.id,
-      sources: [edge.source],
-      targets: [edge.target],
-    })),
+    children: elkNodes,
+    edges: elkEdges,
   };
 
   const layout = await elk.layout(elkGraph);
