@@ -28,6 +28,7 @@ import {
 } from '../../components/domain/guia-conexoes-v2/ConnectionDetailsPanel';
 import { AddConnectionDialog } from '../../components/domain/guia-conexoes-v2/AddConnectionDialog';
 import { EditDeviceLocationDialog } from '../../components/domain/guia-conexoes-v2/EditDeviceLocationDialog';
+import { NovoEquipamentoDialog } from '../../components/domain/guia-conexoes/NovoEquipamentoDialog';
 import {
   DeviceNode,
   type DeviceNodeData,
@@ -260,6 +261,7 @@ export function GuiaConexoesV2Page() {
   );
   const [layoutPending, setLayoutPending] = useState(false);
   const [addConnectionOpen, setAddConnectionOpen] = useState(false);
+  const [addDeviceOpen, setAddDeviceOpen] = useState(false);
   const [nodeShowAllPorts, setNodeShowAllPorts] = useState<Record<string, boolean>>({});
   const [sidebarDragPortId, setSidebarDragPortId] = useState<string | null>(null);
   const [hoveredHandleId, setHoveredHandleId] = useState<string | null>(null);
@@ -1199,6 +1201,8 @@ export function GuiaConexoesV2Page() {
           onPortMouseDown={handleSidebarPortMouseDown}
           onPortMouseUp={handleSidebarPortMouseUp}
           onEditLocation={(deviceId) => setLocationEditDeviceId(deviceId)}
+          onDeleteDevice={handleDeleteDevice}
+          onAddDevice={() => setAddDeviceOpen(true)}
         />
       </div>
       <AddConnectionDialog
@@ -1206,6 +1210,15 @@ export function GuiaConexoesV2Page() {
         projectId={selectedProjectId}
         onClose={() => setAddConnectionOpen(false)}
         onLinked={async () => {
+          await reload();
+          setLayoutPending(true);
+        }}
+      />
+      <NovoEquipamentoDialog
+        open={addDeviceOpen}
+        projectId={selectedProjectId}
+        onClose={() => setAddDeviceOpen(false)}
+        onCreated={async () => {
           await reload();
           setLayoutPending(true);
         }}
