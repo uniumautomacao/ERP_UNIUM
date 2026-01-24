@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.95';
+export const APP_VERSION = '0.1.96';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.96',
+    date: '2026-01-24',
+    changes: 'Layout ELK agora estima largura do header para espaçamento entre camadas.',
+  },
   {
     version: '0.1.95',
     date: '2026-01-24',

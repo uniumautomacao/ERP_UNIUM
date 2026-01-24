@@ -9,6 +9,53 @@ const PORT_ROW_HEIGHT = 44;
 const NODE_PADDING = 10;
 const MIN_HEIGHT = 80;
 
+const TITLE_FONT = '600 14px Segoe UI';
+const BADGE_FONT = '400 12px Segoe UI';
+const HEADER_PADDING_X = 10;
+const HEADER_GAP = 8;
+const ACTIONS_GAP = 4;
+const ACTION_BUTTON_SIZE = 28;
+const ACTION_BUTTON_COUNT = 3;
+const BADGE_PADDING_X = 8;
+
+const textWidthCache = new Map<string, number>();
+
+const measureTextWidthPx = (text: string, font: string) => {
+  if (!text) return 0;
+  const key = `${font}|${text}`;
+  const cached = textWidthCache.get(key);
+  if (cached !== undefined) return cached;
+  if (typeof document === 'undefined') {
+    const estimated = text.length * 7;
+    textWidthCache.set(key, estimated);
+    return estimated;
+  }
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    const fallback = text.length * 7;
+    textWidthCache.set(key, fallback);
+    return fallback;
+  }
+  ctx.font = font;
+  const width = ctx.measureText(text).width;
+  textWidthCache.set(key, width);
+  return width;
+};
+
+const estimateHeaderMinWidth = (title?: string | null, locationLabel?: string | null) => {
+  const titleText = title || 'Equipamento';
+  const locationText = locationLabel || 'Sem localização';
+  const titleWidth = measureTextWidthPx(titleText, TITLE_FONT);
+  const badgeTextWidth = measureTextWidthPx(locationText, BADGE_FONT);
+  const badgeWidth = badgeTextWidth + BADGE_PADDING_X * 2;
+  const actionsWidth =
+    badgeWidth +
+    ACTIONS_GAP * ACTION_BUTTON_COUNT +
+    ACTION_BUTTON_SIZE * ACTION_BUTTON_COUNT;
+  return HEADER_PADDING_X * 2 + titleWidth + HEADER_GAP + actionsWidth;
+};
+
 export const getDeviceNodeSize = (inputCount: number, outputCount: number) => {
   const rows = Math.max(1, Math.max(inputCount, outputCount));
   const height = HEADER_HEIGHT + NODE_PADDING * 2 + rows * PORT_ROW_HEIGHT + (rows - 1) * 6;
@@ -129,7 +176,12 @@ export const applyAutoLayout = async (
       (acc, port) => acc + (port.side === 'right' || port.directionCode === 'BI' ? 1 : 0),
       0
     );
-    const { width, height } = getDeviceNodeSize(inputCount, outputCount);
+    const { width: baseWidth, height } = getDeviceNodeSize(inputCount, outputCount);
+    const headerWidth = estimateHeaderMinWidth(
+      (node.data as { title?: string; locationLabel?: string | null })?.title,
+      (node.data as { title?: string; locationLabel?: string | null })?.locationLabel
+    );
+    const width = Math.max(baseWidth, headerWidth);
 
     const portOrder = new Map<string, number>();
     const elkPorts: ElkPort[] = [];
