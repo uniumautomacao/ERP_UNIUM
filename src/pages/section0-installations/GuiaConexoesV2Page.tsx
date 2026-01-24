@@ -204,16 +204,31 @@ const isConnectionCompatible = (a?: GuiaDeviceIOConnection | null, b?: GuiaDevic
     isDirectionCompatible(a.new_direcao, b.new_direcao);
 };
 
-const resolveEdgeEndpoints = (a: GuiaDeviceIOConnection, b: GuiaDeviceIOConnection) => {
+const resolveEdgeEndpoints = (
+  a: GuiaDeviceIOConnection,
+  b: GuiaDeviceIOConnection,
+  deviceDepths: Map<string, number>
+) => {
   const aFlags = getDirectionFlags(a.new_direcao);
   const bFlags = getDirectionFlags(b.new_direcao);
 
-  if (aFlags.allowOutput && bFlags.allowInput) {
-    return { source: a, target: b };
+  const canAtoB = aFlags.allowOutput && bFlags.allowInput;
+  const canBtoA = bFlags.allowOutput && aFlags.allowInput;
+
+  if (canAtoB && !canBtoA) return { source: a, target: b };
+  if (canBtoA && !canAtoB) return { source: b, target: a };
+
+  // Ambos os sentidos são possíveis (ex.: BI↔BI). Use a direção do nó raiz:
+  // menor depth = mais perto do root (esquerda), maior depth = mais longe (direita).
+  const aDeviceId = a._new_device_value ?? null;
+  const bDeviceId = b._new_device_value ?? null;
+  const aDepth = aDeviceId ? deviceDepths.get(aDeviceId) : undefined;
+  const bDepth = bDeviceId ? deviceDepths.get(bDeviceId) : undefined;
+  if (aDepth !== undefined && bDepth !== undefined && aDepth !== bDepth) {
+    return aDepth < bDepth ? { source: a, target: b } : { source: b, target: a };
   }
-  if (bFlags.allowOutput && aFlags.allowInput) {
-    return { source: b, target: a };
-  }
+
+  // Fallback determinístico.
   return { source: a, target: b };
 };
 
@@ -453,6 +468,7 @@ export function GuiaConexoesV2Page() {
         const device = deviceMap.get(deviceId);
         if (!device) continue;
         const existing = prevMap.get(deviceId);
+        const currentPosition = existing?.position;
         const connectionsForDevice = connectionsByDevice.get(deviceId) ?? [];
         const ports: DevicePortData[] = [];
         for (const connection of connectionsForDevice) {
@@ -482,7 +498,10 @@ export function GuiaConexoesV2Page() {
           if (connection._new_connectedto_value) {
             const targetConnection = connectionsById.get(connection._new_connectedto_value);
             const targetDeviceId = targetConnection?._new_device_value ?? null;
-            if (targetDeviceId && deviceDepths.has(targetDeviceId) && deviceDepths.has(deviceId)) {
+            const targetPosition = targetDeviceId ? prevMap.get(targetDeviceId)?.position : undefined;
+            if (currentPosition && targetPosition) {
+              side = targetPosition.x < currentPosition.x ? 'left' : 'right';
+            } else if (targetDeviceId && deviceDepths.has(targetDeviceId) && deviceDepths.has(deviceId)) {
               const currentDepth = deviceDepths.get(deviceId) ?? 0;
               const targetDepth = deviceDepths.get(targetDeviceId) ?? 0;
               side = targetDepth < currentDepth ? 'left' : 'right';
@@ -559,7 +578,7 @@ export function GuiaConexoesV2Page() {
         connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
           ? connectionTypeColorMap.get(connection.new_tipodeconexao) ?? '#7aa2ff'
           : '#7aa2ff';
-      const endpoints = resolveEdgeEndpoints(connection, target);
+      const endpoints = resolveEdgeEndpoints(connection, target, deviceDepths);
       const sourceDeviceId = endpoints.source._new_device_value;
       const targetDeviceId = endpoints.target._new_device_value;
       if (!sourceDeviceId || !targetDeviceId) continue;
@@ -579,7 +598,15 @@ export function GuiaConexoesV2Page() {
       });
     }
     setEdges(nextEdges);
-  }, [connections, connectionsById, connectedDeviceIds, connectionTypeLabelMap, connectionTypeColorMap, setEdges]);
+  }, [
+    connections,
+    connectionsById,
+    connectedDeviceIds,
+    connectionTypeLabelMap,
+    connectionTypeColorMap,
+    deviceDepths,
+    setEdges,
+  ]);
 
   useEffect(() => {
     if (flowInstance && layoutViewport) {

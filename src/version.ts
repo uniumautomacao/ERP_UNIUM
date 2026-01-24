@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.1.68';
+export const APP_VERSION = '0.1.70';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.70',
+    date: '2026-01-24',
+    changes: 'Orientação de arestas BI↔BI agora respeita depth do nó raiz (evita inversão).',
+  },
+  {
+    version: '0.1.69',
+    date: '2026-01-24',
+    changes: 'Lado das portas agora usa posição X do layout para evitar inversão.',
+  },
   {
     version: '0.1.68',
     date: '2026-01-24',
