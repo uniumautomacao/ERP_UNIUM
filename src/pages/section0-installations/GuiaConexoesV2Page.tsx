@@ -258,7 +258,7 @@ export function GuiaConexoesV2Page() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectLabel, setSelectedProjectLabel] = useState('');
   const [rootDeviceId, setRootDeviceId] = useState<string | null>(null);
-  const [selectedConnectionType, setSelectedConnectionType] = useState<string>('all');
+  const [selectedConnectionType, setSelectedConnectionType] = useState<string[]>(['all']);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [connectingHandleId, setConnectingHandleId] = useState<string | null>(null);
   const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(null);
@@ -296,26 +296,32 @@ export function GuiaConexoesV2Page() {
   );
   const connectionDirectionLabelMap = useMemo(() => buildDirectionMap(), []);
 
-  const selectedConnectionTypeValue = useMemo(() => {
-    if (selectedConnectionType === 'all') return null;
-    const parsed = Number(selectedConnectionType);
-    return Number.isNaN(parsed) ? null : parsed;
+  const selectedConnectionTypeValues = useMemo(() => {
+    if (selectedConnectionType.includes('all')) return null;
+    return selectedConnectionType.map((val) => Number(val)).filter((n) => !Number.isNaN(n));
   }, [selectedConnectionType]);
 
   const selectedConnectionTypeLabel = useMemo(() => {
-    if (selectedConnectionType === 'all') return 'Todas as conexões';
-    if (selectedConnectionTypeValue === null || selectedConnectionTypeValue === undefined) {
-      return 'Tipo de conexão';
+    if (selectedConnectionType.includes('all')) return 'Todas as conexões';
+    if (selectedConnectionType.length === 0) return 'Tipo de conexão';
+    if (selectedConnectionType.length === 1) {
+      const val = Number(selectedConnectionType[0]);
+      return connectionTypeLabelMap.get(val) ?? 'Tipo de conexão';
     }
-    return connectionTypeLabelMap.get(selectedConnectionTypeValue) ?? 'Tipo de conexão';
-  }, [connectionTypeLabelMap, selectedConnectionType, selectedConnectionTypeValue]);
+    return `${selectedConnectionType.length} tipos selecionados`;
+  }, [connectionTypeLabelMap, selectedConnectionType]);
 
   const filteredConnections = useMemo(() => {
-    if (selectedConnectionType === 'all') return connections;
+    if (selectedConnectionType.includes('all')) return connections;
+    if (selectedConnectionType.length === 0) return [];
+    const values = selectedConnectionTypeValues ?? [];
     return connections.filter(
-      (connection) => connection.new_tipodeconexao === selectedConnectionTypeValue
+      (connection) =>
+        connection.new_tipodeconexao !== null &&
+        connection.new_tipodeconexao !== undefined &&
+        values.includes(connection.new_tipodeconexao)
     );
-  }, [connections, selectedConnectionType, selectedConnectionTypeValue]);
+  }, [connections, selectedConnectionType, selectedConnectionTypeValues]);
 
   const deviceMap = useMemo(() => {
     const map = new Map<string, GuiaDeviceIO>();
@@ -1185,11 +1191,23 @@ export function GuiaConexoesV2Page() {
           </div>
           <div className={styles.headerField}>
             <Dropdown
+              multiselect
               placeholder="Tipo de conexão"
               value={selectedConnectionTypeLabel}
-              selectedOptions={[selectedConnectionType]}
+              selectedOptions={selectedConnectionType}
               onOptionSelect={(_, data) => {
-                setSelectedConnectionType((data.optionValue as string) || 'all');
+                const selected = data.selectedOptions;
+                if (selected.length === 0) {
+                  setSelectedConnectionType(['all']);
+                } else if (selected.includes('all') && selected.length > 1) {
+                  if (data.optionValue === 'all') {
+                    setSelectedConnectionType(['all']);
+                  } else {
+                    setSelectedConnectionType(selected.filter((v) => v !== 'all'));
+                  }
+                } else {
+                  setSelectedConnectionType(selected);
+                }
                 setLayoutPending(true);
               }}
               disabled={!selectedProjectId || connections.length === 0}
