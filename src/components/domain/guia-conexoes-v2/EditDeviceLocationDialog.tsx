@@ -9,6 +9,7 @@ import {
   DialogSurface,
   DialogTitle,
   Field,
+  Input,
   Option,
   Text,
   makeStyles,
@@ -49,12 +50,16 @@ export function EditDeviceLocationDialog({
 }: EditDeviceLocationDialogProps) {
   const styles = useStyles();
   const [locationValue, setLocationValue] = useState('');
+  const [newLocationValue, setNewLocationValue] = useState('');
+  const [useNewLocation, setUseNewLocation] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setLocationValue(currentLocation?.trim() || '');
+      setNewLocationValue('');
+      setUseNewLocation(false);
       setSaving(false);
       setError(null);
     }
@@ -69,7 +74,8 @@ export function EditDeviceLocationDialog({
     setSaving(true);
     setError(null);
     try {
-      await onSave(locationValue.trim());
+      const finalLocation = useNewLocation ? newLocationValue.trim() : locationValue.trim();
+      await onSave(finalLocation);
       onClose();
     } catch (err) {
       setError('Falha ao salvar localização.');
@@ -88,30 +94,60 @@ export function EditDeviceLocationDialog({
             <Text className={styles.helper}>
               {deviceName ? `Equipamento: ${deviceName}` : 'Atualize a localização do equipamento.'}
             </Text>
-            <Field label="Localização">
-              <Combobox
-                placeholder="Digite ou selecione uma localização"
-                value={locationValue}
-                onChange={(_, data) => setLocationValue(data.value)}
-                onOptionSelect={(_, data) => {
-                  if (data.optionText) {
-                    setLocationValue(data.optionText);
-                  }
-                }}
-                listbox={{
-                  style: { maxHeight: '240px', overflowY: 'auto' },
-                }}
-              >
-                {options.map((option) => (
-                  <Option key={option} value={option}>
-                    {option}
-                  </Option>
-                ))}
-              </Combobox>
-            </Field>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <Field label="Selecionar existente">
+                <Combobox
+                  placeholder="Selecione uma localização"
+                  value={locationValue}
+                  disabled={useNewLocation || saving}
+                  onChange={(_, data) => setLocationValue(data.value)}
+                  onOptionSelect={(_, data) => {
+                    if (data.optionText) {
+                      setLocationValue(data.optionText);
+                    }
+                  }}
+                  listbox={{
+                    style: { maxHeight: '200px', overflowY: 'auto' },
+                  }}
+                >
+                  {options.map((option) => (
+                    <Option key={option} value={option}>
+                      {option}
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ flex: 1, height: '1px', backgroundColor: tokens.colorNeutralStroke2 }} />
+                <Text size={100} className={styles.helper}>OU</Text>
+                <div style={{ flex: 1, height: '1px', backgroundColor: tokens.colorNeutralStroke2 }} />
+              </div>
+
+              <Field label="Digitar novo nome">
+                <Input
+                  placeholder="Ex: Sala de Reunião, CPD, etc."
+                  value={newLocationValue}
+                  disabled={saving}
+                  onChange={(_, data) => {
+                    setNewLocationValue(data.value);
+                    if (data.value.trim().length > 0) {
+                      setUseNewLocation(true);
+                    } else {
+                      setUseNewLocation(false);
+                    }
+                  }}
+                />
+              </Field>
+            </div>
           </DialogContent>
           <DialogActions>
-            <Button appearance="primary" onClick={handleSave} disabled={saving}>
+            <Button 
+              appearance="primary" 
+              onClick={handleSave} 
+              disabled={saving || (!useNewLocation && !locationValue.trim() && !!newLocationValue.trim())}
+            >
               Salvar
             </Button>
             <Button appearance="subtle" onClick={onClose} disabled={saving}>
