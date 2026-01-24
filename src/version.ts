@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.82';
+export const APP_VERSION = '0.1.83';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.83',
+    date: '2026-01-24',
+    changes: 'Lado das portas (esquerda/direita) agora é recalculado imediatamente após o layout.',
+  },
   {
     version: '0.1.82',
     date: '2026-01-24',

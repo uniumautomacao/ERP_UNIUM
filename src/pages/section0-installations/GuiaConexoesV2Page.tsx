@@ -599,7 +599,11 @@ export function GuiaConexoesV2Page() {
             const targetConnection = connectionsById.get(connection._new_connectedto_value);
             const targetDeviceId = targetConnection?._new_device_value ?? null;
             const targetPosition = targetDeviceId ? prevMap.get(targetDeviceId)?.position : undefined;
-            if (currentPosition && targetPosition) {
+            const hasRealPosition =
+              currentPosition &&
+              targetPosition &&
+              (currentPosition.x !== 0 || currentPosition.y !== 0 || targetPosition.x !== 0 || targetPosition.y !== 0);
+            if (hasRealPosition) {
               side = targetPosition.x < currentPosition.x ? 'left' : 'right';
             } else if (targetDeviceId && deviceDepths.has(targetDeviceId) && deviceDepths.has(deviceId)) {
               const currentDepth = deviceDepths.get(deviceId) ?? 0;
@@ -923,6 +927,23 @@ export function GuiaConexoesV2Page() {
     const runLayout = async () => {
       const next = await applyAutoLayout(nodes, edges, rootDeviceId, expandedNodes);
       if (isActive) {
+        const nextMap = new Map(next.map((n) => [n.id, n]));
+        next.forEach((node) => {
+          const nodeData = node.data as DeviceNodeData;
+          if (nodeData?.ports) {
+            nodeData.ports.forEach((port) => {
+              const connection = connectionsById.get(port.id);
+              if (connection?._new_connectedto_value) {
+                const targetConnection = connectionsById.get(connection._new_connectedto_value);
+                const targetDeviceId = targetConnection?._new_device_value;
+                const targetNode = targetDeviceId ? nextMap.get(targetDeviceId) : null;
+                if (targetNode) {
+                  port.side = targetNode.position.x < node.position.x ? 'left' : 'right';
+                }
+              }
+            });
+          }
+        });
         setNodes(next);
         setLayoutPending(false);
       }
@@ -931,7 +952,7 @@ export function GuiaConexoesV2Page() {
     return () => {
       isActive = false;
     };
-  }, [edges, expandedNodes, layoutPending, nodes, rootDeviceId, setNodes]);
+  }, [edges, expandedNodes, layoutPending, nodes, rootDeviceId, setNodes, connectionsById]);
 
   const linkPorts = useCallback(
     async (sourcePortId: string, targetPortId: string) => {
