@@ -752,6 +752,21 @@ public partial class new_DeviceIO : Microsoft.Xrm.Sdk.Entity, System.ComponentMo
 		}
 	}
 	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_raiz")]
+	public System.Nullable<bool> new_Raiz
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<bool>>("new_raiz");
+		}
+		set
+		{
+			this.OnPropertyChanging("new_Raiz");
+			this.SetAttributeValue("new_raiz", value);
+			this.OnPropertyChanged("new_Raiz");
+		}
+	}
+	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_requercabeamento")]
 	public System.Nullable<bool> new_RequerCabeamento
 	{
@@ -960,24 +975,6 @@ public partial class new_DeviceIO : Microsoft.Xrm.Sdk.Entity, System.ComponentMo
 	}
 	
 	/// <summary>
-	/// 1:N new_new_deviceioconnection_Device_new_devicei
-	/// </summary>
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_new_deviceioconnection_Device_new_devicei")]
-	public System.Collections.Generic.IEnumerable<new_DeviceIOConnection> new_new_deviceioconnection_Device_new_devicei
-	{
-		get
-		{
-			return this.GetRelatedEntities<new_DeviceIOConnection>("new_new_deviceioconnection_Device_new_devicei", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_new_deviceioconnection_Device_new_devicei");
-			this.SetRelatedEntities<new_DeviceIOConnection>("new_new_deviceioconnection_Device_new_devicei", null, value);
-			this.OnPropertyChanged("new_new_deviceioconnection_Device_new_devicei");
-		}
-	}
-	
-	/// <summary>
 	/// N:1 new_deviceio_CopiedFrom_new_deviceio
 	/// </summary>
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_copiedfrom")]
@@ -993,25 +990,6 @@ public partial class new_DeviceIO : Microsoft.Xrm.Sdk.Entity, System.ComponentMo
 			this.OnPropertyChanging("Referencingnew_deviceio_CopiedFrom_new_deviceio");
 			this.SetRelatedEntity<new_DeviceIO>("new_deviceio_CopiedFrom_new_deviceio", Microsoft.Xrm.Sdk.EntityRole.Referencing, value);
 			this.OnPropertyChanged("Referencingnew_deviceio_CopiedFrom_new_deviceio");
-		}
-	}
-	
-	/// <summary>
-	/// N:1 new_new_deviceio_ModelodeProduto_cr22f_modelo
-	/// </summary>
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_modelodeproduto")]
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_new_deviceio_ModelodeProduto_cr22f_modelo")]
-	public cr22f_ModelosdeProdutoFromSharepointList new_new_deviceio_ModelodeProduto_cr22f_modelo
-	{
-		get
-		{
-			return this.GetRelatedEntity<cr22f_ModelosdeProdutoFromSharepointList>("new_new_deviceio_ModelodeProduto_cr22f_modelo", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_new_deviceio_ModelodeProduto_cr22f_modelo");
-			this.SetRelatedEntity<cr22f_ModelosdeProdutoFromSharepointList>("new_new_deviceio_ModelodeProduto_cr22f_modelo", null, value);
-			this.OnPropertyChanged("new_new_deviceio_ModelodeProduto_cr22f_modelo");
 		}
 	}
 }

@@ -5,18 +5,60 @@
 
 export interface NewDeviceIOBase {
   new_deviceioid: string;
-  new_name?: string;
-  new_localizacao?: string | null;
+  new_aprovacaopendente?: boolean;
+  new_cabeado?: boolean;
+  new_cabeadobase?: boolean;
+  new_cabeamentoaprovado?: boolean;
+  new_cabeamentoaprovadobase?: boolean;
+  new_cabeamentoreprovado?: boolean;
+  new_configuracaoaprovada?: boolean;
+  new_configuracaoaprovadabase?: boolean;
+  new_configuracaoreprovada?: boolean;
+  new_configurado?: boolean;
+  new_configuradobase?: boolean;
+  new_dataehoradaconfiguracao?: string;
+  new_dataehoradainstalacao?: string;
+  new_dataehoradeaprovacaodaconfiguracao?: string;
+  new_dataehoradeaprovacaodainstalacao?: string;
+  new_dataehoradeaprovacaodocabeamento?: string;
+  new_dataehoradocabeamento?: string;
   new_externalid?: string;
+  new_instalacaoaprovada?: boolean;
+  new_instalacaoaprovadabase?: boolean;
+  new_instalacaoreprovada?: boolean;
+  new_instalado?: boolean;
+  new_instaladobase?: boolean;
+  new_localizacao?: string;
+  new_name?: string;
+  new_numerodeaprovacoespendentes?: number;
+  new_numeroderegistrosdecabeamento?: number;
+  new_numeroderegistrosdecabeamento_date?: string;
+  new_numeroderegistrosdecabeamento_state?: number;
+  new_numeroderegistrosdeconfiguracao?: number;
+  new_numeroderegistrosdeconfiguracao_date?: string;
+  new_numeroderegistrosdeconfiguracao_state?: number;
+  new_numeroderegistrosdeinstalacao?: number;
+  new_numeroderegistrosdeinstalacao_date?: string;
+  new_numeroderegistrosdeinstalacao_state?: number;
+  new_observacaodeaprovacao?: string;
+  new_pontosdecabeamentoporfuncionario?: number;
+  new_pontosdeconfiguracaoporfuncionario?: number;
+  new_pontosdeinstalacaoporfuncionario?: number;
+  new_raiz?: boolean;
+  new_requercabeamento?: boolean;
+  new_serainstalado?: boolean;
+  new_serainstaladobase?: boolean;
+  "new_CopiedFrom@odata.bind"?: string;
   "new_ModelodeProduto@odata.bind"?: string;
-  "new_Projeto@odata.bind"?: string;
   "new_Produto@odata.bind"?: string;
-  new_serainstaladobase?: boolean | null;
+  "new_Projeto@odata.bind"?: string;
   statecode?: number;
   statuscode?: number;
 }
 
 export interface NewDeviceIO extends NewDeviceIOBase {
+  _new_copiedfrom_value?: string;
   _new_modelodeproduto_value?: string;
+  _new_produto_value?: string;
   _new_projeto_value?: string;
 }
