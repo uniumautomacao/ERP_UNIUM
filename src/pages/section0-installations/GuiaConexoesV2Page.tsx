@@ -27,6 +27,7 @@ import {
   type ConnectionDetails,
 } from '../../components/domain/guia-conexoes-v2/ConnectionDetailsPanel';
 import { AddConnectionDialog } from '../../components/domain/guia-conexoes-v2/AddConnectionDialog';
+import { EditDeviceLocationDialog } from '../../components/domain/guia-conexoes-v2/EditDeviceLocationDialog';
 import {
   DeviceNode,
   type DeviceNodeData,
@@ -43,6 +44,7 @@ import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { clearDeviceIOConnectionLink, deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
 import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/device-io/optionSetMaps';
+import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
 import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
 import { DisconnectedDevicesSidebar } from '../../components/domain/guia-conexoes-v2/DisconnectedDevicesSidebar.tsx';
 
@@ -265,11 +267,12 @@ export function GuiaConexoesV2Page() {
     start: { x: number; y: number };
     end: { x: number; y: number };
   } | null>(null);
+  const [locationEditDeviceId, setLocationEditDeviceId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [removingLink, setRemovingLink] = useState(false);
   const [linking, setLinking] = useState(false);
 
-  const { devices, connections, loading, error, reload } = useGuiaConexoesData(
+  const { devices, connections, modelos, loading, error, reload } = useGuiaConexoesData(
     selectedProjectId,
     '',
     ''
@@ -311,6 +314,14 @@ export function GuiaConexoesV2Page() {
     }
     return map;
   }, [connections]);
+
+  const modelosMap = useMemo(() => {
+    const map = new Map<string, { new_tipodesistemapadrao?: number | null }>();
+    modelos.forEach((modelo) => {
+      map.set(modelo.cr22f_modelosdeprodutofromsharepointlistid, modelo);
+    });
+    return map;
+  }, [modelos]);
 
   const connectedDeviceIds = useMemo(() => {
     const ids = new Set<string>();
@@ -377,6 +388,8 @@ export function GuiaConexoesV2Page() {
       id: string;
       name: string;
       location?: string | null;
+      systemTypeValue?: string | null;
+      systemTypeLabel?: string | null;
       ports: { id: string; label: string; directionCode: 'IN' | 'OUT' | 'BI'; typeLabel: string }[];
     }[] = [];
     for (const device of devices) {
@@ -405,15 +418,38 @@ export function GuiaConexoesV2Page() {
           };
         });
       if (ports.length === 0) continue;
+      const modelId = device._new_modelodeproduto_value;
+      const systemTypeValue =
+        modelId && modelosMap.get(modelId)?.new_tipodesistemapadrao !== undefined
+          ? String(modelosMap.get(modelId)?.new_tipodesistemapadrao ?? '')
+          : null;
+      const systemTypeLabel =
+        modelId && modelosMap.get(modelId)?.new_tipodesistemapadrao !== undefined
+          ? SISTEMA_TIPO_LABELS.get(modelosMap.get(modelId)?.new_tipodesistemapadrao ?? 0) ||
+            `Tipo ${modelosMap.get(modelId)?.new_tipodesistemapadrao}`
+          : 'Sem tipo de sistema';
       list.push({
         id: deviceId,
         name: device.new_name || 'Equipamento',
         location: device.new_localizacao,
+        systemTypeValue: systemTypeValue || 'Sem tipo de sistema',
+        systemTypeLabel,
         ports,
       });
     }
     return list;
-  }, [connectionsByDevice, connectionTypeLabelMap, devices]);
+  }, [connectionsByDevice, connectionTypeLabelMap, devices, modelosMap]);
+
+  const locationOptions = useMemo(() => {
+    const set = new Set<string>();
+    devices.forEach((device) => {
+      const raw = device.new_localizacao?.trim();
+      if (raw) {
+        set.add(raw);
+      }
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [devices]);
 
   const connectedDeviceKey = useMemo(() => {
     let key = '';
@@ -564,6 +600,7 @@ export function GuiaConexoesV2Page() {
               setLayoutPending(true);
             },
             onDelete: () => handleDeleteDevice(deviceId, device.new_name),
+            onEditLocation: (id) => setLocationEditDeviceId(id),
           },
         });
       }
@@ -757,6 +794,23 @@ export function GuiaConexoesV2Page() {
       }
     },
     [reload, rootDeviceId, selectedProjectId]
+  );
+
+  const handleSaveLocation = useCallback(
+    async (deviceId: string, nextLocation: string) => {
+      if (!deviceId) return;
+      setActionError(null);
+      const payload = {
+        new_localizacao: nextLocation ? nextLocation : undefined,
+      };
+      const result = await NewDeviceIOService.update(deviceId, payload);
+      if (!result.success) {
+        throw new Error(resolveErrorMessage(result.error, 'Falha ao salvar localização.'));
+      }
+      await reload();
+      setLayoutPending(true);
+    },
+    [reload]
   );
 
   const handleSaveLayout = useCallback(() => {
@@ -1144,6 +1198,7 @@ export function GuiaConexoesV2Page() {
           isConnecting={!!connectingHandleId}
           onPortMouseDown={handleSidebarPortMouseDown}
           onPortMouseUp={handleSidebarPortMouseUp}
+          onEditLocation={(deviceId) => setLocationEditDeviceId(deviceId)}
         />
       </div>
       <AddConnectionDialog
@@ -1154,6 +1209,20 @@ export function GuiaConexoesV2Page() {
           await reload();
           setLayoutPending(true);
         }}
+      />
+      <EditDeviceLocationDialog
+        open={!!locationEditDeviceId}
+        deviceName={locationEditDeviceId ? deviceMap.get(locationEditDeviceId)?.new_name : undefined}
+        currentLocation={
+          locationEditDeviceId ? deviceMap.get(locationEditDeviceId)?.new_localizacao : undefined
+        }
+        locationOptions={locationOptions}
+        onClose={() => setLocationEditDeviceId(null)}
+        onSave={(nextLocation) =>
+          locationEditDeviceId
+            ? handleSaveLocation(locationEditDeviceId, nextLocation)
+            : Promise.resolve()
+        }
       />
     </div>
   );

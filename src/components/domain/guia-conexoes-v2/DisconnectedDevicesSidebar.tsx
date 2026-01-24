@@ -1,5 +1,16 @@
-import { useMemo } from 'react';
-import { Badge, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { useMemo, useState } from 'react';
+import {
+  Accordion,
+  AccordionHeader,
+  AccordionItem,
+  AccordionPanel,
+  Badge,
+  Button,
+  Text,
+  makeStyles,
+  tokens,
+} from '@fluentui/react-components';
+import { Edit24Regular } from '@fluentui/react-icons';
 
 export type SidebarPort = {
   id: string;
@@ -12,6 +23,8 @@ export type SidebarDevice = {
   id: string;
   name: string;
   location?: string | null;
+  systemTypeValue?: string | null;
+  systemTypeLabel?: string | null;
   ports: SidebarPort[];
 };
 
@@ -20,6 +33,7 @@ interface DisconnectedDevicesSidebarProps {
   isConnecting: boolean;
   onPortMouseDown?: (portId: string) => void;
   onPortMouseUp: (portId: string) => void;
+  onEditLocation?: (deviceId: string) => void;
 }
 
 const useStyles = makeStyles({
@@ -36,6 +50,18 @@ const useStyles = makeStyles({
   },
   title: {
     fontWeight: 600,
+  },
+  accordionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '8px',
+    width: '100%',
+  },
+  headerMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
   },
   deviceCard: {
     border: `1px solid ${tokens.colorNeutralStroke2}`,
@@ -100,61 +126,146 @@ export function DisconnectedDevicesSidebar({
   isConnecting,
   onPortMouseDown,
   onPortMouseUp,
+  onEditLocation,
 }: DisconnectedDevicesSidebarProps) {
   const styles = useStyles();
+  const [openLocations, setOpenLocations] = useState<string[]>([]);
+  const [openTypes, setOpenTypes] = useState<Record<string, string[]>>({});
   const hintText = useMemo(() => {
     if (devices.length === 0) return 'Nenhum equipamento sem conexão.';
     if (isConnecting) return 'Solte a conexão em uma porta livre.';
     return 'Arraste uma conexão do blueprint até uma porta livre.';
   }, [devices.length, isConnecting]);
 
+  const grouped = useMemo(() => {
+    const locationMap = new Map<
+      string,
+      { label: string; types: Map<string, { label: string; devices: SidebarDevice[] }> }
+    >();
+    devices.forEach((device) => {
+      const rawLocation = device.location?.trim();
+      const locationKey = rawLocation && rawLocation.length > 0 ? rawLocation : 'Sem localização';
+      const locationLabel = locationKey;
+      const typeKey = device.systemTypeValue || 'Sem tipo de sistema';
+      const typeLabel = device.systemTypeLabel || 'Sem tipo de sistema';
+      if (!locationMap.has(locationKey)) {
+        locationMap.set(locationKey, { label: locationLabel, types: new Map() });
+      }
+      const typeMap = locationMap.get(locationKey)?.types;
+      if (!typeMap) return;
+      if (!typeMap.has(typeKey)) {
+        typeMap.set(typeKey, { label: typeLabel, devices: [] });
+      }
+      typeMap.get(typeKey)?.devices.push(device);
+    });
+
+    return Array.from(locationMap.entries()).map(([key, value]) => ({
+      key,
+      label: value.label,
+      types: Array.from(value.types.entries()).map(([typeKey, typeValue]) => ({
+        key: typeKey,
+        label: typeValue.label,
+        devices: typeValue.devices,
+      })),
+    }));
+  }, [devices]);
+
   return (
     <aside className={styles.sidebar}>
       <Text className={styles.title}>Equipamentos sem conexão</Text>
       <Text className={styles.hint}>{hintText}</Text>
-      {devices.map((device) => (
-        <div key={device.id} className={styles.deviceCard}>
-          <div className={styles.deviceHeader}>
-            <Text weight="semibold">{device.name}</Text>
-            {device.location && (
-              <Badge size="small" appearance="outline">
-                {device.location}
-              </Badge>
-            )}
-          </div>
-          <div className={styles.ports}>
-            {device.ports.map((port) => (
-              <div
-                key={port.id}
-                className={styles.portRow}
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  onPortMouseDown?.(port.id);
-                }}
-                onMouseUp={() => onPortMouseUp(port.id)}
-                data-sidebar-port-id={port.id}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                  <span className={styles.portDot} />
-                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                    <Text className={styles.portLabel}>
-                      {port.directionCode === 'BI'
-                        ? port.label
-                        : `${port.label} ${port.directionCode}`}
-                    </Text>
-                    {port.directionCode === 'BI' && (
-                      <Text className={styles.portMeta}>{port.typeLabel}</Text>
-                    )}
-                  </div>
+      <Accordion
+        multiple
+        openItems={openLocations}
+        onToggle={(_, data) => setOpenLocations(data.openItems as string[])}
+        collapsible
+      >
+        {grouped.map((locationGroup) => (
+          <AccordionItem key={locationGroup.key} value={locationGroup.key}>
+            <AccordionHeader>
+              <div className={styles.accordionHeader}>
+                <Text weight="semibold">{locationGroup.label}</Text>
+                <div className={styles.headerMeta}>
+                  <Badge size="small" appearance="outline">
+                    {locationGroup.types.reduce((acc, group) => acc + group.devices.length, 0)}
+                  </Badge>
                 </div>
-                <Badge size="small" appearance="outline" className={styles.portBadge}>
-                  {port.directionCode}
-                </Badge>
               </div>
-            ))}
-          </div>
-        </div>
-      ))}
+            </AccordionHeader>
+            <AccordionPanel>
+              <Accordion
+                multiple
+                openItems={openTypes[locationGroup.key] ?? []}
+                onToggle={(_, data) =>
+                  setOpenTypes((prev) => ({ ...prev, [locationGroup.key]: data.openItems as string[] }))
+                }
+                collapsible
+              >
+                {locationGroup.types.map((typeGroup) => (
+                  <AccordionItem key={typeGroup.key} value={typeGroup.key}>
+                    <AccordionHeader>
+                      <div className={styles.accordionHeader}>
+                        <Text weight="semibold">{typeGroup.label}</Text>
+                        <div className={styles.headerMeta}>
+                          <Badge size="small" appearance="outline">
+                            {typeGroup.devices.length}
+                          </Badge>
+                        </div>
+                      </div>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      {typeGroup.devices.map((device) => (
+                        <div key={device.id} className={styles.deviceCard}>
+                          <div className={styles.deviceHeader}>
+                            <Text weight="semibold">{device.name}</Text>
+                            <Button
+                              appearance="subtle"
+                              size="small"
+                              icon={<Edit24Regular />}
+                              onClick={() => onEditLocation?.(device.id)}
+                            />
+                          </div>
+                          <div className={styles.ports}>
+                            {device.ports.map((port) => (
+                              <div
+                                key={port.id}
+                                className={styles.portRow}
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  onPortMouseDown?.(port.id);
+                                }}
+                                onMouseUp={() => onPortMouseUp(port.id)}
+                                data-sidebar-port-id={port.id}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                                  <span className={styles.portDot} />
+                                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                    <Text className={styles.portLabel}>
+                                      {port.directionCode === 'BI'
+                                        ? port.label
+                                        : `${port.label} ${port.directionCode}`}
+                                    </Text>
+                                    {port.directionCode === 'BI' && (
+                                      <Text className={styles.portMeta}>{port.typeLabel}</Text>
+                                    )}
+                                  </div>
+                                </div>
+                                <Badge size="small" appearance="outline" className={styles.portBadge}>
+                                  {port.directionCode}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </AccordionPanel>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </aside>
   );
 }

@@ -1,7 +1,7 @@
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
 import { Badge, Button, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Delete24Regular, Eye24Regular, EyeOff24Regular } from '@fluentui/react-icons';
+import { Delete24Regular, Edit24Regular, Eye24Regular, EyeOff24Regular } from '@fluentui/react-icons';
 
 export type DevicePortState = 'free' | 'connected' | 'manual' | 'incompatible';
 
@@ -27,6 +27,7 @@ export type DeviceNodeData = {
   showAllPorts?: boolean;
   onToggleShowAll?: () => void;
   onDelete?: () => void;
+  onEditLocation?: (deviceId: string) => void;
 };
 
 const useStyles = makeStyles({
@@ -160,7 +161,7 @@ const getPortStateClass = (state: DevicePortState, styles: ReturnType<typeof use
 
 const buildHandleId = (portId: string, suffix: 'in' | 'out') => `${portId}:${suffix}`;
 
-export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
+export function DeviceNode({ data, id }: NodeProps<DeviceNodeData>) {
   const styles = useStyles();
 
   return (
@@ -175,6 +176,12 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
           <Badge appearance="outline" size="small" className={styles.locationBadge}>
             {data.locationLabel || 'Sem localização'}
           </Badge>
+          <Button
+            appearance="subtle"
+            size="small"
+            icon={<Edit24Regular />}
+            onClick={() => data.onEditLocation?.(id)}
+          />
           <Button
             appearance="subtle"
             size="small"
