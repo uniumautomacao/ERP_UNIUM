@@ -44,7 +44,7 @@ import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { clearDeviceIOConnectionLink } from '../../utils/guia-conexoes/deleteDevice';
 import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/device-io/optionSetMaps';
 import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
-import { DisconnectedDevicesSidebar } from '../../components/domain/guia-conexoes-v2/DisconnectedDevicesSidebar';
+import { DisconnectedDevicesSidebar } from '../../components/domain/guia-conexoes-v2/DisconnectedDevicesSidebar.tsx';
 
 const useStyles = makeStyles({
   page: {
@@ -373,7 +373,12 @@ export function GuiaConexoesV2Page() {
   }, [connectedDeviceIds]);
 
   const disconnectedDevices = useMemo(() => {
-    const list: { id: string; name: string; location?: string | null; ports: { id: string; label: string; directionCode: 'IN' | 'OUT' | 'BI'; typeLabel: string }[] }[] = [];
+    const list: {
+      id: string;
+      name: string;
+      location?: string | null;
+      ports: { id: string; label: string; directionCode: 'IN' | 'OUT' | 'BI'; typeLabel: string }[];
+    }[] = [];
     for (const device of devices) {
       const deviceId = device.new_deviceioid;
       const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
@@ -391,7 +396,7 @@ export function GuiaConexoesV2Page() {
             connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
               ? connectionTypeLabelMap.get(connection.new_tipodeconexao) ?? 'Tipo'
               : connection.new_tipodeconexaorawtext || 'Tipo';
-          const directionCode = getDirectionCode(connection.new_direcao);
+          const directionCode = getDirectionCode(connection.new_direcao) as 'IN' | 'OUT' | 'BI';
           return {
             id: connection.new_deviceioconnectionid,
             label: getConnectionLabel(connection),
@@ -431,6 +436,20 @@ export function GuiaConexoesV2Page() {
     }
     return options;
   }, [connectedDeviceIdList, deviceMap]);
+
+  const expandedNodes = useMemo(() => {
+    const list: { id: string; spacing: number }[] = [];
+    Object.entries(nodeShowAllPorts).forEach(([deviceId, isExpanded]) => {
+      if (!isExpanded) return;
+      const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
+      const visibleCount = deviceConnections.length;
+      if (visibleCount <= 0) return;
+      const rawBoost = visibleCount * 32;
+      const spacing = Math.max(0, rawBoost);
+      list.push({ id: deviceId, spacing });
+    });
+    return list;
+  }, [connectionsByDevice, nodeShowAllPorts]);
 
   const activeConnectionId = useMemo(
     () => resolveConnectionIdFromHandle(connectingHandleId),
@@ -522,6 +541,10 @@ export function GuiaConexoesV2Page() {
             allowOutput: flags.allowOutput,
           });
         }
+        const showAllPorts = nodeShowAllPorts[deviceId] ?? false;
+        const visiblePorts = showAllPorts
+          ? ports
+          : ports.filter((port) => port.state === 'connected');
         const position = existing?.position || ({ x: 0, y: 0 } as { x: number; y: number });
         nextNodes.push({
           id: deviceId,
@@ -531,13 +554,15 @@ export function GuiaConexoesV2Page() {
           data: {
             title: device.new_name || 'Equipamento',
             locationLabel: device.new_localizacao || 'Sem localização',
-            ports,
-            showAllPorts: nodeShowAllPorts[deviceId] ?? false,
-            onToggleShowAll: () =>
+            ports: visiblePorts,
+            showAllPorts,
+            onToggleShowAll: () => {
               setNodeShowAllPorts((prev) => ({
                 ...prev,
                 [deviceId]: !(prev[deviceId] ?? false),
-              })),
+              }));
+              setLayoutPending(true);
+            },
           },
         });
       }
@@ -749,7 +774,7 @@ export function GuiaConexoesV2Page() {
     }
     let isActive = true;
     const runLayout = async () => {
-      const next = await applyAutoLayout(nodes, edges, rootDeviceId);
+      const next = await applyAutoLayout(nodes, edges, rootDeviceId, expandedNodes);
       if (isActive) {
         setNodes(next);
         setLayoutPending(false);
@@ -759,7 +784,7 @@ export function GuiaConexoesV2Page() {
     return () => {
       isActive = false;
     };
-  }, [edges, layoutPending, nodes, rootDeviceId, setNodes]);
+  }, [edges, expandedNodes, layoutPending, nodes, rootDeviceId, setNodes]);
 
   const linkPorts = useCallback(
     async (sourcePortId: string, targetPortId: string) => {
@@ -847,7 +872,10 @@ export function GuiaConexoesV2Page() {
   );
 
   const isValidConnection = useCallback(
-    (connection: Connection) => {
+    (connection: Connection | Edge) => {
+      if (!('sourceHandle' in connection) || !('targetHandle' in connection)) {
+        return false;
+      }
       if (!connection.sourceHandle || !connection.targetHandle) return false;
       const sourceId = resolveConnectionIdFromHandle(connection.sourceHandle);
       const targetId = resolveConnectionIdFromHandle(connection.targetHandle);

@@ -157,11 +157,6 @@ const buildHandleId = (portId: string, suffix: 'in' | 'out') => `${portId}:${suf
 export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
   const styles = useStyles();
 
-  const showAllPorts = data.showAllPorts ?? false;
-  const visiblePorts = showAllPorts
-    ? data.ports
-    : data.ports.filter((port) => port.state === 'connected');
-
   return (
     <div className={styles.node}>
       <div className={`${styles.header} device-node__header`}>
@@ -177,13 +172,13 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
           <Button
             appearance="subtle"
             size="small"
-            icon={showAllPorts ? <Eye24Regular /> : <EyeOff24Regular />}
+            icon={data.showAllPorts ? <Eye24Regular /> : <EyeOff24Regular />}
             onClick={data.onToggleShowAll}
           />
         </div>
       </div>
       <div className={styles.portList}>
-        {visiblePorts.map((port) => (
+        {data.ports.map((port) => (
           <div
             key={port.id}
             className={`${styles.portCard} ${getPortStateClass(port.state, styles)}`}
@@ -232,7 +227,7 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
             </div>
           </div>
         ))}
-        {visiblePorts.length === 0 && (
+        {data.ports.length === 0 && (
           <Text size={200} className={styles.portMeta}>
             Nenhuma conexão disponível.
           </Text>

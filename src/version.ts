@@ -1,6 +1,26 @@
-export const APP_VERSION = '0.1.71';
+export const APP_VERSION = '0.1.75';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.75',
+    date: '2026-01-24',
+    changes: 'Espaçamento do layout agora escala com quantidade de portas expandidas.',
+  },
+  {
+    version: '0.1.74',
+    date: '2026-01-24',
+    changes: 'Ajuste fino de layout expandido e correções de tipagem.',
+  },
+  {
+    version: '0.1.73',
+    date: '2026-01-24',
+    changes: 'Aumenta espaçamento do layout quando portas expandidas para evitar sobreposição.',
+  },
+  {
+    version: '0.1.72',
+    date: '2026-01-24',
+    changes: 'Recalcula layout ao expandir portas e ajusta altura dos nós.',
+  },
   {
     version: '0.1.71',
     date: '2026-01-24',
