@@ -1,6 +1,26 @@
-export const APP_VERSION = '0.1.83';
+export const APP_VERSION = '0.1.90';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.90',
+    date: '2026-01-24',
+    changes: 'Ignora inconsistências bidirecionais em conexões do tipo BUS.',
+  },
+  {
+    version: '0.1.89',
+    date: '2026-01-24',
+    changes: 'Corrigida ordem de inicialização de filtros e mapas no guia de conexões.',
+  },
+  {
+    version: '0.1.88',
+    date: '2026-01-24',
+    changes: 'Substituída autocorreção silenciosa por diálogo de gestão de inconsistências para o usuário.',
+  },
+  {
+    version: '0.1.87',
+    date: '2026-01-24',
+    changes: 'Detecção de portas conectadas agora considera vínculos bidirecionais.',
+  },
   {
     version: '0.1.83',
     date: '2026-01-24',

@@ -35,6 +35,10 @@ import {
   type DeviceNodeData,
   type DevicePortData,
 } from '../../components/domain/guia-conexoes-v2/nodes/DeviceNode';
+import {
+  InconsistencyManagerDialog,
+  type Inconsistency,
+} from '../../components/domain/guia-conexoes-v2/InconsistencyManagerDialog';
 import { applyAutoLayout } from '../../components/domain/guia-conexoes-v2/layout/elkLayout';
 import {
   buildUndirectedDeviceEdges,
@@ -284,6 +288,10 @@ export function GuiaConexoesV2Page() {
   const [removingLink, setRemovingLink] = useState(false);
   const [linking, setLinking] = useState(false);
 
+  const [inconsistencies, setInconsistencies] = useState<Inconsistency[]>([]);
+  const [inconsistencyDialogOpen, setInconsistencyDialogOpen] = useState(false);
+  const [ignoredInconsistencies, setIgnoredInconsistencies] = useState<Set<string>>(new Set());
+
   const { devices, connections, modelos, loading, error, reload } = useGuiaConexoesData(
     selectedProjectId,
     '',
@@ -331,6 +339,42 @@ export function GuiaConexoesV2Page() {
     return map;
   }, [devices]);
 
+  useEffect(() => {
+    if (loading || connections.length === 0) return;
+
+    const found: Inconsistency[] = [];
+    const connectionMap = new Map(connections.map((c) => [c.new_deviceioconnectionid, c]));
+
+    connections.forEach((conn) => {
+      const targetId = conn._new_connectedto_value;
+      if (!targetId) return;
+
+      if (conn.new_direcao === DIRECTION.Bus) return;
+      const targetConn = connectionMap.get(targetId);
+      if (targetConn?.new_direcao === DIRECTION.Bus) return;
+      if (!targetConn || targetConn._new_connectedto_value !== conn.new_deviceioconnectionid) {
+        if (ignoredInconsistencies.has(targetId)) return;
+
+        const sourceDevice = deviceMap.get(conn._new_device_value ?? '');
+        const targetDevice = deviceMap.get(targetConn?._new_device_value ?? '');
+
+        found.push({
+          id: targetId,
+          name: targetConn ? getConnectionLabel(targetConn) : 'Porta Desconhecida',
+          targetId: conn.new_deviceioconnectionid,
+          targetName: getConnectionLabel(conn),
+          deviceName: targetDevice?.new_name ?? 'Equipamento Desconhecido',
+          targetDeviceName: sourceDevice?.new_name ?? 'Equipamento Desconhecido',
+        });
+      }
+    });
+
+    if (found.length > 0) {
+      setInconsistencies(found);
+      setInconsistencyDialogOpen(true);
+    }
+  }, [connections, loading, ignoredInconsistencies, deviceMap]);
+
   const connectionsByDevice = useMemo(() => {
     const map = new Map<string, GuiaDeviceIOConnection[]>();
     for (const connection of filteredConnections) {
@@ -352,6 +396,20 @@ export function GuiaConexoesV2Page() {
       map.set(connection.new_deviceioconnectionid, connection);
     }
     return map;
+  }, [filteredConnections]);
+
+  const linkedConnectionInfo = useMemo(() => {
+    const linkedToByConnectionId = new Map<string, string>();
+    const linkedConnectionIds = new Set<string>();
+    filteredConnections.forEach((connection) => {
+      if (!connection._new_connectedto_value) return;
+      const otherId = connection._new_connectedto_value;
+      linkedToByConnectionId.set(connection.new_deviceioconnectionid, otherId);
+      linkedToByConnectionId.set(otherId, connection.new_deviceioconnectionid);
+      linkedConnectionIds.add(connection.new_deviceioconnectionid);
+      linkedConnectionIds.add(otherId);
+    });
+    return { linkedToByConnectionId, linkedConnectionIds };
   }, [filteredConnections]);
 
   const modelosMap = useMemo(() => {
@@ -435,13 +493,16 @@ export function GuiaConexoesV2Page() {
       const deviceId = device.new_deviceioid;
       const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
       const hasAnyLink = deviceConnections.some(
-        (connection) => !!connection._new_connectedto_value || !!connection.new_connectedtomanual
+        (connection) =>
+          linkedConnectionInfo.linkedConnectionIds.has(connection.new_deviceioconnectionid) ||
+          !!connection.new_connectedtomanual
       );
       if (hasAnyLink) continue;
       const ports = deviceConnections
         .filter(
           (connection) =>
-            !connection._new_connectedto_value && !connection.new_connectedtomanual
+            !linkedConnectionInfo.linkedConnectionIds.has(connection.new_deviceioconnectionid) &&
+            !connection.new_connectedtomanual
         )
         .map((connection) => {
           const typeLabel =
@@ -477,7 +538,7 @@ export function GuiaConexoesV2Page() {
       });
     }
     return list;
-  }, [connectionsByDevice, connectionTypeLabelMap, devices, modelosMap]);
+  }, [connectionsByDevice, connectionTypeLabelMap, devices, modelosMap, linkedConnectionInfo]);
 
   const locationOptions = useMemo(() => {
     const set = new Set<string>();
@@ -580,7 +641,9 @@ export function GuiaConexoesV2Page() {
             connection.new_direcao !== null && connection.new_direcao !== undefined
               ? connectionDirectionLabelMap.get(connection.new_direcao) ?? 'Direção'
               : connection.new_direcaorawtext || 'Direção';
-          const isConnected = !!connection._new_connectedto_value;
+          const connectionId = connection.new_deviceioconnectionid;
+          const partnerId = linkedConnectionInfo.linkedToByConnectionId.get(connectionId);
+          const isConnected = linkedConnectionInfo.linkedConnectionIds.has(connectionId);
           const isManual = !!connection.new_connectedtomanual;
           const connectable = !isConnected && !isManual;
           let state: DevicePortData['state'] = isManual ? 'manual' : isConnected ? 'connected' : 'free';
@@ -595,8 +658,9 @@ export function GuiaConexoesV2Page() {
           const highlight =
             !!activeConnection && connectable && isConnectionCompatible(activeConnection, connection);
           let side: DevicePortData['side'] = 'right';
-          if (connection._new_connectedto_value) {
-            const targetConnection = connectionsById.get(connection._new_connectedto_value);
+          const linkedTargetId = partnerId ?? connection._new_connectedto_value;
+          if (linkedTargetId) {
+            const targetConnection = connectionsById.get(linkedTargetId);
             const targetDeviceId = targetConnection?._new_device_value ?? null;
             const targetPosition = targetDeviceId ? prevMap.get(targetDeviceId)?.position : undefined;
             const hasRealPosition =
@@ -664,6 +728,7 @@ export function GuiaConexoesV2Page() {
     activeConnection,
     connectionsById,
     deviceDepths,
+    linkedConnectionInfo,
     nodeShowAllPorts,
     setNodes,
   ]);
@@ -672,7 +737,8 @@ export function GuiaConexoesV2Page() {
     const nextEdges: Edge[] = [];
     const dedupe = new Set<string>();
     for (const connection of filteredConnections) {
-      const connectedId = connection._new_connectedto_value;
+      const partnerId = linkedConnectionInfo.linkedToByConnectionId.get(connection.new_deviceioconnectionid);
+      const connectedId = partnerId ?? connection._new_connectedto_value;
       if (!connectedId) continue;
       const target = connectionsById.get(connectedId);
       if (!target) continue;
@@ -718,6 +784,7 @@ export function GuiaConexoesV2Page() {
     connectionTypeColorMap,
     deviceDepths,
     setEdges,
+    linkedConnectionInfo,
   ]);
 
   useEffect(() => {
@@ -933,8 +1000,10 @@ export function GuiaConexoesV2Page() {
           if (nodeData?.ports) {
             nodeData.ports.forEach((port) => {
               const connection = connectionsById.get(port.id);
-              if (connection?._new_connectedto_value) {
-                const targetConnection = connectionsById.get(connection._new_connectedto_value);
+              const partnerId = linkedConnectionInfo.linkedToByConnectionId.get(port.id);
+              const targetId = partnerId ?? connection?._new_connectedto_value ?? null;
+              if (targetId) {
+                const targetConnection = connectionsById.get(targetId);
                 const targetDeviceId = targetConnection?._new_device_value;
                 const targetNode = targetDeviceId ? nextMap.get(targetDeviceId) : null;
                 if (targetNode) {
@@ -952,7 +1021,16 @@ export function GuiaConexoesV2Page() {
     return () => {
       isActive = false;
     };
-  }, [edges, expandedNodes, layoutPending, nodes, rootDeviceId, setNodes, connectionsById]);
+  }, [
+    edges,
+    expandedNodes,
+    layoutPending,
+    nodes,
+    rootDeviceId,
+    setNodes,
+    connectionsById,
+    linkedConnectionInfo,
+  ]);
 
   const linkPorts = useCallback(
     async (sourcePortId: string, targetPortId: string) => {
@@ -961,9 +1039,11 @@ export function GuiaConexoesV2Page() {
       const targetConnection = connectionsById.get(targetPortId);
       if (!sourceConnection || !targetConnection) return;
       const sourceConnected =
-        !!sourceConnection._new_connectedto_value || !!sourceConnection.new_connectedtomanual;
+        linkedConnectionInfo.linkedConnectionIds.has(sourcePortId) ||
+        !!sourceConnection.new_connectedtomanual;
       const targetConnected =
-        !!targetConnection._new_connectedto_value || !!targetConnection.new_connectedtomanual;
+        linkedConnectionInfo.linkedConnectionIds.has(targetPortId) ||
+        !!targetConnection.new_connectedtomanual;
       if (sourceConnected || targetConnected) {
         setActionError('Uma das portas já está conectada.');
         return;
@@ -1005,7 +1085,7 @@ export function GuiaConexoesV2Page() {
         setLinking(false);
       }
     },
-    [connectionsById, reload]
+    [connectionsById, linkedConnectionInfo, reload]
   );
 
   const handleConnect = useCallback(
@@ -1070,12 +1150,16 @@ export function GuiaConexoesV2Page() {
       const sourceConnection = connectionsById.get(sourceId);
       const targetConnection = connectionsById.get(targetId);
       if (!sourceConnection || !targetConnection) return false;
-      const sourceConnected = !!sourceConnection._new_connectedto_value || !!sourceConnection.new_connectedtomanual;
-      const targetConnected = !!targetConnection._new_connectedto_value || !!targetConnection.new_connectedtomanual;
+      const sourceConnected =
+        linkedConnectionInfo.linkedConnectionIds.has(sourceId) ||
+        !!sourceConnection.new_connectedtomanual;
+      const targetConnected =
+        linkedConnectionInfo.linkedConnectionIds.has(targetId) ||
+        !!targetConnection.new_connectedtomanual;
       if (sourceConnected || targetConnected) return false;
       return isConnectionCompatible(sourceConnection, targetConnection);
     },
-    [connectionsById]
+    [connectionsById, linkedConnectionInfo]
   );
 
   const handleSidebarPortMouseUp = useCallback(
@@ -1390,6 +1474,18 @@ export function GuiaConexoesV2Page() {
             ? handleSaveLocation(locationEditDeviceId, nextLocation)
             : Promise.resolve()
         }
+      />
+      <InconsistencyManagerDialog
+        open={inconsistencyDialogOpen}
+        inconsistencies={inconsistencies}
+        onClose={() => {
+          setInconsistencyDialogOpen(false);
+          setIgnoredInconsistencies(new Set([...ignoredInconsistencies, ...inconsistencies.map(i => i.id)]));
+        }}
+        onFixed={async () => {
+          setInconsistencyDialogOpen(false);
+          await reload();
+        }}
       />
     </div>
   );
