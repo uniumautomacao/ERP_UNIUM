@@ -146,6 +146,56 @@ const CONNECTION_COLORS = [
   '#93c5fd',
 ];
 
+const CONNECTION_CATEGORIES = [
+  {
+    id: 'audio',
+    label: 'Áudio',
+    types: ['Speaker', 'Toslink', 'Audio Analogico', 'Trigger 12V'],
+  },
+  {
+    id: 'video',
+    label: 'Vídeo',
+    types: ['HDMI'],
+  },
+  {
+    id: 'rede',
+    label: 'Rede',
+    types: ['Ethernet'],
+  },
+  {
+    id: 'automacao',
+    label: 'Automação',
+    types: [
+      'RNET',
+      'ACNET',
+      'PNET',
+      'IR',
+      'Serial',
+      'Luz ON/OFF',
+      'Luz Triac Dimmer',
+      'Luz PWM Dimmer',
+      'Motor',
+      'GPIO',
+      'RF',
+    ],
+  },
+  {
+    id: 'aspiracao',
+    label: 'Aspiração Central',
+    types: ['Aspiracao'],
+  },
+  {
+    id: 'controle_acesso',
+    label: 'Controle de Acesso',
+    types: ['Controle de Acesso'],
+  },
+  {
+    id: 'forca',
+    label: 'Força',
+    types: ['Power 110V', 'Power 220V'],
+  },
+];
+
 const resolveConnectionIdFromHandle = (handleId?: string | null) => {
   if (!handleId) return null;
   const split = handleId.split(':');
@@ -303,21 +353,46 @@ export function GuiaConexoesV2Page() {
     []
   );
   const connectionDirectionLabelMap = useMemo(() => buildDirectionMap(), []);
+  const connectionTypeValueByLabel = useMemo(() => {
+    const map = new Map<string, number>();
+    connectionTypeOptions.forEach((option) => {
+      map.set(option.label, option.value);
+    });
+    return map;
+  }, []);
+  const connectionCategoryLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    CONNECTION_CATEGORIES.forEach((category) => {
+      map.set(category.id, category.label);
+    });
+    return map;
+  }, []);
 
   const selectedConnectionTypeValues = useMemo(() => {
     if (selectedConnectionType.includes('all')) return null;
-    return selectedConnectionType.map((val) => Number(val)).filter((n) => !Number.isNaN(n));
-  }, [selectedConnectionType]);
+    const values: number[] = [];
+    selectedConnectionType.forEach((categoryId) => {
+      const category = CONNECTION_CATEGORIES.find((item) => item.id === categoryId);
+      if (!category) return;
+      category.types.forEach((typeLabel) => {
+        const value = connectionTypeValueByLabel.get(typeLabel);
+        if (value !== undefined) {
+          values.push(value);
+        }
+      });
+    });
+    return values;
+  }, [selectedConnectionType, connectionTypeValueByLabel]);
 
   const selectedConnectionTypeLabel = useMemo(() => {
-    if (selectedConnectionType.includes('all')) return 'Todas as conexões';
-    if (selectedConnectionType.length === 0) return 'Tipo de conexão';
+    if (selectedConnectionType.includes('all')) return 'Todas as categorias';
+    if (selectedConnectionType.length === 0) return 'Categoria';
     if (selectedConnectionType.length === 1) {
-      const val = Number(selectedConnectionType[0]);
-      return connectionTypeLabelMap.get(val) ?? 'Tipo de conexão';
+      const label = connectionCategoryLabelMap.get(selectedConnectionType[0]);
+      return label ?? 'Categoria';
     }
-    return `${selectedConnectionType.length} tipos selecionados`;
-  }, [connectionTypeLabelMap, selectedConnectionType]);
+    return `${selectedConnectionType.length} categorias selecionadas`;
+  }, [connectionCategoryLabelMap, selectedConnectionType]);
 
   const filteredConnections = useMemo(() => {
     if (selectedConnectionType.includes('all')) return connections;
@@ -1309,7 +1384,7 @@ export function GuiaConexoesV2Page() {
           <div className={styles.headerField}>
             <Dropdown
               multiselect
-              placeholder="Tipo de conexão"
+              placeholder="Categoria"
               value={selectedConnectionTypeLabel}
               selectedOptions={selectedConnectionType}
               onOptionSelect={(_, data) => {
@@ -1329,10 +1404,10 @@ export function GuiaConexoesV2Page() {
               }}
               disabled={!selectedProjectId || connections.length === 0}
             >
-              <Option value="all">Todas as conexões</Option>
-              {connectionTypeOptions.map((option) => (
-                <Option key={option.value} value={`${option.value}`}>
-                  {option.label}
+              <Option value="all">Todas as categorias</Option>
+              {CONNECTION_CATEGORIES.map((category) => (
+                <Option key={category.id} value={category.id}>
+                  {category.label}
                 </Option>
               ))}
             </Dropdown>

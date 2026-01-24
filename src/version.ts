@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.91';
+export const APP_VERSION = '0.1.92';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.92',
+    date: '2026-01-24',
+    changes: 'Filtro de conexões agora usa categorias em vez de tipos individuais.',
+  },
   {
     version: '0.1.91',
     date: '2026-01-24',
