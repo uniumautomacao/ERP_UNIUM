@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.80';
+export const APP_VERSION = '0.1.81';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.81',
+    date: '2026-01-24',
+    changes: 'Comando de raiz automática calcula o melhor nó e persiste no Dataverse.',
+  },
   {
     version: '0.1.80',
     date: '2026-01-24',

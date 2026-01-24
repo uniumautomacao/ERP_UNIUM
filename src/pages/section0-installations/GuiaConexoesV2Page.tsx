@@ -10,6 +10,7 @@ import {
 } from '@fluentui/react-components';
 import {
   Add24Regular,
+  ArrowClockwise24Regular,
   Save24Regular,
 } from '@fluentui/react-icons';
 import {
@@ -35,6 +36,10 @@ import {
   type DevicePortData,
 } from '../../components/domain/guia-conexoes-v2/nodes/DeviceNode';
 import { applyAutoLayout } from '../../components/domain/guia-conexoes-v2/layout/elkLayout';
+import {
+  buildUndirectedDeviceEdges,
+  pickBestRootByExhaustiveLayout,
+} from '../../components/domain/guia-conexoes-v2/layout/autoRoot';
 import {
   loadLayout,
   saveLayout,
@@ -261,6 +266,10 @@ export function GuiaConexoesV2Page() {
     null
   );
   const [layoutPending, setLayoutPending] = useState(false);
+  const [autoRootPending, setAutoRootPending] = useState(false);
+  const [autoRootProgress, setAutoRootProgress] = useState<{ current: number; total: number } | null>(
+    null
+  );
   const [addConnectionOpen, setAddConnectionOpen] = useState(false);
   const [addDeviceOpen, setAddDeviceOpen] = useState(false);
   const [nodeShowAllPorts, setNodeShowAllPorts] = useState<Record<string, boolean>>({});
@@ -826,6 +835,53 @@ export function GuiaConexoesV2Page() {
     [reload, rootDeviceId, selectedProjectId]
   );
 
+  const handleAutoRoot = useCallback(async () => {
+    if (!selectedProjectId) return;
+    if (connectedDeviceIdList.length === 0) return;
+    setActionError(null);
+    setAutoRootPending(true);
+    setAutoRootProgress({ current: 0, total: connectedDeviceIdList.length });
+    try {
+      const undirectedEdges = buildUndirectedDeviceEdges(
+        filteredConnections,
+        connectionsById,
+        connectedDeviceIds
+      );
+      const { bestRootId } = await pickBestRootByExhaustiveLayout({
+        candidates: connectedDeviceIdList,
+        nodes,
+        edges,
+        expandedNodes,
+        undirectedEdges,
+        applyAutoLayout,
+        onProgress: (current, total) => setAutoRootProgress({ current, total }),
+        yieldFn: () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+          }),
+      });
+      if (!bestRootId) {
+        throw new Error('Não foi possível determinar o nó raiz.');
+      }
+      await updateRootDevice(bestRootId);
+    } catch (err) {
+      setActionError(resolveErrorMessage(err, 'Falha ao calcular raiz automática.'));
+    } finally {
+      setAutoRootPending(false);
+      setAutoRootProgress(null);
+    }
+  }, [
+    selectedProjectId,
+    connectedDeviceIdList,
+    filteredConnections,
+    connectionsById,
+    connectedDeviceIds,
+    nodes,
+    edges,
+    expandedNodes,
+    updateRootDevice,
+  ]);
+
   const handleSaveLocation = useCallback(
     async (deviceId: string, nextLocation: string) => {
       if (!deviceId) return;
@@ -1171,6 +1227,11 @@ export function GuiaConexoesV2Page() {
               Carregando...
             </Text>
           )}
+          {autoRootPending && autoRootProgress && (
+            <Text size={200} className={styles.statusText}>
+              Calculando raiz automática... {autoRootProgress.current}/{autoRootProgress.total}
+            </Text>
+          )}
           {error && <Text className={styles.errorText}>{error}</Text>}
           <Button
             icon={<Add24Regular />}
@@ -1180,10 +1241,17 @@ export function GuiaConexoesV2Page() {
             Adicionar Conexão
           </Button>
           <Button
+            icon={<ArrowClockwise24Regular />}
+            onClick={handleAutoRoot}
+            disabled={!selectedProjectId || connectedDeviceIdList.length === 0 || autoRootPending}
+          >
+            Raiz automática
+          </Button>
+          <Button
             appearance="primary"
             icon={<Save24Regular />}
             onClick={handleSaveLayout}
-            disabled={!selectedProjectId}
+            disabled={!selectedProjectId || autoRootPending}
           >
             Salvar
           </Button>
