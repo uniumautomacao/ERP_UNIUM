@@ -205,6 +205,20 @@ const resolveConnectionIdFromHandle = (handleId?: string | null) => {
 const getConnectionLabel = (connection: GuiaDeviceIOConnection) =>
   connection.new_name || connection.new_displayname || connection.new_tipodeconexaorawtext || 'Porta';
 
+const findPreferredNetworkRootId = (
+  deviceIds: string[],
+  deviceMap: Map<string, GuiaDeviceIO>
+) => {
+  const findByToken = (token: string) =>
+    deviceIds.find((id) => {
+      const device = deviceMap.get(id);
+      const name = device?.new_name || '';
+      return name.toLowerCase().includes(token);
+    });
+
+  return findByToken('modem') || findByToken('tl-er605') || null;
+};
+
 const buildDirectionMap = () => {
   const map = new Map<number, string>();
   for (const option of connectionDirectionOptions) {
@@ -394,6 +408,11 @@ export function GuiaConexoesV2Page() {
     return `${selectedConnectionType.length} categorias selecionadas`;
   }, [connectionCategoryLabelMap, selectedConnectionType]);
 
+  const isNetworkCategorySelected = useMemo(
+    () => selectedConnectionType.includes('rede'),
+    [selectedConnectionType]
+  );
+
   const filteredConnections = useMemo(() => {
     if (selectedConnectionType.includes('all')) return connections;
     if (selectedConnectionType.length === 0) return [];
@@ -554,6 +573,11 @@ export function GuiaConexoesV2Page() {
     }
     return list;
   }, [connectedDeviceIds]);
+
+  const preferredNetworkRootId = useMemo(() => {
+    if (!isNetworkCategorySelected) return null;
+    return findPreferredNetworkRootId(connectedDeviceIdList, deviceMap);
+  }, [connectedDeviceIdList, deviceMap, isNetworkCategorySelected]);
 
   const autoRootCandidates = useMemo(() => {
     const candidates: string[] = [];
@@ -912,6 +936,12 @@ export function GuiaConexoesV2Page() {
       setRootDeviceId(null);
       return;
     }
+    if (isNetworkCategorySelected && preferredNetworkRootId) {
+      if (rootDeviceId !== preferredNetworkRootId) {
+        setRootDeviceId(preferredNetworkRootId);
+      }
+      return;
+    }
     const rootDevice = devices.find((device) => device.new_raiz);
     if (rootDevice?.new_deviceioid && autoRootCandidateSet.has(rootDevice.new_deviceioid)) {
       if (rootDeviceId !== rootDevice.new_deviceioid) {
@@ -933,6 +963,8 @@ export function GuiaConexoesV2Page() {
     connectedDeviceIdList,
     connectedDeviceIds,
     devices,
+    isNetworkCategorySelected,
+    preferredNetworkRootId,
     rootDeviceId,
   ]);
 
@@ -1029,6 +1061,18 @@ export function GuiaConexoesV2Page() {
     if (connectedDeviceIdList.length === 0) return;
     setActionError(null);
     setAutoRootPending(true);
+    if (isNetworkCategorySelected && preferredNetworkRootId) {
+      setAutoRootProgress({ current: 1, total: 1 });
+      try {
+        await updateRootDevice(preferredNetworkRootId);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao calcular raiz automática.'));
+      } finally {
+        setAutoRootPending(false);
+        setAutoRootProgress(null);
+      }
+      return;
+    }
     setAutoRootProgress({ current: 0, total: autoRootCandidates.length });
     if (autoRootCandidates.length === 0) {
       setActionError('Nenhum nó com conexões de saída disponível para raiz automática.');
@@ -1070,6 +1114,8 @@ export function GuiaConexoesV2Page() {
     connectedDeviceIdList,
     connectionsByDevice,
     autoRootCandidates,
+    isNetworkCategorySelected,
+    preferredNetworkRootId,
     filteredConnections,
     connectionsById,
     connectedDeviceIds,
