@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.78';
+export const APP_VERSION = '0.1.79';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.79',
+    date: '2026-01-24',
+    changes: 'Espaçamento vertical do blueprint agora escala com conexões ativas.',
+  },
   {
     version: '0.1.78',
     date: '2026-01-24',

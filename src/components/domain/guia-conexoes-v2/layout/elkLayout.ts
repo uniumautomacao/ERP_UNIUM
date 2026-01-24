@@ -103,7 +103,7 @@ export const applyAutoLayout = async (
   nodes: Node[],
   edges: Edge[],
   rootDeviceId?: string | null,
-  expandedNodes?: { id: string; spacing: number }[]
+  expandedNodes?: { id: string; spacing?: number; spacingX?: number; spacingY?: number }[]
 ): Promise<Node[]> => {
   if (nodes.length === 0) return nodes;
 
@@ -377,15 +377,17 @@ export const applyAutoLayout = async (
     expandedNodes.forEach((expanded) => {
       const expandedPosition = positions.get(expanded.id);
       if (!expandedPosition) return;
+      const spacingX = expanded.spacingX ?? expanded.spacing ?? 0;
+      const spacingY = expanded.spacingY ?? expanded.spacing ?? 0;
       positions.forEach((position, nodeId) => {
         if (nodeId === expanded.id) return;
         let nextX = position.x;
         let nextY = position.y;
         if (position.x > expandedPosition.x) {
-          nextX += expanded.spacing;
+          nextX += spacingX;
         }
         if (position.y > expandedPosition.y) {
-          nextY += expanded.spacing;
+          nextY += spacingY;
         }
         if (nextX !== position.x || nextY !== position.y) {
           positions.set(nodeId, { x: nextX, y: nextY });
