@@ -1,6 +1,21 @@
-export const APP_VERSION = '0.1.92';
+export const APP_VERSION = '0.1.95';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.95',
+    date: '2026-01-24',
+    changes: 'Raiz automática agora considera apenas conexões ativas na direção.',
+  },
+  {
+    version: '0.1.94',
+    date: '2026-01-24',
+    changes: 'Seleção automática da raiz evita devices com apenas entradas.',
+  },
+  {
+    version: '0.1.93',
+    date: '2026-01-24',
+    changes: 'Raiz automática agora ignora nós com conexões apenas de entrada.',
+  },
   {
     version: '0.1.92',
     date: '2026-01-24',

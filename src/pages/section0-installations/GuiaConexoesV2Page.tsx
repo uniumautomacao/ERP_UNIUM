@@ -555,6 +555,32 @@ export function GuiaConexoesV2Page() {
     return list;
   }, [connectedDeviceIds]);
 
+  const autoRootCandidates = useMemo(() => {
+    const candidates: string[] = [];
+    connectedDeviceIdList.forEach((deviceId) => {
+      const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
+      if (deviceConnections.length === 0) return;
+      const activeConnections = deviceConnections.filter(
+        (connection) =>
+          linkedConnectionInfo.linkedConnectionIds.has(connection.new_deviceioconnectionid) ||
+          !!connection.new_connectedtomanual
+      );
+      if (activeConnections.length === 0) return;
+      const hasOutput = activeConnections.some(
+        (connection) => connection.new_direcao !== DIRECTION.Input
+      );
+      if (hasOutput) {
+        candidates.push(deviceId);
+      }
+    });
+    return candidates;
+  }, [connectedDeviceIdList, connectionsByDevice, linkedConnectionInfo]);
+
+  const autoRootCandidateSet = useMemo(
+    () => new Set(autoRootCandidates),
+    [autoRootCandidates]
+  );
+
   const disconnectedDevices = useMemo(() => {
     const list: {
       id: string;
@@ -887,17 +913,28 @@ export function GuiaConexoesV2Page() {
       return;
     }
     const rootDevice = devices.find((device) => device.new_raiz);
-    if (rootDevice?.new_deviceioid) {
+    if (rootDevice?.new_deviceioid && autoRootCandidateSet.has(rootDevice.new_deviceioid)) {
       if (rootDeviceId !== rootDevice.new_deviceioid) {
         setRootDeviceId(rootDevice.new_deviceioid);
       }
       return;
     }
-    if (rootDeviceId && connectedDeviceIds.has(rootDeviceId)) {
+    if (
+      rootDeviceId &&
+      connectedDeviceIds.has(rootDeviceId) &&
+      autoRootCandidateSet.has(rootDeviceId)
+    ) {
       return;
     }
-    setRootDeviceId(connectedDeviceIdList[0]);
-  }, [connectedDeviceIdList, connectedDeviceIds, devices, rootDeviceId]);
+    setRootDeviceId(autoRootCandidates[0] ?? null);
+  }, [
+    autoRootCandidates,
+    autoRootCandidateSet,
+    connectedDeviceIdList,
+    connectedDeviceIds,
+    devices,
+    rootDeviceId,
+  ]);
 
   useEffect(() => {
     if (connectedDeviceIdList.length === 0) {
@@ -992,7 +1029,13 @@ export function GuiaConexoesV2Page() {
     if (connectedDeviceIdList.length === 0) return;
     setActionError(null);
     setAutoRootPending(true);
-    setAutoRootProgress({ current: 0, total: connectedDeviceIdList.length });
+    setAutoRootProgress({ current: 0, total: autoRootCandidates.length });
+    if (autoRootCandidates.length === 0) {
+      setActionError('Nenhum nó com conexões de saída disponível para raiz automática.');
+      setAutoRootPending(false);
+      setAutoRootProgress(null);
+      return;
+    }
     try {
       const undirectedEdges = buildUndirectedDeviceEdges(
         filteredConnections,
@@ -1000,7 +1043,7 @@ export function GuiaConexoesV2Page() {
         connectedDeviceIds
       );
       const { bestRootId } = await pickBestRootByExhaustiveLayout({
-        candidates: connectedDeviceIdList,
+        candidates: autoRootCandidates,
         nodes,
         edges,
         expandedNodes,
@@ -1025,6 +1068,8 @@ export function GuiaConexoesV2Page() {
   }, [
     selectedProjectId,
     connectedDeviceIdList,
+    connectionsByDevice,
+    autoRootCandidates,
     filteredConnections,
     connectionsById,
     connectedDeviceIds,
