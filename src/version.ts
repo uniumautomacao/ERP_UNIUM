@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.77';
+export const APP_VERSION = '0.1.78';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.78',
+    date: '2026-01-24',
+    changes: 'Filtro de tipo de conexão no blueprint com ocultação de devices sem correspondência.',
+  },
   {
     version: '0.1.77',
     date: '2026-01-24',

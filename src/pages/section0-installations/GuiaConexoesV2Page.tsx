@@ -253,6 +253,7 @@ export function GuiaConexoesV2Page() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectLabel, setSelectedProjectLabel] = useState('');
   const [rootDeviceId, setRootDeviceId] = useState<string | null>(null);
+  const [selectedConnectionType, setSelectedConnectionType] = useState<string>('all');
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [connectingHandleId, setConnectingHandleId] = useState<string | null>(null);
   const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(null);
@@ -286,6 +287,27 @@ export function GuiaConexoesV2Page() {
   );
   const connectionDirectionLabelMap = useMemo(() => buildDirectionMap(), []);
 
+  const selectedConnectionTypeValue = useMemo(() => {
+    if (selectedConnectionType === 'all') return null;
+    const parsed = Number(selectedConnectionType);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [selectedConnectionType]);
+
+  const selectedConnectionTypeLabel = useMemo(() => {
+    if (selectedConnectionType === 'all') return 'Todas as conexões';
+    if (selectedConnectionTypeValue === null || selectedConnectionTypeValue === undefined) {
+      return 'Tipo de conexão';
+    }
+    return connectionTypeLabelMap.get(selectedConnectionTypeValue) ?? 'Tipo de conexão';
+  }, [connectionTypeLabelMap, selectedConnectionType, selectedConnectionTypeValue]);
+
+  const filteredConnections = useMemo(() => {
+    if (selectedConnectionType === 'all') return connections;
+    return connections.filter(
+      (connection) => connection.new_tipodeconexao === selectedConnectionTypeValue
+    );
+  }, [connections, selectedConnectionType, selectedConnectionTypeValue]);
+
   const deviceMap = useMemo(() => {
     const map = new Map<string, GuiaDeviceIO>();
     for (const device of devices) {
@@ -296,7 +318,7 @@ export function GuiaConexoesV2Page() {
 
   const connectionsByDevice = useMemo(() => {
     const map = new Map<string, GuiaDeviceIOConnection[]>();
-    for (const connection of connections) {
+    for (const connection of filteredConnections) {
       const deviceId = connection._new_device_value;
       if (!deviceId) continue;
       const list = map.get(deviceId);
@@ -307,15 +329,15 @@ export function GuiaConexoesV2Page() {
       }
     }
     return map;
-  }, [connections]);
+  }, [filteredConnections]);
 
   const connectionsById = useMemo(() => {
     const map = new Map<string, GuiaDeviceIOConnection>();
-    for (const connection of connections) {
+    for (const connection of filteredConnections) {
       map.set(connection.new_deviceioconnectionid, connection);
     }
     return map;
-  }, [connections]);
+  }, [filteredConnections]);
 
   const modelosMap = useMemo(() => {
     const map = new Map<string, { new_tipodesistemapadrao?: number | null }>();
@@ -327,7 +349,7 @@ export function GuiaConexoesV2Page() {
 
   const connectedDeviceIds = useMemo(() => {
     const ids = new Set<string>();
-    for (const connection of connections) {
+    for (const connection of filteredConnections) {
       if (!connection._new_connectedto_value || !connection._new_device_value) {
         continue;
       }
@@ -338,13 +360,13 @@ export function GuiaConexoesV2Page() {
       }
     }
     return ids;
-  }, [connections, connectionsById]);
+  }, [filteredConnections, connectionsById]);
 
   const deviceDepths = useMemo(() => {
     if (!rootDeviceId) return new Map<string, number>();
     const adjacency = new Map<string, Set<string>>();
     connectedDeviceIds.forEach((id) => adjacency.set(id, new Set()));
-    connections.forEach((connection) => {
+    filteredConnections.forEach((connection) => {
       if (!connection._new_connectedto_value || !connection._new_device_value) return;
       const target = connectionsById.get(connection._new_connectedto_value);
       if (!target?._new_device_value) return;
@@ -375,7 +397,7 @@ export function GuiaConexoesV2Page() {
       });
     }
     return depths;
-  }, [connections, connectionsById, connectedDeviceIds, rootDeviceId]);
+  }, [filteredConnections, connectionsById, connectedDeviceIds, rootDeviceId]);
 
   const connectedDeviceIdList = useMemo(() => {
     const list: string[] = [];
@@ -624,7 +646,7 @@ export function GuiaConexoesV2Page() {
   useEffect(() => {
     const nextEdges: Edge[] = [];
     const dedupe = new Set<string>();
-    for (const connection of connections) {
+    for (const connection of filteredConnections) {
       const connectedId = connection._new_connectedto_value;
       if (!connectedId) continue;
       const target = connectionsById.get(connectedId);
@@ -664,7 +686,7 @@ export function GuiaConexoesV2Page() {
     }
     setEdges(nextEdges);
   }, [
-    connections,
+    filteredConnections,
     connectionsById,
     connectedDeviceIds,
     connectionTypeLabelMap,
@@ -1098,6 +1120,25 @@ export function GuiaConexoesV2Page() {
               onSearch={searchProjects}
               showAllOnFocus={true}
             />
+          </div>
+          <div className={styles.headerField}>
+            <Dropdown
+              placeholder="Tipo de conexão"
+              value={selectedConnectionTypeLabel}
+              selectedOptions={[selectedConnectionType]}
+              onOptionSelect={(_, data) => {
+                setSelectedConnectionType((data.optionValue as string) || 'all');
+                setLayoutPending(true);
+              }}
+              disabled={!selectedProjectId || connections.length === 0}
+            >
+              <Option value="all">Todas as conexões</Option>
+              {connectionTypeOptions.map((option) => (
+                <Option key={option.value} value={`${option.value}`}>
+                  {option.label}
+                </Option>
+              ))}
+            </Dropdown>
           </div>
           <div className={styles.headerField}>
             <Dropdown
