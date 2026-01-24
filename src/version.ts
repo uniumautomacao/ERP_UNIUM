@@ -1,6 +1,27 @@
-export const APP_VERSION = '0.1.54';
+export const APP_VERSION = '0.1.58';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.58',
+    date: '2026-01-24',
+    changes: 'Ajustado z-index de nós/arestas no React Flow para garantir arestas visíveis.',
+  },
+  {
+    version: '0.1.57',
+    date: '2026-01-24',
+    changes: 'Arestas do React Flow elevadas acima dos nós para melhor visualização.',
+  },
+  {
+    version: '0.1.56',
+    date: '2026-01-24',
+    changes: 'Ajustado espaçamento e tamanho de nós no layout ELK para evitar sobreposição.',
+  },
+  {
+    version: '0.1.55',
+    date: '2026-01-24',
+    changes:
+      'Reformulado Guia de Conexões v2: layout automático com nó raiz, sem drag e inclusão baseada em conexões.',
+  },
   {
     version: '0.1.54',
     date: '2026-01-24',

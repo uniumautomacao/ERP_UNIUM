@@ -3,7 +3,7 @@ import type { Edge, Node } from 'reactflow';
 
 const elk = new ELK();
 
-const NODE_WIDTH = 280;
+const NODE_WIDTH = 500;
 const HEADER_HEIGHT = 52;
 const PORT_ROW_HEIGHT = 28;
 const PORTS_PER_ROW = 2;
@@ -47,11 +47,13 @@ const collectPositions = (
 
 export const applyAutoLayout = async (
   nodes: Node[],
-  edges: Edge[]
+  edges: Edge[],
+  rootDeviceId?: string | null
 ): Promise<Node[]> => {
   if (nodes.length === 0) return nodes;
 
   const groups = new Map<string, { id: string; label: string; children: ElkNode[] }>();
+  const groupByNodeId = new Map<string, string>();
 
   for (const node of nodes) {
     const locationLabel =
@@ -74,22 +76,66 @@ export const applyAutoLayout = async (
       width,
       height,
     });
+    groupByNodeId.set(node.id, groupId);
+  }
+
+  const orderedGroups = Array.from(groups.values());
+  if (rootDeviceId) {
+    const rootGroupId = groupByNodeId.get(rootDeviceId);
+    if (rootGroupId) {
+      let rootGroupIndex = -1;
+      for (let i = 0; i < orderedGroups.length; i += 1) {
+        if (orderedGroups[i].id === rootGroupId) {
+          rootGroupIndex = i;
+          break;
+        }
+      }
+      if (rootGroupIndex > 0) {
+        const rootGroup = orderedGroups[rootGroupIndex];
+        orderedGroups.splice(rootGroupIndex, 1);
+        orderedGroups.unshift(rootGroup);
+      }
+    }
+  }
+
+  for (const group of orderedGroups) {
+    if (!rootDeviceId) continue;
+    let rootIndex = -1;
+    for (let i = 0; i < group.children.length; i += 1) {
+      if (group.children[i].id === rootDeviceId) {
+        rootIndex = i;
+        break;
+      }
+    }
+    if (rootIndex > 0) {
+      const rootChild = group.children[rootIndex];
+      group.children.splice(rootIndex, 1);
+      group.children.unshift(rootChild);
+    }
   }
 
   const elkGraph = {
     id: 'root',
     layoutOptions: {
+      'elk.algorithm': 'layered',
       'elk.direction': 'RIGHT',
-      'elk.layered.spacing.nodeNodeBetweenLayers': '190',
-      'elk.spacing.nodeNode': '40',
-      'elk.spacing.componentComponent': '60',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '260',
+      'elk.spacing.nodeNode': '80',
+      'elk.spacing.componentComponent': '120',
+      'elk.spacing.edgeNode': '40',
+      'elk.layered.spacing.edgeNodeBetweenLayers': '40',
+      'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
+      'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+      'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+      'elk.partitioning.activate': 'true',
+      ...(rootDeviceId ? { 'elk.layered.rootIds': rootDeviceId } : {}),
     },
-    children: Array.from(groups.values()).map((group) => ({
+    children: orderedGroups.map((group) => ({
       id: group.id,
       children: group.children,
       layoutOptions: {
-        'elk.padding': '[top=30,left=30,bottom=30,right=30]',
-        'elk.spacing.nodeNode': '40',
+        'elk.padding': '[top=40,left=40,bottom=40,right=40]',
+        'elk.spacing.nodeNode': '60',
       },
     })),
     edges: edges.map((edge) => ({

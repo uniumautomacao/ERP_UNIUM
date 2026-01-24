@@ -1,8 +1,6 @@
 export type GuiaConexoesV2Layout = {
-  canvasDeviceIds: string[];
-  nodePositions: Record<string, { x: number; y: number }>;
+  rootDeviceId: string | null;
   viewport: { x: number; y: number; zoom: number };
-  autoLayoutEnabled: boolean;
 };
 
 const STORAGE_PREFIX = 'guiaConexoesV2:layout:';
@@ -15,14 +13,12 @@ export const loadLayout = (projectId: string): GuiaConexoesV2Layout | null => {
     const raw = localStorage.getItem(getLayoutStorageKey(projectId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GuiaConexoesV2Layout;
-    if (!parsed || !Array.isArray(parsed.canvasDeviceIds)) {
+    if (!parsed) {
       return null;
     }
     return {
-      canvasDeviceIds: parsed.canvasDeviceIds ?? [],
-      nodePositions: parsed.nodePositions ?? {},
+      rootDeviceId: parsed.rootDeviceId ?? null,
       viewport: parsed.viewport ?? { x: 0, y: 0, zoom: 1 },
-      autoLayoutEnabled: parsed.autoLayoutEnabled ?? true,
     };
   } catch (error) {
     console.warn('[GuiaConexoesV2] Falha ao carregar layout:', error);

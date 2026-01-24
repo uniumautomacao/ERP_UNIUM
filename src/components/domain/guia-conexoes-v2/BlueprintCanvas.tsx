@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -11,7 +10,6 @@ import ReactFlow, {
   type OnConnectEnd,
   type OnConnectStart,
   type OnEdgesChange,
-  type OnNodesChange,
   type OnEdgesDelete,
   type OnSelectionChangeFunc,
   type ReactFlowInstance,
@@ -25,6 +23,12 @@ const useStyles = makeStyles({
     flex: 1,
     minHeight: 0,
     backgroundColor: '#0f2440',
+    ':global(.react-flow__edges)': {
+      zIndex: 2,
+    },
+    ':global(.react-flow__nodes)': {
+      zIndex: 1,
+    },
   },
   emptyState: {
     position: 'absolute',
@@ -45,7 +49,6 @@ interface BlueprintCanvasProps {
   nodes: Node[];
   edges: Edge[];
   nodeTypes: NodeTypes;
-  onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
   onConnectStart: OnConnectStart;
@@ -54,7 +57,6 @@ interface BlueprintCanvasProps {
   onEdgesDelete: OnEdgesDelete;
   isValidConnection: IsValidConnection;
   onInit: (instance: ReactFlowInstance) => void;
-  onDropDevice: (deviceId: string, position: { x: number; y: number }) => void;
   isEmpty: boolean;
 }
 
@@ -62,7 +64,6 @@ export function BlueprintCanvas({
   nodes,
   edges,
   nodeTypes,
-  onNodesChange,
   onEdgesChange,
   onConnect,
   onConnectStart,
@@ -71,36 +72,16 @@ export function BlueprintCanvas({
   onEdgesDelete,
   isValidConnection,
   onInit,
-  onDropDevice,
   isEmpty,
 }: BlueprintCanvasProps) {
   const styles = useStyles();
-  const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(null);
 
   return (
-    <div
-      className={styles.wrapper}
-      onDrop={(event) => {
-        event.preventDefault();
-        const deviceId = event.dataTransfer.getData('application/guia-device-id');
-        if (!deviceId) return;
-        if (!flowInstance) return;
-        const position = flowInstance.screenToFlowPosition({
-          x: event.clientX,
-          y: event.clientY,
-        });
-        onDropDevice(deviceId, position);
-      }}
-      onDragOver={(event) => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-      }}
-    >
+    <div className={styles.wrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onConnectStart={onConnectStart}
@@ -108,11 +89,9 @@ export function BlueprintCanvas({
         onSelectionChange={onSelectionChange}
         onEdgesDelete={onEdgesDelete}
         isValidConnection={isValidConnection}
-        onInit={(instance) => {
-          setFlowInstance(instance);
-          onInit(instance);
-        }}
+        onInit={onInit}
         connectionMode={ConnectionMode.Strict}
+        nodesDraggable={false}
         fitView
         panOnScroll
         selectionOnDrag
@@ -128,7 +107,7 @@ export function BlueprintCanvas({
       </ReactFlow>
       {isEmpty && (
         <div className={styles.emptyState}>
-          Arraste equipamentos da paleta para iniciar o blueprint.
+          Nenhuma conexão encontrada. Use &quot;Adicionar Conexão&quot; para começar.
         </div>
       )}
     </div>

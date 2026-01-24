@@ -2,25 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import 'reactflow/dist/style.css';
 import {
   Button,
-  Menu,
-  MenuItem,
-  MenuList,
-  MenuPopover,
-  MenuTrigger,
+  Dropdown,
+  Option,
   Text,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
 import {
-  Checkmark24Regular,
-  Flowchart24Regular,
-  FullScreenMaximize24Regular,
+  Add24Regular,
   Save24Regular,
-  Settings24Regular,
 } from '@fluentui/react-icons';
 import {
   useEdgesState,
-  useNodesState,
   type Connection,
   type Edge,
   type Node,
@@ -28,12 +21,12 @@ import {
 } from 'reactflow';
 import { Cr22fProjetoService } from '../../generated/services/Cr22fProjetoService';
 import { NewDeviceIOConnectionService } from '../../generated';
-import { EquipmentPalette } from '../../components/domain/guia-conexoes-v2/EquipmentPalette';
 import { BlueprintCanvas } from '../../components/domain/guia-conexoes-v2/BlueprintCanvas';
 import {
   ConnectionDetailsPanel,
   type ConnectionDetails,
 } from '../../components/domain/guia-conexoes-v2/ConnectionDetailsPanel';
+import { AddConnectionDialog } from '../../components/domain/guia-conexoes-v2/AddConnectionDialog';
 import {
   DeviceNode,
   type DeviceNodeData,
@@ -43,7 +36,6 @@ import { applyAutoLayout } from '../../components/domain/guia-conexoes-v2/layout
 import {
   loadLayout,
   saveLayout,
-  type GuiaConexoesV2Layout,
 } from '../../components/domain/guia-conexoes-v2/storage/layoutStorage';
 import { useGuiaConexoesData } from '../../hooks/guia-conexoes/useGuiaConexoesData';
 import type { GuiaDeviceIO, GuiaDeviceIOConnection, GuiaModeloProduto } from '../../types/guiaConexoes';
@@ -51,6 +43,7 @@ import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { clearDeviceIOConnectionLink } from '../../utils/guia-conexoes/deleteDevice';
 import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/device-io/optionSetMaps';
+import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
 
 const useStyles = makeStyles({
   page: {
@@ -67,16 +60,28 @@ const useStyles = makeStyles({
     padding: '16px 20px',
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground1,
+    gap: '16px',
+    flexWrap: 'wrap',
   },
   headerTitle: {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
   },
+  headerControls: {
+    display: 'flex',
+    gap: '12px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  headerField: {
+    minWidth: '220px',
+  },
   headerActions: {
     display: 'flex',
     gap: '8px',
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   content: {
     display: 'flex',
@@ -222,28 +227,23 @@ export function GuiaConexoesV2Page() {
   const styles = useStyles();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectLabel, setSelectedProjectLabel] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [autoLayoutEnabled, setAutoLayoutEnabled] = useState(true);
-  const [layoutPositions, setLayoutPositions] = useState<Record<string, { x: number; y: number }>>(
-    {}
-  );
-  const [canvasDeviceIds, setCanvasDeviceIds] = useState<string[]>([]);
+  const [rootDeviceId, setRootDeviceId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [connectingHandleId, setConnectingHandleId] = useState<string | null>(null);
   const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [layoutViewport, setLayoutViewport] = useState<{ x: number; y: number; zoom: number } | null>(
     null
   );
-  const [autoLayoutPending, setAutoLayoutPending] = useState(false);
+  const [layoutPending, setLayoutPending] = useState(false);
+  const [addConnectionOpen, setAddConnectionOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [removingLink, setRemovingLink] = useState(false);
   const [linking, setLinking] = useState(false);
 
   const { devices, connections, modelos, loading, error, reload } = useGuiaConexoesData(
     selectedProjectId,
-    searchTerm,
-    locationFilter
+    '',
+    ''
   );
 
   const { labelMap: connectionTypeLabelMap, colorMap: connectionTypeColorMap } = useMemo(
@@ -291,17 +291,50 @@ export function GuiaConexoesV2Page() {
     return map;
   }, [connections]);
 
-  const canvasDeviceIdSet = useMemo(() => new Set(canvasDeviceIds), [canvasDeviceIds]);
-
-  const availableLocations = useMemo(() => {
-    const set = new Set<string>();
-    for (const device of devices) {
-      if (device.new_localizacao) {
-        set.add(device.new_localizacao);
+  const connectedDeviceIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const connection of connections) {
+      if (!connection._new_connectedto_value || !connection._new_device_value) {
+        continue;
+      }
+      ids.add(connection._new_device_value);
+      const target = connectionsById.get(connection._new_connectedto_value);
+      if (target && target._new_device_value) {
+        ids.add(target._new_device_value);
       }
     }
-    return Array.from(set.values());
-  }, [devices]);
+    return ids;
+  }, [connections, connectionsById]);
+
+  const connectedDeviceIdList = useMemo(() => {
+    const list: string[] = [];
+    for (const id of connectedDeviceIds) {
+      list.push(id);
+    }
+    return list;
+  }, [connectedDeviceIds]);
+
+  const connectedDeviceKey = useMemo(() => {
+    let key = '';
+    for (const id of connectedDeviceIdList) {
+      key += `${id}|`;
+    }
+    return key;
+  }, [connectedDeviceIdList]);
+
+  const connectedDeviceOptions = useMemo(() => {
+    const options: { id: string; label: string }[] = [];
+    for (const deviceId of connectedDeviceIdList) {
+      const device = deviceMap.get(deviceId);
+      if (!device) continue;
+      const labelParts: string[] = [];
+      if (device.new_name) labelParts.push(device.new_name);
+      if (device.new_localizacao) labelParts.push(device.new_localizacao);
+      const label = labelParts.join(' · ') || 'Equipamento';
+      options.push({ id: deviceId, label });
+    }
+    return options;
+  }, [connectedDeviceIdList, deviceMap]);
 
   const activeConnectionId = useMemo(
     () => resolveConnectionIdFromHandle(connectingHandleId),
@@ -313,10 +346,20 @@ export function GuiaConexoesV2Page() {
     return connectionsById.get(activeConnectionId) ?? null;
   }, [activeConnectionId, connectionsById]);
 
+  const rootDeviceLabel = useMemo(() => {
+    if (!rootDeviceId) return '';
+    for (const option of connectedDeviceOptions) {
+      if (option.id === rootDeviceId) {
+        return option.label;
+      }
+    }
+    return '';
+  }, [connectedDeviceOptions, rootDeviceId]);
+
   const nodeTypes = useMemo(() => ({ device: DeviceNode }), []);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<DeviceNodeData>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes] = useState<Node<DeviceNodeData>[]>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
 
   useEffect(() => {
     setNodes((prevNodes) => {
@@ -325,7 +368,7 @@ export function GuiaConexoesV2Page() {
         prevMap.set(node.id, node);
       }
       const nextNodes: Node<DeviceNodeData>[] = [];
-      for (const deviceId of canvasDeviceIds) {
+      for (const deviceId of connectedDeviceIdList) {
         const device = deviceMap.get(deviceId);
         if (!device) continue;
         const existing = prevMap.get(deviceId);
@@ -366,35 +409,30 @@ export function GuiaConexoesV2Page() {
             allowOutput: flags.allowOutput,
           });
         }
-        const position =
-          existing?.position ||
-          layoutPositions[deviceId] ||
-          ({ x: 0, y: 0 } as { x: number; y: number });
+        const position = existing?.position || ({ x: 0, y: 0 } as { x: number; y: number });
         nextNodes.push({
           id: deviceId,
           type: 'device',
           position,
+          zIndex: 0,
           data: {
             title: device.new_name || 'Equipamento',
             modelLabel: model?.cr22f_title || model?.cr22f_id || 'Modelo',
             locationLabel: device.new_localizacao || 'Sem localização',
             ports,
           },
-          draggable: true,
-          dragHandle: '.device-node__header',
         });
       }
       return nextNodes;
     });
   }, [
-    canvasDeviceIds,
+    connectedDeviceIdList,
     connectionsByDevice,
     deviceMap,
     modelosMap,
     connectionDirectionLabelMap,
     connectionTypeLabelMap,
     activeConnection,
-    layoutPositions,
     setNodes,
   ]);
 
@@ -407,8 +445,8 @@ export function GuiaConexoesV2Page() {
       const target = connectionsById.get(connectedId);
       if (!target) continue;
       if (!connection._new_device_value || !target._new_device_value) continue;
-      if (!canvasDeviceIdSet.has(connection._new_device_value)) continue;
-      if (!canvasDeviceIdSet.has(target._new_device_value)) continue;
+      if (!connectedDeviceIds.has(connection._new_device_value)) continue;
+      if (!connectedDeviceIds.has(target._new_device_value)) continue;
       const key = [connection.new_deviceioconnectionid, connectedId].sort().join('|');
       if (dedupe.has(key)) continue;
       dedupe.add(key);
@@ -433,6 +471,7 @@ export function GuiaConexoesV2Page() {
         label: `${getConnectionLabel(connection)} ↔ ${getConnectionLabel(target)}`,
         style: { stroke: edgeColor },
         labelStyle: { fill: edgeColor, fontSize: 12 },
+        zIndex: 5,
         data: {
           sourceConnectionId: endpoints.source.new_deviceioconnectionid,
           targetConnectionId: endpoints.target.new_deviceioconnectionid,
@@ -441,7 +480,7 @@ export function GuiaConexoesV2Page() {
       });
     }
     setEdges(nextEdges);
-  }, [connections, connectionsById, canvasDeviceIdSet, connectionTypeLabelMap, connectionTypeColorMap, setEdges]);
+  }, [connections, connectionsById, connectedDeviceIds, connectionTypeLabelMap, connectionTypeColorMap, setEdges]);
 
   useEffect(() => {
     if (flowInstance && layoutViewport) {
@@ -451,25 +490,44 @@ export function GuiaConexoesV2Page() {
 
   useEffect(() => {
     if (!selectedProjectId) {
-      setCanvasDeviceIds([]);
-      setLayoutPositions({});
       setLayoutViewport(null);
-      setAutoLayoutEnabled(true);
+      setRootDeviceId(null);
       return;
     }
     const stored = loadLayout(selectedProjectId);
     if (stored) {
-      setCanvasDeviceIds(stored.canvasDeviceIds || []);
-      setLayoutPositions(stored.nodePositions || {});
+      setRootDeviceId(stored.rootDeviceId ?? null);
       setLayoutViewport(stored.viewport || null);
-      setAutoLayoutEnabled(stored.autoLayoutEnabled ?? true);
     } else {
-      setCanvasDeviceIds([]);
-      setLayoutPositions({});
+      setRootDeviceId(null);
       setLayoutViewport(null);
-      setAutoLayoutEnabled(true);
     }
   }, [selectedProjectId]);
+
+  useEffect(() => {
+    if (connectedDeviceIdList.length === 0) {
+      setRootDeviceId(null);
+      return;
+    }
+    if (rootDeviceId && connectedDeviceIds.has(rootDeviceId)) {
+      return;
+    }
+    setRootDeviceId(connectedDeviceIdList[0]);
+  }, [connectedDeviceIdList, connectedDeviceIds, rootDeviceId]);
+
+  useEffect(() => {
+    if (connectedDeviceIdList.length === 0) {
+      setLayoutPending(false);
+      return;
+    }
+    setLayoutPending(true);
+  }, [connectedDeviceKey, edges.length, rootDeviceId]);
+
+  useEffect(() => {
+    if (!selectedProjectId || !rootDeviceId) return;
+    const viewport = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
+    saveLayout(selectedProjectId, { rootDeviceId, viewport });
+  }, [flowInstance, rootDeviceId, selectedProjectId]);
 
   const searchProjects = useCallback(async (term: string) => {
     const normalized = term.trim();
@@ -502,55 +560,32 @@ export function GuiaConexoesV2Page() {
 
   const handleSaveLayout = useCallback(() => {
     if (!selectedProjectId) return;
-    const nodePositions: GuiaConexoesV2Layout['nodePositions'] = {};
-    for (const node of nodes) {
-      nodePositions[node.id] = { x: node.position.x, y: node.position.y };
-    }
     const viewport = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
     saveLayout(selectedProjectId, {
-      canvasDeviceIds,
-      nodePositions,
       viewport,
-      autoLayoutEnabled,
+      rootDeviceId: rootDeviceId ?? null,
     });
-  }, [autoLayoutEnabled, canvasDeviceIds, flowInstance, nodes, selectedProjectId]);
-
-  const handleApplyAutoLayout = useCallback(async () => {
-    const next = await applyAutoLayout(nodes, edges);
-    setNodes(next);
-  }, [edges, nodes, setNodes]);
+  }, [flowInstance, rootDeviceId, selectedProjectId]);
 
   useEffect(() => {
-    if (!autoLayoutEnabled || !autoLayoutPending) return;
+    if (!layoutPending) return;
     if (nodes.length === 0) {
-      setAutoLayoutPending(false);
+      setLayoutPending(false);
       return;
     }
     let isActive = true;
     const runLayout = async () => {
-      const next = await applyAutoLayout(nodes, edges);
+      const next = await applyAutoLayout(nodes, edges, rootDeviceId);
       if (isActive) {
         setNodes(next);
-        setAutoLayoutPending(false);
+        setLayoutPending(false);
       }
     };
     void runLayout();
     return () => {
       isActive = false;
     };
-  }, [autoLayoutEnabled, autoLayoutPending, edges, nodes, setNodes]);
-
-  const handleDropDevice = useCallback(
-    (deviceId: string, position: { x: number; y: number }) => {
-      if (canvasDeviceIdSet.has(deviceId)) return;
-      setCanvasDeviceIds((prev) => [...prev, deviceId]);
-      setLayoutPositions((prev) => ({ ...prev, [deviceId]: position }));
-      if (autoLayoutEnabled) {
-        setAutoLayoutPending(true);
-      }
-    },
-    [autoLayoutEnabled, canvasDeviceIdSet]
-  );
+  }, [edges, layoutPending, nodes, rootDeviceId, setNodes]);
 
   const handleConnect = useCallback(
     async (params: Connection) => {
@@ -583,16 +618,14 @@ export function GuiaConexoesV2Page() {
           );
         }
         await reload();
-        if (autoLayoutEnabled) {
-          setAutoLayoutPending(true);
-        }
+        setLayoutPending(true);
       } catch (err) {
         setActionError(resolveErrorMessage(err, 'Falha ao vincular conexões.'));
       } finally {
         setLinking(false);
       }
     },
-    [autoLayoutEnabled, handleApplyAutoLayout, reload]
+    [reload]
   );
 
   const handleRemoveLink = useCallback(
@@ -605,16 +638,14 @@ export function GuiaConexoesV2Page() {
       try {
         await clearDeviceIOConnectionLink(sourceId, targetId);
         await reload();
-        if (autoLayoutEnabled) {
-          setAutoLayoutPending(true);
-        }
+        setLayoutPending(true);
       } catch (err) {
         setActionError(resolveErrorMessage(err, 'Falha ao remover vínculo.'));
       } finally {
         setRemovingLink(false);
       }
     },
-    [autoLayoutEnabled, handleApplyAutoLayout, reload]
+    [reload]
   );
 
   const isValidConnection = useCallback(
@@ -678,11 +709,38 @@ export function GuiaConexoesV2Page() {
           <Text size={500} weight="semibold">
             Guia de Conexões v2
           </Text>
-          {selectedProjectLabel && (
-            <Text size={200} className={styles.statusText}>
-              Projeto: {selectedProjectLabel}
-            </Text>
-          )}
+        </div>
+        <div className={styles.headerControls}>
+          <div className={styles.headerField}>
+            <SearchableCombobox
+              placeholder="Selecionar projeto"
+              value={selectedProjectLabel}
+              selectedId={selectedProjectId}
+              onSelect={(id, label) => {
+                setSelectedProjectId(id);
+                setSelectedProjectLabel(label);
+                setLayoutViewport(null);
+                setRootDeviceId(null);
+              }}
+              onSearch={searchProjects}
+              showAllOnFocus={true}
+            />
+          </div>
+          <div className={styles.headerField}>
+            <Dropdown
+              placeholder="Selecionar nó raiz"
+              value={rootDeviceLabel}
+              selectedOptions={rootDeviceId ? [rootDeviceId] : []}
+              onOptionSelect={(_, data) => setRootDeviceId((data.optionValue as string) || null)}
+              disabled={!selectedProjectId || connectedDeviceOptions.length === 0}
+            >
+              {connectedDeviceOptions.map((option) => (
+                <Option key={option.id} value={option.id}>
+                  {option.label}
+                </Option>
+              ))}
+            </Dropdown>
+          </div>
         </div>
         <div className={styles.headerActions}>
           {actionError && <Text className={styles.errorText}>{actionError}</Text>}
@@ -693,6 +751,13 @@ export function GuiaConexoesV2Page() {
           )}
           {error && <Text className={styles.errorText}>{error}</Text>}
           <Button
+            icon={<Add24Regular />}
+            onClick={() => setAddConnectionOpen(true)}
+            disabled={!selectedProjectId}
+          >
+            Adicionar Conexão
+          </Button>
+          <Button
             appearance="primary"
             icon={<Save24Regular />}
             onClick={handleSaveLayout}
@@ -700,72 +765,14 @@ export function GuiaConexoesV2Page() {
           >
             Salvar
           </Button>
-          <Menu>
-            <MenuTrigger>
-              <Button icon={<Settings24Regular />} aria-label="Configurações do canvas" />
-            </MenuTrigger>
-            <MenuPopover>
-              <MenuList>
-                <MenuItem
-                  icon={autoLayoutEnabled ? <Checkmark24Regular /> : undefined}
-                  onClick={() =>
-                    setAutoLayoutEnabled((prev) => {
-                      const next = !prev;
-                      if (!next) {
-                        setAutoLayoutPending(false);
-                      }
-                      return next;
-                    })
-                  }
-                >
-                  Auto-layout
-                </MenuItem>
-                <MenuItem
-                  icon={<Flowchart24Regular />}
-                  onClick={() => void handleApplyAutoLayout()}
-                  disabled={nodes.length === 0}
-                >
-                  Auto-organizar
-                </MenuItem>
-                <MenuItem
-                  icon={<FullScreenMaximize24Regular />}
-                  onClick={() => flowInstance?.fitView({ padding: 0.2 })}
-                  disabled={!flowInstance || nodes.length === 0}
-                >
-                  Fit view
-                </MenuItem>
-              </MenuList>
-            </MenuPopover>
-          </Menu>
         </div>
       </div>
       <div className={styles.content}>
-        <EquipmentPalette
-          devices={devices}
-          modelosMap={modelosMap}
-          connectionsByDevice={connectionsByDevice}
-          canvasDeviceIds={canvasDeviceIdSet}
-          searchTerm={searchTerm}
-          onSearchTermChange={setSearchTerm}
-          locations={availableLocations}
-          selectedLocation={locationFilter}
-          onLocationChange={setLocationFilter}
-          selectedProjectId={selectedProjectId}
-          selectedProjectLabel={selectedProjectLabel}
-          onProjectSelect={(id, label) => {
-            setSelectedProjectId(id);
-            setSelectedProjectLabel(label);
-            setSearchTerm('');
-            setLocationFilter('');
-          }}
-          onProjectSearch={searchProjects}
-        />
         <div className={styles.canvasArea}>
           <BlueprintCanvas
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
-            onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={handleConnect}
             onConnectStart={(_, data) => setConnectingHandleId(data.handleId ?? null)}
@@ -779,8 +786,7 @@ export function GuiaConexoesV2Page() {
             }}
             isValidConnection={isValidConnection}
             onInit={setFlowInstance}
-            onDropDevice={handleDropDevice}
-            isEmpty={nodes.length === 0}
+            isEmpty={connectedDeviceIdList.length === 0}
           />
           <ConnectionDetailsPanel
             details={connectionDetails}
@@ -801,6 +807,15 @@ export function GuiaConexoesV2Page() {
           />
         </div>
       </div>
+      <AddConnectionDialog
+        open={addConnectionOpen}
+        projectId={selectedProjectId}
+        onClose={() => setAddConnectionOpen(false)}
+        onLinked={async () => {
+          await reload();
+          setLayoutPending(true);
+        }}
+      />
     </div>
   );
 }
