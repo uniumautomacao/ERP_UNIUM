@@ -29,6 +29,9 @@ const useStyles = makeStyles({
     ':global(.react-flow__nodes)': {
       zIndex: 1,
     },
+    ':global(.react-flow__handle)': {
+      pointerEvents: 'all',
+    },
   },
   emptyState: {
     position: 'absolute',
@@ -58,6 +61,9 @@ interface BlueprintCanvasProps {
   isValidConnection: IsValidConnection;
   onInit: (instance: ReactFlowInstance) => void;
   isEmpty: boolean;
+  panOnDragEnabled?: boolean;
+  onCanvasMouseUp?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  dragPreview?: { start: { x: number; y: number }; end: { x: number; y: number } } | null;
 }
 
 export function BlueprintCanvas({
@@ -73,11 +79,14 @@ export function BlueprintCanvas({
   isValidConnection,
   onInit,
   isEmpty,
+  panOnDragEnabled = true,
+  onCanvasMouseUp,
+  dragPreview,
 }: BlueprintCanvasProps) {
   const styles = useStyles();
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} onMouseUp={onCanvasMouseUp} data-blueprint-wrapper="true">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -93,6 +102,7 @@ export function BlueprintCanvas({
         connectionMode={ConnectionMode.Strict}
         nodesDraggable={false}
         fitView
+        panOnDrag={panOnDragEnabled}
         panOnScroll
         selectionOnDrag
         deleteKeyCode={['Backspace', 'Delete']}
@@ -105,6 +115,27 @@ export function BlueprintCanvas({
         />
         <Controls position="bottom-right" />
       </ReactFlow>
+      {dragPreview && (
+        <svg
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        >
+          <line
+            x1={dragPreview.start.x}
+            y1={dragPreview.start.y}
+            x2={dragPreview.end.x}
+            y2={dragPreview.end.y}
+            stroke="#ffffff"
+            strokeWidth={2}
+            strokeDasharray="6 6"
+            opacity={0.8}
+          />
+        </svg>
+      )}
       {isEmpty && (
         <div className={styles.emptyState}>
           Nenhuma conexão encontrada. Use &quot;Adicionar Conexão&quot; para começar.

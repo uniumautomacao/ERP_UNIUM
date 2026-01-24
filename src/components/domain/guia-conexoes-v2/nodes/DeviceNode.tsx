@@ -15,6 +15,7 @@ export type DevicePortData = {
   side?: 'left' | 'right';
   state: DevicePortState;
   isConnectable: boolean;
+  highlight?: boolean;
   allowInput: boolean;
   allowOutput: boolean;
 };
@@ -118,6 +119,24 @@ const useStyles = makeStyles({
     border: `2px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground1,
   },
+  handleHighlight: {
+    animationDuration: '900ms',
+    animationIterationCount: 'infinite',
+    animationName: {
+      from: {
+        boxShadow: `0 0 0 0 ${tokens.colorPaletteBlueBorder2}`,
+        borderColor: tokens.colorPaletteBlueBorder2,
+      },
+      '50%': {
+        boxShadow: `0 0 0 6px ${tokens.colorPaletteBlueBorder2}`,
+        borderColor: tokens.colorPaletteBlueBorder2,
+      },
+      to: {
+        boxShadow: `0 0 0 0 ${tokens.colorPaletteBlueBorder2}`,
+        borderColor: tokens.colorPaletteBlueBorder2,
+      },
+    },
+  },
   portLabel: {
     fontSize: tokens.fontSizeBase200,
     whiteSpace: 'nowrap',
@@ -175,7 +194,7 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
                   type={port.allowInput ? 'target' : 'source'}
                   id={buildHandleId(port.id, port.allowInput ? 'in' : 'out')}
                   position={Position.Left}
-                  className={styles.handle}
+                  className={`${styles.handle} ${port.highlight ? styles.handleHighlight : ''}`}
                   isConnectable={port.isConnectable}
                   style={{ top: '50%' }}
                 />
@@ -205,7 +224,7 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
                   type={port.allowOutput ? 'source' : 'target'}
                   id={buildHandleId(port.id, port.allowOutput ? 'out' : 'in')}
                   position={Position.Right}
-                  className={styles.handle}
+                  className={`${styles.handle} ${port.highlight ? styles.handleHighlight : ''}`}
                   isConnectable={port.isConnectable}
                   style={{ top: '50%' }}
                 />

@@ -18,6 +18,7 @@ export type SidebarDevice = {
 interface DisconnectedDevicesSidebarProps {
   devices: SidebarDevice[];
   isConnecting: boolean;
+  onPortMouseDown?: (portId: string) => void;
   onPortMouseUp: (portId: string) => void;
 }
 
@@ -97,6 +98,7 @@ const useStyles = makeStyles({
 export function DisconnectedDevicesSidebar({
   devices,
   isConnecting,
+  onPortMouseDown,
   onPortMouseUp,
 }: DisconnectedDevicesSidebarProps) {
   const styles = useStyles();
@@ -125,6 +127,10 @@ export function DisconnectedDevicesSidebar({
               <div
                 key={port.id}
                 className={styles.portRow}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  onPortMouseDown?.(port.id);
+                }}
                 onMouseUp={() => onPortMouseUp(port.id)}
                 data-sidebar-port-id={port.id}
               >

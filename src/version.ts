@@ -1,6 +1,36 @@
-export const APP_VERSION = '0.1.62';
+export const APP_VERSION = '0.1.68';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.68',
+    date: '2026-01-24',
+    changes: 'Portas compatíveis agora piscam durante o drag de conexão.',
+  },
+  {
+    version: '0.1.67',
+    date: '2026-01-24',
+    changes: 'Feedback visual do drag sempre visível durante movimento do mouse.',
+  },
+  {
+    version: '0.1.66',
+    date: '2026-01-24',
+    changes: 'Adicionado feedback visual de aresta durante drag da sidebar.',
+  },
+  {
+    version: '0.1.65',
+    date: '2026-01-24',
+    changes: 'Drag da sidebar rastreia handle por hover para vincular portas.',
+  },
+  {
+    version: '0.1.64',
+    date: '2026-01-24',
+    changes: 'Drag da sidebar agora escuta mouseup global para conectar no blueprint.',
+  },
+  {
+    version: '0.1.63',
+    date: '2026-01-24',
+    changes: 'Conexão por drag da sidebar e bloqueio de pan enquanto conecta.',
+  },
   {
     version: '0.1.62',
     date: '2026-01-24',

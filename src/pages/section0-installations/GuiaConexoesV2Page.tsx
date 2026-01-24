@@ -244,6 +244,12 @@ export function GuiaConexoesV2Page() {
   const [layoutPending, setLayoutPending] = useState(false);
   const [addConnectionOpen, setAddConnectionOpen] = useState(false);
   const [nodeShowAllPorts, setNodeShowAllPorts] = useState<Record<string, boolean>>({});
+  const [sidebarDragPortId, setSidebarDragPortId] = useState<string | null>(null);
+  const [hoveredHandleId, setHoveredHandleId] = useState<string | null>(null);
+  const [dragPreview, setDragPreview] = useState<{
+    start: { x: number; y: number };
+    end: { x: number; y: number };
+  } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [removingLink, setRemovingLink] = useState(false);
   const [linking, setLinking] = useState(false);
@@ -470,6 +476,8 @@ export function GuiaConexoesV2Page() {
           }
           const flags = getDirectionFlags(connection.new_direcao);
           const directionCode = getDirectionCode(connection.new_direcao);
+          const highlight =
+            !!activeConnection && connectable && isConnectionCompatible(activeConnection, connection);
           let side: DevicePortData['side'] = 'right';
           if (connection._new_connectedto_value) {
             const targetConnection = connectionsById.get(connection._new_connectedto_value);
@@ -490,6 +498,7 @@ export function GuiaConexoesV2Page() {
             side,
             state,
             isConnectable: connectable,
+            highlight,
             allowInput: flags.allowInput,
             allowOutput: flags.allowOutput,
           });
@@ -791,6 +800,67 @@ export function GuiaConexoesV2Page() {
     [connectingHandleId, linkPorts]
   );
 
+  const handleSidebarPortMouseDown = useCallback((portId: string) => {
+    setSidebarDragPortId(portId);
+  }, []);
+
+  useEffect(() => {
+    if (!sidebarDragPortId) return;
+    const handleMouseMove = (event: MouseEvent) => {
+      const wrapper = document.querySelector('[data-blueprint-wrapper="true"]') as HTMLElement | null;
+      if (!wrapper) {
+        setDragPreview(null);
+        return;
+      }
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const element = document.elementFromPoint(event.clientX, event.clientY);
+      const handleEl =
+        (element?.closest('[data-handleid]') as HTMLElement | null) ??
+        (element?.closest('.react-flow__handle') as HTMLElement | null);
+      const handleId =
+        handleEl?.getAttribute('data-handleid') ??
+        handleEl?.dataset.handleid ??
+        handleEl?.dataset.handleId ??
+        null;
+      setHoveredHandleId(handleId);
+
+      let startX = event.clientX - wrapperRect.left;
+      let startY = event.clientY - wrapperRect.top;
+      if (handleEl) {
+        const handleRect = handleEl.getBoundingClientRect();
+        startX = handleRect.left + handleRect.width / 2 - wrapperRect.left;
+        startY = handleRect.top + handleRect.height / 2 - wrapperRect.top;
+      } else {
+        startX = Math.max(12, Math.min(event.clientX - wrapperRect.left, wrapperRect.width - 12));
+        startY = Math.max(12, Math.min(event.clientY - wrapperRect.top, wrapperRect.height - 12));
+      }
+      const endX = event.clientX - wrapperRect.left;
+      const endY = event.clientY - wrapperRect.top;
+      setDragPreview({
+        start: { x: startX, y: startY },
+        end: { x: endX, y: endY },
+      });
+    };
+    const handleMouseUp = () => {
+      if (hoveredHandleId) {
+        const targetPortId = resolveConnectionIdFromHandle(hoveredHandleId);
+        if (targetPortId) {
+          void linkPorts(sidebarDragPortId, targetPortId);
+        }
+      }
+      setHoveredHandleId(null);
+      setSidebarDragPortId(null);
+      setDragPreview(null);
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      setDragPreview(null);
+    };
+  }, [hoveredHandleId, linkPorts, sidebarDragPortId]);
+
   const connectionDetails: ConnectionDetails | null = useMemo(() => {
     if (!selectedEdgeId) return null;
     let selectedEdge: Edge | null = null;
@@ -924,6 +994,8 @@ export function GuiaConexoesV2Page() {
             isValidConnection={isValidConnection}
             onInit={setFlowInstance}
             isEmpty={connectedDeviceIdList.length === 0}
+            panOnDragEnabled={!connectingHandleId && !sidebarDragPortId}
+            dragPreview={dragPreview}
           />
           <ConnectionDetailsPanel
             details={connectionDetails}
@@ -946,6 +1018,7 @@ export function GuiaConexoesV2Page() {
         <DisconnectedDevicesSidebar
           devices={disconnectedDevices}
           isConnecting={!!connectingHandleId}
+          onPortMouseDown={handleSidebarPortMouseDown}
           onPortMouseUp={handleSidebarPortMouseUp}
         />
       </div>
