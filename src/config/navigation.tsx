@@ -38,6 +38,7 @@ import { DevPage } from '../pages/section3-dev/DevPage';
 import { QrCodeScannerPage } from '../pages/section3-dev/QrCodeScannerPage';
 import { MermaidPrototypePage } from '../pages/section3-dev/MermaidPrototypePage';
 import { InteligenciaComercialPage } from '../pages/section5-comercial/InteligenciaComercialPage';
+import { GuiaConexoesV2Page } from '../pages/section0-installations/GuiaConexoesV2Page';
 
 export const navigation: NavSection[] = [
   {
@@ -78,6 +79,13 @@ export const navigation: NavSection[] = [
         icon: <DocumentBulletList24Regular />,
         path: '/instalacoes/guia-conexoes',
         component: GuiaConexoesPage,
+      },
+      {
+        id: 'guia-conexoes-v2',
+        label: 'Guia de Conexões v2',
+        icon: <DocumentBulletList24Regular />,
+        path: '/instalacoes/guia-conexoes-v2',
+        component: GuiaConexoesV2Page,
       },
     ],
   },

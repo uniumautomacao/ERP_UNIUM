@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.53';
+export const APP_VERSION = '0.1.54';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.54',
+    date: '2026-01-24',
+    changes: 'Implementação inicial do Guia de Conexões v2 com blueprint interativo: página, navegação, painel lateral (busca/filtro), canvas React Flow com nós customizados, handles de portas, arestas com labels, painel de detalhes de conexão, auto-layout com ELK e persistência em localStorage.',
+  },
   {
     version: '0.1.53',
     date: '2026-01-24',
