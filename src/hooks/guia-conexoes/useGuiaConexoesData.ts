@@ -21,6 +21,7 @@ const DEVICE_SELECT = [
   'new_localizacao',
   'new_serainstaladobase',
   'new_serainstalado',
+  'new_raiz',
   'new_externalid',
   '_new_modelodeproduto_value',
   '_new_produto_value',

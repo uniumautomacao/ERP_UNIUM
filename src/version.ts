@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.70';
+export const APP_VERSION = '0.1.71';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.71',
+    date: '2026-01-24',
+    changes: 'Raiz do blueprint agora é persistida no Dataverse via new_raiz.',
+  },
   {
     version: '0.1.70',
     date: '2026-01-24',

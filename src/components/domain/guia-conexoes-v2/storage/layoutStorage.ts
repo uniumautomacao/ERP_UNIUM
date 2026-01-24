@@ -1,5 +1,4 @@
 export type GuiaConexoesV2Layout = {
-  rootDeviceId: string | null;
   viewport: { x: number; y: number; zoom: number };
 };
 
@@ -17,7 +16,6 @@ export const loadLayout = (projectId: string): GuiaConexoesV2Layout | null => {
       return null;
     }
     return {
-      rootDeviceId: parsed.rootDeviceId ?? null,
       viewport: parsed.viewport ?? { x: 0, y: 0, zoom: 1 },
     };
   } catch (error) {

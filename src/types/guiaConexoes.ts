@@ -11,6 +11,7 @@ export interface GuiaDeviceIO {
   new_localizacao?: string | null;
   new_serainstaladobase?: boolean | null;
   new_serainstalado?: boolean | null;
+  new_raiz?: boolean | null;
   new_externalid?: string | null;
   _new_modelodeproduto_value?: string | null;
   _new_produto_value?: string | null;

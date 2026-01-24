@@ -20,7 +20,7 @@ import {
   type ReactFlowInstance,
 } from 'reactflow';
 import { Cr22fProjetoService } from '../../generated/services/Cr22fProjetoService';
-import { NewDeviceIOConnectionService } from '../../generated';
+import { NewDeviceIOConnectionService, NewDeviceIOService } from '../../generated';
 import { BlueprintCanvas } from '../../components/domain/guia-conexoes-v2/BlueprintCanvas';
 import {
   ConnectionDetailsPanel,
@@ -617,15 +617,12 @@ export function GuiaConexoesV2Page() {
   useEffect(() => {
     if (!selectedProjectId) {
       setLayoutViewport(null);
-      setRootDeviceId(null);
       return;
     }
     const stored = loadLayout(selectedProjectId);
     if (stored) {
-      setRootDeviceId(stored.rootDeviceId ?? null);
       setLayoutViewport(stored.viewport || null);
     } else {
-      setRootDeviceId(null);
       setLayoutViewport(null);
     }
   }, [selectedProjectId]);
@@ -635,11 +632,18 @@ export function GuiaConexoesV2Page() {
       setRootDeviceId(null);
       return;
     }
+    const rootDevice = devices.find((device) => device.new_raiz);
+    if (rootDevice?.new_deviceioid) {
+      if (rootDeviceId !== rootDevice.new_deviceioid) {
+        setRootDeviceId(rootDevice.new_deviceioid);
+      }
+      return;
+    }
     if (rootDeviceId && connectedDeviceIds.has(rootDeviceId)) {
       return;
     }
     setRootDeviceId(connectedDeviceIdList[0]);
-  }, [connectedDeviceIdList, connectedDeviceIds, rootDeviceId]);
+  }, [connectedDeviceIdList, connectedDeviceIds, devices, rootDeviceId]);
 
   useEffect(() => {
     if (connectedDeviceIdList.length === 0) {
@@ -650,10 +654,10 @@ export function GuiaConexoesV2Page() {
   }, [connectedDeviceKey, edges.length, rootDeviceId]);
 
   useEffect(() => {
-    if (!selectedProjectId || !rootDeviceId) return;
+    if (!selectedProjectId) return;
     const viewport = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
-    saveLayout(selectedProjectId, { rootDeviceId, viewport });
-  }, [flowInstance, rootDeviceId, selectedProjectId]);
+    saveLayout(selectedProjectId, { viewport });
+  }, [flowInstance, selectedProjectId]);
 
   const searchProjects = useCallback(async (term: string) => {
     const normalized = term.trim();
@@ -684,14 +688,58 @@ export function GuiaConexoesV2Page() {
     return options;
   }, []);
 
+  const updateRootDevice = useCallback(
+    async (nextRootId: string | null) => {
+      if (!selectedProjectId || !nextRootId) return;
+      if (nextRootId === rootDeviceId) return;
+      setActionError(null);
+      setRootDeviceId(nextRootId);
+      try {
+        const rootResult = await NewDeviceIOService.getAll({
+          select: ['new_deviceioid'],
+          filter: `statecode eq 0 and _new_projeto_value eq ${escapeODataValue(
+            selectedProjectId
+          )} and new_raiz eq true`,
+          maxPageSize: 5000,
+        });
+        if (!rootResult.success) {
+          throw new Error(
+            resolveErrorMessage(rootResult.error, 'Falha ao buscar raiz atual.')
+          );
+        }
+        const currentRootIds = (rootResult.data ?? [])
+          .map((item) => (item as { new_deviceioid?: string }).new_deviceioid)
+          .filter((id) => id && id !== nextRootId) as string[];
+
+        const updates: Promise<unknown>[] = [];
+        currentRootIds.forEach((id) => {
+          updates.push(NewDeviceIOService.update(id, { new_raiz: false }));
+        });
+        updates.push(NewDeviceIOService.update(nextRootId, { new_raiz: true }));
+        const results = await Promise.all(updates);
+        const failed = results.filter(
+          (result) => (result as { success?: boolean }).success === false
+        );
+        if (failed.length > 0) {
+          throw new Error('Falha ao atualizar raiz no Dataverse.');
+        }
+
+        await reload();
+        setLayoutPending(true);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao salvar raiz.'));
+      }
+    },
+    [reload, rootDeviceId, selectedProjectId]
+  );
+
   const handleSaveLayout = useCallback(() => {
     if (!selectedProjectId) return;
     const viewport = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
     saveLayout(selectedProjectId, {
       viewport,
-      rootDeviceId: rootDeviceId ?? null,
     });
-  }, [flowInstance, rootDeviceId, selectedProjectId]);
+  }, [flowInstance, selectedProjectId]);
 
   useEffect(() => {
     if (!layoutPending) return;
@@ -953,7 +1001,9 @@ export function GuiaConexoesV2Page() {
               placeholder="Selecionar nó raiz"
               value={rootDeviceLabel}
               selectedOptions={rootDeviceId ? [rootDeviceId] : []}
-              onOptionSelect={(_, data) => setRootDeviceId((data.optionValue as string) || null)}
+              onOptionSelect={(_, data) =>
+                updateRootDevice((data.optionValue as string) || null)
+              }
               disabled={!selectedProjectId || connectedDeviceOptions.length === 0}
             >
               {connectedDeviceOptions.map((option) => (
