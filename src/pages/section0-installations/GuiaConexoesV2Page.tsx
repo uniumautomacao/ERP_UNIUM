@@ -499,7 +499,8 @@ export function GuiaConexoesV2Page() {
 
   const expandedNodes = useMemo(() => {
     const list: { id: string; spacing?: number; spacingX?: number; spacingY?: number }[] = [];
-    Object.entries(nodeShowAllPorts).forEach(([deviceId, isExpanded]) => {
+    connectedDeviceIdList.forEach((deviceId) => {
+      const isExpanded = nodeShowAllPorts[deviceId] ?? false;
       const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
       if (deviceConnections.length === 0) return;
       const connectedCount = deviceConnections.filter(
@@ -507,14 +508,14 @@ export function GuiaConexoesV2Page() {
       ).length;
       const visibleCount = isExpanded ? deviceConnections.length : connectedCount;
       if (visibleCount <= 0) return;
-      const dynamicSpacingY = Math.max(0, (visibleCount-3) * 24);
+      const dynamicSpacingY = Math.max(0, (visibleCount - 3) * 24);
       const expandedSpacing = isExpanded ? visibleCount * 32 : 0;
       const spacingY = Math.max(dynamicSpacingY, expandedSpacing);
       if (spacingY <= 0) return;
       list.push({ id: deviceId, spacingX: 0, spacingY });
     });
     return list;
-  }, [connectionsByDevice, nodeShowAllPorts]);
+  }, [connectedDeviceIdList, connectionsByDevice, nodeShowAllPorts]);
 
   const activeConnectionId = useMemo(
     () => resolveConnectionIdFromHandle(connectingHandleId),
