@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.76';
+export const APP_VERSION = '0.1.77';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.77',
+    date: '2026-01-24',
+    changes: 'Layout ELK agora usa árvore BFS e ordem das portas do pai para posicionar irmãos.',
+  },
   {
     version: '0.1.76',
     date: '2026-01-24',
