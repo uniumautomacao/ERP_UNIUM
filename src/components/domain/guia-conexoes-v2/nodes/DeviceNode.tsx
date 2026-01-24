@@ -1,6 +1,7 @@
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
-import { Badge, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { Badge, Button, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { Eye24Regular, EyeOff24Regular } from '@fluentui/react-icons';
 
 export type DevicePortState = 'free' | 'connected' | 'manual' | 'incompatible';
 
@@ -10,6 +11,8 @@ export type DevicePortData = {
   typeLabel: string;
   directionLabel: string;
   direction?: number | null;
+  directionCode?: 'IN' | 'OUT' | 'BI';
+  side?: 'left' | 'right';
   state: DevicePortState;
   isConnectable: boolean;
   allowInput: boolean;
@@ -18,9 +21,10 @@ export type DevicePortData = {
 
 export type DeviceNodeData = {
   title: string;
-  modelLabel?: string;
   locationLabel?: string;
   ports: DevicePortData[];
+  showAllPorts?: boolean;
+  onToggleShowAll?: () => void;
 };
 
 const useStyles = makeStyles({
@@ -29,41 +33,42 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground1,
     boxShadow: tokens.shadow4,
-    minWidth: '260px',
+    minWidth: '200px',
   },
   header: {
-    padding: '12px 12px 8px 12px',
+    padding: '8px 10px',
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
     display: 'flex',
     gap: '8px',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    cursor: 'grab',
   },
   headerTitle: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
+    flexDirection: 'row',
+    gap: '8px',
+    alignItems: 'center',
   },
   locationBadge: {
     alignSelf: 'flex-start',
   },
-  portsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-    gap: '8px',
-    padding: '10px 12px 12px 12px',
+  portList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    padding: '8px 10px 10px 10px',
   },
   portCard: {
     position: 'relative',
-    borderRadius: '8px',
-    padding: '8px 10px',
+    borderRadius: '6px',
+    padding: '6px 8px',
     border: `1px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground2,
-    minHeight: '44px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
+    minHeight: '30px',
+    display: 'grid',
+    gridTemplateColumns: '1fr auto 1fr',
+    alignItems: 'center',
+    gap: '6px',
   },
   portFree: {
     borderColor: tokens.colorPaletteGreenBorder2,
@@ -86,12 +91,38 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase200,
   },
+  portLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: '6px',
+    minWidth: 0,
+  },
+  portRight: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: '6px',
+    minWidth: 0,
+  },
+  portCenter: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '2px',
+  },
   handle: {
-    width: '10px',
-    height: '10px',
+    width: '12px',
+    height: '12px',
     borderRadius: '999px',
     border: `2px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground1,
+  },
+  portLabel: {
+    fontSize: tokens.fontSizeBase200,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 });
 
@@ -107,6 +138,11 @@ const buildHandleId = (portId: string, suffix: 'in' | 'out') => `${portId}:${suf
 export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
   const styles = useStyles();
 
+  const showAllPorts = data.showAllPorts ?? false;
+  const visiblePorts = showAllPorts
+    ? data.ports
+    : data.ports.filter((port) => port.state === 'connected');
+
   return (
     <div className={styles.node}>
       <div className={`${styles.header} device-node__header`}>
@@ -114,50 +150,74 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
           <Text weight="semibold" size={300}>
             {data.title || 'Equipamento'}
           </Text>
-          {data.modelLabel && (
-            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-              {data.modelLabel}
-            </Text>
-          )}
         </div>
-        <Badge appearance="outline" size="small" className={styles.locationBadge}>
-          {data.locationLabel || 'Sem localização'}
-        </Badge>
+        <div className={styles.headerTitle}>
+          <Badge appearance="outline" size="small" className={styles.locationBadge}>
+            {data.locationLabel || 'Sem localização'}
+          </Badge>
+          <Button
+            appearance="subtle"
+            size="small"
+            icon={showAllPorts ? <Eye24Regular /> : <EyeOff24Regular />}
+            onClick={data.onToggleShowAll}
+          />
+        </div>
       </div>
-      <div className={styles.portsGrid}>
-        {data.ports.map((port) => (
+      <div className={styles.portList}>
+        {visiblePorts.map((port) => (
           <div
             key={port.id}
             className={`${styles.portCard} ${getPortStateClass(port.state, styles)}`}
           >
-            {port.allowInput && (
-              <Handle
-                type="target"
-                id={buildHandleId(port.id, 'in')}
-                position={Position.Left}
-                className={styles.handle}
-                isConnectable={port.isConnectable}
-                style={{ top: '50%' }}
-              />
-            )}
-            {port.allowOutput && (
-              <Handle
-                type="source"
-                id={buildHandleId(port.id, 'out')}
-                position={Position.Right}
-                className={styles.handle}
-                isConnectable={port.isConnectable}
-                style={{ top: '50%' }}
-              />
-            )}
-            <Text size={200} weight="medium">
-              {port.label}
-            </Text>
-            <span className={styles.portMeta}>
-              {port.typeLabel} · {port.directionLabel}
-            </span>
+            <div className={styles.portLeft}>
+              {(port.side === 'left' || port.directionCode === 'BI') && (
+                <Handle
+                  type={port.allowInput ? 'target' : 'source'}
+                  id={buildHandleId(port.id, port.allowInput ? 'in' : 'out')}
+                  position={Position.Left}
+                  className={styles.handle}
+                  isConnectable={port.isConnectable}
+                  style={{ top: '50%' }}
+                />
+              )}
+              {port.side === 'left' && (
+                <Text className={styles.portLabel}>
+                  {port.directionCode === 'BI' ? port.label : `${port.label} ${port.directionCode ?? 'IN'}`}
+                </Text>
+              )}
+            </div>
+            <div className={styles.portCenter}>
+              {(port.directionCode === 'BI' || (!port.allowInput && !port.allowOutput)) && (
+                <Text className={styles.portMeta}>BI</Text>
+              )}
+              {(port.directionCode === 'BI' || (!port.allowInput && !port.allowOutput)) && (
+                <Text className={styles.portMeta}>{port.typeLabel}</Text>
+              )}
+            </div>
+            <div className={styles.portRight}>
+              {port.side === 'right' && (
+                <Text className={styles.portLabel}>
+                  {port.directionCode === 'BI' ? port.label : `${port.label} ${port.directionCode ?? 'OUT'}`}
+                </Text>
+              )}
+              {(port.side === 'right' || port.directionCode === 'BI') && (
+                <Handle
+                  type={port.allowOutput ? 'source' : 'target'}
+                  id={buildHandleId(port.id, port.allowOutput ? 'out' : 'in')}
+                  position={Position.Right}
+                  className={styles.handle}
+                  isConnectable={port.isConnectable}
+                  style={{ top: '50%' }}
+                />
+              )}
+            </div>
           </div>
         ))}
+        {visiblePorts.length === 0 && (
+          <Text size={200} className={styles.portMeta}>
+            Nenhuma conexão disponível.
+          </Text>
+        )}
       </div>
     </div>
   );

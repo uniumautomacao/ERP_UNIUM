@@ -3,15 +3,14 @@ import type { Edge, Node } from 'reactflow';
 
 const elk = new ELK();
 
-const NODE_WIDTH = 500;
+const NODE_WIDTH = 220;
 const HEADER_HEIGHT = 52;
-const PORT_ROW_HEIGHT = 28;
-const PORTS_PER_ROW = 2;
-const NODE_PADDING = 16;
-const MIN_HEIGHT = 140;
+const PORT_ROW_HEIGHT = 22;
+const NODE_PADDING = 10;
+const MIN_HEIGHT = 80;
 
-export const getDeviceNodeSize = (portCount: number) => {
-  const rows = Math.max(1, Math.ceil(portCount / PORTS_PER_ROW));
+export const getDeviceNodeSize = (inputCount: number, outputCount: number) => {
+  const rows = Math.max(1, Math.max(inputCount, outputCount));
   const height = HEADER_HEIGHT + NODE_PADDING * 2 + rows * PORT_ROW_HEIGHT;
   return {
     width: NODE_WIDTH,
@@ -92,9 +91,11 @@ export const applyAutoLayout = async (
 
   const elkNodes: ElkNode[] = [];
   for (const node of nodes) {
-    const ports = (node.data as { ports?: unknown[] })?.ports ?? [];
-    const portCount = Array.isArray(ports) ? ports.length : 0;
-    const { width, height } = getDeviceNodeSize(portCount);
+    const ports = (node.data as { ports?: { allowInput?: boolean; allowOutput?: boolean }[] })
+      ?.ports ?? [];
+    const inputCount = ports.reduce((acc, port) => acc + (port.allowInput ? 1 : 0), 0);
+    const outputCount = ports.reduce((acc, port) => acc + (port.allowOutput ? 1 : 0), 0);
+    const { width, height } = getDeviceNodeSize(inputCount, outputCount);
     elkNodes.push({
       id: node.id,
       width,
@@ -128,11 +129,11 @@ export const applyAutoLayout = async (
     layoutOptions: {
       'elk.algorithm': 'layered',
       'elk.direction': 'RIGHT',
-      'elk.layered.spacing.nodeNodeBetweenLayers': '260',
-      'elk.spacing.nodeNode': '80',
-      'elk.spacing.componentComponent': '120',
-      'elk.spacing.edgeNode': '40',
-      'elk.layered.spacing.edgeNodeBetweenLayers': '40',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '140',
+      'elk.spacing.nodeNode': '30',
+      'elk.spacing.componentComponent': '40',
+      'elk.spacing.edgeNode': '20',
+      'elk.layered.spacing.edgeNodeBetweenLayers': '20',
       'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
       'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
       'elk.hierarchyHandling': 'INCLUDE_CHILDREN',

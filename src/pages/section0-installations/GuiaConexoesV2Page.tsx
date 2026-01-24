@@ -38,12 +38,13 @@ import {
   saveLayout,
 } from '../../components/domain/guia-conexoes-v2/storage/layoutStorage';
 import { useGuiaConexoesData } from '../../hooks/guia-conexoes/useGuiaConexoesData';
-import type { GuiaDeviceIO, GuiaDeviceIOConnection, GuiaModeloProduto } from '../../types/guiaConexoes';
+import type { GuiaDeviceIO, GuiaDeviceIOConnection } from '../../types/guiaConexoes';
 import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { clearDeviceIOConnectionLink } from '../../utils/guia-conexoes/deleteDevice';
 import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/device-io/optionSetMaps';
 import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
+import { DisconnectedDevicesSidebar } from '../../components/domain/guia-conexoes-v2/DisconnectedDevicesSidebar';
 
 const useStyles = makeStyles({
   page: {
@@ -171,6 +172,12 @@ const getDirectionFlags = (direction?: number | null) => {
   return { allowInput: true, allowOutput: true };
 };
 
+const getDirectionCode = (direction?: number | null) => {
+  if (direction === DIRECTION.Input) return 'IN';
+  if (direction === DIRECTION.Output) return 'OUT';
+  return 'BI';
+};
+
 const isDirectionCompatible = (a?: number | null, b?: number | null) => {
   const check = (source?: number | null, target?: number | null) => {
     if (source === DIRECTION.Input) {
@@ -236,11 +243,12 @@ export function GuiaConexoesV2Page() {
   );
   const [layoutPending, setLayoutPending] = useState(false);
   const [addConnectionOpen, setAddConnectionOpen] = useState(false);
+  const [nodeShowAllPorts, setNodeShowAllPorts] = useState<Record<string, boolean>>({});
   const [actionError, setActionError] = useState<string | null>(null);
   const [removingLink, setRemovingLink] = useState(false);
   const [linking, setLinking] = useState(false);
 
-  const { devices, connections, modelos, loading, error, reload } = useGuiaConexoesData(
+  const { devices, connections, loading, error, reload } = useGuiaConexoesData(
     selectedProjectId,
     '',
     ''
@@ -251,14 +259,6 @@ export function GuiaConexoesV2Page() {
     []
   );
   const connectionDirectionLabelMap = useMemo(() => buildDirectionMap(), []);
-
-  const modelosMap = useMemo(() => {
-    const map = new Map<string, GuiaModeloProduto>();
-    for (const modelo of modelos) {
-      map.set(modelo.cr22f_modelosdeprodutofromsharepointlistid, modelo);
-    }
-    return map;
-  }, [modelos]);
 
   const deviceMap = useMemo(() => {
     const map = new Map<string, GuiaDeviceIO>();
@@ -306,6 +306,43 @@ export function GuiaConexoesV2Page() {
     return ids;
   }, [connections, connectionsById]);
 
+  const deviceDepths = useMemo(() => {
+    if (!rootDeviceId) return new Map<string, number>();
+    const adjacency = new Map<string, Set<string>>();
+    connectedDeviceIds.forEach((id) => adjacency.set(id, new Set()));
+    connections.forEach((connection) => {
+      if (!connection._new_connectedto_value || !connection._new_device_value) return;
+      const target = connectionsById.get(connection._new_connectedto_value);
+      if (!target?._new_device_value) return;
+      const sourceDeviceId = connection._new_device_value;
+      const targetDeviceId = target._new_device_value;
+      if (!connectedDeviceIds.has(sourceDeviceId) || !connectedDeviceIds.has(targetDeviceId)) return;
+      adjacency.get(sourceDeviceId)?.add(targetDeviceId);
+      adjacency.get(targetDeviceId)?.add(sourceDeviceId);
+    });
+
+    const depths = new Map<string, number>();
+    const queue: string[] = [];
+    if (connectedDeviceIds.has(rootDeviceId)) {
+      depths.set(rootDeviceId, 0);
+      queue.push(rootDeviceId);
+    }
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (!current) break;
+      const currentDepth = depths.get(current) ?? 0;
+      const neighbors = adjacency.get(current);
+      if (!neighbors) continue;
+      neighbors.forEach((neighbor) => {
+        if (!depths.has(neighbor)) {
+          depths.set(neighbor, currentDepth + 1);
+          queue.push(neighbor);
+        }
+      });
+    }
+    return depths;
+  }, [connections, connectionsById, connectedDeviceIds, rootDeviceId]);
+
   const connectedDeviceIdList = useMemo(() => {
     const list: string[] = [];
     for (const id of connectedDeviceIds) {
@@ -313,6 +350,44 @@ export function GuiaConexoesV2Page() {
     }
     return list;
   }, [connectedDeviceIds]);
+
+  const disconnectedDevices = useMemo(() => {
+    const list: { id: string; name: string; location?: string | null; ports: { id: string; label: string; directionCode: 'IN' | 'OUT' | 'BI'; typeLabel: string }[] }[] = [];
+    for (const device of devices) {
+      const deviceId = device.new_deviceioid;
+      const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
+      const hasAnyLink = deviceConnections.some(
+        (connection) => !!connection._new_connectedto_value || !!connection.new_connectedtomanual
+      );
+      if (hasAnyLink) continue;
+      const ports = deviceConnections
+        .filter(
+          (connection) =>
+            !connection._new_connectedto_value && !connection.new_connectedtomanual
+        )
+        .map((connection) => {
+          const typeLabel =
+            connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
+              ? connectionTypeLabelMap.get(connection.new_tipodeconexao) ?? 'Tipo'
+              : connection.new_tipodeconexaorawtext || 'Tipo';
+          const directionCode = getDirectionCode(connection.new_direcao);
+          return {
+            id: connection.new_deviceioconnectionid,
+            label: getConnectionLabel(connection),
+            directionCode,
+            typeLabel,
+          };
+        });
+      if (ports.length === 0) continue;
+      list.push({
+        id: deviceId,
+        name: device.new_name || 'Equipamento',
+        location: device.new_localizacao,
+        ports,
+      });
+    }
+    return list;
+  }, [connectionsByDevice, connectionTypeLabelMap, devices]);
 
   const connectedDeviceKey = useMemo(() => {
     let key = '';
@@ -372,9 +447,6 @@ export function GuiaConexoesV2Page() {
         const device = deviceMap.get(deviceId);
         if (!device) continue;
         const existing = prevMap.get(deviceId);
-        const model = device._new_modelodeproduto_value
-          ? modelosMap.get(device._new_modelodeproduto_value)
-          : null;
         const connectionsForDevice = connectionsByDevice.get(deviceId) ?? [];
         const ports: DevicePortData[] = [];
         for (const connection of connectionsForDevice) {
@@ -397,12 +469,25 @@ export function GuiaConexoesV2Page() {
             }
           }
           const flags = getDirectionFlags(connection.new_direcao);
+          const directionCode = getDirectionCode(connection.new_direcao);
+          let side: DevicePortData['side'] = 'right';
+          if (connection._new_connectedto_value) {
+            const targetConnection = connectionsById.get(connection._new_connectedto_value);
+            const targetDeviceId = targetConnection?._new_device_value ?? null;
+            if (targetDeviceId && deviceDepths.has(targetDeviceId) && deviceDepths.has(deviceId)) {
+              const currentDepth = deviceDepths.get(deviceId) ?? 0;
+              const targetDepth = deviceDepths.get(targetDeviceId) ?? 0;
+              side = targetDepth < currentDepth ? 'left' : 'right';
+            }
+          }
           ports.push({
             id: connection.new_deviceioconnectionid,
             label: getConnectionLabel(connection),
             typeLabel,
             directionLabel,
             direction: connection.new_direcao,
+            directionCode,
+            side,
             state,
             isConnectable: connectable,
             allowInput: flags.allowInput,
@@ -417,9 +502,14 @@ export function GuiaConexoesV2Page() {
           zIndex: 0,
           data: {
             title: device.new_name || 'Equipamento',
-            modelLabel: model?.cr22f_title || model?.cr22f_id || 'Modelo',
             locationLabel: device.new_localizacao || 'Sem localização',
             ports,
+            showAllPorts: nodeShowAllPorts[deviceId] ?? false,
+            onToggleShowAll: () =>
+              setNodeShowAllPorts((prev) => ({
+                ...prev,
+                [deviceId]: !(prev[deviceId] ?? false),
+              })),
           },
         });
       }
@@ -429,10 +519,12 @@ export function GuiaConexoesV2Page() {
     connectedDeviceIdList,
     connectionsByDevice,
     deviceMap,
-    modelosMap,
     connectionDirectionLabelMap,
     connectionTypeLabelMap,
     activeConnection,
+    connectionsById,
+    deviceDepths,
+    nodeShowAllPorts,
     setNodes,
   ]);
 
@@ -468,9 +560,7 @@ export function GuiaConexoesV2Page() {
         target: targetDeviceId,
         sourceHandle: `${endpoints.source.new_deviceioconnectionid}:out`,
         targetHandle: `${endpoints.target.new_deviceioconnectionid}:in`,
-        label: `${getConnectionLabel(connection)} ↔ ${getConnectionLabel(target)}`,
         style: { stroke: edgeColor },
-        labelStyle: { fill: edgeColor, fontSize: 12 },
         zIndex: 5,
         data: {
           sourceConnectionId: endpoints.source.new_deviceioconnectionid,
@@ -587,31 +677,44 @@ export function GuiaConexoesV2Page() {
     };
   }, [edges, layoutPending, nodes, rootDeviceId, setNodes]);
 
-  const handleConnect = useCallback(
-    async (params: Connection) => {
-      if (!params.sourceHandle || !params.targetHandle) return;
-      const sourceId = resolveConnectionIdFromHandle(params.sourceHandle);
-      const targetId = resolveConnectionIdFromHandle(params.targetHandle);
-      if (!sourceId || !targetId) return;
-      if (sourceId === targetId) return;
+  const linkPorts = useCallback(
+    async (sourcePortId: string, targetPortId: string) => {
+      if (sourcePortId === targetPortId) return;
+      const sourceConnection = connectionsById.get(sourcePortId);
+      const targetConnection = connectionsById.get(targetPortId);
+      if (!sourceConnection || !targetConnection) return;
+      const sourceConnected =
+        !!sourceConnection._new_connectedto_value || !!sourceConnection.new_connectedtomanual;
+      const targetConnected =
+        !!targetConnection._new_connectedto_value || !!targetConnection.new_connectedtomanual;
+      if (sourceConnected || targetConnected) {
+        setActionError('Uma das portas já está conectada.');
+        return;
+      }
+      if (!isConnectionCompatible(sourceConnection, targetConnection)) {
+        setActionError('Conexões incompatíveis.');
+        return;
+      }
+
       setLinking(true);
       setActionError(null);
       try {
         const payloadA = {
-          'new_ConnectedTo@odata.bind': `/new_deviceioconnections(${targetId})`,
+          'new_ConnectedTo@odata.bind': `/new_deviceioconnections(${targetPortId})`,
           new_connectedtomanual: null,
         } as unknown as Record<string, unknown>;
         const payloadB = {
-          'new_ConnectedTo@odata.bind': `/new_deviceioconnections(${sourceId})`,
+          'new_ConnectedTo@odata.bind': `/new_deviceioconnections(${sourcePortId})`,
           new_connectedtomanual: null,
         } as unknown as Record<string, unknown>;
-        const resultA = await NewDeviceIOConnectionService.update(sourceId, payloadA);
+
+        const resultA = await NewDeviceIOConnectionService.update(sourcePortId, payloadA);
         if (!resultA.success) {
           throw new Error(
             resolveErrorMessage(resultA.error, 'Falha ao vincular conexão A.')
           );
         }
-        const resultB = await NewDeviceIOConnectionService.update(targetId, payloadB);
+        const resultB = await NewDeviceIOConnectionService.update(targetPortId, payloadB);
         if (!resultB.success) {
           throw new Error(
             resolveErrorMessage(resultB.error, 'Falha ao vincular conexão B.')
@@ -625,7 +728,18 @@ export function GuiaConexoesV2Page() {
         setLinking(false);
       }
     },
-    [reload]
+    [connectionsById, reload]
+  );
+
+  const handleConnect = useCallback(
+    async (params: Connection) => {
+      if (!params.sourceHandle || !params.targetHandle) return;
+      const sourceId = resolveConnectionIdFromHandle(params.sourceHandle);
+      const targetId = resolveConnectionIdFromHandle(params.targetHandle);
+      if (!sourceId || !targetId) return;
+      await linkPorts(sourceId, targetId);
+    },
+    [linkPorts]
   );
 
   const handleRemoveLink = useCallback(
@@ -664,6 +778,17 @@ export function GuiaConexoesV2Page() {
       return isConnectionCompatible(sourceConnection, targetConnection);
     },
     [connectionsById]
+  );
+
+  const handleSidebarPortMouseUp = useCallback(
+    async (portId: string) => {
+      if (!connectingHandleId) return;
+      const sourcePortId = resolveConnectionIdFromHandle(connectingHandleId);
+      if (!sourcePortId) return;
+      await linkPorts(sourcePortId, portId);
+      setConnectingHandleId(null);
+    },
+    [connectingHandleId, linkPorts]
   );
 
   const connectionDetails: ConnectionDetails | null = useMemo(() => {
@@ -776,7 +901,19 @@ export function GuiaConexoesV2Page() {
             onEdgesChange={onEdgesChange}
             onConnect={handleConnect}
             onConnectStart={(_, data) => setConnectingHandleId(data.handleId ?? null)}
-            onConnectEnd={() => setConnectingHandleId(null)}
+            onConnectEnd={(event) => {
+              if (event && event.target instanceof HTMLElement && connectingHandleId) {
+                const targetEl = event.target.closest('[data-sidebar-port-id]') as HTMLElement | null;
+                const sidebarPortId = targetEl?.dataset.sidebarPortId;
+                if (sidebarPortId) {
+                  const sourcePortId = resolveConnectionIdFromHandle(connectingHandleId);
+                  if (sourcePortId) {
+                    void linkPorts(sourcePortId, sidebarPortId);
+                  }
+                }
+              }
+              setConnectingHandleId(null);
+            }}
             onSelectionChange={({ edges: selectedEdges }) => {
               const first = selectedEdges[0];
               setSelectedEdgeId(first?.id ?? null);
@@ -806,6 +943,11 @@ export function GuiaConexoesV2Page() {
             removing={removingLink || linking}
           />
         </div>
+        <DisconnectedDevicesSidebar
+          devices={disconnectedDevices}
+          isConnecting={!!connectingHandleId}
+          onPortMouseUp={handleSidebarPortMouseUp}
+        />
       </div>
       <AddConnectionDialog
         open={addConnectionOpen}

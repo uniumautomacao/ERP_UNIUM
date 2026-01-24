@@ -1,6 +1,17 @@
-export const APP_VERSION = '0.1.60';
+export const APP_VERSION = '0.1.62';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.62',
+    date: '2026-01-24',
+    changes: 'Removidos os rótulos das arestas no blueprint.',
+  },
+  {
+    version: '0.1.61',
+    date: '2026-01-24',
+    changes:
+      'Layout compacto aplicado: nós simplificados, sidebar de desconectados e drag para conectar portas.',
+  },
   {
     version: '0.1.60',
     date: '2026-01-24',
