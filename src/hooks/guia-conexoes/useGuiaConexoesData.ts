@@ -67,16 +67,28 @@ const MODELO_SELECT = [
 const buildProjectFilter = (projectId: string) =>
   `statecode eq 0 and _new_projeto_value eq ${escapeODataValue(projectId)}`;
 
-const buildDeviceFilter = (projectId: string, searchTerm: string) => {
+const buildDeviceFilter = (
+  projectId: string,
+  searchTerm: string,
+  locationFilter?: string | null
+) => {
   const base = buildProjectFilter(projectId);
+  const filters: string[] = [base];
   const normalized = searchTerm.trim();
   if (!normalized) {
-    return base;
+    if (locationFilter && locationFilter.trim().length > 0) {
+      filters.push(`new_localizacao eq '${escapeODataValue(locationFilter.trim())}'`);
+    }
+    return filters.join(' and ');
   }
 
   const escaped = escapeODataValue(normalized);
   const searchFilter = `(contains(new_name, '${escaped}') or contains(new_localizacao, '${escaped}'))`;
-  return `${base} and ${searchFilter}`;
+  filters.push(searchFilter);
+  if (locationFilter && locationFilter.trim().length > 0) {
+    filters.push(`new_localizacao eq '${escapeODataValue(locationFilter.trim())}'`);
+  }
+  return filters.join(' and ');
 };
 
 const emptyData: GuiaConexoesData = {
@@ -86,7 +98,11 @@ const emptyData: GuiaConexoesData = {
   modelos: [],
 };
 
-export const useGuiaConexoesData = (projectId: string | null, searchTerm: string) => {
+export const useGuiaConexoesData = (
+  projectId: string | null,
+  searchTerm: string,
+  locationFilter?: string | null
+) => {
   const [data, setData] = useState<GuiaConexoesData>(emptyData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -181,7 +197,7 @@ export const useGuiaConexoesData = (projectId: string | null, searchTerm: string
 
     try {
       const filter = buildProjectFilter(projectId);
-      const deviceFilter = buildDeviceFilter(projectId, searchTerm);
+      const deviceFilter = buildDeviceFilter(projectId, searchTerm, locationFilter);
 
       const [deviceResult, connectionResult, produtoResult] = await Promise.all([
         NewDeviceIOService.getAll({
@@ -286,7 +302,7 @@ export const useGuiaConexoesData = (projectId: string | null, searchTerm: string
     } finally {
       setLoading(false);
     }
-  }, [loadModelos, projectId, searchTerm]);
+  }, [loadModelos, projectId, searchTerm, locationFilter]);
 
   useEffect(() => {
     load();

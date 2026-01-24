@@ -1,240 +1,208 @@
-import { useCallback, useMemo, useState } from 'react';
 import {
-  Input,
-  Dropdown,
-  Option,
-  Card,
-  Text,
   Badge,
+  Card,
+  Dropdown,
+  Input,
+  Label,
+  Option,
+  Text,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { Search24Regular } from '@fluentui/react-icons';
-import type { GuiaConexoesData, GuiaDeviceIO } from '../../../types/guiaConexoes';
+import type { GuiaDeviceIO, GuiaDeviceIOConnection, GuiaModeloProduto } from '../../../types/guiaConexoes';
+import { SearchableCombobox } from '../../shared/SearchableCombobox';
 
 const useStyles = makeStyles({
-  container: {
+  palette: {
+    width: '250px',
+    minWidth: '250px',
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground1,
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-    padding: tokens.spacingHorizontalM,
-    overflow: 'hidden',
+    gap: '12px',
+    padding: '16px',
+    overflowY: 'auto',
   },
-  searchBox: {
+  section: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
+    gap: '6px',
   },
-  filterBox: {
+  cards: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
+    gap: '8px',
   },
-  cardsList: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    overflow: 'auto',
-  },
-  deviceCard: {
-    padding: tokens.spacingHorizontalM,
+  card: {
     cursor: 'grab',
-    '&:hover': {
-      backgroundColor: tokens.colorNeutralBackground1Hover,
-    },
-  },
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: tokens.spacingVerticalS,
-  },
-  cardTitle: {
-    fontWeight: 600,
-  },
-  cardMeta: {
+    padding: '12px',
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXS,
+    gap: '6px',
   },
-  portStats: {
+  cardDisabled: {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+  },
+  metaText: {
+    color: tokens.colorNeutralForeground3,
+  },
+  cardRow: {
     display: 'flex',
-    gap: tokens.spacingHorizontalS,
-    marginTop: tokens.spacingVerticalS,
-  },
-  searchInput: {
-    position: 'relative' as const,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '8px',
   },
 });
 
+type ProjectOption = { id: string; label: string };
+
 interface EquipmentPaletteProps {
-  data: any;
+  devices: GuiaDeviceIO[];
+  modelosMap: Map<string, GuiaModeloProduto>;
+  connectionsByDevice: Map<string, GuiaDeviceIOConnection[]>;
+  canvasDeviceIds: Set<string>;
   searchTerm: string;
-  onSearchTermChange: (term: string) => void;
-  canvasDeviceIds: string[];
+  onSearchTermChange: (value: string) => void;
+  locations: string[];
+  selectedLocation: string;
+  onLocationChange: (value: string) => void;
+  selectedProjectId: string | null;
+  selectedProjectLabel: string;
+  onProjectSelect: (id: string | null, label: string) => void;
+  onProjectSearch: (term: string) => Promise<ProjectOption[]>;
 }
 
-export const EquipmentPalette: React.FC<EquipmentPaletteProps> = ({
-  data,
+const getModelLabel = (device: GuiaDeviceIO, modelosMap: Map<string, GuiaModeloProduto>) => {
+  if (!device._new_modelodeproduto_value) return 'Modelo não informado';
+  const modelo = modelosMap.get(device._new_modelodeproduto_value);
+  if (!modelo) return 'Modelo não informado';
+  return modelo.cr22f_title || modelo.cr22f_id || 'Modelo';
+};
+
+const getConnectionStats = (connections: GuiaDeviceIOConnection[] | undefined) => {
+  let total = 0;
+  let connected = 0;
+  if (!connections) {
+    return { total, connected };
+  }
+  for (const connection of connections) {
+    total += 1;
+    if (connection._new_connectedto_value || connection.new_connectedtomanual) {
+      connected += 1;
+    }
+  }
+  return { total, connected };
+};
+
+export function EquipmentPalette({
+  devices,
+  modelosMap,
+  connectionsByDevice,
+  canvasDeviceIds,
   searchTerm,
   onSearchTermChange,
-  canvasDeviceIds,
-}) => {
+  locations,
+  selectedLocation,
+  onLocationChange,
+  selectedProjectId,
+  selectedProjectLabel,
+  onProjectSelect,
+  onProjectSearch,
+}: EquipmentPaletteProps) {
   const styles = useStyles();
-  const [selectedLocation, setSelectedLocation] = useState<string>('all');
-
-  // Extrair localizações únicas
-  const locations = useMemo(() => {
-    const locs = new Set<string>();
-    data.devices?.forEach((device: GuiaDeviceIO) => {
-      if (device.new_localizacao) {
-        locs.add(device.new_localizacao);
-      }
-    });
-    return Array.from(locs).sort();
-  }, [data.devices]);
-
-  // Filtrar dispositivos por localização
-  const filteredDevices = useMemo(() => {
-    if (!data.devices) return [];
-    let filtered = data.devices;
-
-    if (selectedLocation !== 'all') {
-      filtered = filtered.filter(
-        (d: GuiaDeviceIO) => d.new_localizacao === selectedLocation
-      );
-    }
-
-    return filtered;
-  }, [data.devices, selectedLocation]);
-
-  // Mapear modelos
-  const modelosMap = useMemo(() => {
-    const map = new Map<string, string>();
-    data.modelos?.forEach((m: any) => {
-      map.set(
-        m.cr22f_modelosdeprodutofromsharepointlistid,
-        m.cr22f_title || m.new_nomedofabricante || 'Modelo desconhecido'
-      );
-    });
-    return map;
-  }, [data.modelos]);
-
-  // Contar portas por dispositivo
-  const connectionsByDevice = useMemo(() => {
-    const map = new Map<string, { total: number; connected: number }>();
-    data.devices?.forEach((device: GuiaDeviceIO) => {
-      map.set(device.new_deviceioid, { total: 0, connected: 0 });
-    });
-
-    data.connections?.forEach((conn: any) => {
-      if (conn._new_device_value && map.has(conn._new_device_value)) {
-        const stats = map.get(conn._new_device_value)!;
-        stats.total += 1;
-        if (conn._new_connectedto_value || conn.new_connectedtomanual) {
-          stats.connected += 1;
-        }
-      }
-    });
-
-    return map;
-  }, [data.devices, data.connections]);
-
-  const handleDragStart = useCallback(
-    (e: React.DragEvent<HTMLDivElement>, deviceId: string) => {
-      e.dataTransfer.effectAllowed = 'copy';
-      e.dataTransfer.setData('deviceId', deviceId);
-    },
-    []
-  );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.searchBox}>
-        <Input
-          placeholder="Buscar equipamento…"
-          value={searchTerm}
-          onChange={(e, data) => onSearchTermChange(data.value)}
-          contentBefore={<Search24Regular />}
+    <aside className={styles.palette}>
+      <div className={styles.section}>
+        <Label>Projeto</Label>
+        <SearchableCombobox
+          placeholder="Selecionar projeto"
+          value={selectedProjectLabel}
+          selectedId={selectedProjectId}
+          onSelect={onProjectSelect}
+          onSearch={onProjectSearch}
+          showAllOnFocus={true}
         />
       </div>
 
-      <div className={styles.filterBox}>
+      <div className={styles.section}>
+        <Label>Buscar equipamento</Label>
+        <Input
+          placeholder="Buscar equipamento..."
+          value={searchTerm}
+          onChange={(_, data) => onSearchTermChange(data.value)}
+          disabled={!selectedProjectId}
+        />
+      </div>
+
+      <div className={styles.section}>
+        <Label>Localização</Label>
         <Dropdown
-          value={selectedLocation === 'all' ? 'Todas' : selectedLocation}
-          onOptionSelect={(e, data) => {
-            setSelectedLocation(data.optionValue || 'all');
-          }}
+          placeholder="Todas"
+          value={selectedLocation || 'Todas'}
+          selectedOptions={[selectedLocation || 'Todas']}
+          onOptionSelect={(_, data) => onLocationChange((data.optionValue as string) || '')}
+          disabled={!selectedProjectId}
         >
-          <Option value="all">Todas as localizações</Option>
-          {locations.map((loc) => (
-            <Option key={loc} value={loc}>
-              {loc}
+          <Option key="Todas" value="">
+            Todas
+          </Option>
+          {locations.map((location) => (
+            <Option key={location} value={location}>
+              {location}
             </Option>
           ))}
         </Dropdown>
       </div>
 
-      <div className={styles.cardsList}>
-        {filteredDevices.length === 0 ? (
-          <Text size={200}>Nenhum equipamento encontrado</Text>
-        ) : (
-          filteredDevices.map((device: GuiaDeviceIO) => {
-            const modeloId = device._new_modelodeproduto_value;
-            const modelName = modeloId
-              ? modelosMap.get(modeloId) || 'Modelo desconhecido'
-              : 'Sem modelo';
-            const portStats = connectionsByDevice.get(device.new_deviceioid) || {
-              total: 0,
-              connected: 0,
-            };
-            const isOnCanvas = canvasDeviceIds.includes(device.new_deviceioid);
-
-            return (
-              <Card
-                key={device.new_deviceioid}
-                className={styles.deviceCard}
-                draggable
-                onDragStart={(e) =>
-                  handleDragStart(e, device.new_deviceioid)
-                }
-              >
-                <div className={styles.cardHeader}>
-                  <div>
-                    <Text className={styles.cardTitle}>{device.new_name}</Text>
-                    {isOnCanvas && (
-                      <Badge color="success" size="small">
-                        No canvas
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                <div className={styles.cardMeta}>
-                  <Text size={200}>
-                    <strong>Modelo:</strong> {modelName}
-                  </Text>
-                  {device.new_localizacao && (
-                    <Text size={200}>
-                      <strong>Localização:</strong> {device.new_localizacao}
-                    </Text>
-                  )}
-                </div>
-
-                <div className={styles.portStats}>
-                  <Badge appearance="outline">
-                    {portStats.total} porta(s)
-                  </Badge>
-                  <Badge appearance="outline" color="success">
-                    {portStats.connected} conectada(s)
-                  </Badge>
-                </div>
-              </Card>
-            );
-          })
+      <div className={styles.cards}>
+        {devices.map((device) => {
+          const deviceId = device.new_deviceioid;
+          const modelLabel = getModelLabel(device, modelosMap);
+          const connections = connectionsByDevice.get(deviceId);
+          const stats = getConnectionStats(connections);
+          const free = Math.max(stats.total - stats.connected, 0);
+          const isOnCanvas = canvasDeviceIds.has(deviceId);
+          return (
+            <Card
+              key={deviceId}
+              className={`${styles.card} ${isOnCanvas ? styles.cardDisabled : ''}`}
+              draggable={!isOnCanvas}
+              onDragStart={(event) => {
+                if (isOnCanvas) return;
+                event.dataTransfer.setData('application/guia-device-id', deviceId);
+                event.dataTransfer.effectAllowed = 'move';
+              }}
+            >
+              <div className={styles.cardRow}>
+                <Text weight="semibold">{device.new_name || 'Equipamento'}</Text>
+                {isOnCanvas && <Badge size="small">No canvas</Badge>}
+              </div>
+              <Text size={200} className={styles.metaText}>
+                {modelLabel}
+              </Text>
+              <Text size={200} className={styles.metaText}>
+                {device.new_localizacao || 'Sem localização'}
+              </Text>
+              <div className={styles.cardRow}>
+                <Text size={200} className={styles.metaText}>
+                  {free} livres / {stats.total} portas
+                </Text>
+                <Badge appearance={stats.connected > 0 ? 'filled' : 'outline'} size="small">
+                  {stats.connected > 0 ? 'Conectado' : 'Livre'}
+                </Badge>
+              </div>
+            </Card>
+          );
+        })}
+        {devices.length === 0 && (
+          <Text size={200} className={styles.metaText}>
+            Nenhum equipamento encontrado.
+          </Text>
         )}
       </div>
-    </div>
+    </aside>
   );
-};
+}

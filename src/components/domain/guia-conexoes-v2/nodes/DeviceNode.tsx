@@ -1,167 +1,164 @@
-import { memo, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
-import { Card, Badge, Text, makeStyles, tokens } from '@fluentui/react-components';
-import type { GuiaDeviceIO, GuiaDeviceIOConnection } from '../../../../types/guiaConexoes';
+import type { NodeProps } from 'reactflow';
+import { Handle, Position } from 'reactflow';
+import { Badge, Text, makeStyles, tokens } from '@fluentui/react-components';
+
+export type DevicePortState = 'free' | 'connected' | 'manual' | 'incompatible';
+
+export type DevicePortData = {
+  id: string;
+  label: string;
+  typeLabel: string;
+  directionLabel: string;
+  direction?: number | null;
+  state: DevicePortState;
+  isConnectable: boolean;
+  allowInput: boolean;
+  allowOutput: boolean;
+};
+
+export type DeviceNodeData = {
+  title: string;
+  modelLabel?: string;
+  locationLabel?: string;
+  ports: DevicePortData[];
+};
 
 const useStyles = makeStyles({
-  nodeContainer: {
-    minWidth: '200px',
+  node: {
+    borderRadius: '10px',
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground1,
-    border: `2px solid ${tokens.colorNeutralStroke1}`,
-    borderRadius: tokens.borderRadiusLarge,
-    padding: tokens.spacingHorizontalM,
+    boxShadow: tokens.shadow4,
+    minWidth: '260px',
   },
-  nodeHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: tokens.spacingVerticalS,
-    paddingBottom: tokens.spacingVerticalS,
+  header: {
+    padding: '12px 12px 8px 12px',
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     cursor: 'grab',
   },
-  nodeTitle: {
-    fontWeight: 600,
-    marginBottom: '2px',
+  headerTitle: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
   },
-  nodeLocation: {
-    fontSize: '11px',
-    color: tokens.colorNeutralForegroundDisabled,
+  locationBadge: {
+    alignSelf: 'flex-start',
   },
   portsGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: tokens.spacingHorizontalS,
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '8px',
+    padding: '10px 12px 12px 12px',
   },
-  portContainer: {
+  portCard: {
+    position: 'relative',
+    borderRadius: '8px',
+    padding: '8px 10px',
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    minHeight: '44px',
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXS,
+    gap: '2px',
   },
-  port: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalXS,
-    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalXS}`,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusSmall,
-    fontSize: '12px',
-    minHeight: '28px',
+  portFree: {
+    borderColor: tokens.colorPaletteGreenBorder2,
+    backgroundColor: tokens.colorPaletteGreenBackground1,
   },
   portConnected: {
-    backgroundColor: tokens.colorStatusSuccessBackground2,
-    color: tokens.colorStatusSuccessForeground2,
+    borderColor: tokens.colorNeutralStroke2,
+    backgroundColor: tokens.colorNeutralBackground3,
   },
   portManual: {
-    backgroundColor: tokens.colorStatusWarningBackground2,
-    color: tokens.colorStatusWarningForeground2,
+    borderColor: tokens.colorPaletteYellowBorder2,
+    backgroundColor: tokens.colorPaletteYellowBackground1,
   },
   portIncompatible: {
-    backgroundColor: tokens.colorPaletteRedBackground3,
-    opacity: 0.6,
+    borderColor: tokens.colorPaletteRedBorder2,
+    backgroundColor: tokens.colorPaletteRedBackground1,
+    opacity: 0.7,
   },
-  portIndicator: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    display: 'inline-block',
+  portMeta: {
+    color: tokens.colorNeutralForeground3,
+    fontSize: tokens.fontSizeBase200,
   },
-  portLabel: {
-    flex: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as const,
+  handle: {
+    width: '10px',
+    height: '10px',
+    borderRadius: '999px',
+    border: `2px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground1,
   },
 });
 
-interface DeviceNodeData {
-  device: GuiaDeviceIO;
-  connections: GuiaDeviceIOConnection[];
-  modelName?: string;
-}
+const getPortStateClass = (state: DevicePortState, styles: ReturnType<typeof useStyles>) => {
+  if (state === 'connected') return styles.portConnected;
+  if (state === 'manual') return styles.portManual;
+  if (state === 'incompatible') return styles.portIncompatible;
+  return styles.portFree;
+};
 
-export const DeviceNode = memo(function DeviceNode({
-  data,
-  id,
-}: NodeProps<DeviceNodeData>) {
+const buildHandleId = (portId: string, suffix: 'in' | 'out') => `${portId}:${suffix}`;
+
+export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
   const styles = useStyles();
-  const { device, connections, modelName } = data;
-
-  // Agrupar conexões por porta (device)
-  const portsByDevice = connections.filter(
-    (c) => c._new_device_value === device.new_deviceioid
-  );
-
-  const getPortStatus = useCallback((connection: GuiaDeviceIOConnection) => {
-    if (connection._new_connectedto_value) {
-      return 'connected';
-    }
-    if (connection.new_connectedtomanual) {
-      return 'manual';
-    }
-    return 'free';
-  }, []);
 
   return (
-    <Card className={styles.nodeContainer}>
-      <div className={styles.nodeHeader}>
-        <div>
-          <Text className={styles.nodeTitle}>{device.new_name}</Text>
-          <Text className={styles.nodeLocation}>{modelName}</Text>
-          {device.new_localizacao && (
-            <Badge size="small" appearance="outline">
-              {device.new_localizacao}
-            </Badge>
+    <div className={styles.node}>
+      <div className={`${styles.header} device-node__header`}>
+        <div className={styles.headerTitle}>
+          <Text weight="semibold" size={300}>
+            {data.title || 'Equipamento'}
+          </Text>
+          {data.modelLabel && (
+            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+              {data.modelLabel}
+            </Text>
           )}
         </div>
+        <Badge appearance="outline" size="small" className={styles.locationBadge}>
+          {data.locationLabel || 'Sem localização'}
+        </Badge>
       </div>
-
-      {portsByDevice.length === 0 ? (
-        <Text size={200}>Nenhuma porta</Text>
-      ) : (
-        <div className={styles.portsGrid}>
-          {portsByDevice.map((connection, index) => {
-            const status = getPortStatus(connection);
-            const statusClass = {
-              connected: styles.portConnected,
-              manual: styles.portManual,
-              free: '',
-            }[status];
-
-            return (
-              <div
-                key={`port-${connection.new_deviceioconnectionid}`}
-                className={styles.portContainer}
-              >
-                <Handle
-                  type="source"
-                  position={index % 2 === 0 ? Position.Left : Position.Right}
-                  id={`${id}-${connection.new_deviceioconnectionid}-source`}
-                  style={{
-                    background: status === 'connected' ? '#107C10' : '#FFB900',
-                  }}
-                />
-                <Handle
-                  type="target"
-                  position={index % 2 === 0 ? Position.Left : Position.Right}
-                  id={`${id}-${connection.new_deviceioconnectionid}-target`}
-                  style={{
-                    background: status === 'connected' ? '#107C10' : '#FFB900',
-                  }}
-                />
-                <div className={`${styles.port} ${statusClass}`}>
-                  <span className={styles.portIndicator} />
-                  <span className={styles.portLabel}>
-                    {connection.new_name || connection.new_displayname || `Porta ${index + 1}`}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Card>
+      <div className={styles.portsGrid}>
+        {data.ports.map((port) => (
+          <div
+            key={port.id}
+            className={`${styles.portCard} ${getPortStateClass(port.state, styles)}`}
+          >
+            {port.allowInput && (
+              <Handle
+                type="target"
+                id={buildHandleId(port.id, 'in')}
+                position={Position.Left}
+                className={styles.handle}
+                isConnectable={port.isConnectable}
+                style={{ top: '50%' }}
+              />
+            )}
+            {port.allowOutput && (
+              <Handle
+                type="source"
+                id={buildHandleId(port.id, 'out')}
+                position={Position.Right}
+                className={styles.handle}
+                isConnectable={port.isConnectable}
+                style={{ top: '50%' }}
+              />
+            )}
+            <Text size={200} weight="medium">
+              {port.label}
+            </Text>
+            <span className={styles.portMeta}>
+              {port.typeLabel} · {port.directionLabel}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
-});
-
-DeviceNode.displayName = 'DeviceNode';
+}

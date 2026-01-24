@@ -1,144 +1,114 @@
-import ELK, { ElkNode } from 'elkjs';
-import type { Node, Edge } from 'reactflow';
+import ELK from 'elkjs/lib/elk.bundled.js';
+import type { Edge, Node } from 'reactflow';
 
 const elk = new ELK();
 
-interface LayoutOptions {
-  direction?: 'LR' | 'TB' | 'RL' | 'BT';
-  rankSpacing?: number;
-  nodeSpacing?: number;
-  groupByLocation?: boolean;
-  locationMap?: Map<string, string>;
-}
+const NODE_WIDTH = 280;
+const HEADER_HEIGHT = 52;
+const PORT_ROW_HEIGHT = 28;
+const PORTS_PER_ROW = 2;
+const NODE_PADDING = 16;
+const MIN_HEIGHT = 140;
 
-async function layoutNodes(
+export const getDeviceNodeSize = (portCount: number) => {
+  const rows = Math.max(1, Math.ceil(portCount / PORTS_PER_ROW));
+  const height = HEADER_HEIGHT + NODE_PADDING * 2 + rows * PORT_ROW_HEIGHT;
+  return {
+    width: NODE_WIDTH,
+    height: Math.max(MIN_HEIGHT, height),
+  };
+};
+
+type ElkNode = {
+  id: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  children?: ElkNode[];
+};
+
+const collectPositions = (
+  node: ElkNode,
+  offsetX: number,
+  offsetY: number,
+  positions: Map<string, { x: number; y: number }>
+) => {
+  const currentX = offsetX + (node.x ?? 0);
+  const currentY = offsetY + (node.y ?? 0);
+  if (node.children && node.children.length > 0) {
+    node.children.forEach((child) => collectPositions(child, currentX, currentY, positions));
+    return;
+  }
+  if (node.x !== undefined && node.y !== undefined) {
+    positions.set(node.id, { x: currentX, y: currentY });
+  }
+};
+
+export const applyAutoLayout = async (
   nodes: Node[],
-  edges: Edge[],
-  options: LayoutOptions = {}
-): Promise<Node[]> {
-  const {
-    direction = 'LR',
-    rankSpacing = 190,
-    nodeSpacing = 40,
-    groupByLocation = true,
-    locationMap,
-  } = options;
-
+  edges: Edge[]
+): Promise<Node[]> => {
   if (nodes.length === 0) return nodes;
 
-  // Agrupar nós por localização se groupByLocation estiver ativo
-  const groups = new Map<string, Node[]>();
-  const deviceGroups = new Map<string, string>();
+  const groups = new Map<string, { id: string; label: string; children: ElkNode[] }>();
 
-  if (groupByLocation && locationMap) {
-    nodes.forEach((node) => {
-      const location = locationMap.get(node.id) || 'Sem localização';
-      if (!groups.has(location)) {
-        groups.set(location, []);
-      }
-      groups.get(location)!.push(node);
-      deviceGroups.set(node.id, location);
-    });
-  }
+  for (const node of nodes) {
+    const locationLabel =
+      (node.data as { locationLabel?: string; device?: { new_localizacao?: string | null } })
+        ?.locationLabel ??
+      (node.data as { device?: { new_localizacao?: string | null } })?.device?.new_localizacao ??
+      'Sem localização';
+    const locationKey = locationLabel?.trim() ? locationLabel.trim() : 'Sem localização';
+    const groupId = `location:${locationKey}`;
 
-  // Construir estrutura ELK
-  const elkChildren: ElkNode[] = [];
-  let nodeIndex = 0;
-
-  if (groupByLocation && groups.size > 0) {
-    // Criar grupos por localização
-    for (const [location, groupNodes] of groups) {
-      const groupElkNodes: ElkNode[] = groupNodes.map((node) => ({
-        id: node.id,
-        width: 200,
-        height: 120,
-      }));
-
-      elkChildren.push({
-        id: `group-${location.replace(/\s+/g, '-')}`,
-        children: groupElkNodes,
-        layoutOptions: {
-          'elk.algorithm': 'layered',
-          'elk.direction': direction,
-          'elk.spacing.nodeNode': `${nodeSpacing}`,
-        },
-      });
+    if (!groups.has(groupId)) {
+      groups.set(groupId, { id: groupId, label: locationKey, children: [] });
     }
-  } else {
-    // Layout sem agrupamento
-    elkChildren.push(
-      ...nodes.map((node) => ({
-        id: node.id,
-        width: 200,
-        height: 120,
-      }))
-    );
-  }
 
-  // Construir arestas para ELK
-  const elkEdges = edges.map((edge) => ({
-    id: edge.id,
-    sources: [edge.source],
-    targets: [edge.target],
-  }));
-
-  try {
-    const layout = await elk.layout({
-      id: 'root',
-      layoutOptions: {
-        'elk.algorithm': groupByLocation && groups.size > 0 ? 'rectpacking' : 'layered',
-        'elk.direction': direction,
-        'elk.spacing.nodeNode': `${nodeSpacing}`,
-        'elk.spacing.rankNodeBetweenLayers': `${rankSpacing}`,
-      },
-      children: groupByLocation && groups.size > 0 ? elkChildren : undefined,
-      edges: groupByLocation && groups.size > 0 ? undefined : elkEdges,
-    } as any);
-
-    // Mapear posições de volta aos nós
-    const positionMap = new Map<string, { x: number; y: number }>();
-
-    const processLayoutChildren = (children: ElkNode[] | undefined) => {
-      if (!children) return;
-      children.forEach((child) => {
-        if (child.children) {
-          child.children.forEach((grandChild) => {
-            if (grandChild.x !== undefined && grandChild.y !== undefined) {
-              positionMap.set(grandChild.id, {
-                x: grandChild.x,
-                y: grandChild.y,
-              });
-            }
-          });
-        } else if (child.x !== undefined && child.y !== undefined) {
-          positionMap.set(child.id, {
-            x: child.x,
-            y: child.y,
-          });
-        }
-      });
-    };
-
-    processLayoutChildren(layout.children);
-
-    // Atualizar posições dos nós
-    return nodes.map((node) => {
-      const position = positionMap.get(node.id) || node.position;
-      return {
-        ...node,
-        position: position || { x: 0, y: 0 },
-      };
+    const ports = (node.data as { ports?: unknown[] })?.ports ?? [];
+    const portCount = Array.isArray(ports) ? ports.length : 0;
+    const { width, height } = getDeviceNodeSize(portCount);
+    groups.get(groupId)?.children.push({
+      id: node.id,
+      width,
+      height,
     });
-  } catch (err) {
-    console.error('Erro ao aplicar auto-layout:', err);
-    return nodes;
   }
-}
 
-export async function applyAutoLayout(
-  nodes: Node[],
-  edges: Edge[],
-  options?: LayoutOptions
-): Promise<Node[]> {
-  return layoutNodes(nodes, edges, options);
-}
+  const elkGraph = {
+    id: 'root',
+    layoutOptions: {
+      'elk.direction': 'RIGHT',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '190',
+      'elk.spacing.nodeNode': '40',
+      'elk.spacing.componentComponent': '60',
+    },
+    children: Array.from(groups.values()).map((group) => ({
+      id: group.id,
+      children: group.children,
+      layoutOptions: {
+        'elk.padding': '[top=30,left=30,bottom=30,right=30]',
+        'elk.spacing.nodeNode': '40',
+      },
+    })),
+    edges: edges.map((edge) => ({
+      id: edge.id,
+      sources: [edge.source],
+      targets: [edge.target],
+    })),
+  };
+
+  const layout = await elk.layout(elkGraph);
+  const positions = new Map<string, { x: number; y: number }>();
+  collectPositions(layout as ElkNode, 0, 0, positions);
+
+  return nodes.map((node) => {
+    const position = positions.get(node.id);
+    if (!position) return node;
+    return {
+      ...node,
+      position,
+    };
+  });
+};

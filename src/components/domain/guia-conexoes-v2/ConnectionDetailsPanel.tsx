@@ -1,208 +1,117 @@
-import { useCallback, useMemo } from 'react';
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-  DialogBody,
-  DialogActions,
-  Button,
-  Text,
-  Badge,
-  Card,
-  makeStyles,
-  tokens,
-  Divider,
-} from '@fluentui/react-components';
-import { Delete24Regular, ChevronUp24Regular } from '@fluentui/react-icons';
-import type { GuiaDeviceIO, GuiaDeviceIOConnection } from '../../../types/guiaConexoes';
-import { connectionTypeOptions, connectionDirectionOptions } from '../../../utils/device-io/optionSetMaps';
-import { clearDeviceIOConnectionLink } from '../../../utils/guia-conexoes/deleteDevice';
+import { useEffect, useState } from 'react';
+import { Button, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { ChevronDown24Regular, ChevronUp24Regular, Delete24Regular } from '@fluentui/react-icons';
+
+export type ConnectionDetails = {
+  id: string;
+  sourceLabel: string;
+  targetLabel: string;
+  typeLabel?: string;
+};
+
+interface ConnectionDetailsPanelProps {
+  details: ConnectionDetails | null;
+  onRemove: () => void;
+  removing: boolean;
+}
 
 const useStyles = makeStyles({
   panel: {
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground1,
-    borderTop: `2px solid ${tokens.colorNeutralStroke1}`,
-    boxShadow: tokens.shadow28,
-    zIndex: 100,
+    padding: '12px 16px',
   },
-  panelContent: {
-    padding: tokens.spacingHorizontalL,
-    maxHeight: '300px',
-    overflow: 'auto',
-  },
-  panelHeader: {
+  header: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: tokens.spacingVerticalM,
-    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    justifyContent: 'space-between',
+    gap: '12px',
   },
-  connectionInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-    marginTop: tokens.spacingVerticalM,
+  content: {
+    marginTop: '12px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: '12px',
   },
-  infoRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
+  muted: {
+    color: tokens.colorNeutralForeground3,
   },
-  infoLabel: {
-    fontWeight: 600,
-    color: tokens.colorNeutralForeground1,
-  },
-  deviceInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    padding: tokens.spacingHorizontalM,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusSmall,
+  empty: {
+    padding: '8px 0',
   },
   actions: {
     display: 'flex',
-    gap: tokens.spacingHorizontalS,
-    justifyContent: 'flex-end',
-    paddingTop: tokens.spacingVerticalM,
-    borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+    gap: '8px',
+    marginTop: '12px',
   },
 });
 
-interface ConnectionDetailsPanelProps {
-  edgeId: string;
-  connections: GuiaDeviceIOConnection[];
-  devices: GuiaDeviceIO[];
-  onClose: () => void;
-  onRemoveConnection: () => void;
-}
-
-export const ConnectionDetailsPanel: React.FC<ConnectionDetailsPanelProps> = ({
-  edgeId,
-  connections,
-  devices,
-  onClose,
-  onRemoveConnection,
-}) => {
+export function ConnectionDetailsPanel({ details, onRemove, removing }: ConnectionDetailsPanelProps) {
   const styles = useStyles();
+  const [collapsed, setCollapsed] = useState(false);
 
-  // Parse edge ID para obter device IDs
-  const [sourceDeviceId, targetDeviceId] = edgeId.split('-');
-
-  // Encontrar conexões
-  const sourceDevice = devices.find((d) => d.new_deviceioid === sourceDeviceId);
-  const targetDevice = devices.find((d) => d.new_deviceioid === targetDeviceId);
-
-  const sourceConnections = connections.filter(
-    (c) =>
-      c._new_device_value === sourceDeviceId &&
-      (c._new_connectedto_value === targetDeviceId ||
-        c._new_connectedto_value === targetDeviceId)
-  );
-
-  const connection = sourceConnections[0];
-
-  const getTypeLabel = useCallback((value: number | string | undefined | null) => {
-    if (!value) return 'Desconhecido';
-    const option = connectionTypeOptions.find((opt) => opt.value === value);
-    return option?.label || 'Desconhecido';
-  }, []);
-
-  const getDirectionLabel = useCallback((value: number | string | undefined | null) => {
-    if (!value) return 'Desconhecido';
-    const option = connectionDirectionOptions.find((opt) => opt.value === value);
-    return option?.label || 'Desconhecido';
-  }, []);
-
-  const handleRemoveConnection = useCallback(async () => {
-    try {
-      if (connection?._new_connectedto_value) {
-        await clearDeviceIOConnectionLink(
-          connection.new_deviceioconnectionid,
-          connection._new_connectedto_value
-        );
-      }
-      onRemoveConnection();
-    } catch (err) {
-      console.error('Erro ao remover conexão:', err);
+  useEffect(() => {
+    if (details) {
+      setCollapsed(false);
     }
-  }, [connection, onRemoveConnection]);
+  }, [details?.id]);
 
-  if (!sourceDevice || !targetDevice || !connection) {
-    return null;
+  if (!details) {
+    return (
+      <div className={styles.panel}>
+        <Text size={200} className={`${styles.muted} ${styles.empty}`}>
+          Selecione uma conexão para ver os detalhes.
+        </Text>
+      </div>
+    );
   }
 
   return (
     <div className={styles.panel}>
-      <div className={styles.panelContent}>
-        <div className={styles.panelHeader}>
-          <Text weight="semibold" size={500}>
-            Detalhes da Conexão
-          </Text>
-          <Button
-            icon={<ChevronUp24Regular />}
-            appearance="subtle"
-            onClick={onClose}
-          />
-        </div>
-
-        <div className={styles.connectionInfo}>
-          {/* Origem */}
-          <div className={styles.infoRow}>
-            <Text className={styles.infoLabel}>Origem</Text>
-            <Card className={styles.deviceInfo}>
-              <Text weight="semibold">{sourceDevice.new_name}</Text>
-              <Text size={200}>Porta: {connection.new_name || connection.new_displayname}</Text>
-              {sourceDevice.new_localizacao && (
-                <Badge appearance="outline" size="small">
-                  {sourceDevice.new_localizacao}
-                </Badge>
-              )}
-            </Card>
+      <div className={styles.header}>
+        <Text weight="semibold">Detalhes da conexão</Text>
+        <Button
+          appearance="subtle"
+          icon={collapsed ? <ChevronUp24Regular /> : <ChevronDown24Regular />}
+          onClick={() => setCollapsed((prev) => !prev)}
+        >
+          {collapsed ? 'Expandir' : 'Recolher'}
+        </Button>
+      </div>
+      {!collapsed && (
+        <>
+          <div className={styles.content}>
+            <div>
+              <Text size={200} className={styles.muted}>
+                Origem
+              </Text>
+              <Text>{details.sourceLabel}</Text>
+            </div>
+            <div>
+              <Text size={200} className={styles.muted}>
+                Destino
+              </Text>
+              <Text>{details.targetLabel}</Text>
+            </div>
+            <div>
+              <Text size={200} className={styles.muted}>
+                Tipo
+              </Text>
+              <Text>{details.typeLabel || 'Não informado'}</Text>
+            </div>
           </div>
-
-          {/* Destino */}
-          <div className={styles.infoRow}>
-            <Text className={styles.infoLabel}>Destino</Text>
-            <Card className={styles.deviceInfo}>
-              <Text weight="semibold">{targetDevice.new_name}</Text>
-              {targetDevice.new_localizacao && (
-                <Badge appearance="outline" size="small">
-                  {targetDevice.new_localizacao}
-                </Badge>
-              )}
-            </Card>
-          </div>
-
-          {/* Detalhes da conexão */}
-          <Divider />
-          <div className={styles.infoRow}>
-            <Text className={styles.infoLabel}>Tipo</Text>
-            <Text>{getTypeLabel(connection.new_tipodeconexao)}</Text>
-          </div>
-
-          <div className={styles.infoRow}>
-            <Text className={styles.infoLabel}>Direção</Text>
-            <Text>{getDirectionLabel(connection.new_direcao)}</Text>
-          </div>
-
-          {/* Ações */}
           <div className={styles.actions}>
             <Button
+              appearance="primary"
               icon={<Delete24Regular />}
-              appearance="subtle"
-              onClick={handleRemoveConnection}
+              onClick={onRemove}
+              disabled={removing}
             >
               Remover vínculo
             </Button>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
-};
+}

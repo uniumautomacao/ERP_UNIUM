@@ -4,7 +4,7 @@ export const VERSION_HISTORY = [
   {
     version: '0.1.54',
     date: '2026-01-24',
-    changes: 'Implementação inicial do Guia de Conexões v2 com blueprint interativo: página, navegação, painel lateral (busca/filtro), canvas React Flow com nós customizados, handles de portas, arestas com labels, painel de detalhes de conexão, auto-layout com ELK e persistência em localStorage.',
+    changes: 'Implementado Guia de Conexões v2 com canvas interativo, paleta, auto-layout e persistência local.',
   },
   {
     version: '0.1.53',

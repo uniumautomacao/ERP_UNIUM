@@ -19,6 +19,7 @@ import { HomePage } from '../pages/HomePage';
 import { TimelinePage } from '../pages/section0-installations/TimelinePage';
 import { GaleriaFotosPage } from '../pages/section0-installations/GaleriaFotosPage';
 import { GuiaConexoesPage } from '../pages/section0-installations/GuiaConexoesPage';
+import { GuiaConexoesV2Page } from '../pages/section0-installations/GuiaConexoesV2Page';
 import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
 import { CadastroRapidoProdutoPage } from '../pages/section-cadastros/CadastroRapidoProdutoPage';
 import { AjustesCadastroProdutosPage } from '../pages/section-cadastros/AjustesCadastroProdutosPage';
@@ -38,7 +39,6 @@ import { DevPage } from '../pages/section3-dev/DevPage';
 import { QrCodeScannerPage } from '../pages/section3-dev/QrCodeScannerPage';
 import { MermaidPrototypePage } from '../pages/section3-dev/MermaidPrototypePage';
 import { InteligenciaComercialPage } from '../pages/section5-comercial/InteligenciaComercialPage';
-import { GuiaConexoesV2Page } from '../pages/section0-installations/GuiaConexoesV2Page';
 
 export const navigation: NavSection[] = [
   {
