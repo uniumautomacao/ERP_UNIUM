@@ -984,6 +984,18 @@ export function GuiaConexoesV2Page() {
     });
   }, [flowInstance, selectedProjectId]);
 
+  const handleExpandAllPorts = useCallback(() => {
+    if (connectedDeviceIdList.length === 0) return;
+    setNodeShowAllPorts((prev) => {
+      const next = { ...prev };
+      connectedDeviceIdList.forEach((deviceId) => {
+        next[deviceId] = true;
+      });
+      return next;
+    });
+    setLayoutPending(true);
+  }, [connectedDeviceIdList]);
+
   useEffect(() => {
     if (!layoutPending) return;
     if (nodes.length === 0) {
@@ -1369,6 +1381,12 @@ export function GuiaConexoesV2Page() {
             disabled={!selectedProjectId || connectedDeviceIdList.length === 0 || autoRootPending}
           >
             Raiz automática
+          </Button>
+          <Button
+            onClick={handleExpandAllPorts}
+            disabled={!selectedProjectId || connectedDeviceIdList.length === 0}
+          >
+            Expandir todas
           </Button>
           <Button
             appearance="primary"
