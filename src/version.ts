@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.75';
+export const APP_VERSION = '0.1.76';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.76',
+    date: '2026-01-24',
+    changes: 'Adicionado botão para remover equipamento e conexões vinculadas.',
+  },
   {
     version: '0.1.75',
     date: '2026-01-24',

@@ -1,7 +1,7 @@
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
 import { Badge, Button, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Eye24Regular, EyeOff24Regular } from '@fluentui/react-icons';
+import { Delete24Regular, Eye24Regular, EyeOff24Regular } from '@fluentui/react-icons';
 
 export type DevicePortState = 'free' | 'connected' | 'manual' | 'incompatible';
 
@@ -26,6 +26,7 @@ export type DeviceNodeData = {
   ports: DevicePortData[];
   showAllPorts?: boolean;
   onToggleShowAll?: () => void;
+  onDelete?: () => void;
 };
 
 const useStyles = makeStyles({
@@ -49,6 +50,11 @@ const useStyles = makeStyles({
     flexDirection: 'row',
     gap: '8px',
     alignItems: 'center',
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
   locationBadge: {
     alignSelf: 'flex-start',
@@ -165,7 +171,7 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
             {data.title || 'Equipamento'}
           </Text>
         </div>
-        <div className={styles.headerTitle}>
+        <div className={styles.headerActions}>
           <Badge appearance="outline" size="small" className={styles.locationBadge}>
             {data.locationLabel || 'Sem localização'}
           </Badge>
@@ -174,6 +180,12 @@ export function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
             size="small"
             icon={data.showAllPorts ? <Eye24Regular /> : <EyeOff24Regular />}
             onClick={data.onToggleShowAll}
+          />
+          <Button
+            appearance="subtle"
+            size="small"
+            icon={<Delete24Regular />}
+            onClick={data.onDelete}
           />
         </div>
       </div>

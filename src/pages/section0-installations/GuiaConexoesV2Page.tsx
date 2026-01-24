@@ -41,7 +41,7 @@ import { useGuiaConexoesData } from '../../hooks/guia-conexoes/useGuiaConexoesDa
 import type { GuiaDeviceIO, GuiaDeviceIOConnection } from '../../types/guiaConexoes';
 import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
-import { clearDeviceIOConnectionLink } from '../../utils/guia-conexoes/deleteDevice';
+import { clearDeviceIOConnectionLink, deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
 import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/device-io/optionSetMaps';
 import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
 import { DisconnectedDevicesSidebar } from '../../components/domain/guia-conexoes-v2/DisconnectedDevicesSidebar.tsx';
@@ -563,6 +563,7 @@ export function GuiaConexoesV2Page() {
               }));
               setLayoutPending(true);
             },
+            onDelete: () => handleDeleteDevice(deviceId, device.new_name),
           },
         });
       }
@@ -849,6 +850,24 @@ export function GuiaConexoesV2Page() {
       await linkPorts(sourceId, targetId);
     },
     [linkPorts]
+  );
+
+  const handleDeleteDevice = useCallback(
+    async (deviceId: string, deviceName?: string | null) => {
+      const confirm = window.confirm(
+        `Deseja remover o equipamento${deviceName ? ` "${deviceName}"` : ''} e todas as conexões?`
+      );
+      if (!confirm) return;
+      setActionError(null);
+      try {
+        await deleteDeviceWithConnections(deviceId);
+        await reload();
+        setLayoutPending(true);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao remover equipamento.'));
+      }
+    },
+    [reload]
   );
 
   const handleRemoveLink = useCallback(
