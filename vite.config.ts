@@ -20,4 +20,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["elkjs"],
+    exclude: ["@vite/client", "@vite/env"],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          elkjs: ["elkjs"],
+        },
+      },
+    },
+  },
 });
