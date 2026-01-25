@@ -19,13 +19,14 @@ export function SidebarItem({ icon, label, path, exact, isCollapsed, onClick }: 
         return (
           <Button
             appearance="subtle"
+            className="text-left"
             icon={IconElement}
             style={{
               width: '100%',
-              justifyContent: isCollapsed ? 'flex-start' : 'flex-start',
+              justifyContent: 'flex-start',
               height: '36px',
-              paddingLeft: isCollapsed ? '10px' : '12px',
-              paddingRight: isCollapsed ? '0px' : '12px',
+              paddingLeft: '12px',
+              paddingRight: '12px',
               borderRadius: '4px',
               backgroundColor: isActive ? tokens.colorBrandBackground2 : 'transparent',
               color: isActive ? tokens.colorBrandForeground1 : tokens.colorNeutralForeground1,
