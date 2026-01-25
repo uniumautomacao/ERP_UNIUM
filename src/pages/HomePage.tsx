@@ -23,7 +23,7 @@ export function HomePage() {
     <>
       <PageHeader
         title="Bem-vindo ao Stoa"
-        subtitle="Template UI - Estilo Model-Driven App"
+        subtitle="Clareza para decidir."
       />
       <PageContainer>
         {sections.length === 0 ? (
