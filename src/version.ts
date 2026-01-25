@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.117';
+export const APP_VERSION = '0.1.118';
 export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.118',
+    date: '2026-01-25',
+    changes: 'Alinhado o conteúdo das células expandidas ao centro horizontalmente.',
+  },
   {
     version: '0.1.117',
     date: '2026-01-25',

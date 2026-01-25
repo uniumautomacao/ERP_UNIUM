@@ -1937,7 +1937,7 @@ export function useUsoInstaladorController({
     const innerContainerStyle: React.CSSProperties = {
       display: 'flex',
       flexDirection: 'column',
-      alignItems: isParent && isCollapsed ? 'flex-start' : (!isParent && activity ? 'flex-start' : 'center'),
+      alignItems: isParent && isCollapsed ? 'flex-start' : 'center',
       gap: isMergedCell ? '0px' : '1px',
       padding: isMergedCell ? '0px' : '2px',
       width: '100%',
