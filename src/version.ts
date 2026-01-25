@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.113';
-export const APP_BUILD_DATE = '2026-01-26';
+export const APP_VERSION = '0.1.114';
+export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.114',
+    date: '2026-01-25',
+    changes: 'Melhorada a visualização da Linha do Tempo com cards de atividades e horários visíveis no modo colapsado e expandido.',
+  },
   {
     version: '0.1.113',
     date: '2026-01-26',

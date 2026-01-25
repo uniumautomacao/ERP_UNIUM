@@ -11,7 +11,7 @@
   --row-height-parent: 42px;
   --row-height-child: 34px;
   --column-width-name: 120px;
-  --column-width-day: 72px;
+  --column-width-day: 100px;
   --color-bar-width: 4px;
   --indent-width: 24px;
 
@@ -300,6 +300,10 @@
   overflow: visible;
 }
 
+.uso-instalador__installer-name-cell--collapsed {
+  height: auto;
+}
+
 .uso-instalador__installer-name-wrapper {
   display: flex;
   align-items: center;
@@ -507,6 +511,64 @@
   padding-left: 8px;
 }
 
+.uso-instalador__activity-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.uso-instalador__activity-stack--spanning {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+}
+
+.uso-instalador__activity-card {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--ui-surface);
+  border-left: 3px solid transparent;
+  font-size: 11px;
+  line-height: 1.2;
+  min-height: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.uso-instalador__activity-card-time {
+  font-weight: 700;
+  color: var(--ui-text-primary);
+  flex-shrink: 0;
+  width: 48px;
+}
+
+.uso-instalador__activity-card-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ui-text-secondary);
+}
+
+.uso-instalador__activity-card-icon {
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.uso-instalador__activity-more {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ui-text-muted);
+  padding-left: 2px;
+}
+
 .uso-instalador__project-summary {
   width: 100%;
   display: flex;
@@ -644,6 +706,23 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
+}
+
+.uso-instalador__activity-project-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ui-text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.uso-instalador__activity-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ui-text-secondary);
 }
 
 .uso-instalador__inline-editor {
@@ -1091,6 +1170,11 @@
     font-size: 11px;
   }
 
+  .uso-instalador__activity-card-name,
+  .uso-instalador__activity-project-name {
+    display: none;
+  }
+
   .uso-instalador__legend {
     display: none;
   }
@@ -1108,6 +1192,10 @@
 
   .uso-instalador__project-indent {
     display: none;
+  }
+
+  .uso-instalador__activity-card-time {
+    width: 40px;
   }
 }
 

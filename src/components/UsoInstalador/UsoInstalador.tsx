@@ -1904,6 +1904,10 @@ export function useUsoInstaladorController({
     const isOverload = dayInfo?.hasOverload || false;
     const isCritical = dayInfo?.hasCriticalOverload || false;
     const hasConflict = dayInfo?.hasConflict || false;
+    const maxCollapsedActivities = 3;
+    const collapsedActivities = isParent && isCollapsed && dayInfo
+      ? [...dayInfo.activities].sort((a, b) => a.startTime.localeCompare(b.startTime))
+      : [];
     
     const cellClasses = [
       isParent ? 'uso-instalador__hours-cell' : 'uso-instalador__project-hours-cell',
@@ -1918,27 +1922,12 @@ export function useUsoInstaladorController({
       isParent && isCollapsed && 'uso-instalador__hours-cell--collapsed',
     ].filter(Boolean).join(' ');
     
-    // Resumo de projetos para células colapsadas
-    const projectSummary = isParent && isCollapsed && dayInfo && dayInfo.activities.length > 0
-      ? (() => {
-          // Mapear projectId -> projectName (mantendo a primeira ocorrência)
-          const projectMap = new Map<string, string>();
-          dayInfo.activities.forEach(a => {
-            if (a.projectId && a.projectName && !projectMap.has(a.projectId)) {
-              projectMap.set(a.projectId, a.projectName);
-            }
-          });
-
-          const projectList = Array.from(projectMap.entries()).map(([id, name]) => ({ id, name }));
-          const displayList = projectList.slice(0, 5);
-          const hasMore = projectList.length > 5;
-
-          return { projects: displayList, hasMore };
-        })()
-      : null;
+    const collapsedTitle = collapsedActivities.length > 0
+      ? collapsedActivities.map(a => `${a.startTime} ${a.projectName}`).join(', ')
+      : undefined;
     
     // Horário da atividade para células expandidas
-    const activityTime = !isParent && activity ? `${activity.startTime}` : null;
+    const activityTime = !isParent && activity ? `${activity.startTime}-${activity.endTime}` : null;
     
     // Determine merge state for this cell
     const isMergedCell = typeof installerIndex === 'number' && typeof dayIndex === 'number' && (() => {
@@ -1949,7 +1938,7 @@ export function useUsoInstaladorController({
     const innerContainerStyle: React.CSSProperties = {
       display: 'flex',
       flexDirection: 'column',
-      alignItems: isParent && isCollapsed ? 'flex-start' : 'center',
+      alignItems: isParent && isCollapsed ? 'flex-start' : (!isParent && activity ? 'flex-start' : 'center'),
       gap: isMergedCell ? '0px' : '1px',
       padding: isMergedCell ? '0px' : '2px',
       width: '100%',
@@ -1979,68 +1968,57 @@ export function useUsoInstaladorController({
       <div
         className={cellClasses}
         onClick={() => activity && handleCellClick(activity)}
-        title={projectSummary ? projectSummary.projects.map(p => p.name).join(', ') : undefined}
+        title={isParent && isCollapsed ? collapsedTitle : undefined}
       >
         {isEmpty ? '—' : (
           <div style={innerContainerStyle}>
             {/* Quando colapsado: priorizar nomes de projetos */}
             {isParent && isCollapsed ? (
               <>
-                {projectSummary && (() => {
-                  // Check if this cell is part of a merge group
-                  let mergeInfo: { pos: number; len: number; activity: { projectId: string } } | null = null;
+                {collapsedActivities.length > 0 && (() => {
+                  let mergeInfo: { pos: number; len: number } | null = null;
                   if (typeof installerIndex === 'number' && typeof dayIndex === 'number') {
                     const groups = verticalMergeGroups[dayIndex] || [];
                     const group = groups.find(g => installerIndex >= g.start && installerIndex < g.start + g.len);
                     if (group) {
-                      mergeInfo = { pos: installerIndex - group.start, len: group.len, activity: group.activity };
+                      mergeInfo = { pos: installerIndex - group.start, len: group.len };
                     }
                   }
 
-                  // If we're in a merged cell but NOT the top, hide chip content
+                  const displayActivities = collapsedActivities.slice(0, maxCollapsedActivities);
+                  const hiddenCount = collapsedActivities.length - displayActivities.length;
+                  const stackClasses = [
+                    'uso-instalador__activity-stack',
+                    mergeInfo && mergeInfo.pos === 0 ? 'uso-instalador__activity-stack--spanning' : null,
+                  ].filter(Boolean).join(' ');
+                  const stackStyle: React.CSSProperties = mergeInfo && mergeInfo.pos === 0
+                    ? { height: `${42 * mergeInfo.len}px` }
+                    : {};
+
                   if (mergeInfo && mergeInfo.pos > 0) {
-                    return <div className="uso-instalador__project-summary" style={{ visibility: 'hidden', height: '100%' }} />;
+                    return <div className={stackClasses} style={{ visibility: 'hidden', height: '100%' }} />;
                   }
 
                   return (
-                    <div className="uso-instalador__project-summary" style={{ display: 'flex', flexDirection: 'column', gap: mergeInfo ? '0px' : '2px', width: '100%', height: mergeInfo ? '100%' : 'auto', position: mergeInfo ? 'relative' : 'static' }}>
-                      {projectSummary.projects.map((p, idx) => {
-                        const color = projectColorMap[p.id] || projectColors(p.id);
-                        let chipClass = 'uso-instalador__project-summary-name uso-instalador__project-chip';
-                        let chipStyle: React.CSSProperties = { backgroundColor: color.background, color: color.text };
-
-                        // If this is the top cell of a merge group and the project matches
-                        if (mergeInfo && mergeInfo.pos === 0 && mergeInfo.activity.projectId === p.id) {
-                          chipClass += ' uso-instalador__project-chip--spanning';
-                          // Calculate height to span all merged cells
-                          const rowHeight = 42; // var(--row-height-parent)
-                          const spanHeight = rowHeight * mergeInfo.len;
-                          chipStyle = {
-                            ...chipStyle,
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: `${spanHeight}px`,
-                            zIndex: 5,
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '8px',
-                            borderRadius: '6px',
-                          };
-                        }
-
+                    <div className={stackClasses} style={stackStyle}>
+                      {displayActivities.map((collapsedActivity) => {
+                        const color = projectColorMap[collapsedActivity.projectId] || projectColors(collapsedActivity.projectId);
                         return (
-                          <span
-                            key={p.id}
-                            className={chipClass}
-                            style={chipStyle}
-                            title={p.name}
+                          <div
+                            key={collapsedActivity.id}
+                            className="uso-instalador__activity-card"
+                            style={{ borderLeftColor: color.background }}
+                            title={`${collapsedActivity.startTime}-${collapsedActivity.endTime} • ${collapsedActivity.projectName}`}
                           >
-                            {p.name}{idx === projectSummary.projects.length - 1 && projectSummary.hasMore ? '...' : ''}
-                          </span>
+                            <span className="uso-instalador__activity-card-time">{collapsedActivity.startTime}</span>
+                            <span className="uso-instalador__activity-card-name">{collapsedActivity.projectName}</span>
+                            <span className="uso-instalador__activity-card-icon">{ActivityTypeIcons[collapsedActivity.type]}</span>
+                          </div>
                         );
                       })}
+                      {hiddenCount > 0 && (
+                        <span className="uso-instalador__activity-more">+{hiddenCount} mais</span>
+                      )}
                     </div>
                   );
                 })()}
@@ -2183,9 +2161,14 @@ export function useUsoInstaladorController({
                       title={canEditActivityTime(activity) ? 'Clique para editar horário' : 'Apenas atividades futuras podem ter horário alterado'}
                       className="uso-instalador__inline-button"
                     >
-                      {activityTime}
+                      <span className="uso-instalador__activity-time">{activityTime}</span>
                     </Button>
                   )
+                )}
+                {!isParent && activity && (
+                  <span className="uso-instalador__activity-project-name" title={activity.projectName}>
+                    {activity.projectName}
+                  </span>
                 )}
               </>
             )}
@@ -2918,7 +2901,11 @@ export function useUsoInstaladorController({
                       style={{ backgroundColor: colorInfo.background }}
                       onClick={() => handleToggleExpand(installer.id)}
                     >
-                      <div className="uso-instalador__installer-cell uso-instalador__installer-name-cell">
+                      <div
+                        className={`uso-instalador__installer-cell uso-instalador__installer-name-cell ${
+                          !isExpanded ? 'uso-instalador__installer-name-cell--collapsed' : ''
+                        }`}
+                      >
                         <div 
                           className="uso-instalador__color-bar uso-instalador__color-bar--clickable"
                           style={{ backgroundColor: colorInfo.primary }}
