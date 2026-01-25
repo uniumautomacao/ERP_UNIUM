@@ -11,6 +11,7 @@ import {
 import {
   Add24Regular,
   ArrowClockwise24Regular,
+  Flowchart24Regular,
   Save24Regular,
 } from '@fluentui/react-icons';
 import {
@@ -30,6 +31,7 @@ import {
 import { AddConnectionDialog } from '../../components/domain/guia-conexoes-v2/AddConnectionDialog';
 import { EditDeviceLocationDialog } from '../../components/domain/guia-conexoes-v2/EditDeviceLocationDialog';
 import { NovoEquipamentoDialog } from '../../components/domain/guia-conexoes/NovoEquipamentoDialog';
+import { DiagramModal } from '../../components/domain/guia-conexoes/DiagramModal';
 import {
   DeviceNode,
   type DeviceNodeData,
@@ -53,6 +55,7 @@ import type { GuiaDeviceIO, GuiaDeviceIOConnection, GuiaModeloProduto } from '..
 import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { clearDeviceIOConnectionLink, deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
+import { generateMermaidGraph } from '../../utils/guia-conexoes/mermaid';
 import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/device-io/optionSetMaps';
 import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
 import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
@@ -155,7 +158,7 @@ const CONNECTION_TYPE_COLORS: Record<string, string> = {
   Ethernet: '#f97316',
   IR: '#166534',
   Serial: '#166534',
-  RF: '#ffffff',
+  RF: '#878787',
   RNET: '#60a5fa',
   ACNET: '#00ff0d',
   PNET: '#60a5fa',
@@ -374,6 +377,8 @@ export function GuiaConexoesV2Page() {
   const [nodeShowAllPorts, setNodeShowAllPorts] = useState<Record<string, boolean>>({});
   const [sidebarDragPortId, setSidebarDragPortId] = useState<string | null>(null);
   const [hoveredHandleId, setHoveredHandleId] = useState<string | null>(null);
+  const [diagramModalOpen, setDiagramModalOpen] = useState(false);
+  const [diagramCode, setDiagramCode] = useState('');
   const [dragPreview, setDragPreview] = useState<{
     start: { x: number; y: number };
     end: { x: number; y: number };
@@ -1229,6 +1234,18 @@ export function GuiaConexoesV2Page() {
     setLayoutPending(true);
   }, [areAllPortsExpanded, connectedDeviceIdList]);
 
+  const handleMermaidDiagram = useCallback(() => {
+    const diagram = generateMermaidGraph(
+      devices,
+      filteredConnections,
+      modelosMap,
+      rootDeviceId ?? undefined,
+      CONNECTION_TYPE_COLORS
+    );
+    setDiagramCode(diagram);
+    setDiagramModalOpen(true);
+  }, [devices, filteredConnections, modelosMap, rootDeviceId]);
+
   useEffect(() => {
     if (!layoutPending) return;
     if (nodes.length === 0) {
@@ -1622,6 +1639,13 @@ export function GuiaConexoesV2Page() {
             {areAllPortsExpanded ? 'Compactar todas' : 'Expandir todas'}
           </Button>
           <Button
+            icon={<Flowchart24Regular />}
+            onClick={handleMermaidDiagram}
+            disabled={!selectedProjectId || connectedDeviceIdList.length === 0}
+          >
+            Diagrama Mermaid
+          </Button>
+          <Button
             appearance="primary"
             icon={<Save24Regular />}
             onClick={handleSaveLayout}
@@ -1703,6 +1727,11 @@ export function GuiaConexoesV2Page() {
           await reload();
           setLayoutPending(true);
         }}
+      />
+      <DiagramModal
+        open={diagramModalOpen}
+        chart={diagramCode}
+        onClose={() => setDiagramModalOpen(false)}
       />
       <NovoEquipamentoDialog
         open={addDeviceOpen}

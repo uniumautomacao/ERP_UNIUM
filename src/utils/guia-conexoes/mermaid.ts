@@ -26,7 +26,8 @@ export const generateMermaidGraph = (
   devices: GuiaDeviceIO[],
   connections: GuiaDeviceIOConnection[],
   modelosMap: Map<string, GuiaModeloProduto>,
-  rootDeviceId?: string
+  rootDeviceId?: string,
+  edgeColorByTypeLabel?: Record<string, string>
 ) => {
   const lines: string[] = [
     "%%{init: {'flowchart': {'rankSpacing': 190, 'nodeSpacing':40, 'curve': 'linear','defaultRenderer': 'elk'}} }%%",
@@ -129,7 +130,7 @@ export const generateMermaidGraph = (
     lines.push('    end');
   });
 
-  orderedEdges.forEach(({ from, to, conn }) => {
+  orderedEdges.forEach(({ from, to, conn }, index) => {
     const fromDevice = deviceMap.get(from);
     const toDevice = deviceMap.get(to);
     const targetConn = connectionMap.get(conn._new_connectedto_value!);
@@ -141,11 +142,16 @@ export const generateMermaidGraph = (
 
     const fromPort = getConnectionPort(conn);
     const toPort = getConnectionPort(targetConn);
+    const typeLabel = getConnectionType(conn);
     
     const edgeLabel = `${fromPort} <-> ${toPort}`;
 
     // Always draw from -> to based on BFS order to maintain direction
     lines.push(`    ${fromId} -->|"${edgeLabel}"| ${toId};`);
+    const edgeColor = edgeColorByTypeLabel?.[typeLabel];
+    if (edgeColor) {
+      lines.push(`    linkStyle ${index} stroke:${edgeColor},stroke-width:2px;`);
+    }
   });
 
   return lines.join('\n');
