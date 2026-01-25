@@ -1404,46 +1404,10 @@ export function useUsoInstaladorController({
     );
   }, [installers, activities, weekDaysWithToggle, maxProjectsPerInstaller, expandedState, defaultExpanded]);
 
-  // Compute vertical merge groups: for each day, find consecutive parent rows (installers) in the same team
-  // that have exactly one activity on that day and that activity matches (projectId, startTime, hours).
+  // Compute vertical merge groups: disabled to ensure individual cards per installer
   const verticalMergeGroups = useMemo(() => {
-    const map: Record<number, Array<{ start: number; len: number; activity: Activity }>> = {};
-    for (let dayIndex = 0; dayIndex < weekDaysWithToggle.length; dayIndex++) {
-      const groups: Array<{ start: number; len: number; activity: Activity }> = [];
-      let i = 0;
-      while (i < gridData.length) {
-        const curr = gridData[i];
-        const dayInfo = curr.dailyHours[dayIndex];
-        if (!dayInfo || dayInfo.activities.length !== 1) { i++; continue; }
-        const activity = dayInfo.activities[0];
-        // Attempt to extend group downwards
-        let j = i + 1;
-        while (j < gridData.length) {
-          const next = gridData[j];
-          const nextDay = next.dailyHours[dayIndex];
-          if (!nextDay || nextDay.activities.length !== 1) break;
-          const nextActivity = nextDay.activities[0];
-          if (
-            next.installer.teamId === curr.installer.teamId &&
-            nextActivity.projectId === activity.projectId &&
-            nextActivity.startTime === activity.startTime &&
-            nextActivity.hours === activity.hours
-          ) {
-            j++;
-          } else {
-            break;
-          }
-        }
-        const len = j - i;
-        if (len > 1) {
-          groups.push({ start: i, len, activity });
-        }
-        i = j;
-      }
-      map[dayIndex] = groups;
-    }
-    return map;
-  }, [gridData, weekDaysWithToggle]);
+    return {} as Record<number, Array<{ start: number; len: number; activity: Activity }>>;
+  }, []);
   
   // Week end date
   const weekEnd = useMemo(() => {

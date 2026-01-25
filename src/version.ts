@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.118';
+export const APP_VERSION = '0.1.119';
 export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.119',
+    date: '2026-01-25',
+    changes: 'Removido o agrupamento vertical de atividades para garantir que cada instalador tenha seus próprios cards individuais.',
+  },
   {
     version: '0.1.118',
     date: '2026-01-25',
