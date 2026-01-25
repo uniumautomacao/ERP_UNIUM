@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.116';
+export const APP_VERSION = '0.1.117';
 export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.117',
+    date: '2026-01-25',
+    changes: 'Compactado os controles de navegação de data e semana na Linha do Tempo.',
+  },
   {
     version: '0.1.116',
     date: '2026-01-25',

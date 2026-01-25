@@ -113,27 +113,36 @@ export function TimelinePage() {
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button appearance="subtle" icon={<ChevronLeft24Regular />} onClick={handlePrevWeek}>
-              Semana anterior
-            </Button>
-            <Button
-              appearance="subtle"
-              icon={<ChevronRight24Regular />}
-              iconPosition="after"
-              onClick={handleNextWeek}
-            >
-              Próxima semana
-            </Button>
-
-            <Field label="Data da semana">
-              <Input
-                type="date"
-                value={datePickerValue}
-                onChange={(_, data) => handleDatePick(data.value)}
-                aria-label="Selecionar data"
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center">
+              <Button
+                appearance="subtle"
+                size="small"
+                icon={<ChevronLeft24Regular />}
+                onClick={handlePrevWeek}
+                title="Semana anterior"
               />
-            </Field>
+              <Button
+                appearance="subtle"
+                size="small"
+                icon={<ChevronRight24Regular />}
+                onClick={handleNextWeek}
+                title="Próxima semana"
+              />
+            </div>
+
+            <Input
+              type="date"
+              size="small"
+              value={datePickerValue}
+              onChange={(_, data) => handleDatePick(data.value)}
+              aria-label="Selecionar data"
+              style={{ maxWidth: '130px' }}
+            />
+            
+            <Text size={200} weight="semibold" style={{ color: tokens.colorNeutralForeground3, marginLeft: '8px' }}>
+              {weekRangeLabel}
+            </Text>
           </div>
 
           <div className="flex-1 min-h-0">
