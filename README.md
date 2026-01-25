@@ -1,4 +1,4 @@
-# ERP UNIUM
+# Stoa
 
 Aplicação Power Apps Code Apps com guia de conexões ao Microsoft Dataverse.
 Este projeto demonstra como conectar e consumir dados da tabela systemusers do Dataverse.

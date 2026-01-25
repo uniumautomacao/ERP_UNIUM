@@ -22,7 +22,7 @@ export function HomePage() {
   return (
     <>
       <PageHeader
-        title="Bem-vindo ao ERP UNIUM"
+        title="Bem-vindo ao Stoa"
         subtitle="Template UI - Estilo Model-Driven App"
       />
       <PageContainer>

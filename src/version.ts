@@ -4,7 +4,7 @@ export const VERSION_HISTORY = [
   {
     version: '0.1.109',
     date: '2026-01-25',
-    changes: 'Renomeado aplicativo de ERP_UNIUM para Stoa.',
+    changes: 'Alterado nome do aplicativo de ERP UNIUM para Stoa.',
   },
   {
     version: '0.1.108',

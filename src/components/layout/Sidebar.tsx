@@ -47,7 +47,7 @@ export function Sidebar() {
         />
         {isExpanded && (
           <Text weight="semibold" size={400}>
-            ERP UNIUM
+            Stoa
           </Text>
         )}
       </div>
