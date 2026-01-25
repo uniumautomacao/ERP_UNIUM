@@ -105,15 +105,15 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorPaletteGreenBackground1,
   },
   portConnected: {
-    borderColor: tokens.colorNeutralStroke2,
+    ...shorthands.borderColor(tokens.colorNeutralStroke2),
     backgroundColor: tokens.colorNeutralBackground3,
   },
   portManual: {
-    borderColor: tokens.colorPaletteYellowBorder2,
+    ...shorthands.borderColor(tokens.colorPaletteYellowBorder2),
     backgroundColor: tokens.colorPaletteYellowBackground1,
   },
   portIncompatible: {
-    borderColor: tokens.colorPaletteRedBorder2,
+    ...shorthands.borderColor(tokens.colorPaletteRedBorder2),
     backgroundColor: tokens.colorPaletteRedBackground1,
     opacity: 0.7,
   },
@@ -154,15 +154,12 @@ const useStyles = makeStyles({
     animationName: {
       from: {
         boxShadow: `0 0 0 0 ${tokens.colorBrandBackground}`,
-        borderColor: tokens.colorBrandBackground,
       },
       '50%': {
         boxShadow: `0 0 0 6px ${tokens.colorBrandBackground}`,
-        borderColor: tokens.colorBrandBackground,
       },
       to: {
         boxShadow: `0 0 0 0 ${tokens.colorBrandBackground}`,
-        borderColor: tokens.colorBrandBackground,
       },
     },
   },

@@ -101,7 +101,7 @@ export function EditDeviceLocationDialog({
                   placeholder="Selecione uma localização"
                   value={locationValue}
                   disabled={useNewLocation || saving}
-                  onChange={(_, data) => setLocationValue(data.value ?? '')}
+                  onChange={(event) => setLocationValue(event.currentTarget.value)}
                   onOptionSelect={(_, data) => {
                     if (data.optionText) {
                       setLocationValue(data.optionText);

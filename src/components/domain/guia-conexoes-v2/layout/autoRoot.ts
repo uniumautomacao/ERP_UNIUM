@@ -1,5 +1,5 @@
 import type { Edge, Node } from 'reactflow';
-import type { GuiaDeviceIOConnection } from '../../types/guiaConexoes';
+import type { GuiaDeviceIOConnection } from '../../../../types/guiaConexoes';
 import { getDeviceNodeSize } from './elkLayout';
 
 type Point = { x: number; y: number };
