@@ -18,6 +18,13 @@ export interface ConnectionLabel {
   isValid: boolean;
 }
 
+export interface DeviceLabel {
+  id: string;
+  name: string;
+  location: string;
+  isValid: boolean;
+}
+
 interface IndexedConnection {
   connectionId: string;
   rootConnectionId: string;
@@ -298,6 +305,66 @@ export function downloadLabelsFile(
   const projectPrefix = projectName ? `${projectName.replace(/[^a-zA-Z0-9]/g, '-')}-` : '';
   a.download = filename || `etiquetas-${projectPrefix}${date}.txt`;
   
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Gera a etiqueta de um dispositivo
+ */
+export function generateDeviceLabel(device: GuiaDeviceIO): DeviceLabel {
+  const name = device.new_name || '';
+  const location = device.new_localizacao || '';
+
+  return {
+    id: device.new_deviceioid,
+    name: replaceCommas(name),
+    location: replaceCommas(location),
+    isValid: name.trim().length > 0,
+  };
+}
+
+/**
+ * Gera etiquetas para múltiplos dispositivos
+ */
+export function generateDeviceLabels(devices: GuiaDeviceIO[]): DeviceLabel[] {
+  return devices.map(generateDeviceLabel);
+}
+
+/**
+ * Faz o download de um arquivo TXT com as etiquetas de dispositivos
+ */
+export function downloadDeviceLabelsFile(
+  labels: DeviceLabel[],
+  filename?: string,
+  projectName?: string
+): void {
+  const validLabels = labels.filter((l) => l.isValid);
+
+  if (validLabels.length === 0) {
+    throw new Error('Nenhuma etiqueta válida para imprimir');
+  }
+
+  const content = validLabels
+    .map(
+      (label, i) =>
+        `=== ETIQUETA ${i + 1} ===\nNOME: ${label.name}\nLOCALIZACAO: ${
+          label.location || 'Sem localização'
+        }\n`
+    )
+    .join('\n');
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+
+  const date = new Date().toISOString().split('T')[0];
+  const projectPrefix = projectName ? `${projectName.replace(/[^a-zA-Z0-9]/g, '-')}-` : '';
+  a.download = filename || `etiquetas-dispositivos-${projectPrefix}${date}.txt`;
+
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

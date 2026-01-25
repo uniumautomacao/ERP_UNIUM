@@ -395,6 +395,7 @@ export function GuiaConexoesV2Page() {
   const [printDialogOpen, setPrintDialogOpen] = useState(false);
   const [printPreselectedConnectionId, setPrintPreselectedConnectionId] = useState<string | null>(null);
   const [printPreselectedDeviceId, setPrintPreselectedDeviceId] = useState<string | null>(null);
+  const [printInitialTab, setPrintInitialTab] = useState<'connections' | 'devices'>('connections');
 
   const [inconsistencies, setInconsistencies] = useState<Inconsistency[]>([]);
   const [inconsistencyDialogOpen, setInconsistencyDialogOpen] = useState(false);
@@ -918,9 +919,16 @@ export function GuiaConexoesV2Page() {
             },
             onDelete: () => handleDeleteDevice(deviceId, device.new_name),
             onEditLocation: (id) => setLocationEditDeviceId(id),
-            onPrintLabels: (id) => {
+            onPrintConnections: (id) => {
               setPrintPreselectedConnectionId(null);
               setPrintPreselectedDeviceId(id);
+              setPrintInitialTab('connections');
+              setPrintDialogOpen(true);
+            },
+            onPrintDevice: (id) => {
+              setPrintPreselectedConnectionId(null);
+              setPrintPreselectedDeviceId(id);
+              setPrintInitialTab('devices');
               setPrintDialogOpen(true);
             },
           },
@@ -1670,6 +1678,7 @@ export function GuiaConexoesV2Page() {
             onClick={() => {
               setPrintPreselectedConnectionId(null);
               setPrintPreselectedDeviceId(null);
+              setPrintInitialTab('connections');
               setPrintDialogOpen(true);
             }}
             disabled={!selectedProjectId || filteredConnections.length === 0}
@@ -1743,6 +1752,7 @@ export function GuiaConexoesV2Page() {
                 if (edgeData.sourceConnectionId) {
                   setPrintPreselectedConnectionId(edgeData.sourceConnectionId);
                   setPrintPreselectedDeviceId(null);
+                  setPrintInitialTab('connections');
                   setPrintDialogOpen(true);
                 }
               }
@@ -1824,13 +1834,16 @@ export function GuiaConexoesV2Page() {
           setPrintDialogOpen(false);
           setPrintPreselectedConnectionId(null);
           setPrintPreselectedDeviceId(null);
+          setPrintInitialTab('connections');
         }}
         connections={filteredConnections}
         connectionsById={connectionsById}
+        devices={devices}
         deviceMap={deviceMap}
         projectName={selectedProjectLabel}
         preselectedConnectionId={printPreselectedConnectionId}
         preselectedDeviceId={printPreselectedDeviceId}
+        initialTab={printInitialTab}
       />
     </div>
   );

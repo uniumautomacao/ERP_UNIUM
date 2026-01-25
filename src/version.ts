@@ -1,6 +1,12 @@
-export const APP_VERSION = '0.1.105';
+export const APP_VERSION = '0.1.106';
 export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.106',
+    date: '2026-01-25',
+    changes:
+      'Impressão de etiquetas unificada com abas para conexões e dispositivos, incluindo seleção individual, personalizada ou completa.',
+  },
   {
     version: '0.1.105',
     date: '2026-01-25',

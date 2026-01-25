@@ -1,7 +1,26 @@
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
-import { Badge, Button, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Delete24Regular, Edit24Regular, Eye24Regular, EyeOff24Regular, Print24Regular } from '@fluentui/react-icons';
+import {
+  Badge,
+  Button,
+  Menu,
+  MenuItem,
+  MenuList,
+  MenuPopover,
+  MenuTrigger,
+  Text,
+  makeStyles,
+  tokens,
+} from '@fluentui/react-components';
+import {
+  Box24Regular,
+  Delete24Regular,
+  Edit24Regular,
+  Eye24Regular,
+  EyeOff24Regular,
+  Link24Regular,
+  Print24Regular,
+} from '@fluentui/react-icons';
 
 export type DevicePortState = 'free' | 'connected' | 'manual' | 'incompatible';
 
@@ -28,7 +47,8 @@ export type DeviceNodeData = {
   onToggleShowAll?: () => void;
   onDelete?: () => void;
   onEditLocation?: (deviceId: string) => void;
-  onPrintLabels?: (deviceId: string) => void;
+  onPrintConnections?: (deviceId: string) => void;
+  onPrintDevice?: (deviceId: string) => void;
 };
 
 const useStyles = makeStyles({
@@ -183,13 +203,26 @@ export function DeviceNode({ data, id }: NodeProps<DeviceNodeData>) {
             icon={<Edit24Regular />}
             onClick={() => data.onEditLocation?.(id)}
           />
-          <Button
-            appearance="subtle"
-            size="small"
-            icon={<Print24Regular />}
-            onClick={() => data.onPrintLabels?.(id)}
-            title="Imprimir etiquetas do equipamento"
-          />
+          <Menu>
+            <MenuTrigger disableButtonEnhancement>
+              <Button
+                appearance="subtle"
+                size="small"
+                icon={<Print24Regular />}
+                title="Imprimir etiquetas"
+              />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem icon={<Link24Regular />} onClick={() => data.onPrintConnections?.(id)}>
+                  Etiquetas de conexões
+                </MenuItem>
+                <MenuItem icon={<Box24Regular />} onClick={() => data.onPrintDevice?.(id)}>
+                  Etiqueta do dispositivo
+                </MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
           <Button
             appearance="subtle"
             size="small"
