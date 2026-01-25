@@ -1,10 +1,10 @@
-export const APP_VERSION = '0.1.109';
+export const APP_VERSION = '0.1.110';
 export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
   {
-    version: '0.1.109',
+    version: '0.1.110',
     date: '2026-01-25',
-    changes: 'Alterado nome do aplicativo de ERP UNIUM para Stoa.',
+    changes: 'Removido sufixo v2 do cabeçalho do Guia de Conexões.',
   },
   {
     version: '0.1.108',

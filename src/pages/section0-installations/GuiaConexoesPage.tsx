@@ -1558,7 +1558,7 @@ export function GuiaConexoesPage() {
       <div className={styles.header}>
         <div className={styles.headerTitle}>
           <Text size={500} weight="semibold">
-            Guia de Conexões v2
+            Guia de Conexões
           </Text>
         </div>
         <div className={styles.headerControls}>
