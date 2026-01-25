@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.104';
-export const APP_BUILD_DATE = '2026-01-24';
+export const APP_VERSION = '0.1.105';
+export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.105',
+    date: '2026-01-25',
+    changes: 'Adicionada funcionalidade de impressão de etiquetas de conexões no Guia de Conexões v2 com 4 modos de seleção (individual, por equipamento, por tipo e personalizada).',
+  },
   {
     version: '0.1.104',
     date: '2026-01-24',

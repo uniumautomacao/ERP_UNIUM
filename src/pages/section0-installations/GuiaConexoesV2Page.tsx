@@ -13,6 +13,7 @@ import {
   ArrowClockwise24Regular,
   ClipboardTask24Regular,
   Flowchart24Regular,
+  Print24Regular,
   Save24Regular,
 } from '@fluentui/react-icons';
 import {
@@ -62,6 +63,7 @@ import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/d
 import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
 import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
 import { DisconnectedDevicesSidebar } from '../../components/domain/guia-conexoes-v2/DisconnectedDevicesSidebar.tsx';
+import { PrintLabelsDialog } from '../../components/domain/guia-conexoes-v2/PrintLabelsDialog';
 
 const useStyles = makeStyles({
   page: {
@@ -390,6 +392,9 @@ export function GuiaConexoesV2Page() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [removingLink, setRemovingLink] = useState(false);
   const [linking, setLinking] = useState(false);
+  const [printDialogOpen, setPrintDialogOpen] = useState(false);
+  const [printPreselectedConnectionId, setPrintPreselectedConnectionId] = useState<string | null>(null);
+  const [printPreselectedDeviceId, setPrintPreselectedDeviceId] = useState<string | null>(null);
 
   const [inconsistencies, setInconsistencies] = useState<Inconsistency[]>([]);
   const [inconsistencyDialogOpen, setInconsistencyDialogOpen] = useState(false);
@@ -913,6 +918,11 @@ export function GuiaConexoesV2Page() {
             },
             onDelete: () => handleDeleteDevice(deviceId, device.new_name),
             onEditLocation: (id) => setLocationEditDeviceId(id),
+            onPrintLabels: (id) => {
+              setPrintPreselectedConnectionId(null);
+              setPrintPreselectedDeviceId(id);
+              setPrintDialogOpen(true);
+            },
           },
         });
       }
@@ -1656,6 +1666,17 @@ export function GuiaConexoesV2Page() {
             Diagrama Mermaid
           </Button>
           <Button
+            icon={<Print24Regular />}
+            onClick={() => {
+              setPrintPreselectedConnectionId(null);
+              setPrintPreselectedDeviceId(null);
+              setPrintDialogOpen(true);
+            }}
+            disabled={!selectedProjectId || filteredConnections.length === 0}
+          >
+            Imprimir Etiquetas
+          </Button>
+          <Button
             appearance="primary"
             icon={<Save24Regular />}
             onClick={handleSaveLayout}
@@ -1713,6 +1734,17 @@ export function GuiaConexoesV2Page() {
               }
               if (edge) {
                 void handleRemoveLink(edge);
+              }
+            }}
+            onPrintSingle={(edgeId) => {
+              const foundEdge = edges.find((e) => e.id === edgeId);
+              if (foundEdge?.data) {
+                const edgeData = foundEdge.data as { sourceConnectionId?: string };
+                if (edgeData.sourceConnectionId) {
+                  setPrintPreselectedConnectionId(edgeData.sourceConnectionId);
+                  setPrintPreselectedDeviceId(null);
+                  setPrintDialogOpen(true);
+                }
               }
             }}
             removing={removingLink || linking}
@@ -1785,6 +1817,20 @@ export function GuiaConexoesV2Page() {
           setInconsistencyDialogOpen(false);
           await reload();
         }}
+      />
+      <PrintLabelsDialog
+        open={printDialogOpen}
+        onClose={() => {
+          setPrintDialogOpen(false);
+          setPrintPreselectedConnectionId(null);
+          setPrintPreselectedDeviceId(null);
+        }}
+        connections={filteredConnections}
+        connectionsById={connectionsById}
+        deviceMap={deviceMap}
+        projectName={selectedProjectLabel}
+        preselectedConnectionId={printPreselectedConnectionId}
+        preselectedDeviceId={printPreselectedDeviceId}
       />
     </div>
   );

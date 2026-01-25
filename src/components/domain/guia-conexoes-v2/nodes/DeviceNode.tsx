@@ -1,7 +1,7 @@
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
 import { Badge, Button, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Delete24Regular, Edit24Regular, Eye24Regular, EyeOff24Regular } from '@fluentui/react-icons';
+import { Delete24Regular, Edit24Regular, Eye24Regular, EyeOff24Regular, Print24Regular } from '@fluentui/react-icons';
 
 export type DevicePortState = 'free' | 'connected' | 'manual' | 'incompatible';
 
@@ -28,6 +28,7 @@ export type DeviceNodeData = {
   onToggleShowAll?: () => void;
   onDelete?: () => void;
   onEditLocation?: (deviceId: string) => void;
+  onPrintLabels?: (deviceId: string) => void;
 };
 
 const useStyles = makeStyles({
@@ -181,6 +182,13 @@ export function DeviceNode({ data, id }: NodeProps<DeviceNodeData>) {
             size="small"
             icon={<Edit24Regular />}
             onClick={() => data.onEditLocation?.(id)}
+          />
+          <Button
+            appearance="subtle"
+            size="small"
+            icon={<Print24Regular />}
+            onClick={() => data.onPrintLabels?.(id)}
+            title="Imprimir etiquetas do equipamento"
           />
           <Button
             appearance="subtle"

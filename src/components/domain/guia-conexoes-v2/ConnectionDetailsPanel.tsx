@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { ChevronDown24Regular, ChevronUp24Regular, Delete24Regular } from '@fluentui/react-icons';
+import { ChevronDown24Regular, ChevronUp24Regular, Delete24Regular, Print24Regular } from '@fluentui/react-icons';
 
 export type ConnectionDetails = {
   id: string;
@@ -20,6 +20,7 @@ export type ConnectionDetailsPanelProps = {
   onRemove: () => void;
   removing: boolean;
   legendItems: LegendItem[];
+  onPrintSingle?: (edgeId: string) => void;
 };
 
 const useStyles = makeStyles({
@@ -83,6 +84,7 @@ export function ConnectionDetailsPanel({
   onRemove,
   removing,
   legendItems,
+  onPrintSingle,
 }: ConnectionDetailsPanelProps) {
   const styles = useStyles();
   const [collapsed, setCollapsed] = useState(false);
@@ -157,6 +159,14 @@ export function ConnectionDetailsPanel({
             </div>
           </div>
           <div className={styles.actions}>
+            {onPrintSingle && (
+              <Button
+                icon={<Print24Regular />}
+                onClick={() => onPrintSingle(details.id)}
+              >
+                Imprimir Etiqueta
+              </Button>
+            )}
             <Button
               appearance="primary"
               icon={<Delete24Regular />}
