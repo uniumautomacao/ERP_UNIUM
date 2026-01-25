@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.101';
+export const APP_VERSION = '0.1.102';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.102',
+    date: '2026-01-24',
+    changes: 'Paleta de cores das conexões ajustada por tipo no Guia v2.',
+  },
   {
     version: '0.1.101',
     date: '2026-01-24',

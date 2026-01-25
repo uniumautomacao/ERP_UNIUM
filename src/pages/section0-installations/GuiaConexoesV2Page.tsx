@@ -146,6 +146,28 @@ const CONNECTION_COLORS = [
   '#93c5fd',
 ];
 
+const CONNECTION_TYPE_COLORS: Record<string, string> = {
+  HDMI: '#7c3aed',
+  'Audio Analogico': '#60a5fa',
+  Toslink: '#ef4444',
+  'Trigger 12V': '#fbbf24',
+  Speaker: '#00d5ff',
+  Ethernet: '#f97316',
+  IR: '#166534',
+  Serial: '#166534',
+  RF: '#ffffff',
+  RNET: '#60a5fa',
+  ACNET: '#00ff0d',
+  PNET: '#60a5fa',
+  'Luz ON/OFF': '#ef4444',
+  'Luz Triac Dimmer': '#ef4444',
+  'Luz PWM Dimmer': '#ef4444',
+  Motor: '#ef4444',
+  'Power 110V': '#ef4444',
+  'Power 220V': '#ef4444',
+  GPIO: '#fbbf24',
+};
+
 const CONNECTION_CATEGORIES = [
   {
     id: 'audio',
@@ -238,7 +260,11 @@ const buildTypeMap = () => {
   for (let index = 0; index < connectionTypeOptions.length; index += 1) {
     const option = connectionTypeOptions[index];
     map.set(option.value, option.label);
-    colorMap.set(option.value, CONNECTION_COLORS[index % CONNECTION_COLORS.length]);
+    const explicitColor = CONNECTION_TYPE_COLORS[option.label];
+    colorMap.set(
+      option.value,
+      explicitColor ?? CONNECTION_COLORS[index % CONNECTION_COLORS.length]
+    );
   }
   return { labelMap: map, colorMap };
 };
