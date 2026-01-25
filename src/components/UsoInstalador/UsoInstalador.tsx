@@ -1904,7 +1904,6 @@ export function useUsoInstaladorController({
     const isOverload = dayInfo?.hasOverload || false;
     const isCritical = dayInfo?.hasCriticalOverload || false;
     const hasConflict = dayInfo?.hasConflict || false;
-    const maxCollapsedActivities = 3;
     const collapsedActivities = isParent && isCollapsed && dayInfo
       ? [...dayInfo.activities].sort((a, b) => a.startTime.localeCompare(b.startTime))
       : [];
@@ -1985,14 +1984,12 @@ export function useUsoInstaladorController({
                     }
                   }
 
-                  const displayActivities = collapsedActivities.slice(0, maxCollapsedActivities);
-                  const hiddenCount = collapsedActivities.length - displayActivities.length;
                   const stackClasses = [
                     'uso-instalador__activity-stack',
                     mergeInfo && mergeInfo.pos === 0 ? 'uso-instalador__activity-stack--spanning' : null,
                   ].filter(Boolean).join(' ');
                   const stackStyle: React.CSSProperties = mergeInfo && mergeInfo.pos === 0
-                    ? { height: `${42 * mergeInfo.len}px` }
+                    ? { minHeight: `${42 * mergeInfo.len}px` }
                     : {};
 
                   if (mergeInfo && mergeInfo.pos > 0) {
@@ -2001,7 +1998,7 @@ export function useUsoInstaladorController({
 
                   return (
                     <div className={stackClasses} style={stackStyle}>
-                      {displayActivities.map((collapsedActivity) => {
+                      {collapsedActivities.map((collapsedActivity) => {
                         const color = projectColorMap[collapsedActivity.projectId] || projectColors(collapsedActivity.projectId);
                         return (
                           <div
@@ -2016,9 +2013,6 @@ export function useUsoInstaladorController({
                           </div>
                         );
                       })}
-                      {hiddenCount > 0 && (
-                        <span className="uso-instalador__activity-more">+{hiddenCount} mais</span>
-                      )}
                     </div>
                   );
                 })()}

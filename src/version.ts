@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.114';
+export const APP_VERSION = '0.1.115';
 export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.115',
+    date: '2026-01-25',
+    changes: 'Linha do Tempo agora exibe todas as atividades do dia no modo colapsado, com altura ajustável.',
+  },
   {
     version: '0.1.114',
     date: '2026-01-25',
