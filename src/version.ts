@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.99';
+export const APP_VERSION = '0.1.100';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.100',
+    date: '2026-01-24',
+    changes: 'Botão expandir todas agora alterna entre expandir e compactar.',
+  },
   {
     version: '0.1.99',
     date: '2026-01-24',

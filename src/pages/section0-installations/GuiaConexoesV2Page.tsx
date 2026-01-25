@@ -744,6 +744,11 @@ export function GuiaConexoesV2Page() {
     return list;
   }, [connectedDeviceIdList, connectionsByDevice, nodeShowAllPorts]);
 
+  const areAllPortsExpanded = useMemo(() => {
+    if (connectedDeviceIdList.length === 0) return false;
+    return connectedDeviceIdList.every((deviceId) => nodeShowAllPorts[deviceId]);
+  }, [connectedDeviceIdList, nodeShowAllPorts]);
+
   const activeConnectionId = useMemo(
     () => resolveConnectionIdFromHandle(connectingHandleId),
     [connectingHandleId]
@@ -1178,15 +1183,16 @@ export function GuiaConexoesV2Page() {
 
   const handleExpandAllPorts = useCallback(() => {
     if (connectedDeviceIdList.length === 0) return;
+    const nextExpanded = !areAllPortsExpanded;
     setNodeShowAllPorts((prev) => {
       const next = { ...prev };
       connectedDeviceIdList.forEach((deviceId) => {
-        next[deviceId] = true;
+        next[deviceId] = nextExpanded;
       });
       return next;
     });
     setLayoutPending(true);
-  }, [connectedDeviceIdList]);
+  }, [areAllPortsExpanded, connectedDeviceIdList]);
 
   useEffect(() => {
     if (!layoutPending) return;
@@ -1578,7 +1584,7 @@ export function GuiaConexoesV2Page() {
             onClick={handleExpandAllPorts}
             disabled={!selectedProjectId || connectedDeviceIdList.length === 0}
           >
-            Expandir todas
+            {areAllPortsExpanded ? 'Compactar todas' : 'Expandir todas'}
           </Button>
           <Button
             appearance="primary"
