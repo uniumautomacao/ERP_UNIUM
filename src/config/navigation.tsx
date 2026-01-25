@@ -19,7 +19,6 @@ import { HomePage } from '../pages/HomePage';
 import { TimelinePage } from '../pages/section0-installations/TimelinePage';
 import { GaleriaFotosPage } from '../pages/section0-installations/GaleriaFotosPage';
 import { GuiaConexoesPage } from '../pages/section0-installations/GuiaConexoesPage';
-import { GuiaConexoesV2Page } from '../pages/section0-installations/GuiaConexoesV2Page';
 import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
 import { CadastroRapidoProdutoPage } from '../pages/section-cadastros/CadastroRapidoProdutoPage';
 import { AjustesCadastroProdutosPage } from '../pages/section-cadastros/AjustesCadastroProdutosPage';
@@ -79,13 +78,6 @@ export const navigation: NavSection[] = [
         icon: <DocumentBulletList24Regular />,
         path: '/instalacoes/guia-conexoes',
         component: GuiaConexoesPage,
-      },
-      {
-        id: 'guia-conexoes-v2',
-        label: 'Guia de Conexões v2',
-        icon: <DocumentBulletList24Regular />,
-        path: '/instalacoes/guia-conexoes-v2',
-        component: GuiaConexoesV2Page,
       },
     ],
   },

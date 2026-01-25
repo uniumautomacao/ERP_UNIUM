@@ -1,126 +1,349 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import 'reactflow/dist/style.css';
 import {
-  Badge,
   Button,
-  Card,
   Dropdown,
-  Field,
-  Input,
-  Label,
   Option,
-  Switch,
-  Tab,
-  TabList,
   Text,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
 import {
   Add24Regular,
-  ArrowSync24Regular,
+  ArrowClockwise24Regular,
   ClipboardTask24Regular,
-  Delete24Regular,
   Flowchart24Regular,
+  Print24Regular,
+  Save24Regular,
 } from '@fluentui/react-icons';
-import { CommandBar } from '../../components/layout/CommandBar';
-import { PageContainer } from '../../components/layout/PageContainer';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { DataGrid, createTableColumn } from '../../components/shared/DataGrid';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { LoadingState } from '../../components/shared/LoadingState';
-import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
-import { DeviceDetailDialog } from '../../components/domain/guia-conexoes/DeviceDetailDialog';
-import { GerarPendenciasDialog } from '../../components/domain/guia-conexoes/GerarPendenciasDialog';
-import { NovoEquipamentoDialog } from '../../components/domain/guia-conexoes/NovoEquipamentoDialog';
-import { NewDeviceIOService } from '../../generated';
-import { useGuiaConexoesData } from '../../hooks/guia-conexoes/useGuiaConexoesData';
-import type {
-  GuiaDeviceIO,
-  GuiaDeviceIOConnection,
-  GuiaModeloProduto,
-  GuiaProdutoServico,
-} from '../../types/guiaConexoes';
-import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
-import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
-import { escapeODataValue } from '../../utils/guia-conexoes/odata';
-import { deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
 import {
-  generateMermaidGraph,
-} from '../../utils/guia-conexoes/mermaid';
-import { RootDeviceSelectionDialog } from '../../components/domain/guia-conexoes/RootDeviceSelectionDialog';
-import { DiagramModal } from '../../components/domain/guia-conexoes/DiagramModal';
+  useEdgesState,
+  type Connection,
+  type Edge,
+  type Node,
+  type ReactFlowInstance,
+} from 'reactflow';
 import { Cr22fProjetoService } from '../../generated/services/Cr22fProjetoService';
+import { NewDeviceIOConnectionService, NewDeviceIOService } from '../../generated';
+import { BlueprintCanvas } from '../../components/domain/guia-conexoes-v2/BlueprintCanvas';
+import {
+  ConnectionDetailsPanel,
+  type ConnectionDetails,
+} from '../../components/domain/guia-conexoes-v2/ConnectionDetailsPanel';
+import { AddConnectionDialog } from '../../components/domain/guia-conexoes-v2/AddConnectionDialog';
+import { EditDeviceLocationDialog } from '../../components/domain/guia-conexoes-v2/EditDeviceLocationDialog';
+import { NovoEquipamentoDialog } from '../../components/domain/guia-conexoes/NovoEquipamentoDialog';
+import { GerarPendenciasDialog } from '../../components/domain/guia-conexoes/GerarPendenciasDialog';
+import { DiagramModal } from '../../components/domain/guia-conexoes/DiagramModal';
+import {
+  DeviceNode,
+  type DeviceNodeData,
+  type DevicePortData,
+} from '../../components/domain/guia-conexoes-v2/nodes/DeviceNode';
+import {
+  InconsistencyManagerDialog,
+  type Inconsistency,
+} from '../../components/domain/guia-conexoes-v2/InconsistencyManagerDialog';
+import { applyAutoLayout } from '../../components/domain/guia-conexoes-v2/layout/elkLayout';
+import {
+  buildUndirectedDeviceEdges,
+  pickBestRootByExhaustiveLayout,
+} from '../../components/domain/guia-conexoes-v2/layout/autoRoot';
+import {
+  loadLayout,
+  saveLayout,
+} from '../../components/domain/guia-conexoes-v2/storage/layoutStorage';
+import { useGuiaConexoesData } from '../../hooks/guia-conexoes/useGuiaConexoesData';
+import type { GuiaDeviceIO, GuiaDeviceIOConnection, GuiaModeloProduto } from '../../types/guiaConexoes';
+import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
+import { escapeODataValue } from '../../utils/guia-conexoes/odata';
+import { clearDeviceIOConnectionLink, deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
+import { generateMermaidGraph } from '../../utils/guia-conexoes/mermaid';
+import { connectionDirectionOptions, connectionTypeOptions } from '../../utils/device-io/optionSetMaps';
+import { SISTEMA_TIPO_LABELS } from '../../utils/guia-conexoes/systemTypes';
+import { SearchableCombobox } from '../../components/shared/SearchableCombobox';
+import { DisconnectedDevicesSidebar } from '../../components/domain/guia-conexoes-v2/DisconnectedDevicesSidebar.tsx';
+import { PrintLabelsDialog } from '../../components/domain/guia-conexoes-v2/PrintLabelsDialog';
 
 const useStyles = makeStyles({
-  container: {
+  page: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalL,
-  },
-  filtersRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: tokens.spacingHorizontalM,
-    alignItems: 'end',
-  },
-  tabList: {
+    height: '100%',
+    overflow: 'hidden',
     backgroundColor: tokens.colorNeutralBackground1,
   },
-  tableWrapper: {
-    display: 'none',
-    '@media (min-width: 900px)': {
-      display: 'block',
-    },
-    '& .fui-DataGridHeaderCell': {
-      padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalL}`,
-    },
-    '& .fui-DataGridCell': {
-      padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalL}`,
-    },
-    '& .fui-DataGridRow': {
-      minHeight: '52px',
-    },
-  },
-  cardList: {
+  header: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    '@media (min-width: 900px)': {
-      display: 'none',
-    },
-  },
-  deviceCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-  },
-  cardRow: {
-    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    gap: tokens.spacingHorizontalS,
+    padding: '16px 20px',
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground1,
+    gap: '16px',
     flexWrap: 'wrap',
   },
-  dimText: {
+  headerTitle: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  headerControls: {
+    display: 'flex',
+    gap: '12px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  headerField: {
+    minWidth: '220px',
+  },
+  headerActions: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  content: {
+    display: 'flex',
+    flex: 1,
+    minHeight: 0,
+  },
+  canvasArea: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minWidth: 0,
+  },
+  statusText: {
     color: tokens.colorNeutralForeground3,
   },
-  statusBadge: {
-    alignSelf: 'flex-start',
+  errorText: {
+    color: tokens.colorPaletteRedForeground2,
   },
 });
 
-type GroupByMode = 'system' | 'location' | 'connection' | 'all';
-
-type TabOption = {
-  value: string;
-  label: string;
+const DIRECTION = {
+  Input: 100000000,
+  Output: 100000001,
+  Bidirectional: 100000002,
+  Bus: 100000003,
 };
 
-type DeviceRow = {
-  device: GuiaDeviceIO;
-  model?: GuiaModeloProduto;
-  produto?: GuiaProdutoServico;
-  connections: GuiaDeviceIOConnection[];
-  completedConnections: number;
+const CONNECTION_COLORS = [
+  '#7aa2ff',
+  '#a7f3d0',
+  '#fca5a5',
+  '#fbbf24',
+  '#f472b6',
+  '#60a5fa',
+  '#34d399',
+  '#f9a8d4',
+  '#c084fc',
+  '#f97316',
+  '#84cc16',
+  '#38bdf8',
+  '#fda4af',
+  '#a78bfa',
+  '#fb7185',
+  '#22d3ee',
+  '#bef264',
+  '#fde047',
+  '#fca5a5',
+  '#f87171',
+  '#93c5fd',
+];
+
+const CONNECTION_TYPE_COLORS: Record<string, string> = {
+  HDMI: '#7c3aed',
+  'Audio Analogico': '#60a5fa',
+  Toslink: '#ef4444',
+  'Trigger 12V': '#fbbf24',
+  Speaker: '#00d5ff',
+  Ethernet: '#f97316',
+  IR: '#166534',
+  Serial: '#166534',
+  RF: '#878787',
+  RNET: '#60a5fa',
+  ACNET: '#00ff0d',
+  PNET: '#60a5fa',
+  'Luz ON/OFF': '#ef4444',
+  'Luz Triac Dimmer': '#ef4444',
+  'Luz PWM Dimmer': '#ef4444',
+  Motor: '#ef4444',
+  'Power 110V': '#ef4444',
+  'Power 220V': '#ef4444',
+  GPIO: '#fbbf24',
+};
+
+const CONNECTION_CATEGORIES = [
+  {
+    id: 'audio',
+    label: 'Áudio',
+    types: ['Speaker', 'Toslink', 'Audio Analogico', 'Trigger 12V'],
+  },
+  {
+    id: 'video',
+    label: 'Vídeo',
+    types: ['HDMI'],
+  },
+  {
+    id: 'rede',
+    label: 'Rede',
+    types: ['Ethernet'],
+  },
+  {
+    id: 'automacao',
+    label: 'Automação',
+    types: [
+      'RNET',
+      'ACNET',
+      'PNET',
+      'IR',
+      'Serial',
+      'Luz ON/OFF',
+      'Luz Triac Dimmer',
+      'Luz PWM Dimmer',
+      'Motor',
+      'GPIO',
+      'RF',
+    ],
+  },
+  {
+    id: 'aspiracao',
+    label: 'Aspiração Central',
+    types: ['Aspiracao'],
+  },
+  {
+    id: 'controle_acesso',
+    label: 'Controle de Acesso',
+    types: ['Controle de Acesso'],
+  },
+  {
+    id: 'forca',
+    label: 'Força',
+    types: ['Power 110V', 'Power 220V'],
+  },
+];
+
+const resolveConnectionIdFromHandle = (handleId?: string | null) => {
+  if (!handleId) return null;
+  const split = handleId.split(':');
+  return split.length > 0 ? split[0] : handleId;
+};
+
+const getConnectionLabel = (connection: GuiaDeviceIOConnection) =>
+  connection.new_name || connection.new_displayname || connection.new_tipodeconexaorawtext || 'Porta';
+
+const findPreferredNetworkRootId = (
+  deviceIds: string[],
+  deviceMap: Map<string, GuiaDeviceIO>,
+  modelosMap: Map<string, GuiaModeloProduto>
+) => {
+  const matchesToken = (value: string | null | undefined, token: string) =>
+    (value || '').toLowerCase().includes(token);
+
+  const findByToken = (token: string) =>
+    deviceIds.find((id) => {
+      const device = deviceMap.get(id);
+      const modelId = device?._new_modelodeproduto_value ?? null;
+      const modelTitle = modelId ? modelosMap.get(modelId)?.cr22f_title ?? '' : '';
+      return matchesToken(device?.new_name, token) || matchesToken(modelTitle, token);
+    });
+
+  return findByToken('modem') || findByToken('tl-er605') || null;
+};
+
+const buildDirectionMap = () => {
+  const map = new Map<number, string>();
+  for (const option of connectionDirectionOptions) {
+    map.set(option.value, option.label);
+  }
+  return map;
+};
+
+const buildTypeMap = () => {
+  const map = new Map<number, string>();
+  const colorMap = new Map<number, string>();
+  for (let index = 0; index < connectionTypeOptions.length; index += 1) {
+    const option = connectionTypeOptions[index];
+    map.set(option.value, option.label);
+    const explicitColor = CONNECTION_TYPE_COLORS[option.label];
+    colorMap.set(
+      option.value,
+      explicitColor ?? CONNECTION_COLORS[index % CONNECTION_COLORS.length]
+    );
+  }
+  return { labelMap: map, colorMap };
+};
+
+const getDirectionFlags = (direction?: number | null) => {
+  if (direction === DIRECTION.Input) {
+    return { allowInput: true, allowOutput: false };
+  }
+  if (direction === DIRECTION.Output) {
+    return { allowInput: false, allowOutput: true };
+  }
+  return { allowInput: true, allowOutput: true };
+};
+
+const getDirectionCode = (direction?: number | null) => {
+  if (direction === DIRECTION.Input) return 'IN';
+  if (direction === DIRECTION.Output) return 'OUT';
+  return 'BI';
+};
+
+const isDirectionCompatible = (a?: number | null, b?: number | null) => {
+  const check = (source?: number | null, target?: number | null) => {
+    if (source === DIRECTION.Input) {
+      return target === DIRECTION.Output || target === DIRECTION.Bidirectional || target === DIRECTION.Bus;
+    }
+    if (source === DIRECTION.Output) {
+      return target === DIRECTION.Input || target === DIRECTION.Bidirectional || target === DIRECTION.Bus;
+    }
+    return true;
+  };
+  return check(a, b) && check(b, a);
+};
+
+const isTypeCompatible = (a?: number | null, b?: number | null) => {
+  if (a === null || a === undefined || b === null || b === undefined) {
+    return true;
+  }
+  return a === b;
+};
+
+const isConnectionCompatible = (a?: GuiaDeviceIOConnection | null, b?: GuiaDeviceIOConnection | null) => {
+  if (!a || !b) return false;
+  return isTypeCompatible(a.new_tipodeconexao, b.new_tipodeconexao) &&
+    isDirectionCompatible(a.new_direcao, b.new_direcao);
+};
+
+const resolveEdgeEndpoints = (
+  a: GuiaDeviceIOConnection,
+  b: GuiaDeviceIOConnection,
+  deviceDepths: Map<string, number>
+) => {
+  const aFlags = getDirectionFlags(a.new_direcao);
+  const bFlags = getDirectionFlags(b.new_direcao);
+
+  const canAtoB = aFlags.allowOutput && bFlags.allowInput;
+  const canBtoA = bFlags.allowOutput && aFlags.allowInput;
+
+  if (canAtoB && !canBtoA) return { source: a, target: b };
+  if (canBtoA && !canAtoB) return { source: b, target: a };
+
+  // Ambos os sentidos são possíveis (ex.: BI↔BI). Use a direção do nó raiz:
+  // menor depth = mais perto do root (esquerda), maior depth = mais longe (direita).
+  const aDeviceId = a._new_device_value ?? null;
+  const bDeviceId = b._new_device_value ?? null;
+  const aDepth = aDeviceId ? deviceDepths.get(aDeviceId) : undefined;
+  const bDepth = bDeviceId ? deviceDepths.get(bDeviceId) : undefined;
+  if (aDepth !== undefined && bDepth !== undefined && aDepth !== bDepth) {
+    return aDepth < bDepth ? { source: a, target: b } : { source: b, target: a };
+  }
+
+  // Fallback determinístico.
+  return { source: a, target: b };
 };
 
 type ProjectSearchRecord = {
@@ -129,17 +352,10 @@ type ProjectSearchRecord = {
   cr22f_ano?: string | null;
 };
 
-const GROUP_BY_OPTIONS: { value: GroupByMode; label: string }[] = [
-  { value: 'system', label: 'Agrupar por Sistema' },
-  { value: 'location', label: 'Agrupar por Localização' },
-  { value: 'connection', label: 'Agrupar por Conexão' },
-  { value: 'all', label: 'Mostrar Todos os Dispositivos' },
-];
-
-const EMPTY_LOCATION = 'Sem Localização';
-
 const formatProjectLabel = (project: ProjectSearchRecord) => {
-  const parts = [project.cr22f_apelido, project.cr22f_ano].filter(Boolean);
+  const parts: string[] = [];
+  if (project.cr22f_apelido) parts.push(project.cr22f_apelido);
+  if (project.cr22f_ano) parts.push(project.cr22f_ano);
   return parts.join(' · ') || 'Projeto';
 };
 
@@ -147,24 +363,223 @@ export function GuiaConexoesPage() {
   const styles = useStyles();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectLabel, setSelectedProjectLabel] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [groupBy, setGroupBy] = useState<GroupByMode>('system');
-  const [selectedTab, setSelectedTab] = useState<string>('all');
-  const [toggleBusyId, setToggleBusyId] = useState<string | null>(null);
-  const [bulkDeleting, setBulkDeleting] = useState(false);
-  const [bulkStatus, setBulkStatus] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [detailDeviceId, setDetailDeviceId] = useState<string | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [novoOpen, setNovoOpen] = useState(false);
+  const [rootDeviceId, setRootDeviceId] = useState<string | null>(null);
+  const [selectedConnectionType, setSelectedConnectionType] = useState<string[]>(['all']);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [connectingHandleId, setConnectingHandleId] = useState<string | null>(null);
+  const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [layoutViewport, setLayoutViewport] = useState<{ x: number; y: number; zoom: number } | null>(
+    null
+  );
+  const [layoutPending, setLayoutPending] = useState(false);
+  const [autoRootPending, setAutoRootPending] = useState(false);
+  const [autoRootProgress, setAutoRootProgress] = useState<{ current: number; total: number } | null>(
+    null
+  );
+  const [addConnectionOpen, setAddConnectionOpen] = useState(false);
+  const [addDeviceOpen, setAddDeviceOpen] = useState(false);
   const [pendenciasOpen, setPendenciasOpen] = useState(false);
-  const [rootSelectionOpen, setRootSelectionOpen] = useState(false);
+  const [nodeShowAllPorts, setNodeShowAllPorts] = useState<Record<string, boolean>>({});
+  const [sidebarDragPortId, setSidebarDragPortId] = useState<string | null>(null);
+  const [hoveredHandleId, setHoveredHandleId] = useState<string | null>(null);
   const [diagramModalOpen, setDiagramModalOpen] = useState(false);
-  const [currentDiagramCode, setCurrentDiagramCode] = useState('');
-  const [selectedDeviceRows, setSelectedDeviceRows] = useState<DeviceRow[]>([]);
+  const [diagramCode, setDiagramCode] = useState('');
+  const [dragPreview, setDragPreview] = useState<{
+    start: { x: number; y: number };
+    end: { x: number; y: number };
+  } | null>(null);
+  const [locationEditDeviceId, setLocationEditDeviceId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [removingLink, setRemovingLink] = useState(false);
+  const [linking, setLinking] = useState(false);
+  const [printDialogOpen, setPrintDialogOpen] = useState(false);
+  const [printPreselectedConnectionId, setPrintPreselectedConnectionId] = useState<string | null>(null);
+  const [printPreselectedDeviceId, setPrintPreselectedDeviceId] = useState<string | null>(null);
+  const [printInitialTab, setPrintInitialTab] = useState<'connections' | 'devices'>('connections');
 
-  const { devices, connections, produtos, modelos, loading, error, reload, updateDevice } =
-    useGuiaConexoesData(selectedProjectId, searchTerm);
+  const [inconsistencies, setInconsistencies] = useState<Inconsistency[]>([]);
+  const [inconsistencyDialogOpen, setInconsistencyDialogOpen] = useState(false);
+  const [ignoredInconsistencies, setIgnoredInconsistencies] = useState<Set<string>>(new Set());
+
+  const { devices, connections, produtos, modelos, loading, error, reload } = useGuiaConexoesData(
+    selectedProjectId,
+    '',
+    ''
+  );
+
+  const { labelMap: connectionTypeLabelMap, colorMap: connectionTypeColorMap } = useMemo(
+    () => buildTypeMap(),
+    []
+  );
+  const connectionDirectionLabelMap = useMemo(() => buildDirectionMap(), []);
+  const connectionTypeValueByLabel = useMemo(() => {
+    const map = new Map<string, number>();
+    connectionTypeOptions.forEach((option) => {
+      map.set(option.label, option.value);
+    });
+    return map;
+  }, []);
+  const connectionCategoryLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    CONNECTION_CATEGORIES.forEach((category) => {
+      map.set(category.id, category.label);
+    });
+    return map;
+  }, []);
+
+  const selectedConnectionTypeValues = useMemo(() => {
+    if (selectedConnectionType.includes('all')) return null;
+    const values: number[] = [];
+    selectedConnectionType.forEach((categoryId) => {
+      const category = CONNECTION_CATEGORIES.find((item) => item.id === categoryId);
+      if (!category) return;
+      category.types.forEach((typeLabel) => {
+        const value = connectionTypeValueByLabel.get(typeLabel);
+        if (value !== undefined) {
+          values.push(value);
+        }
+      });
+    });
+    return values;
+  }, [selectedConnectionType, connectionTypeValueByLabel]);
+
+  const selectedConnectionTypeLabel = useMemo(() => {
+    if (selectedConnectionType.includes('all')) return 'Todas as categorias';
+    if (selectedConnectionType.length === 0) return 'Categoria';
+    if (selectedConnectionType.length === 1) {
+      const label = connectionCategoryLabelMap.get(selectedConnectionType[0]);
+      return label ?? 'Categoria';
+    }
+    return `${selectedConnectionType.length} categorias selecionadas`;
+  }, [connectionCategoryLabelMap, selectedConnectionType]);
+
+  const isNetworkCategorySelected = useMemo(
+    () => selectedConnectionType.includes('rede'),
+    [selectedConnectionType]
+  );
+  const isNetworkOrAllSelected = useMemo(
+    () => selectedConnectionType.includes('rede') || selectedConnectionType.includes('all'),
+    [selectedConnectionType]
+  );
+
+  const filteredConnections = useMemo(() => {
+    if (selectedConnectionType.includes('all')) return connections;
+    if (selectedConnectionType.length === 0) return [];
+    const values = selectedConnectionTypeValues ?? [];
+    return connections.filter(
+      (connection) =>
+        connection.new_tipodeconexao !== null &&
+        connection.new_tipodeconexao !== undefined &&
+        values.includes(connection.new_tipodeconexao)
+    );
+  }, [connections, selectedConnectionType, selectedConnectionTypeValues]);
+
+  const legendItems = useMemo(() => {
+    const valuesSet = new Set<number>();
+    if (selectedConnectionType.includes('all')) {
+      filteredConnections.forEach((connection) => {
+        if (connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined) {
+          valuesSet.add(connection.new_tipodeconexao);
+        }
+      });
+    } else {
+      (selectedConnectionTypeValues ?? []).forEach((value) => valuesSet.add(value));
+    }
+    if (valuesSet.size === 0) return [];
+    return connectionTypeOptions
+      .filter((option) => valuesSet.has(option.value))
+      .map((option) => ({
+        value: option.value,
+        label: option.label,
+        color: connectionTypeColorMap.get(option.value) ?? tokens.colorNeutralStroke2,
+      }));
+  }, [
+    selectedConnectionType,
+    selectedConnectionTypeValues,
+    filteredConnections,
+    connectionTypeColorMap,
+  ]);
+
+  const deviceMap = useMemo(() => {
+    const map = new Map<string, GuiaDeviceIO>();
+    for (const device of devices) {
+      map.set(device.new_deviceioid, device);
+    }
+    return map;
+  }, [devices]);
+
+  useEffect(() => {
+    if (loading || connections.length === 0) return;
+
+    const found: Inconsistency[] = [];
+    const connectionMap = new Map(connections.map((c) => [c.new_deviceioconnectionid, c]));
+
+    connections.forEach((conn) => {
+      const targetId = conn._new_connectedto_value;
+      if (!targetId) return;
+
+      if (conn.new_direcao === DIRECTION.Bus) return;
+      const targetConn = connectionMap.get(targetId);
+      if (targetConn?.new_direcao === DIRECTION.Bus) return;
+      if (!targetConn || targetConn._new_connectedto_value !== conn.new_deviceioconnectionid) {
+        if (ignoredInconsistencies.has(targetId)) return;
+
+        const sourceDevice = deviceMap.get(conn._new_device_value ?? '');
+        const targetDevice = deviceMap.get(targetConn?._new_device_value ?? '');
+
+        found.push({
+          id: targetId,
+          name: targetConn ? getConnectionLabel(targetConn) : 'Porta Desconhecida',
+          targetId: conn.new_deviceioconnectionid,
+          targetName: getConnectionLabel(conn),
+          deviceName: targetDevice?.new_name ?? 'Equipamento Desconhecido',
+          targetDeviceName: sourceDevice?.new_name ?? 'Equipamento Desconhecido',
+        });
+      }
+    });
+
+    if (found.length > 0) {
+      setInconsistencies(found);
+      setInconsistencyDialogOpen(true);
+    }
+  }, [connections, loading, ignoredInconsistencies, deviceMap]);
+
+  const connectionsByDevice = useMemo(() => {
+    const map = new Map<string, GuiaDeviceIOConnection[]>();
+    for (const connection of filteredConnections) {
+      const deviceId = connection._new_device_value;
+      if (!deviceId) continue;
+      const list = map.get(deviceId);
+      if (list) {
+        list.push(connection);
+      } else {
+        map.set(deviceId, [connection]);
+      }
+    }
+    return map;
+  }, [filteredConnections]);
+
+  const connectionsById = useMemo(() => {
+    const map = new Map<string, GuiaDeviceIOConnection>();
+    for (const connection of filteredConnections) {
+      map.set(connection.new_deviceioconnectionid, connection);
+    }
+    return map;
+  }, [filteredConnections]);
+
+  const linkedConnectionInfo = useMemo(() => {
+    const linkedToByConnectionId = new Map<string, string>();
+    const linkedConnectionIds = new Set<string>();
+    filteredConnections.forEach((connection) => {
+      if (!connection._new_connectedto_value) return;
+      const otherId = connection._new_connectedto_value;
+      linkedToByConnectionId.set(connection.new_deviceioconnectionid, otherId);
+      linkedToByConnectionId.set(otherId, connection.new_deviceioconnectionid);
+      linkedConnectionIds.add(connection.new_deviceioconnectionid);
+      linkedConnectionIds.add(otherId);
+    });
+    return { linkedToByConnectionId, linkedConnectionIds };
+  }, [filteredConnections]);
 
   const modelosMap = useMemo(() => {
     const map = new Map<string, GuiaModeloProduto>();
@@ -174,213 +589,490 @@ export function GuiaConexoesPage() {
     return map;
   }, [modelos]);
 
-  const produtosMap = useMemo(() => {
-    const map = new Map<string, GuiaProdutoServico>();
-    produtos.forEach((produto) => {
-      map.set(produto.new_produtoservicoid, produto);
-    });
-    return map;
-  }, [produtos]);
-
-  const connectionsByDevice = useMemo(() => {
-    const map = new Map<string, GuiaDeviceIOConnection[]>();
-    connections.forEach((connection) => {
-      const deviceId = connection._new_device_value;
-      if (!deviceId) return;
-      const list = map.get(deviceId) ?? [];
-      list.push(connection);
-      map.set(deviceId, list);
-    });
-    return map;
-  }, [connections]);
-
-  const connectionTypeMap = useMemo(() => {
-    const deviceMap = new Map<string, Set<string>>();
-    const labelMap = new Map<string, string>();
-
-    connections.forEach((connection) => {
-      const deviceId = connection._new_device_value;
-      if (!deviceId) return;
-
-      const key =
-        connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
-          ? String(connection.new_tipodeconexao)
-          : connection.new_tipodeconexaorawtext || 'desconhecido';
-
-      if (!deviceMap.has(key)) {
-        deviceMap.set(key, new Set<string>());
+  const connectedDeviceIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const connection of filteredConnections) {
+      if (!connection._new_connectedto_value || !connection._new_device_value) {
+        continue;
       }
-      deviceMap.get(key)?.add(deviceId);
-
-      if (!labelMap.has(key)) {
-        const typeValue =
-          connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
-            ? Number(connection.new_tipodeconexao)
-            : null;
-
-        const typeLabel = typeValue !== null ? SISTEMA_TIPO_LABELS.get(typeValue) : null;
-
-        labelMap.set(
-          key,
-          typeLabel ||
-            connection.new_tipodeconexaorawtext ||
-            (connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
-              ? `Tipo ${connection.new_tipodeconexao}`
-              : 'Tipo desconhecido')
-        );
+      ids.add(connection._new_device_value);
+      const target = connectionsById.get(connection._new_connectedto_value);
+      if (target && target._new_device_value) {
+        ids.add(target._new_device_value);
       }
+    }
+    return ids;
+  }, [filteredConnections, connectionsById]);
+
+  const deviceDepths = useMemo(() => {
+    if (!rootDeviceId) return new Map<string, number>();
+    const adjacency = new Map<string, Set<string>>();
+    connectedDeviceIds.forEach((id) => adjacency.set(id, new Set()));
+    filteredConnections.forEach((connection) => {
+      if (!connection._new_connectedto_value || !connection._new_device_value) return;
+      const target = connectionsById.get(connection._new_connectedto_value);
+      if (!target?._new_device_value) return;
+      const sourceDeviceId = connection._new_device_value;
+      const targetDeviceId = target._new_device_value;
+      if (!connectedDeviceIds.has(sourceDeviceId) || !connectedDeviceIds.has(targetDeviceId)) return;
+      adjacency.get(sourceDeviceId)?.add(targetDeviceId);
+      adjacency.get(targetDeviceId)?.add(sourceDeviceId);
     });
 
-    return { deviceMap, labelMap };
-  }, [connections]);
-
-  const tabOptions = useMemo<TabOption[]>(() => {
-    if (groupBy === 'all') {
-      return [{ value: 'all', label: 'Todos' }];
+    const depths = new Map<string, number>();
+    const queue: string[] = [];
+    if (connectedDeviceIds.has(rootDeviceId)) {
+      depths.set(rootDeviceId, 0);
+      queue.push(rootDeviceId);
     }
-
-    if (groupBy === 'system') {
-      const map = new Map<number, string>();
-      devices.forEach((device) => {
-        const modelId = device._new_modelodeproduto_value;
-        const systemType = modelId ? modelosMap.get(modelId)?.new_tipodesistemapadrao : null;
-        if (systemType === null || systemType === undefined) return;
-        map.set(systemType, SISTEMA_TIPO_LABELS.get(systemType) ?? String(systemType));
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (!current) break;
+      const currentDepth = depths.get(current) ?? 0;
+      const neighbors = adjacency.get(current);
+      if (!neighbors) continue;
+      neighbors.forEach((neighbor) => {
+        if (!depths.has(neighbor)) {
+          depths.set(neighbor, currentDepth + 1);
+          queue.push(neighbor);
+        }
       });
-      return Array.from(map.entries())
-        .map(([value, label]) => ({ value: String(value), label }))
-        .sort((a, b) => a.label.localeCompare(b.label));
     }
+    return depths;
+  }, [filteredConnections, connectionsById, connectedDeviceIds, rootDeviceId]);
 
-    if (groupBy === 'location') {
-      const map = new Map<string, string>();
-      devices.forEach((device) => {
-        const raw = device.new_localizacao?.trim();
-        const location = raw ? raw : EMPTY_LOCATION;
-        map.set(location, location);
+  const connectedDeviceIdList = useMemo(() => {
+    const list: string[] = [];
+    for (const id of connectedDeviceIds) {
+      list.push(id);
+    }
+    return list;
+  }, [connectedDeviceIds]);
+
+  const preferredNetworkRootId = useMemo(() => {
+    if (!isNetworkOrAllSelected) return null;
+    return findPreferredNetworkRootId(connectedDeviceIdList, deviceMap, modelosMap);
+  }, [connectedDeviceIdList, deviceMap, modelosMap, isNetworkOrAllSelected]);
+
+  const autoRootCandidates = useMemo(() => {
+    const candidates: string[] = [];
+    connectedDeviceIdList.forEach((deviceId) => {
+      const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
+      if (deviceConnections.length === 0) return;
+      const activeConnections = deviceConnections.filter(
+        (connection) =>
+          linkedConnectionInfo.linkedConnectionIds.has(connection.new_deviceioconnectionid) ||
+          !!connection.new_connectedtomanual
+      );
+      if (activeConnections.length === 0) return;
+      const hasOutput = activeConnections.some(
+        (connection) => connection.new_direcao !== DIRECTION.Input
+      );
+      if (hasOutput) {
+        candidates.push(deviceId);
+      }
+    });
+    return candidates;
+  }, [connectedDeviceIdList, connectionsByDevice, linkedConnectionInfo]);
+
+  const autoRootCandidateSet = useMemo(
+    () => new Set(autoRootCandidates),
+    [autoRootCandidates]
+  );
+
+  const disconnectedDevices = useMemo(() => {
+    const list: {
+      id: string;
+      name: string;
+      location?: string | null;
+      systemTypeValue?: string | null;
+      systemTypeLabel?: string | null;
+      ports: { id: string; label: string; directionCode: 'IN' | 'OUT' | 'BI'; typeLabel: string }[];
+    }[] = [];
+    for (const device of devices) {
+      const deviceId = device.new_deviceioid;
+      const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
+      const hasAnyLink = deviceConnections.some(
+        (connection) =>
+          linkedConnectionInfo.linkedConnectionIds.has(connection.new_deviceioconnectionid) ||
+          !!connection.new_connectedtomanual
+      );
+      if (hasAnyLink) continue;
+      const ports = deviceConnections
+        .filter(
+          (connection) =>
+            !linkedConnectionInfo.linkedConnectionIds.has(connection.new_deviceioconnectionid) &&
+            !connection.new_connectedtomanual
+        )
+        .map((connection) => {
+          const typeLabel =
+            connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
+              ? connectionTypeLabelMap.get(connection.new_tipodeconexao) ?? 'Tipo'
+              : connection.new_tipodeconexaorawtext || 'Tipo';
+          const directionCode = getDirectionCode(connection.new_direcao) as 'IN' | 'OUT' | 'BI';
+          return {
+            id: connection.new_deviceioconnectionid,
+            label: getConnectionLabel(connection),
+            directionCode,
+            typeLabel,
+          };
+        });
+      if (ports.length === 0) continue;
+      const modelId = device._new_modelodeproduto_value;
+      const systemTypeValue =
+        modelId && modelosMap.get(modelId)?.new_tipodesistemapadrao !== undefined
+          ? String(modelosMap.get(modelId)?.new_tipodesistemapadrao ?? '')
+          : null;
+      const systemTypeLabel =
+        modelId && modelosMap.get(modelId)?.new_tipodesistemapadrao !== undefined
+          ? SISTEMA_TIPO_LABELS.get(modelosMap.get(modelId)?.new_tipodesistemapadrao ?? 0) ||
+            `Tipo ${modelosMap.get(modelId)?.new_tipodesistemapadrao}`
+          : 'Sem tipo de sistema';
+      list.push({
+        id: deviceId,
+        name: device.new_name || 'Equipamento',
+        location: device.new_localizacao,
+        systemTypeValue: systemTypeValue || 'Sem tipo de sistema',
+        systemTypeLabel,
+        ports,
       });
-      return Array.from(map.entries())
-        .map(([value, label]) => ({ value, label }))
-        .sort((a, b) => a.label.localeCompare(b.label));
     }
+    return list;
+  }, [connectionsByDevice, connectionTypeLabelMap, devices, modelosMap, linkedConnectionInfo]);
 
-    return Array.from(connectionTypeMap.labelMap.entries())
-      .map(([value, label]) => ({ value, label }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [connectionTypeMap.labelMap, devices, groupBy, modelosMap]);
+  const locationOptions = useMemo(() => {
+    const set = new Set<string>();
+    devices.forEach((device) => {
+      const raw = device.new_localizacao?.trim();
+      if (raw) {
+        set.add(raw);
+      }
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [devices]);
+
+  const connectedDeviceKey = useMemo(() => {
+    let key = '';
+    for (const id of connectedDeviceIdList) {
+      key += `${id}|`;
+    }
+    return key;
+  }, [connectedDeviceIdList]);
+
+  const connectedDeviceOptions = useMemo(() => {
+    const options: { id: string; label: string }[] = [];
+    for (const deviceId of connectedDeviceIdList) {
+      const device = deviceMap.get(deviceId);
+      if (!device) continue;
+      const labelParts: string[] = [];
+      if (device.new_name) labelParts.push(device.new_name);
+      if (device.new_localizacao) labelParts.push(device.new_localizacao);
+      const label = labelParts.join(' · ') || 'Equipamento';
+      options.push({ id: deviceId, label });
+    }
+    return options;
+  }, [connectedDeviceIdList, deviceMap]);
+
+  const expandedNodes = useMemo(() => {
+    const list: { id: string; spacing?: number; spacingX?: number; spacingY?: number }[] = [];
+    connectedDeviceIdList.forEach((deviceId) => {
+      const isExpanded = nodeShowAllPorts[deviceId] ?? false;
+      const deviceConnections = connectionsByDevice.get(deviceId) ?? [];
+      if (deviceConnections.length === 0) return;
+      const connectedCount = deviceConnections.filter(
+        (connection) => !!connection._new_connectedto_value
+      ).length;
+      const visibleCount = isExpanded ? deviceConnections.length : connectedCount;
+      if (visibleCount <= 0) return;
+      const dynamicSpacingY = Math.max(0, (visibleCount - 3) * 24);
+      const expandedSpacing = isExpanded ? visibleCount * 32 : 0;
+      const spacingY = Math.max(dynamicSpacingY, expandedSpacing);
+      if (spacingY <= 0) return;
+      list.push({ id: deviceId, spacingX: 0, spacingY });
+    });
+    return list;
+  }, [connectedDeviceIdList, connectionsByDevice, nodeShowAllPorts]);
+
+  const areAllPortsExpanded = useMemo(() => {
+    if (connectedDeviceIdList.length === 0) return false;
+    return connectedDeviceIdList.every((deviceId) => nodeShowAllPorts[deviceId]);
+  }, [connectedDeviceIdList, nodeShowAllPorts]);
+
+  const activeConnectionId = useMemo(
+    () => resolveConnectionIdFromHandle(connectingHandleId),
+    [connectingHandleId]
+  );
+
+  const activeConnection = useMemo(() => {
+    if (!activeConnectionId) return null;
+    return connectionsById.get(activeConnectionId) ?? null;
+  }, [activeConnectionId, connectionsById]);
+
+  const rootDeviceLabel = useMemo(() => {
+    if (!rootDeviceId) return '';
+    for (const option of connectedDeviceOptions) {
+      if (option.id === rootDeviceId) {
+        return option.label;
+      }
+    }
+    return '';
+  }, [connectedDeviceOptions, rootDeviceId]);
+
+  const nodeTypes = useMemo(() => ({ device: DeviceNode }), []);
+
+  const [nodes, setNodes] = useState<Node<DeviceNodeData>[]>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
 
   useEffect(() => {
-    if (tabOptions.length === 0) {
-      setSelectedTab('all');
+    setNodes((prevNodes) => {
+      const prevMap = new Map<string, Node<DeviceNodeData>>();
+      for (const node of prevNodes) {
+        prevMap.set(node.id, node);
+      }
+      const nextNodes: Node<DeviceNodeData>[] = [];
+      for (const deviceId of connectedDeviceIdList) {
+        const device = deviceMap.get(deviceId);
+        if (!device) continue;
+        const existing = prevMap.get(deviceId);
+        const currentPosition = existing?.position;
+        const connectionsForDevice = connectionsByDevice.get(deviceId) ?? [];
+        const ports: DevicePortData[] = [];
+        for (const connection of connectionsForDevice) {
+          const typeLabel =
+            connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
+              ? connectionTypeLabelMap.get(connection.new_tipodeconexao) ?? 'Tipo'
+              : connection.new_tipodeconexaorawtext || 'Tipo';
+          const directionLabel =
+            connection.new_direcao !== null && connection.new_direcao !== undefined
+              ? connectionDirectionLabelMap.get(connection.new_direcao) ?? 'Direção'
+              : connection.new_direcaorawtext || 'Direção';
+          const connectionId = connection.new_deviceioconnectionid;
+          const partnerId = linkedConnectionInfo.linkedToByConnectionId.get(connectionId);
+          const isConnected = linkedConnectionInfo.linkedConnectionIds.has(connectionId);
+          const isManual = !!connection.new_connectedtomanual;
+          const connectable = !isConnected && !isManual;
+          let state: DevicePortData['state'] = isManual ? 'manual' : isConnected ? 'connected' : 'free';
+          if (activeConnection && connectable) {
+            const compatible = isConnectionCompatible(activeConnection, connection);
+            if (!compatible) {
+              state = 'incompatible';
+            }
+          }
+          const flags = getDirectionFlags(connection.new_direcao);
+          const directionCode = getDirectionCode(connection.new_direcao);
+          const highlight =
+            !!activeConnection && connectable && isConnectionCompatible(activeConnection, connection);
+          let side: DevicePortData['side'] = 'right';
+          const linkedTargetId = partnerId ?? connection._new_connectedto_value;
+          if (linkedTargetId) {
+            const targetConnection = connectionsById.get(linkedTargetId);
+            const targetDeviceId = targetConnection?._new_device_value ?? null;
+            const targetPosition = targetDeviceId ? prevMap.get(targetDeviceId)?.position : undefined;
+            const hasRealPosition =
+              currentPosition &&
+              targetPosition &&
+              (currentPosition.x !== 0 || currentPosition.y !== 0 || targetPosition.x !== 0 || targetPosition.y !== 0);
+            if (hasRealPosition) {
+              side = targetPosition.x < currentPosition.x ? 'left' : 'right';
+            } else if (targetDeviceId && deviceDepths.has(targetDeviceId) && deviceDepths.has(deviceId)) {
+              const currentDepth = deviceDepths.get(deviceId) ?? 0;
+              const targetDepth = deviceDepths.get(targetDeviceId) ?? 0;
+              side = targetDepth < currentDepth ? 'left' : 'right';
+            }
+          }
+          ports.push({
+            id: connection.new_deviceioconnectionid,
+            label: getConnectionLabel(connection),
+            typeLabel,
+            directionLabel,
+            direction: connection.new_direcao,
+            directionCode,
+            side,
+            state,
+            isConnectable: connectable,
+            highlight,
+            allowInput: flags.allowInput,
+            allowOutput: flags.allowOutput,
+          });
+        }
+        const showAllPorts = nodeShowAllPorts[deviceId] ?? false;
+        const visiblePorts = showAllPorts
+          ? ports
+          : ports.filter((port) => port.state === 'connected');
+        const position = existing?.position || ({ x: 0, y: 0 } as { x: number; y: number });
+        nextNodes.push({
+          id: deviceId,
+          type: 'device',
+          position,
+          zIndex: 0,
+          data: {
+            title: device.new_name || 'Equipamento',
+            locationLabel: device.new_localizacao || 'Sem localização',
+            ports: visiblePorts,
+            showAllPorts,
+            onToggleShowAll: () => {
+              setNodeShowAllPorts((prev) => ({
+                ...prev,
+                [deviceId]: !(prev[deviceId] ?? false),
+              }));
+              setLayoutPending(true);
+            },
+            onDelete: () => handleDeleteDevice(deviceId, device.new_name),
+            onEditLocation: (id) => setLocationEditDeviceId(id),
+            onPrintConnections: (id) => {
+              setPrintPreselectedConnectionId(null);
+              setPrintPreselectedDeviceId(id);
+              setPrintInitialTab('connections');
+              setPrintDialogOpen(true);
+            },
+            onPrintDevice: (id) => {
+              setPrintPreselectedConnectionId(null);
+              setPrintPreselectedDeviceId(id);
+              setPrintInitialTab('devices');
+              setPrintDialogOpen(true);
+            },
+          },
+        });
+      }
+      return nextNodes;
+    });
+  }, [
+    connectedDeviceIdList,
+    connectionsByDevice,
+    deviceMap,
+    connectionDirectionLabelMap,
+    connectionTypeLabelMap,
+    activeConnection,
+    connectionsById,
+    deviceDepths,
+    linkedConnectionInfo,
+    nodeShowAllPorts,
+    setNodes,
+  ]);
+
+  useEffect(() => {
+    const nextEdges: Edge[] = [];
+    const dedupe = new Set<string>();
+    for (const connection of filteredConnections) {
+      const partnerId = linkedConnectionInfo.linkedToByConnectionId.get(connection.new_deviceioconnectionid);
+      const connectedId = partnerId ?? connection._new_connectedto_value;
+      if (!connectedId) continue;
+      const target = connectionsById.get(connectedId);
+      if (!target) continue;
+      if (!connection._new_device_value || !target._new_device_value) continue;
+      if (!connectedDeviceIds.has(connection._new_device_value)) continue;
+      if (!connectedDeviceIds.has(target._new_device_value)) continue;
+      const key = [connection.new_deviceioconnectionid, connectedId].sort().join('|');
+      if (dedupe.has(key)) continue;
+      dedupe.add(key);
+      const typeLabel =
+        connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
+          ? connectionTypeLabelMap.get(connection.new_tipodeconexao) ?? 'Tipo'
+          : connection.new_tipodeconexaorawtext || 'Tipo';
+      const edgeColor =
+        connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined
+          ? connectionTypeColorMap.get(connection.new_tipodeconexao) ?? '#7aa2ff'
+          : '#7aa2ff';
+      const endpoints = resolveEdgeEndpoints(connection, target, deviceDepths);
+      const sourceDeviceId = endpoints.source._new_device_value;
+      const targetDeviceId = endpoints.target._new_device_value;
+      if (!sourceDeviceId || !targetDeviceId) continue;
+      nextEdges.push({
+        id: `edge:${key}`,
+        source: sourceDeviceId,
+        target: targetDeviceId,
+        sourceHandle: `${endpoints.source.new_deviceioconnectionid}:out`,
+        targetHandle: `${endpoints.target.new_deviceioconnectionid}:in`,
+        style: { stroke: edgeColor },
+        zIndex: 5,
+        data: {
+          sourceConnectionId: endpoints.source.new_deviceioconnectionid,
+          targetConnectionId: endpoints.target.new_deviceioconnectionid,
+          typeLabel,
+        },
+      });
+    }
+    setEdges(nextEdges);
+  }, [
+    filteredConnections,
+    connectionsById,
+    connectedDeviceIds,
+    connectionTypeLabelMap,
+    connectionTypeColorMap,
+    deviceDepths,
+    setEdges,
+    linkedConnectionInfo,
+  ]);
+
+  useEffect(() => {
+    if (flowInstance && layoutViewport) {
+      flowInstance.setViewport(layoutViewport);
+    }
+  }, [flowInstance, layoutViewport]);
+
+  useEffect(() => {
+    if (!selectedProjectId) {
+      setLayoutViewport(null);
       return;
     }
-
-    const exists = tabOptions.some((tab) => tab.value === selectedTab);
-    if (!exists) {
-      setSelectedTab(tabOptions[0].value);
+    const stored = loadLayout(selectedProjectId);
+    if (stored) {
+      setLayoutViewport(stored.viewport || null);
+    } else {
+      setLayoutViewport(null);
     }
-  }, [selectedTab, tabOptions]);
+  }, [selectedProjectId]);
 
-  const visibleDevices = useMemo(() => {
-    if (groupBy === 'all') {
-      return devices;
+  useEffect(() => {
+    if (connectedDeviceIdList.length === 0) {
+      setRootDeviceId(null);
+      return;
     }
-
-    if (groupBy === 'system') {
-      return devices.filter((device) => {
-        const modelId = device._new_modelodeproduto_value;
-        const systemType = modelId ? modelosMap.get(modelId)?.new_tipodesistemapadrao : null;
-        return systemType !== null && String(systemType) === selectedTab;
-      });
-    }
-
-    if (groupBy === 'location') {
-      return devices.filter((device) => {
-        const raw = device.new_localizacao?.trim();
-        const location = raw ? raw : EMPTY_LOCATION;
-        return location === selectedTab;
-      });
-    }
-
-    const deviceSet = connectionTypeMap.deviceMap.get(selectedTab);
-    if (!deviceSet) {
-      return [];
-    }
-    return devices.filter((device) => deviceSet.has(device.new_deviceioid));
-  }, [connectionTypeMap.deviceMap, devices, groupBy, modelosMap, selectedTab]);
-
-  const deviceRows = useMemo<DeviceRow[]>(() => {
-    return visibleDevices.map((device) => {
-      const model = device._new_modelodeproduto_value
-        ? modelosMap.get(device._new_modelodeproduto_value)
-        : undefined;
-      const produto = device._new_produto_value
-        ? produtosMap.get(device._new_produto_value)
-        : undefined;
-      const deviceConnections = connectionsByDevice.get(device.new_deviceioid) ?? [];
-      const completedConnections = deviceConnections.filter(
-        (connection) => !!connection._new_connectedto_value || !!connection.new_connectedtomanual
-      ).length;
-
-      return {
-        device,
-        model,
-        produto,
-        connections: deviceConnections,
-        completedConnections,
-      };
-    });
-  }, [connectionsByDevice, modelosMap, produtosMap, visibleDevices]);
-
-  const visibleDeviceIds = useMemo(
-    () => new Set(visibleDevices.map((device) => device.new_deviceioid)),
-    [visibleDevices]
-  );
-
-  const visibleConnections = useMemo(
-    () =>
-      connections.filter(
-        (connection) =>
-          connection._new_device_value && visibleDeviceIds.has(connection._new_device_value)
-      ),
-    [connections, visibleDeviceIds]
-  );
-
-  const handleToggleInstall = useCallback(
-    async (deviceId: string, value: boolean) => {
-      setToggleBusyId(deviceId);
-      setActionError(null);
-      try {
-        const result = await NewDeviceIOService.update(deviceId, {
-          new_serainstaladobase: value,
-        });
-
-        if (!result.success) {
-          throw new Error(
-            resolveErrorMessage(result.error, 'Falha ao atualizar o status.')
-          );
-        }
-
-        // Atualizar apenas o dispositivo local em vez de recarregar tudo
-        updateDevice(deviceId, { new_serainstaladobase: value });
-      } catch (err) {
-        setActionError(resolveErrorMessage(err, 'Falha ao atualizar o status.'));
-      } finally {
-        setToggleBusyId(null);
+    if (isNetworkOrAllSelected && preferredNetworkRootId) {
+      if (rootDeviceId !== preferredNetworkRootId) {
+        setRootDeviceId(preferredNetworkRootId);
       }
-    },
-    [updateDevice]
-  );
+      return;
+    }
+    const rootDevice = devices.find((device) => device.new_raiz);
+    if (rootDevice?.new_deviceioid && autoRootCandidateSet.has(rootDevice.new_deviceioid)) {
+      if (rootDeviceId !== rootDevice.new_deviceioid) {
+        setRootDeviceId(rootDevice.new_deviceioid);
+      }
+      return;
+    }
+    if (
+      rootDeviceId &&
+      connectedDeviceIds.has(rootDeviceId) &&
+      autoRootCandidateSet.has(rootDeviceId)
+    ) {
+      return;
+    }
+    setRootDeviceId(autoRootCandidates[0] ?? null);
+  }, [
+    autoRootCandidates,
+    autoRootCandidateSet,
+    connectedDeviceIdList,
+    connectedDeviceIds,
+    devices,
+    isNetworkOrAllSelected,
+    preferredNetworkRootId,
+    rootDeviceId,
+  ]);
 
-  const handleOpenDetails = useCallback((deviceId: string) => {
-    setDetailDeviceId(deviceId);
-    setDetailOpen(true);
-  }, []);
+  useEffect(() => {
+    if (connectedDeviceIdList.length === 0) {
+      setLayoutPending(false);
+      return;
+    }
+    setLayoutPending(true);
+  }, [connectedDeviceKey, edges.length, rootDeviceId]);
 
-  const handleCloseDetails = useCallback(() => {
-    setDetailOpen(false);
-    setDetailDeviceId(null);
-  }, []);
+  useEffect(() => {
+    if (!selectedProjectId) return;
+    const viewport = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
+    saveLayout(selectedProjectId, { viewport });
+  }, [flowInstance, selectedProjectId]);
 
   const searchProjects = useCallback(async (term: string) => {
     const normalized = term.trim();
@@ -400,368 +1092,693 @@ export function GuiaConexoesPage() {
       return [];
     }
 
-    return (result.data as ProjectSearchRecord[])
-      .filter((item) => item.cr22f_projetoid)
-      .map((item) => ({
+    const options: { id: string; label: string }[] = [];
+    for (const item of result.data as ProjectSearchRecord[]) {
+      if (!item.cr22f_projetoid) continue;
+      options.push({
         id: item.cr22f_projetoid,
         label: formatProjectLabel(item),
-      }));
+      });
+    }
+    return options;
   }, []);
 
-  const downloadText = useCallback((content: string, filename: string, type = 'text/plain') => {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, []);
+  const updateRootDevice = useCallback(
+    async (nextRootId: string | null) => {
+      if (!selectedProjectId || !nextRootId) return;
+      if (nextRootId === rootDeviceId) return;
+      setActionError(null);
+      setRootDeviceId(nextRootId);
+      try {
+        const rootResult = await NewDeviceIOService.getAll({
+          select: ['new_deviceioid'],
+          filter: `statecode eq 0 and _new_projeto_value eq ${escapeODataValue(
+            selectedProjectId
+          )} and new_raiz eq true`,
+          maxPageSize: 5000,
+        });
+        if (!rootResult.success) {
+          throw new Error(
+            resolveErrorMessage(rootResult.error, 'Falha ao buscar raiz atual.')
+          );
+        }
+        const currentRootIds = (rootResult.data ?? [])
+          .map((item) => (item as { new_deviceioid?: string }).new_deviceioid)
+          .filter((id) => id && id !== nextRootId) as string[];
 
-  const handleMermaid = useCallback(() => {
-    setRootSelectionOpen(true);
-  }, []);
+        const updates: Promise<unknown>[] = [];
+        currentRootIds.forEach((id) => {
+          updates.push(NewDeviceIOService.update(id, { new_raiz: false }));
+        });
+        updates.push(NewDeviceIOService.update(nextRootId, { new_raiz: true }));
+        const results = await Promise.all(updates);
+        const failed = results.filter(
+          (result) => (result as { success?: boolean }).success === false
+        );
+        if (failed.length > 0) {
+          throw new Error('Falha ao atualizar raiz no Dataverse.');
+        }
 
-  const handleRootSelected = useCallback(
-    (rootDeviceId: string) => {
-      const diagram = generateMermaidGraph(
-        devices,
-        connections,
-        modelosMap,
-        rootDeviceId
-      );
-      setCurrentDiagramCode(diagram);
-      setDiagramModalOpen(true);
+        await reload();
+        setLayoutPending(true);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao salvar raiz.'));
+      }
     },
-    [modelosMap, visibleConnections, visibleDevices]
+    [reload, rootDeviceId, selectedProjectId]
   );
 
-  const handleBulkDelete = useCallback(async () => {
+  const handleAutoRoot = useCallback(async () => {
     if (!selectedProjectId) return;
-    if (selectedDeviceRows.length === 0) return;
-
-    const confirm = window.confirm(
-      `Deseja apagar ${selectedDeviceRows.length} equipamento(s) selecionado(s) e suas conexões?\n\n` +
-        `Isso também desfaz vínculos das conexões antes de apagar.`
-    );
-    if (!confirm) return;
-
-    setBulkDeleting(true);
-    setBulkStatus(null);
+    if (connectedDeviceIdList.length === 0) return;
     setActionError(null);
+    setAutoRootPending(true);
+    if (isNetworkOrAllSelected && preferredNetworkRootId) {
+      setAutoRootProgress({ current: 1, total: 1 });
+      try {
+        await updateRootDevice(preferredNetworkRootId);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao calcular raiz automática.'));
+      } finally {
+        setAutoRootPending(false);
+        setAutoRootProgress(null);
+      }
+      return;
+    }
+    setAutoRootProgress({ current: 0, total: autoRootCandidates.length });
+    if (autoRootCandidates.length === 0) {
+      setActionError('Nenhum nó com conexões de saída disponível para raiz automática.');
+      setAutoRootPending(false);
+      setAutoRootProgress(null);
+      return;
+    }
     try {
-      const failures: string[] = [];
-      for (let i = 0; i < selectedDeviceRows.length; i += 1) {
-        const row = selectedDeviceRows[i];
-        const id = row.device.new_deviceioid;
-        const label = row.device.new_name || id;
-        setBulkStatus(`Apagando ${i + 1}/${selectedDeviceRows.length}: ${label}`);
-        try {
-          await deleteDeviceWithConnections(id);
-        } catch (err) {
-          failures.push(`${label}: ${resolveErrorMessage(err, 'Erro desconhecido')}`);
+      const undirectedEdges = buildUndirectedDeviceEdges(
+        filteredConnections,
+        connectionsById,
+        connectedDeviceIds
+      );
+      const { bestRootId } = await pickBestRootByExhaustiveLayout({
+        candidates: autoRootCandidates,
+        nodes,
+        edges,
+        expandedNodes,
+        undirectedEdges,
+        applyAutoLayout,
+        onProgress: (current, total) => setAutoRootProgress({ current, total }),
+        yieldFn: () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+          }),
+      });
+      if (!bestRootId) {
+        throw new Error('Não foi possível determinar o nó raiz.');
+      }
+      await updateRootDevice(bestRootId);
+    } catch (err) {
+      setActionError(resolveErrorMessage(err, 'Falha ao calcular raiz automática.'));
+    } finally {
+      setAutoRootPending(false);
+      setAutoRootProgress(null);
+    }
+  }, [
+    selectedProjectId,
+    connectedDeviceIdList,
+    connectionsByDevice,
+    autoRootCandidates,
+    isNetworkOrAllSelected,
+    preferredNetworkRootId,
+    filteredConnections,
+    connectionsById,
+    connectedDeviceIds,
+    nodes,
+    edges,
+    expandedNodes,
+    updateRootDevice,
+  ]);
+
+  const handleSaveLocation = useCallback(
+    async (deviceId: string, nextLocation: string) => {
+      if (!deviceId) return;
+      setActionError(null);
+      const payload = {
+        new_localizacao: nextLocation ? nextLocation : undefined,
+      };
+      const result = await NewDeviceIOService.update(deviceId, payload);
+      if (!result.success) {
+        throw new Error(resolveErrorMessage(result.error, 'Falha ao salvar localização.'));
+      }
+      await reload();
+      setLayoutPending(true);
+    },
+    [reload]
+  );
+
+  const handleSaveLayout = useCallback(() => {
+    if (!selectedProjectId) return;
+    const viewport = flowInstance?.getViewport() ?? { x: 0, y: 0, zoom: 1 };
+    saveLayout(selectedProjectId, {
+      viewport,
+    });
+  }, [flowInstance, selectedProjectId]);
+
+  const handleExpandAllPorts = useCallback(() => {
+    if (connectedDeviceIdList.length === 0) return;
+    const nextExpanded = !areAllPortsExpanded;
+    setNodeShowAllPorts((prev) => {
+      const next = { ...prev };
+      connectedDeviceIdList.forEach((deviceId) => {
+        next[deviceId] = nextExpanded;
+      });
+      return next;
+    });
+    setLayoutPending(true);
+  }, [areAllPortsExpanded, connectedDeviceIdList]);
+
+  const handleMermaidDiagram = useCallback(() => {
+    const diagram = generateMermaidGraph(
+      devices,
+      filteredConnections,
+      modelosMap,
+      rootDeviceId ?? undefined,
+      CONNECTION_TYPE_COLORS
+    );
+    setDiagramCode(diagram);
+    setDiagramModalOpen(true);
+  }, [devices, filteredConnections, modelosMap, rootDeviceId]);
+
+  useEffect(() => {
+    if (!layoutPending) return;
+    if (nodes.length === 0) {
+      setLayoutPending(false);
+      return;
+    }
+    let isActive = true;
+    const runLayout = async () => {
+      const next = await applyAutoLayout(nodes, edges, rootDeviceId, expandedNodes);
+      if (isActive) {
+        const nextMap = new Map(next.map((n) => [n.id, n]));
+        next.forEach((node) => {
+          const nodeData = node.data as DeviceNodeData;
+          if (nodeData?.ports) {
+            nodeData.ports.forEach((port) => {
+              const connection = connectionsById.get(port.id);
+              const partnerId = linkedConnectionInfo.linkedToByConnectionId.get(port.id);
+              const targetId = partnerId ?? connection?._new_connectedto_value ?? null;
+              if (targetId) {
+                const targetConnection = connectionsById.get(targetId);
+                const targetDeviceId = targetConnection?._new_device_value;
+                const targetNode = targetDeviceId ? nextMap.get(targetDeviceId) : null;
+                if (targetNode) {
+                  port.side = targetNode.position.x < node.position.x ? 'left' : 'right';
+                }
+              }
+            });
+          }
+        });
+        setNodes(next);
+        setLayoutPending(false);
+      }
+    };
+    void runLayout();
+    return () => {
+      isActive = false;
+    };
+  }, [
+    edges,
+    expandedNodes,
+    layoutPending,
+    nodes,
+    rootDeviceId,
+    setNodes,
+    connectionsById,
+    linkedConnectionInfo,
+  ]);
+
+  const linkPorts = useCallback(
+    async (sourcePortId: string, targetPortId: string) => {
+      if (sourcePortId === targetPortId) return;
+      const sourceConnection = connectionsById.get(sourcePortId);
+      const targetConnection = connectionsById.get(targetPortId);
+      if (!sourceConnection || !targetConnection) return;
+      const sourceConnected =
+        linkedConnectionInfo.linkedConnectionIds.has(sourcePortId) ||
+        !!sourceConnection.new_connectedtomanual;
+      const targetConnected =
+        linkedConnectionInfo.linkedConnectionIds.has(targetPortId) ||
+        !!targetConnection.new_connectedtomanual;
+      if (sourceConnected || targetConnected) {
+        setActionError('Uma das portas já está conectada.');
+        return;
+      }
+      if (!isConnectionCompatible(sourceConnection, targetConnection)) {
+        setActionError('Conexões incompatíveis.');
+        return;
+      }
+
+      setLinking(true);
+      setActionError(null);
+      try {
+        const payloadA = {
+          'new_ConnectedTo@odata.bind': `/new_deviceioconnections(${targetPortId})`,
+          new_connectedtomanual: null,
+        } as unknown as Record<string, unknown>;
+        const payloadB = {
+          'new_ConnectedTo@odata.bind': `/new_deviceioconnections(${sourcePortId})`,
+          new_connectedtomanual: null,
+        } as unknown as Record<string, unknown>;
+
+        const resultA = await NewDeviceIOConnectionService.update(sourcePortId, payloadA);
+        if (!resultA.success) {
+          throw new Error(
+            resolveErrorMessage(resultA.error, 'Falha ao vincular conexão A.')
+          );
+        }
+        const resultB = await NewDeviceIOConnectionService.update(targetPortId, payloadB);
+        if (!resultB.success) {
+          throw new Error(
+            resolveErrorMessage(resultB.error, 'Falha ao vincular conexão B.')
+          );
+        }
+        await reload();
+        setLayoutPending(true);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao vincular conexões.'));
+      } finally {
+        setLinking(false);
+      }
+    },
+    [connectionsById, linkedConnectionInfo, reload]
+  );
+
+  const handleConnect = useCallback(
+    async (params: Connection) => {
+      if (!params.sourceHandle || !params.targetHandle) return;
+      const sourceId = resolveConnectionIdFromHandle(params.sourceHandle);
+      const targetId = resolveConnectionIdFromHandle(params.targetHandle);
+      if (!sourceId || !targetId) return;
+      await linkPorts(sourceId, targetId);
+    },
+    [linkPorts]
+  );
+
+  const handleDeleteDevice = useCallback(
+    async (deviceId: string, deviceName?: string | null) => {
+      const confirm = window.confirm(
+        `Deseja remover o equipamento${deviceName ? ` "${deviceName}"` : ''} e todas as conexões?`
+      );
+      if (!confirm) return;
+      setActionError(null);
+      try {
+        await deleteDeviceWithConnections(deviceId);
+        await reload();
+        setLayoutPending(true);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao remover equipamento.'));
+      }
+    },
+    [reload]
+  );
+
+  const handleRemoveLink = useCallback(
+    async (edge: Edge) => {
+      const sourceId = edge.data?.sourceConnectionId as string | undefined;
+      const targetId = edge.data?.targetConnectionId as string | undefined;
+      if (!sourceId) return;
+      setRemovingLink(true);
+      setActionError(null);
+      try {
+        await clearDeviceIOConnectionLink(sourceId, targetId);
+        await reload();
+        setLayoutPending(true);
+      } catch (err) {
+        setActionError(resolveErrorMessage(err, 'Falha ao remover vínculo.'));
+      } finally {
+        setRemovingLink(false);
+      }
+    },
+    [reload]
+  );
+
+  const isValidConnection = useCallback(
+    (connection: Connection | Edge) => {
+      if (!('sourceHandle' in connection) || !('targetHandle' in connection)) {
+        return false;
+      }
+      if (!connection.sourceHandle || !connection.targetHandle) return false;
+      const sourceId = resolveConnectionIdFromHandle(connection.sourceHandle);
+      const targetId = resolveConnectionIdFromHandle(connection.targetHandle);
+      if (!sourceId || !targetId) return false;
+      if (sourceId === targetId) return false;
+      const sourceConnection = connectionsById.get(sourceId);
+      const targetConnection = connectionsById.get(targetId);
+      if (!sourceConnection || !targetConnection) return false;
+      const sourceConnected =
+        linkedConnectionInfo.linkedConnectionIds.has(sourceId) ||
+        !!sourceConnection.new_connectedtomanual;
+      const targetConnected =
+        linkedConnectionInfo.linkedConnectionIds.has(targetId) ||
+        !!targetConnection.new_connectedtomanual;
+      if (sourceConnected || targetConnected) return false;
+      return isConnectionCompatible(sourceConnection, targetConnection);
+    },
+    [connectionsById, linkedConnectionInfo]
+  );
+
+  const handleSidebarPortMouseUp = useCallback(
+    async (portId: string) => {
+      if (!connectingHandleId) return;
+      const sourcePortId = resolveConnectionIdFromHandle(connectingHandleId);
+      if (!sourcePortId) return;
+      await linkPorts(sourcePortId, portId);
+      setConnectingHandleId(null);
+    },
+    [connectingHandleId, linkPorts]
+  );
+
+  const handleSidebarPortMouseDown = useCallback((portId: string) => {
+    setSidebarDragPortId(portId);
+  }, []);
+
+  useEffect(() => {
+    if (!sidebarDragPortId) return;
+    const handleMouseMove = (event: MouseEvent) => {
+      const wrapper = document.querySelector('[data-blueprint-wrapper="true"]') as HTMLElement | null;
+      if (!wrapper) {
+        setDragPreview(null);
+        return;
+      }
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const element = document.elementFromPoint(event.clientX, event.clientY);
+      const handleEl =
+        (element?.closest('[data-handleid]') as HTMLElement | null) ??
+        (element?.closest('.react-flow__handle') as HTMLElement | null);
+      const handleId =
+        handleEl?.getAttribute('data-handleid') ??
+        handleEl?.dataset.handleid ??
+        handleEl?.dataset.handleId ??
+        null;
+      setHoveredHandleId(handleId);
+
+      let startX = event.clientX - wrapperRect.left;
+      let startY = event.clientY - wrapperRect.top;
+      if (handleEl) {
+        const handleRect = handleEl.getBoundingClientRect();
+        startX = handleRect.left + handleRect.width / 2 - wrapperRect.left;
+        startY = handleRect.top + handleRect.height / 2 - wrapperRect.top;
+      } else {
+        startX = Math.max(12, Math.min(event.clientX - wrapperRect.left, wrapperRect.width - 12));
+        startY = Math.max(12, Math.min(event.clientY - wrapperRect.top, wrapperRect.height - 12));
+      }
+      const endX = event.clientX - wrapperRect.left;
+      const endY = event.clientY - wrapperRect.top;
+      setDragPreview({
+        start: { x: startX, y: startY },
+        end: { x: endX, y: endY },
+      });
+    };
+    const handleMouseUp = () => {
+      if (hoveredHandleId) {
+        const targetPortId = resolveConnectionIdFromHandle(hoveredHandleId);
+        if (targetPortId) {
+          void linkPorts(sidebarDragPortId, targetPortId);
         }
       }
+      setHoveredHandleId(null);
+      setSidebarDragPortId(null);
+      setDragPreview(null);
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      setDragPreview(null);
+    };
+  }, [hoveredHandleId, linkPorts, sidebarDragPortId]);
 
-      if (failures.length > 0) {
-        setActionError(
-          `Falha ao apagar ${failures.length} item(ns): ${failures.join(' | ')}`
-        );
+  const connectionDetails: ConnectionDetails | null = useMemo(() => {
+    if (!selectedEdgeId) return null;
+    let selectedEdge: Edge | null = null;
+    for (const edge of edges) {
+      if (edge.id === selectedEdgeId) {
+        selectedEdge = edge;
+        break;
       }
-
-      setSelectedDeviceRows([]);
-      await reload();
-    } finally {
-      setBulkDeleting(false);
-      setBulkStatus(null);
     }
-  }, [reload, selectedDeviceRows, selectedProjectId]);
-
-  const actionsDisabled = !selectedProjectId || loading;
-  const bulkDeleteDisabled =
-    actionsDisabled || bulkDeleting || selectedDeviceRows.length === 0;
-
-  const primaryActions = [
-    {
-      id: 'novo-device',
-      label: 'Novo equipamento',
-      icon: <Add24Regular />,
-      onClick: () => setNovoOpen(true),
-      appearance: 'primary' as const,
-      disabled: actionsDisabled,
-    },
-    {
-      id: 'pendencias',
-      label: 'Gerar pendências',
-      icon: <ClipboardTask24Regular />,
-      onClick: () => setPendenciasOpen(true),
-      disabled: actionsDisabled,
-    },
-  ];
-
-  const secondaryActions = [
-    {
-      id: 'apagar-selecionados',
-      label: `Apagar selecionados (${selectedDeviceRows.length})`,
-      icon: <Delete24Regular />,
-      onClick: handleBulkDelete,
-      disabled: bulkDeleteDisabled,
-    },
-    {
-      id: 'atualizar',
-      label: 'Atualizar',
-      icon: <ArrowSync24Regular />,
-      onClick: reload,
-      disabled: !selectedProjectId,
-    },
-    {
-      id: 'mermaid',
-      label: 'Diagrama Mermaid',
-      icon: <Flowchart24Regular />,
-      onClick: handleMermaid,
-      disabled: actionsDisabled,
-    },
-  ];
-
-  const columns = useMemo(
-    () => [
-      createTableColumn<DeviceRow>({
-        columnId: 'name',
-        renderHeaderCell: () => 'Equipamento',
-        renderCell: (item) => (
-          <div>
-            <Text weight="semibold">{item.device.new_name || 'Sem nome'}</Text>
-            <div className={styles.dimText}>
-              {item.model?.cr22f_title || 'Modelo não informado'}
-            </div>
-          </div>
-        ),
-      }),
-      createTableColumn<DeviceRow>({
-        columnId: 'localizacao',
-        renderHeaderCell: () => 'Localização',
-        renderCell: (item) =>
-          item.device.new_localizacao?.trim() ? item.device.new_localizacao : EMPTY_LOCATION,
-      }),
-      createTableColumn<DeviceRow>({
-        columnId: 'conexoes',
-        renderHeaderCell: () => 'Conexões',
-        renderCell: (item) => (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-            <Badge
-              appearance="outline"
-              color="informative"
-              className={styles.statusBadge}
-            >
-              {item.completedConnections}/{item.connections.length}
-            </Badge>
-          </div>
-        ),
-      }),
-      createTableColumn<DeviceRow>({
-        columnId: 'instalar',
-        renderHeaderCell: () => 'Será instalado',
-        renderCell: (item) => (
-          <Switch
-            checked={!!item.device.new_serainstaladobase}
-            onChange={(_, data) =>
-              handleToggleInstall(item.device.new_deviceioid, data.checked)
-            }
-            disabled={toggleBusyId === item.device.new_deviceioid}
-          />
-        ),
-      }),
-      createTableColumn<DeviceRow>({
-        columnId: 'actions',
-        renderHeaderCell: () => '',
-        renderCell: (item) => (
-          <Button
-            size="small"
-            appearance="subtle"
-            onClick={() => handleOpenDetails(item.device.new_deviceioid)}
-          >
-            Detalhes
-          </Button>
-        ),
-      }),
-    ],
-    [handleOpenDetails, handleToggleInstall, styles.dimText, styles.statusBadge, toggleBusyId]
-  );
-
-  const renderCards = () => (
-    <div className={styles.cardList}>
-      {deviceRows.map((item) => (
-        <Card key={item.device.new_deviceioid} className={styles.deviceCard}>
-          <div className={styles.cardRow}>
-            <div>
-              <Text weight="semibold">{item.device.new_name || 'Sem nome'}</Text>
-              <Text size={300} className={styles.dimText}>
-                {item.model?.cr22f_title || 'Modelo não informado'}
-              </Text>
-            </div>
-            <Badge appearance="outline" color="informative" className={styles.statusBadge}>
-              {item.completedConnections}/{item.connections.length}
-            </Badge>
-          </div>
-          <div className={styles.cardRow}>
-            <Text size={300} className={styles.dimText}>
-              Localização
-            </Text>
-            <Text size={300}>
-              {item.device.new_localizacao?.trim() ? item.device.new_localizacao : EMPTY_LOCATION}
-            </Text>
-          </div>
-          <div className={styles.cardRow}>
-            <Text size={300} className={styles.dimText}>
-              Produto
-            </Text>
-            <Text size={300}>{item.produto?.new_name || 'Sem vínculo'}</Text>
-          </div>
-          <div className={styles.cardRow}>
-            <Switch
-              checked={!!item.device.new_serainstaladobase}
-              onChange={(_, data) =>
-                handleToggleInstall(item.device.new_deviceioid, data.checked)
-              }
-              disabled={toggleBusyId === item.device.new_deviceioid}
-            />
-            <Button
-              size="small"
-              appearance="subtle"
-              onClick={() => handleOpenDetails(item.device.new_deviceioid)}
-            >
-              Detalhes
-            </Button>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-
-  const showEmptyState = !loading && !error && selectedProjectId && deviceRows.length === 0;
+    if (!selectedEdge) return null;
+    const sourceId = selectedEdge.data?.sourceConnectionId as string | undefined;
+    const targetId = selectedEdge.data?.targetConnectionId as string | undefined;
+    if (!sourceId || !targetId) return null;
+    const sourceConnection = connectionsById.get(sourceId);
+    const targetConnection = connectionsById.get(targetId);
+    if (!sourceConnection || !targetConnection) return null;
+    const sourceDevice = sourceConnection._new_device_value
+      ? deviceMap.get(sourceConnection._new_device_value)
+      : null;
+    const targetDevice = targetConnection._new_device_value
+      ? deviceMap.get(targetConnection._new_device_value)
+      : null;
+    const sourceLabel = `${sourceDevice?.new_name || 'Equipamento'} · ${getConnectionLabel(
+      sourceConnection
+    )} · ${sourceDevice?.new_localizacao || 'Sem localização'}`;
+    const targetLabel = `${targetDevice?.new_name || 'Equipamento'} · ${getConnectionLabel(
+      targetConnection
+    )} · ${targetDevice?.new_localizacao || 'Sem localização'}`;
+    return {
+      id: selectedEdge.id,
+      sourceLabel,
+      targetLabel,
+      typeLabel: selectedEdge.data?.typeLabel as string | undefined,
+    };
+  }, [selectedEdgeId, edges, connectionsById, deviceMap]);
 
   return (
-    <>
-      <CommandBar primaryActions={primaryActions} secondaryActions={secondaryActions} />
-      <PageHeader title="Guia de Conexões" subtitle="Gerencie dispositivos e conexões por projeto" />
-      <PageContainer>
-        <div className={styles.container}>
-          <div className={styles.filtersRow}>
-            <div className="flex flex-col gap-2">
-              <Label>Projeto</Label>
-              <SearchableCombobox
-                placeholder="Buscar projeto"
-                value={selectedProjectLabel}
-                selectedId={selectedProjectId}
-                onSelect={(id, label) => {
-                  setSelectedProjectId(id);
-                  setSelectedProjectLabel(label);
-                }}
-                onSearch={searchProjects}
-              />
-            </div>
-            <Field label="Buscar dispositivo">
-              <Input
-                value={searchTerm}
-                onChange={(_, data) => setSearchTerm(data.value)}
-                placeholder="Nome ou localização"
-                disabled={!selectedProjectId}
-              />
-            </Field>
-            <div className="flex flex-col gap-2">
-              <Label>Agrupar</Label>
-              <Dropdown
-                value={GROUP_BY_OPTIONS.find((option) => option.value === groupBy)?.label || ''}
-                onOptionSelect={(_, data) => setGroupBy(data.optionValue as GroupByMode)}
-                disabled={!selectedProjectId}
-              >
-                {GROUP_BY_OPTIONS.map((option) => (
-                  <Option key={option.value} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Dropdown>
-            </div>
-          </div>
-
-          {selectedProjectId && tabOptions.length > 0 && (
-            <TabList
-              selectedValue={selectedTab}
-              onTabSelect={(_, data) => setSelectedTab(data.value as string)}
-              className={styles.tabList}
-            >
-              {tabOptions.map((tab) => (
-                <Tab key={tab.value} value={tab.value}>
-                  {tab.label}
-                </Tab>
-              ))}
-            </TabList>
-          )}
-
-          {!selectedProjectId && (
-            <EmptyState
-              title="Selecione um projeto"
-              description="Escolha um projeto para visualizar os dispositivos e conexões."
-            />
-          )}
-
-          {selectedProjectId && loading && <LoadingState label="Carregando dispositivos..." />}
-
-          {selectedProjectId && error && (
-            <EmptyState
-              title="Falha ao carregar dados"
-              description={error}
-              actionLabel="Tentar novamente"
-              onAction={reload}
-            />
-          )}
-
-          {selectedProjectId && actionError && (
-            <Text size={300} style={{ color: tokens.colorPaletteRedForeground2 }}>
-              {actionError}
-            </Text>
-          )}
-          {selectedProjectId && bulkStatus && (
-            <Text size={300} className={styles.dimText}>
-              {bulkStatus}
-            </Text>
-          )}
-
-          {showEmptyState && (
-            <EmptyState
-              title="Nenhum dispositivo encontrado"
-              description="Ajuste os filtros ou selecione outro projeto."
-            />
-          )}
-
-          {selectedProjectId && !loading && !error && deviceRows.length > 0 && (
-            <>
-              <div className={styles.tableWrapper}>
-                <DataGrid
-                  items={deviceRows}
-                  columns={columns}
-                  getRowId={(item) => item.device.new_deviceioid}
-                  selectionMode="multiselect"
-                  onSelectionChange={setSelectedDeviceRows}
-                />
-              </div>
-              {renderCards()}
-            </>
-          )}
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div className={styles.headerTitle}>
+          <Text size={500} weight="semibold">
+            Guia de Conexões v2
+          </Text>
         </div>
-      </PageContainer>
-      <DeviceDetailDialog
-        open={detailOpen && !!detailDeviceId}
-        deviceId={detailDeviceId}
+        <div className={styles.headerControls}>
+          <div className={styles.headerField}>
+            <SearchableCombobox
+              placeholder="Selecionar projeto"
+              value={selectedProjectLabel}
+              selectedId={selectedProjectId}
+              onSelect={(id, label) => {
+                setSelectedProjectId(id);
+                setSelectedProjectLabel(label);
+                setLayoutViewport(null);
+                setRootDeviceId(null);
+              }}
+              onSearch={searchProjects}
+              showAllOnFocus={true}
+            />
+          </div>
+          <div className={styles.headerField}>
+            <Dropdown
+              multiselect
+              placeholder="Categoria"
+              value={selectedConnectionTypeLabel}
+              selectedOptions={selectedConnectionType}
+              onOptionSelect={(_, data) => {
+                const selected = data.selectedOptions;
+                if (selected.length === 0) {
+                  setSelectedConnectionType(['all']);
+                } else if (selected.includes('all') && selected.length > 1) {
+                  if (data.optionValue === 'all') {
+                    setSelectedConnectionType(['all']);
+                  } else {
+                    setSelectedConnectionType(selected.filter((v) => v !== 'all'));
+                  }
+                } else {
+                  setSelectedConnectionType(selected);
+                }
+                setLayoutPending(true);
+              }}
+              disabled={!selectedProjectId || connections.length === 0}
+            >
+              <Option value="all">Todas as categorias</Option>
+              {CONNECTION_CATEGORIES.map((category) => (
+                <Option key={category.id} value={category.id}>
+                  {category.label}
+                </Option>
+              ))}
+            </Dropdown>
+          </div>
+          <div className={styles.headerField}>
+            <Dropdown
+              placeholder="Selecionar nó raiz"
+              value={rootDeviceLabel}
+              selectedOptions={rootDeviceId ? [rootDeviceId] : []}
+              onOptionSelect={(_, data) =>
+                updateRootDevice((data.optionValue as string) || null)
+              }
+              disabled={!selectedProjectId || connectedDeviceOptions.length === 0}
+            >
+              {connectedDeviceOptions.map((option) => (
+                <Option key={option.id} value={option.id}>
+                  {option.label}
+                </Option>
+              ))}
+            </Dropdown>
+          </div>
+        </div>
+        <div className={styles.headerActions}>
+          {actionError && <Text className={styles.errorText}>{actionError}</Text>}
+          {loading && (
+            <Text size={200} className={styles.statusText}>
+              Carregando...
+            </Text>
+          )}
+          {autoRootPending && autoRootProgress && (
+            <Text size={200} className={styles.statusText}>
+              Calculando raiz automática... {autoRootProgress.current}/{autoRootProgress.total}
+            </Text>
+          )}
+          {error && <Text className={styles.errorText}>{error}</Text>}
+          <Button
+            icon={<Add24Regular />}
+            onClick={() => setAddConnectionOpen(true)}
+            disabled={!selectedProjectId}
+          >
+            Adicionar Conexão
+          </Button>
+          <Button
+            icon={<ClipboardTask24Regular />}
+            onClick={() => setPendenciasOpen(true)}
+            disabled={!selectedProjectId}
+          >
+            Gerar pendências
+          </Button>
+          <Button
+            icon={<ArrowClockwise24Regular />}
+            onClick={handleAutoRoot}
+            disabled={!selectedProjectId || connectedDeviceIdList.length === 0 || autoRootPending}
+          >
+            Raiz automática
+          </Button>
+          <Button
+            onClick={handleExpandAllPorts}
+            disabled={!selectedProjectId || connectedDeviceIdList.length === 0}
+          >
+            {areAllPortsExpanded ? 'Compactar todas' : 'Expandir todas'}
+          </Button>
+          <Button
+            icon={<Flowchart24Regular />}
+            onClick={handleMermaidDiagram}
+            disabled={!selectedProjectId || connectedDeviceIdList.length === 0}
+          >
+            Diagrama Mermaid
+          </Button>
+          <Button
+            icon={<Print24Regular />}
+            onClick={() => {
+              setPrintPreselectedConnectionId(null);
+              setPrintPreselectedDeviceId(null);
+              setPrintInitialTab('connections');
+              setPrintDialogOpen(true);
+            }}
+            disabled={!selectedProjectId || filteredConnections.length === 0}
+          >
+            Imprimir Etiquetas
+          </Button>
+          <Button
+            appearance="primary"
+            icon={<Save24Regular />}
+            onClick={handleSaveLayout}
+            disabled={!selectedProjectId || autoRootPending}
+          >
+            Salvar
+          </Button>
+        </div>
+      </div>
+      <div className={styles.content}>
+        <div className={styles.canvasArea}>
+          <BlueprintCanvas
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            onEdgesChange={onEdgesChange}
+            onConnect={handleConnect}
+            onConnectStart={(_, data) => setConnectingHandleId(data.handleId ?? null)}
+            onConnectEnd={(event) => {
+              if (event && event.target instanceof HTMLElement && connectingHandleId) {
+                const targetEl = event.target.closest('[data-sidebar-port-id]') as HTMLElement | null;
+                const sidebarPortId = targetEl?.dataset.sidebarPortId;
+                if (sidebarPortId) {
+                  const sourcePortId = resolveConnectionIdFromHandle(connectingHandleId);
+                  if (sourcePortId) {
+                    void linkPorts(sourcePortId, sidebarPortId);
+                  }
+                }
+              }
+              setConnectingHandleId(null);
+            }}
+            onSelectionChange={({ edges: selectedEdges }) => {
+              const first = selectedEdges[0];
+              setSelectedEdgeId(first?.id ?? null);
+            }}
+            onEdgesDelete={(deleted) => {
+              deleted.forEach((edge) => void handleRemoveLink(edge));
+            }}
+            isValidConnection={isValidConnection}
+            onInit={setFlowInstance}
+            isEmpty={connectedDeviceIdList.length === 0}
+            panOnDragEnabled={!connectingHandleId && !sidebarDragPortId}
+            dragPreview={dragPreview}
+          />
+          <ConnectionDetailsPanel
+            details={connectionDetails}
+            onRemove={() => {
+              if (!connectionDetails) return;
+              let edge: Edge | null = null;
+              for (const item of edges) {
+                if (item.id === connectionDetails.id) {
+                  edge = item;
+                  break;
+                }
+              }
+              if (edge) {
+                void handleRemoveLink(edge);
+              }
+            }}
+            onPrintSingle={(edgeId) => {
+              const foundEdge = edges.find((e) => e.id === edgeId);
+              if (foundEdge?.data) {
+                const edgeData = foundEdge.data as { sourceConnectionId?: string };
+                if (edgeData.sourceConnectionId) {
+                  setPrintPreselectedConnectionId(edgeData.sourceConnectionId);
+                  setPrintPreselectedDeviceId(null);
+                  setPrintInitialTab('connections');
+                  setPrintDialogOpen(true);
+                }
+              }
+            }}
+            removing={removingLink || linking}
+            legendItems={legendItems}
+          />
+        </div>
+        <DisconnectedDevicesSidebar
+          devices={disconnectedDevices}
+          isConnecting={!!connectingHandleId}
+          onPortMouseDown={handleSidebarPortMouseDown}
+          onPortMouseUp={handleSidebarPortMouseUp}
+          onEditLocation={(deviceId) => setLocationEditDeviceId(deviceId)}
+          onDeleteDevice={handleDeleteDevice}
+          onAddDevice={() => setAddDeviceOpen(true)}
+        />
+      </div>
+      <AddConnectionDialog
+        open={addConnectionOpen}
         projectId={selectedProjectId}
-        onClose={handleCloseDetails}
-        onUpdated={reload}
-      />
-      <NovoEquipamentoDialog
-        open={novoOpen}
-        projectId={selectedProjectId}
-        onClose={() => setNovoOpen(false)}
-        onCreated={reload}
+        onClose={() => setAddConnectionOpen(false)}
+        onLinked={async () => {
+          await reload();
+          setLayoutPending(true);
+        }}
       />
       <GerarPendenciasDialog
         open={pendenciasOpen}
@@ -771,17 +1788,63 @@ export function GuiaConexoesPage() {
         onClose={() => setPendenciasOpen(false)}
         onGenerated={reload}
       />
-      <RootDeviceSelectionDialog
-        open={rootSelectionOpen}
-        devices={visibleDevices}
-        onClose={() => setRootSelectionOpen(false)}
-        onSelect={handleRootSelected}
-      />
       <DiagramModal
         open={diagramModalOpen}
-        chart={currentDiagramCode}
+        chart={diagramCode}
         onClose={() => setDiagramModalOpen(false)}
       />
-    </>
+      <NovoEquipamentoDialog
+        open={addDeviceOpen}
+        projectId={selectedProjectId}
+        onClose={() => setAddDeviceOpen(false)}
+        onCreated={async () => {
+          await reload();
+          setLayoutPending(true);
+        }}
+      />
+      <EditDeviceLocationDialog
+        open={!!locationEditDeviceId}
+        deviceName={locationEditDeviceId ? deviceMap.get(locationEditDeviceId)?.new_name : undefined}
+        currentLocation={
+          locationEditDeviceId ? deviceMap.get(locationEditDeviceId)?.new_localizacao : undefined
+        }
+        locationOptions={locationOptions}
+        onClose={() => setLocationEditDeviceId(null)}
+        onSave={(nextLocation) =>
+          locationEditDeviceId
+            ? handleSaveLocation(locationEditDeviceId, nextLocation)
+            : Promise.resolve()
+        }
+      />
+      <InconsistencyManagerDialog
+        open={inconsistencyDialogOpen}
+        inconsistencies={inconsistencies}
+        onClose={() => {
+          setInconsistencyDialogOpen(false);
+          setIgnoredInconsistencies(new Set([...ignoredInconsistencies, ...inconsistencies.map(i => i.id)]));
+        }}
+        onFixed={async () => {
+          setInconsistencyDialogOpen(false);
+          await reload();
+        }}
+      />
+      <PrintLabelsDialog
+        open={printDialogOpen}
+        onClose={() => {
+          setPrintDialogOpen(false);
+          setPrintPreselectedConnectionId(null);
+          setPrintPreselectedDeviceId(null);
+          setPrintInitialTab('connections');
+        }}
+        connections={filteredConnections}
+        connectionsById={connectionsById}
+        devices={devices}
+        deviceMap={deviceMap}
+        projectName={selectedProjectLabel}
+        preselectedConnectionId={printPreselectedConnectionId}
+        preselectedDeviceId={printPreselectedDeviceId}
+        initialTab={printInitialTab}
+      />
+    </div>
   );
 }
