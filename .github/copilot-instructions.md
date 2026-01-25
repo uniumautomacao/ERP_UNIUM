@@ -8,14 +8,12 @@
 
 ## ⚠️ REGRAS CRÍTICAS
 
-### 1. Versão Obrigatória em TODA Mudança
-```typescript
-// src/version.ts - SEMPRE atualizar:
-APP_VERSION      // Incrementar (PATCH para mudanças pequenas)
-APP_BUILD_DATE   // Data atual
-VERSION_HISTORY  // Adicionar entrada
-```
-> Versão exibida automaticamente via `AppShell.tsx`
+### 1. Atualização de Versão
+Atualizar `src/version.ts` **apenas quando**:
+- Publicar no PowerApps (`pac code push`)
+- Usuário solicitar explicitamente
+
+> Versão exibida via `AppShell.tsx`
 
 ### 2. NUNCA Publicar Automaticamente
 - Testar localmente com `npm run dev` primeiro
