@@ -16,10 +16,11 @@ import {
   MenuItem,
   tokens,
 } from '@fluentui/react-components';
-import { MoreHorizontal24Regular, Navigation24Regular } from '@fluentui/react-icons';
+import { MoreHorizontal24Regular } from '@fluentui/react-icons';
 import { LAYOUT } from '../../config/theme';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobile } from '../../hooks/useMediaQuery';
+import { useTheme } from '../../hooks/useTheme';
 
 interface CommandAction {
   id: string;
@@ -39,6 +40,7 @@ interface CommandBarProps {
 export function CommandBar({ primaryActions = [], secondaryActions = [], overflowActions = [] }: CommandBarProps) {
   const { toggleMobileOpen } = useSidebar();
   const isMobile = useIsMobile();
+  const { isDark } = useTheme();
   const itemGap = 8;
   const dividerStyle = { alignSelf: 'center', height: '60%' };
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -59,6 +61,9 @@ export function CommandBar({ primaryActions = [], secondaryActions = [], overflo
   const overflowMenuActions = isMobile
     ? mobileOverflowActions
     : [...hiddenActions, ...overflowActions];
+  const symbolSrc = isDark
+    ? new URL('../../../branding/stoa-simbolo-fundo-escuro.svg', import.meta.url).href
+    : new URL('../../../branding/stoa-simbolo-fundo-claro.svg', import.meta.url).href;
 
   useLayoutEffect(() => {
     if (isMobile) {
@@ -142,7 +147,14 @@ export function CommandBar({ primaryActions = [], secondaryActions = [], overflo
         {/* Botao Hamburger (apenas mobile) */}
         {isMobile && (
           <ToolbarButton
-            icon={<Navigation24Regular />}
+            icon={
+              <img
+                src={symbolSrc}
+                alt=""
+                aria-hidden="true"
+                style={{ width: 20, height: 20, objectFit: 'contain', display: 'block' }}
+              />
+            }
             onClick={toggleMobileOpen}
             aria-label="Open menu"
           />

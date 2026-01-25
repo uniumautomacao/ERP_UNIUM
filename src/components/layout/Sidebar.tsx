@@ -1,8 +1,18 @@
 import { useMemo } from 'react';
-import { Button, Avatar, Text, tokens, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
-import { Navigation24Regular, Settings24Regular, Dismiss24Regular } from '@fluentui/react-icons';
+import {
+  Button,
+  Avatar,
+  Text,
+  tokens,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerHeaderTitle,
+} from '@fluentui/react-components';
+import { Settings24Regular, Dismiss24Regular } from '@fluentui/react-icons';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobile } from '../../hooks/useMediaQuery';
+import { useTheme } from '../../hooks/useTheme';
 import { useAccessControl } from '../../security/AccessControlContext';
 import { SidebarSection } from './SidebarSection';
 import { ThemeToggle } from './ThemeToggle';
@@ -13,6 +23,7 @@ import { LAYOUT } from '../../config/theme';
 export function Sidebar() {
   const { isExpanded, isMobileOpen, toggleExpanded, closeMobile } = useSidebar();
   const isMobile = useIsMobile();
+  const { isDark } = useTheme();
   const { canAccessPath } = useAccessControl();
 
   const filteredNavigation = useMemo(
@@ -21,6 +32,12 @@ export function Sidebar() {
   );
 
   const sidebarWidth = isExpanded ? LAYOUT.sidebar.expandedWidth : LAYOUT.sidebar.collapsedWidth;
+  const symbolSrc = isDark
+    ? new URL('../../../branding/stoa-simbolo-fundo-escuro.svg', import.meta.url).href
+    : new URL('../../../branding/stoa-simbolo-fundo-claro.svg', import.meta.url).href;
+  const nameSrc = isDark
+    ? new URL('../../../branding/stoa-nome-fundo-escuro.svg', import.meta.url).href
+    : new URL('../../../branding/stoa-nome-fundo-claro.svg', import.meta.url).href;
 
   const sidebarContent = (
     <div
@@ -41,14 +58,23 @@ export function Sidebar() {
       >
         <Button
           appearance="subtle"
-          icon={<Navigation24Regular />}
+          icon={
+            <img
+              src={symbolSrc}
+              alt=""
+              aria-hidden="true"
+              style={{ width: 20, height: 20, objectFit: 'contain', display: 'block' }}
+            />
+          }
           onClick={toggleExpanded}
           aria-label="Toggle sidebar"
         />
         {isExpanded && (
-          <Text weight="semibold" size={400}>
-            Stoa
-          </Text>
+          <img
+            src={nameSrc}
+            alt="Stoa"
+            style={{ height: 20, width: 'auto', display: 'block' }}
+          />
         )}
       </div>
 

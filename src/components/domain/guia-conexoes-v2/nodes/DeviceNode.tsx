@@ -102,7 +102,7 @@ const useStyles = makeStyles({
   },
   portFree: {
     ...shorthands.borderColor(tokens.colorPaletteGreenBorder2),
-    ...shorthands.backgroundColor(tokens.colorPaletteGreenBackground1),
+    backgroundColor: tokens.colorPaletteGreenBackground1,
   },
   portConnected: {
     borderColor: tokens.colorNeutralStroke2,
