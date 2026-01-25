@@ -34,6 +34,7 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Cotação Temporária de Produto | `new_cotacaotemporariadeproduto` | `new_cotacaotemporariadeprodutos` | `new_cotacaotemporariadeprodutoid` |
 | Regime de Cotação Temporária | `new_regimedecotacaotemporaria` | `new_regimedecotacaotemporarias` | `new_regimedecotacaotemporariaid` |
 | Tipo de Serviço Regime de Cotação Temporária | `new_tipodeservicoregimedecotacaotemporaria` | `new_tipodeservicoregimedecotacaotemporarias` | `new_tipodeservicoregimedecotacaotemporariaid` |
+| Comentário de Ordem de Serviço | `new_comentariodeordemdeservico` | `new_comentariodeordemdeservicos` | `new_comentariodeordemdeservicoid` |
 
 ---
 
@@ -553,6 +554,24 @@ PrimaryKey:                       new_produtoservicoid
 | new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
 | new_projeto | new_Projeto | cr22f_projetos |
 | new_produto | new_Produto | products |
+
+---
+
+## 🔵 new_comentariodeordemdeservico (Comentário de Ordem de Serviço)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_comentariodeordemdeservico
+EntityLogicalCollectionName:      new_comentariodeordemdeservicos
+EntitySetName:                    new_comentariodeordemdeservicos
+PrimaryKey:                       new_comentariodeordemdeservicoid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
+| new_usuario | new_Usuario | systemusers |
 
 ---
 

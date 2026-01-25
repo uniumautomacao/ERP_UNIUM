@@ -221,5 +221,12 @@ export const dataSourcesInfo = {
     "primaryKey": "new_tipodeservicoregimedecotacaotemporariaid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_comentariodeordemdeservicos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_comentariodeordemdeservicoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

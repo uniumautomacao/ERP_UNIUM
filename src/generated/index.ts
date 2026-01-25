@@ -36,6 +36,7 @@ export * as NewTipodeservicoModel from './models/NewTipodeservicoModel';
 export * as NewCotacaotemporariadeprodutoModel from './models/NewCotacaotemporariadeprodutoModel';
 export * as NewRegimedecotacaotemporariaModel from './models/NewRegimedecotacaotemporariaModel';
 export * as NewTipodeservicoregimedecotacaotemporariaModel from './models/NewTipodeservicoregimedecotacaotemporariaModel';
+export * as NewComentariodeOrdemdeServicoModel from './models/NewComentariodeOrdemdeServicoModel';
 
 // Services
 export * from './services/RolesService';
@@ -69,3 +70,4 @@ export * from './services/NewTipodeservicoService';
 export * from './services/NewCotacaotemporariadeprodutoService';
 export * from './services/NewRegimedecotacaotemporariaService';
 export * from './services/NewTipodeservicoregimedecotacaotemporariaService';
+export * from './services/NewComentariodeOrdemdeServicoService';
