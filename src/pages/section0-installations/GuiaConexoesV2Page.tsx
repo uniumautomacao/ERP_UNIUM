@@ -425,6 +425,32 @@ export function GuiaConexoesV2Page() {
     );
   }, [connections, selectedConnectionType, selectedConnectionTypeValues]);
 
+  const legendItems = useMemo(() => {
+    const valuesSet = new Set<number>();
+    if (selectedConnectionType.includes('all')) {
+      filteredConnections.forEach((connection) => {
+        if (connection.new_tipodeconexao !== null && connection.new_tipodeconexao !== undefined) {
+          valuesSet.add(connection.new_tipodeconexao);
+        }
+      });
+    } else {
+      (selectedConnectionTypeValues ?? []).forEach((value) => valuesSet.add(value));
+    }
+    if (valuesSet.size === 0) return [];
+    return connectionTypeOptions
+      .filter((option) => valuesSet.has(option.value))
+      .map((option) => ({
+        value: option.value,
+        label: option.label,
+        color: connectionTypeColorMap.get(option.value) ?? tokens.colorNeutralStroke2,
+      }));
+  }, [
+    selectedConnectionType,
+    selectedConnectionTypeValues,
+    filteredConnections,
+    connectionTypeColorMap,
+  ]);
+
   const deviceMap = useMemo(() => {
     const map = new Map<string, GuiaDeviceIO>();
     for (const device of devices) {
@@ -1615,6 +1641,7 @@ export function GuiaConexoesV2Page() {
               }
             }}
             removing={removingLink || linking}
+            legendItems={legendItems}
           />
         </div>
         <DisconnectedDevicesSidebar

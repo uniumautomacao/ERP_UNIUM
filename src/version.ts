@@ -1,6 +1,16 @@
-export const APP_VERSION = '0.1.97';
+export const APP_VERSION = '0.1.99';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.99',
+    date: '2026-01-24',
+    changes: 'Legenda de conexões movida para o painel de detalhes.',
+  },
+  {
+    version: '0.1.98',
+    date: '2026-01-24',
+    changes: 'Adicionada legenda de cores por tipo de conexão no Guia de Conexões v2.',
+  },
   {
     version: '0.1.97',
     date: '2026-01-24',
