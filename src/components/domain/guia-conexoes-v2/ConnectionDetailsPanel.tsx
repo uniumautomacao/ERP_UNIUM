@@ -15,12 +15,12 @@ type LegendItem = {
   color: string;
 };
 
-interface ConnectionDetailsPanelProps {
+export type ConnectionDetailsPanelProps = {
   details: ConnectionDetails | null;
   onRemove: () => void;
   removing: boolean;
   legendItems: LegendItem[];
-}
+};
 
 const useStyles = makeStyles({
   panel: {
