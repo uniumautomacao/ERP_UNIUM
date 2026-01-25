@@ -34,7 +34,7 @@ import {
 import { connectionTypeOptions } from '../../../utils/device-io/optionSetMaps';
 
 type ConnectionSelectionMode = 'single' | 'device' | 'type' | 'custom';
-type DeviceSelectionMode = 'single' | 'custom' | 'all';
+type DeviceSelectionMode = 'single' | 'custom' | 'all' | 'location';
 type ActiveTab = 'connections' | 'devices';
 
 export interface PrintLabelsDialogProps {
@@ -151,6 +151,7 @@ export function PrintLabelsDialog({
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
   const [selectedConnectionDeviceId, setSelectedConnectionDeviceId] = useState<string | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [selectedDeviceLocation, setSelectedDeviceLocation] = useState<string | null>(null);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [customSelection, setCustomSelection] = useState<Set<string>>(new Set());
   const [deviceCustomSelection, setDeviceCustomSelection] = useState<Set<string>>(new Set());
@@ -190,6 +191,7 @@ export function PrintLabelsDialog({
       setSelectedTypes([]);
       setCustomSelection(new Set());
       setDeviceCustomSelection(new Set());
+      setSelectedDeviceLocation(null);
     }
   }, [open, preselectedConnectionId, preselectedDeviceId, initialTab]);
 
@@ -246,6 +248,17 @@ export function PrintLabelsDialog({
         }`,
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
+  }, [devices]);
+
+  const deviceLocationOptions = useMemo(() => {
+    const locations = new Set<string>();
+    devices.forEach((device) => {
+      const location = device.new_localizacao?.trim();
+      if (location) {
+        locations.add(location);
+      }
+    });
+    return Array.from(locations).sort((a, b) => a.localeCompare(b));
   }, [devices]);
 
   // Opções de tipos
@@ -313,12 +326,17 @@ export function PrintLabelsDialog({
         return devices.filter((device) => device.new_deviceioid === selectedDeviceId);
       case 'custom':
         return devices.filter((device) => deviceCustomSelection.has(device.new_deviceioid));
+      case 'location':
+        if (!selectedDeviceLocation) return [];
+        return devices.filter(
+          (device) => device.new_localizacao?.trim() === selectedDeviceLocation
+        );
       case 'all':
         return devices;
       default:
         return [];
     }
-  }, [deviceMode, selectedDeviceId, deviceCustomSelection, devices]);
+  }, [deviceMode, selectedDeviceId, selectedDeviceLocation, deviceCustomSelection, devices]);
 
   const deviceLabels = useMemo(() => {
     if (selectedDevices.length === 0) return [];
@@ -596,6 +614,7 @@ export function PrintLabelsDialog({
                   >
                     <Radio value="single" label="Dispositivo individual" />
                     <Radio value="custom" label="Seleção personalizada" />
+                    <Radio value="location" label="Por localização" />
                     <Radio value="all" label="Todos os dispositivos" />
                   </RadioGroup>
                 </div>
@@ -618,6 +637,24 @@ export function PrintLabelsDialog({
                       {deviceOptions.map((opt) => (
                         <Option key={opt.id} value={opt.id}>
                           {opt.label}
+                        </Option>
+                      ))}
+                    </Dropdown>
+                  )}
+
+                  {deviceMode === 'location' && (
+                    <Dropdown
+                      placeholder="Selecione uma localização"
+                      value={selectedDeviceLocation || ''}
+                      selectedOptions={selectedDeviceLocation ? [selectedDeviceLocation] : []}
+                      onOptionSelect={(_, data) =>
+                        setSelectedDeviceLocation((data.optionValue as string) || null)
+                      }
+                      className={styles.dropdown}
+                    >
+                      {deviceLocationOptions.map((location) => (
+                        <Option key={location} value={location}>
+                          {location}
                         </Option>
                       ))}
                     </Dropdown>

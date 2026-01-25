@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.106';
+export const APP_VERSION = '0.1.107';
 export const APP_BUILD_DATE = '2026-01-25';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.107',
+    date: '2026-01-25',
+    changes: 'Impressão de etiquetas de dispositivos agora suporta seleção por localização.',
+  },
   {
     version: '0.1.106',
     date: '2026-01-25',
