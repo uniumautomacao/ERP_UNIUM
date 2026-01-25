@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.100';
+export const APP_VERSION = '0.1.101';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.101',
+    date: '2026-01-24',
+    changes: 'Raiz prioriza modem/TL-ER605 com categoria Rede ou Todas, usando nome e modelo.',
+  },
   {
     version: '0.1.100',
     date: '2026-01-24',

@@ -49,7 +49,7 @@ import {
   saveLayout,
 } from '../../components/domain/guia-conexoes-v2/storage/layoutStorage';
 import { useGuiaConexoesData } from '../../hooks/guia-conexoes/useGuiaConexoesData';
-import type { GuiaDeviceIO, GuiaDeviceIOConnection } from '../../types/guiaConexoes';
+import type { GuiaDeviceIO, GuiaDeviceIOConnection, GuiaModeloProduto } from '../../types/guiaConexoes';
 import { resolveErrorMessage } from '../../utils/guia-conexoes/errors';
 import { escapeODataValue } from '../../utils/guia-conexoes/odata';
 import { clearDeviceIOConnectionLink, deleteDeviceWithConnections } from '../../utils/guia-conexoes/deleteDevice';
@@ -207,13 +207,18 @@ const getConnectionLabel = (connection: GuiaDeviceIOConnection) =>
 
 const findPreferredNetworkRootId = (
   deviceIds: string[],
-  deviceMap: Map<string, GuiaDeviceIO>
+  deviceMap: Map<string, GuiaDeviceIO>,
+  modelosMap: Map<string, GuiaModeloProduto>
 ) => {
+  const matchesToken = (value: string | null | undefined, token: string) =>
+    (value || '').toLowerCase().includes(token);
+
   const findByToken = (token: string) =>
     deviceIds.find((id) => {
       const device = deviceMap.get(id);
-      const name = device?.new_name || '';
-      return name.toLowerCase().includes(token);
+      const modelId = device?._new_modelodeproduto_value ?? null;
+      const modelTitle = modelId ? modelosMap.get(modelId)?.cr22f_title ?? '' : '';
+      return matchesToken(device?.new_name, token) || matchesToken(modelTitle, token);
     });
 
   return findByToken('modem') || findByToken('tl-er605') || null;
@@ -412,6 +417,10 @@ export function GuiaConexoesV2Page() {
     () => selectedConnectionType.includes('rede'),
     [selectedConnectionType]
   );
+  const isNetworkOrAllSelected = useMemo(
+    () => selectedConnectionType.includes('rede') || selectedConnectionType.includes('all'),
+    [selectedConnectionType]
+  );
 
   const filteredConnections = useMemo(() => {
     if (selectedConnectionType.includes('all')) return connections;
@@ -533,7 +542,7 @@ export function GuiaConexoesV2Page() {
   }, [filteredConnections]);
 
   const modelosMap = useMemo(() => {
-    const map = new Map<string, { new_tipodesistemapadrao?: number | null }>();
+    const map = new Map<string, GuiaModeloProduto>();
     modelos.forEach((modelo) => {
       map.set(modelo.cr22f_modelosdeprodutofromsharepointlistid, modelo);
     });
@@ -601,9 +610,9 @@ export function GuiaConexoesV2Page() {
   }, [connectedDeviceIds]);
 
   const preferredNetworkRootId = useMemo(() => {
-    if (!isNetworkCategorySelected) return null;
-    return findPreferredNetworkRootId(connectedDeviceIdList, deviceMap);
-  }, [connectedDeviceIdList, deviceMap, isNetworkCategorySelected]);
+    if (!isNetworkOrAllSelected) return null;
+    return findPreferredNetworkRootId(connectedDeviceIdList, deviceMap, modelosMap);
+  }, [connectedDeviceIdList, deviceMap, modelosMap, isNetworkOrAllSelected]);
 
   const autoRootCandidates = useMemo(() => {
     const candidates: string[] = [];
@@ -967,7 +976,7 @@ export function GuiaConexoesV2Page() {
       setRootDeviceId(null);
       return;
     }
-    if (isNetworkCategorySelected && preferredNetworkRootId) {
+    if (isNetworkOrAllSelected && preferredNetworkRootId) {
       if (rootDeviceId !== preferredNetworkRootId) {
         setRootDeviceId(preferredNetworkRootId);
       }
@@ -994,7 +1003,7 @@ export function GuiaConexoesV2Page() {
     connectedDeviceIdList,
     connectedDeviceIds,
     devices,
-    isNetworkCategorySelected,
+    isNetworkOrAllSelected,
     preferredNetworkRootId,
     rootDeviceId,
   ]);
@@ -1092,7 +1101,7 @@ export function GuiaConexoesV2Page() {
     if (connectedDeviceIdList.length === 0) return;
     setActionError(null);
     setAutoRootPending(true);
-    if (isNetworkCategorySelected && preferredNetworkRootId) {
+    if (isNetworkOrAllSelected && preferredNetworkRootId) {
       setAutoRootProgress({ current: 1, total: 1 });
       try {
         await updateRootDevice(preferredNetworkRootId);
@@ -1145,7 +1154,7 @@ export function GuiaConexoesV2Page() {
     connectedDeviceIdList,
     connectionsByDevice,
     autoRootCandidates,
-    isNetworkCategorySelected,
+    isNetworkOrAllSelected,
     preferredNetworkRootId,
     filteredConnections,
     connectionsById,
