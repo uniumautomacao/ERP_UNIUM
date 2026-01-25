@@ -323,6 +323,21 @@ public partial class new_OrdemdeServicoFieldControl : Microsoft.Xrm.Sdk.Entity, 
 		}
 	}
 	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_contagemdetentativasdecontato")]
+	public System.Nullable<int> new_ContagemdeTentativasdeContato
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<int>>("new_contagemdetentativasdecontato");
+		}
+		set
+		{
+			this.OnPropertyChanging("new_ContagemdeTentativasdeContato");
+			this.SetAttributeValue("new_contagemdetentativasdecontato", value);
+			this.OnPropertyChanged("new_ContagemdeTentativasdeContato");
+		}
+	}
+	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_coordenador")]
 	public Microsoft.Xrm.Sdk.EntityReference new_Coordenador
 	{
@@ -530,6 +545,21 @@ public partial class new_OrdemdeServicoFieldControl : Microsoft.Xrm.Sdk.Entity, 
 			this.OnPropertyChanging("new_DatadaUltimaConferenciadeCabeamentoExecutada");
 			this.SetAttributeValue("new_datadaultimaconferenciadecabeamentoexecutada", value);
 			this.OnPropertyChanged("new_DatadaUltimaConferenciadeCabeamentoExecutada");
+		}
+	}
+	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_datadaultimaconfirmacao")]
+	public System.Nullable<System.DateTime> new_DatadaUltimaConfirmacao
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<System.DateTime>>("new_datadaultimaconfirmacao");
+		}
+		set
+		{
+			this.OnPropertyChanging("new_DatadaUltimaConfirmacao");
+			this.SetAttributeValue("new_datadaultimaconfirmacao", value);
+			this.OnPropertyChanged("new_DatadaUltimaConfirmacao");
 		}
 	}
 	
@@ -1694,6 +1724,21 @@ public partial class new_OrdemdeServicoFieldControl : Microsoft.Xrm.Sdk.Entity, 
 		}
 	}
 	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_statusdaprogramacao")]
+	public virtual new_statusdaprogramacao? new_StatusdaProgramacao
+	{
+		get
+		{
+			return ((new_statusdaprogramacao?)(EntityOptionSetEnum.GetEnum(this, "new_statusdaprogramacao")));
+		}
+		set
+		{
+			this.OnPropertyChanging("new_StatusdaProgramacao");
+			this.SetAttributeValue("new_statusdaprogramacao", value.HasValue ? new Microsoft.Xrm.Sdk.OptionSetValue((int)value) : null);
+			this.OnPropertyChanged("new_StatusdaProgramacao");
+		}
+	}
+	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_tecnicositeomada")]
 	public Microsoft.Xrm.Sdk.EntityReference new_TecnicoSiteOmada
 	{
@@ -1940,61 +1985,6 @@ public partial class new_OrdemdeServicoFieldControl : Microsoft.Xrm.Sdk.Entity, 
 		get
 		{
 			return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
-		}
-	}
-	
-	/// <summary>
-	/// 1:N new_new_atividadefieldcontrol_OrdemdeServico_
-	/// </summary>
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_new_atividadefieldcontrol_OrdemdeServico_")]
-	public System.Collections.Generic.IEnumerable<new_AtividadeFieldControl> new_new_atividadefieldcontrol_OrdemdeServico_
-	{
-		get
-		{
-			return this.GetRelatedEntities<new_AtividadeFieldControl>("new_new_atividadefieldcontrol_OrdemdeServico_", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_new_atividadefieldcontrol_OrdemdeServico_");
-			this.SetRelatedEntities<new_AtividadeFieldControl>("new_new_atividadefieldcontrol_OrdemdeServico_", null, value);
-			this.OnPropertyChanged("new_new_atividadefieldcontrol_OrdemdeServico_");
-		}
-	}
-	
-	/// <summary>
-	/// 1:N new_new_produtoservico_OrdemdeServico_new_ord
-	/// </summary>
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_new_produtoservico_OrdemdeServico_new_ord")]
-	public System.Collections.Generic.IEnumerable<new_ProdutoServico> new_new_produtoservico_OrdemdeServico_new_ord
-	{
-		get
-		{
-			return this.GetRelatedEntities<new_ProdutoServico>("new_new_produtoservico_OrdemdeServico_new_ord", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_new_produtoservico_OrdemdeServico_new_ord");
-			this.SetRelatedEntities<new_ProdutoServico>("new_new_produtoservico_OrdemdeServico_new_ord", null, value);
-			this.OnPropertyChanged("new_new_produtoservico_OrdemdeServico_new_ord");
-		}
-	}
-	
-	/// <summary>
-	/// N:1 new_new_ordemdeservicofieldcontrol_Projeto_cr
-	/// </summary>
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_projeto")]
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_new_ordemdeservicofieldcontrol_Projeto_cr")]
-	public cr22f_Projeto new_new_ordemdeservicofieldcontrol_Projeto_cr
-	{
-		get
-		{
-			return this.GetRelatedEntity<cr22f_Projeto>("new_new_ordemdeservicofieldcontrol_Projeto_cr", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_new_ordemdeservicofieldcontrol_Projeto_cr");
-			this.SetRelatedEntity<cr22f_Projeto>("new_new_ordemdeservicofieldcontrol_Projeto_cr", null, value);
-			this.OnPropertyChanged("new_new_ordemdeservicofieldcontrol_Projeto_cr");
 		}
 	}
 }

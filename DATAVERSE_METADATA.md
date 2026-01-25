@@ -528,7 +528,11 @@ PrimaryKey:                       new_ordemdeservicofieldcontrolid
 |------------------------------|---------------------|------------------|
 | new_cliente | new_Cliente | accounts/contacts |
 | new_coordenador | new_Coordenador | systemusers |
+| new_defaultlocation | new_DefaultLocation | new_userlocations |
+| new_orcamento | new_Orcamento | new_orcamentos |
 | new_projeto | new_Projeto | cr22f_projetos |
+| new_publicadopor | new_PublicadoPor | systemusers |
+| new_tecnicositeomada | new_TecnicoSiteOmada | systemusers |
 
 ---
 
