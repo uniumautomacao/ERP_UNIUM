@@ -168,7 +168,7 @@ export function NovoEquipamentoDialog({
 
         const payload: DeviceCreatePayload = {
           new_name: name,
-          new_localizacao: location.trim() || null,
+          new_localizacao: location.trim() || undefined,
           'new_ModelodeProduto@odata.bind': `/cr22f_modelosdeprodutofromsharepointlists(${modelId})`,
           'new_Projeto@odata.bind': `/cr22f_projetos(${projectId})`,
         };

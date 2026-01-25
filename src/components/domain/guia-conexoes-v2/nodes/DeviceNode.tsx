@@ -12,6 +12,7 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
+import { shorthands } from '@fluentui/react-components';
 import {
   Box24Regular,
   Delete24Regular,
@@ -100,8 +101,8 @@ const useStyles = makeStyles({
     gap: '6px',
   },
   portFree: {
-    borderColor: tokens.colorPaletteGreenBorder2,
-    backgroundColor: tokens.colorPaletteGreenBackground1,
+    ...shorthands.borderColor(tokens.colorPaletteGreenBorder2),
+    ...shorthands.backgroundColor(tokens.colorPaletteGreenBackground1),
   },
   portConnected: {
     borderColor: tokens.colorNeutralStroke2,
@@ -152,16 +153,16 @@ const useStyles = makeStyles({
     animationIterationCount: 'infinite',
     animationName: {
       from: {
-        boxShadow: `0 0 0 0 ${tokens.colorPaletteBlueBorder2}`,
-        borderColor: tokens.colorPaletteBlueBorder2,
+        boxShadow: `0 0 0 0 ${tokens.colorBrandBackground}`,
+        borderColor: tokens.colorBrandBackground,
       },
       '50%': {
-        boxShadow: `0 0 0 6px ${tokens.colorPaletteBlueBorder2}`,
-        borderColor: tokens.colorPaletteBlueBorder2,
+        boxShadow: `0 0 0 6px ${tokens.colorBrandBackground}`,
+        borderColor: tokens.colorBrandBackground,
       },
       to: {
-        boxShadow: `0 0 0 0 ${tokens.colorPaletteBlueBorder2}`,
-        borderColor: tokens.colorPaletteBlueBorder2,
+        boxShadow: `0 0 0 0 ${tokens.colorBrandBackground}`,
+        borderColor: tokens.colorBrandBackground,
       },
     },
   },

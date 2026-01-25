@@ -282,7 +282,7 @@ export function DisconnectedDevicesSidebar({
                             }
                           >
                             <AccordionItem value="ports">
-                              <AccordionHeader size="extra-small">
+                              <AccordionHeader size="small">
                                 <Text size={100} className={styles.portMeta}>
                                   {device.ports.length} conexões disponíveis
                                 </Text>

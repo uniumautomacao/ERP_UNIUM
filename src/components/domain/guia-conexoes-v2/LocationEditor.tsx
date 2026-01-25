@@ -25,7 +25,7 @@ export function LocationEditor({
   onCommit,
 }: LocationEditorProps) {
   const styles = useStyles();
-  const listId = useId('location-list');
+  const listId = useId();
   const [draft, setDraft] = useState(value ?? '');
 
   useEffect(() => {
