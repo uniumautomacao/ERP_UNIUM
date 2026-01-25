@@ -11,6 +11,7 @@ import {
 import {
   Add24Regular,
   ArrowClockwise24Regular,
+  ClipboardTask24Regular,
   Flowchart24Regular,
   Save24Regular,
 } from '@fluentui/react-icons';
@@ -31,6 +32,7 @@ import {
 import { AddConnectionDialog } from '../../components/domain/guia-conexoes-v2/AddConnectionDialog';
 import { EditDeviceLocationDialog } from '../../components/domain/guia-conexoes-v2/EditDeviceLocationDialog';
 import { NovoEquipamentoDialog } from '../../components/domain/guia-conexoes/NovoEquipamentoDialog';
+import { GerarPendenciasDialog } from '../../components/domain/guia-conexoes/GerarPendenciasDialog';
 import { DiagramModal } from '../../components/domain/guia-conexoes/DiagramModal';
 import {
   DeviceNode,
@@ -374,6 +376,7 @@ export function GuiaConexoesV2Page() {
   );
   const [addConnectionOpen, setAddConnectionOpen] = useState(false);
   const [addDeviceOpen, setAddDeviceOpen] = useState(false);
+  const [pendenciasOpen, setPendenciasOpen] = useState(false);
   const [nodeShowAllPorts, setNodeShowAllPorts] = useState<Record<string, boolean>>({});
   const [sidebarDragPortId, setSidebarDragPortId] = useState<string | null>(null);
   const [hoveredHandleId, setHoveredHandleId] = useState<string | null>(null);
@@ -392,7 +395,7 @@ export function GuiaConexoesV2Page() {
   const [inconsistencyDialogOpen, setInconsistencyDialogOpen] = useState(false);
   const [ignoredInconsistencies, setIgnoredInconsistencies] = useState<Set<string>>(new Set());
 
-  const { devices, connections, modelos, loading, error, reload } = useGuiaConexoesData(
+  const { devices, connections, produtos, modelos, loading, error, reload } = useGuiaConexoesData(
     selectedProjectId,
     '',
     ''
@@ -1626,6 +1629,13 @@ export function GuiaConexoesV2Page() {
             Adicionar Conexão
           </Button>
           <Button
+            icon={<ClipboardTask24Regular />}
+            onClick={() => setPendenciasOpen(true)}
+            disabled={!selectedProjectId}
+          >
+            Gerar pendências
+          </Button>
+          <Button
             icon={<ArrowClockwise24Regular />}
             onClick={handleAutoRoot}
             disabled={!selectedProjectId || connectedDeviceIdList.length === 0 || autoRootPending}
@@ -1727,6 +1737,14 @@ export function GuiaConexoesV2Page() {
           await reload();
           setLayoutPending(true);
         }}
+      />
+      <GerarPendenciasDialog
+        open={pendenciasOpen}
+        projectId={selectedProjectId}
+        produtos={produtos}
+        modelos={modelos}
+        onClose={() => setPendenciasOpen(false)}
+        onGenerated={reload}
       />
       <DiagramModal
         open={diagramModalOpen}

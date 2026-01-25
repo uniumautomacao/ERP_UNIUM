@@ -1,6 +1,11 @@
-export const APP_VERSION = '0.1.103';
+export const APP_VERSION = '0.1.104';
 export const APP_BUILD_DATE = '2026-01-24';
 export const VERSION_HISTORY = [
+  {
+    version: '0.1.104',
+    date: '2026-01-24',
+    changes: 'Adicionada geração de pendências no Guia de Conexões v2.',
+  },
   {
     version: '0.1.103',
     date: '2026-01-24',
