@@ -40,19 +40,19 @@ export function PageHeader({
       <div
         className="flex items-center justify-between"
         style={{
-          padding: '16px 24px',
-          minHeight: avatar ? '100px' : 'auto',
+          padding: '8px 24px',
+          minHeight: avatar ? '60px' : 'auto',
         }}
       >
         {/* Left side - Title */}
-        <div className="flex items-center gap-4">
-          {avatar && <Avatar name={title} size={48} style={{ borderRadius: '4px' }} />}
+        <div className="flex items-center gap-3">
+          {avatar && <Avatar name={title} size={32} style={{ borderRadius: '4px' }} />}
           <div>
-            <Text size={600} weight="semibold" block>
+            <Text size={400} weight="semibold" block>
               {title}
             </Text>
             {subtitle && (
-              <Text size={300} style={{ color: tokens.colorNeutralForeground3 }}>
+              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
                 {subtitle}
               </Text>
             )}
@@ -85,7 +85,7 @@ export function PageHeader({
                   </Text>
                   <div className="flex items-center gap-1 justify-center">
                     {kpi.icon}
-                    <Text size={600} weight="semibold">
+                    <Text size={400} weight="semibold">
                       {kpi.value}
                     </Text>
                   </div>

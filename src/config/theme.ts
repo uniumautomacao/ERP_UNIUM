@@ -50,13 +50,13 @@ export const LAYOUT = {
     collapsedWidth: 48,
   },
   header: {
-    height: 48,
+    height: 36,
   },
   commandBar: {
-    height: 44,
+    height: 40,
   },
   pageHeader: {
-    height: 100,
+    height: 60,
   },
 } as const;
 
