@@ -5,6 +5,7 @@ import {
   DocumentBulletList24Regular,
   Box24Regular,
   CalendarLtr24Regular,
+  CalendarClock24Regular,
   People24Regular,
   ImageMultiple24Regular,
   ShieldLock24Regular,
@@ -19,6 +20,7 @@ import { HomePage } from '../pages/HomePage';
 import { TimelinePage } from '../pages/section0-installations/TimelinePage';
 import { GaleriaFotosPage } from '../pages/section0-installations/GaleriaFotosPage';
 import { GuiaConexoesPage } from '../pages/section0-installations/GuiaConexoesPage';
+import { CronogramaInstalacoesPage } from '../pages/section0-installations/CronogramaInstalacoesPage';
 import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
 import { CadastroRapidoProdutoPage } from '../pages/section-cadastros/CadastroRapidoProdutoPage';
 import { AjustesCadastroProdutosPage } from '../pages/section-cadastros/AjustesCadastroProdutosPage';
@@ -64,6 +66,13 @@ export const navigation: NavSection[] = [
         icon: <CalendarLtr24Regular />,
         path: '/timeline',
         component: TimelinePage,
+      },
+      {
+        id: 'cronograma-instalacoes',
+        label: 'Cronograma de Instalações',
+        icon: <CalendarClock24Regular />,
+        path: '/instalacoes/cronograma',
+        component: CronogramaInstalacoesPage,
       },
       {
         id: 'galeria-fotos',
