@@ -69,9 +69,9 @@ const mapOrdemServico = (record: any): CronogramaOS => {
   };
 };
 
-const buildDateIso = (dateString: string) => {
-  const date = new Date(`${dateString}T00:00:00`);
-  return date.toISOString();
+const formatDateYMD = (dateString: string) => {
+  // Para campos "Date Only" no Dataverse, o formato deve ser YYYY-MM-DD
+  return dateString; // dateString já vem no formato YYYY-MM-DD do input type="date"
 };
 
 const buildAutoComment = (prefixo: string, campos: Array<{ campo: string; antes: string; depois: string }>) => {
@@ -202,10 +202,16 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
     });
   }, [comentariosPorOs]);
 
-  const updateOs = useCallback(async (osId: string, payload: Record<string, unknown>) => {
-    const result = await NewOrdemdeServicoFieldControlService.update(osId, payload as any);
+  const updateOs = useCallback(async (osId: string, payload: any) => {
+    // Limpar payload de campos nulos ou indefinidos que não devem ser enviados se não alterados
+    const cleanPayload = Object.fromEntries(
+      Object.entries(payload).filter(([_, v]) => v !== undefined)
+    );
+
+    const result = await NewOrdemdeServicoFieldControlService.update(osId, cleanPayload);
     if (!result.success) {
-      throw new Error('Falha ao atualizar OS no Dataverse.');
+      console.error('Erro Dataverse:', result.error);
+      throw new Error(result.error?.message || 'Falha ao atualizar OS no Dataverse.');
     }
   }, []);
 
@@ -228,16 +234,16 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
   }, [systemUserId]);
 
   const definirDataPrevista = useCallback(async (os: CronogramaOS, dataSelecionada: string, comentario: string) => {
-    const iso = buildDateIso(dataSelecionada);
+    const ymd = formatDateYMD(dataSelecionada);
     const statusCalculado = calcularStatus({
       ...os,
-      datadaproximaatividade: iso,
+      datadaproximaatividade: ymd,
       confirmacao60d: false,
       confirmacao30d: false,
       confirmacao15d: false,
     });
     await updateOs(os.id, {
-      new_previsaodeentregadosprodutos: iso,
+      new_previsaodeentregadosprodutos: ymd,
       new_datadaultimaalteracaodeprevisao: new Date().toISOString(),
       new_datadaultimaconfirmacao: new Date().toISOString(),
       new_statusdaprogramacao: statusCalculado,
@@ -274,16 +280,16 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
     if (!novaData) {
       throw new Error('Nova data não informada.');
     }
-    const iso = buildDateIso(novaData);
+    const ymd = formatDateYMD(novaData);
     const statusCalculado = calcularStatus({
       ...os,
-      datadaproximaatividade: iso,
+      datadaproximaatividade: ymd,
       confirmacao60d: false,
       confirmacao30d: false,
       confirmacao15d: false,
     });
     await updateOs(os.id, {
-      new_previsaodeentregadosprodutos: iso,
+      new_previsaodeentregadosprodutos: ymd,
       new_datadaultimaalteracaodeprevisao: new Date().toISOString(),
       new_datadaultimaconfirmacao: new Date().toISOString(),
       new_statusdaprogramacao: statusCalculado,
@@ -296,7 +302,7 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
         {
           campo: 'new_previsaodeentregadosprodutos',
           antes: formatDateLong(os.datadaproximaatividade),
-          depois: formatDateLong(iso),
+          depois: formatDateLong(ymd),
         },
       ])
     );

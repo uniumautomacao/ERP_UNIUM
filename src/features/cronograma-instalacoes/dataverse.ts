@@ -75,7 +75,7 @@ export const fetchPendentesGroups = async (params: {
   const fetchGroup = async (status: number, includeYearRange: boolean, orderBy: string[]) => {
     let statusFilter = `new_statusdaprogramacao eq ${status}`;
     if (status === STATUS_PROGRAMACAO.AguardandoPrimeiroContato) {
-      statusFilter = `(new_statusdaprogramacao eq ${status} or new_statusdaprogramacao eq null)`;
+      statusFilter = `(new_statusdaprogramacao eq ${status} or new_statusdaprogramacao eq null) and new_numerodeentregaspendentes gt 0`;
     }
     const filter = `${base}${service}${search} and ${statusFilter}${includeYearRange ? yearRange : ''} and _new_cliente_value ne null`;
     return NewOrdemdeServicoFieldControlService.getAll({
