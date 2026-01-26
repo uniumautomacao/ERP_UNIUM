@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Text, tokens } from '@fluentui/react-components';
+import { Button, Text, tokens } from '@fluentui/react-components';
 import { CalendarClock24Regular } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -27,6 +27,7 @@ export function CronogramaInstalacoesPage() {
   const [calendarMonth, setCalendarMonth] = useState<number>(new Date().getMonth());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedAnnualMonth, setSelectedAnnualMonth] = useState<number | null>(null);
+  const [annualSidebarTab, setAnnualSidebarTab] = useState<'list' | 'details'>('list');
 
   const {
     itens,
@@ -82,6 +83,15 @@ export function CronogramaInstalacoesPage() {
     });
   }, [ano, calendarioAnoItens, selectedAnnualMonth]);
 
+  const selectedAnnualOS = useMemo(
+    () => annualMonthItems.find((os) => os.id === selectedOsId) ?? null,
+    [annualMonthItems, selectedOsId]
+  );
+  const selectedAnnualComentarios = useMemo(
+    () => (selectedAnnualOS ? comentariosPorOs.get(selectedAnnualOS.id) ?? [] : []),
+    [comentariosPorOs, selectedAnnualOS]
+  );
+
   useEffect(() => {
     if (!selectedOS && itens.length > 0) {
       setSelectedOsId(itens[0].id);
@@ -116,6 +126,19 @@ export function CronogramaInstalacoesPage() {
       setSelectedAnnualMonth(new Date().getMonth());
     }
   }, [selectedAnnualMonth, selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab !== 'visao-anual') return;
+    setSelectedOsId(null);
+    setAnnualSidebarTab('list');
+  }, [selectedAnnualMonth, selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab !== 'visao-anual') return;
+    if (selectedOsId && annualMonthItems.some((os) => os.id === selectedOsId)) {
+      setAnnualSidebarTab('details');
+    }
+  }, [annualMonthItems, selectedOsId, selectedTab]);
 
   const handleSelectMonth = (mes: number) => {
     setSelectedAnnualMonth(mes);
@@ -230,7 +253,7 @@ export function CronogramaInstalacoesPage() {
                   onClienteRetornou={clienteRetornou}
                 />
               ) : selectedTab === 'visao-anual' ? (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 h-full min-h-0">
                   <Text size={300} weight="semibold">
                     {selectedAnnualMonth === null
                       ? 'Selecione um mês'
@@ -243,11 +266,75 @@ export function CronogramaInstalacoesPage() {
                   ) : annualMonthItems.length === 0 ? (
                     <Text size={200}>Nenhuma OS neste mês.</Text>
                   ) : (
-                    <div className="flex flex-col gap-2">
-                      {annualMonthItems.map((os) => (
-                        <OSCard key={os.id} os={os} onClick={() => undefined} />
-                      ))}
-                    </div>
+                    <>
+                      {selectedAnnualOS && (
+                        <div className="flex gap-2 border-b" style={{ borderColor: tokens.colorNeutralStroke2 }}>
+                          <button
+                            type="button"
+                            onClick={() => setAnnualSidebarTab('list')}
+                            style={{
+                              padding: '8px 16px',
+                              borderBottom:
+                                annualSidebarTab === 'list' ? `2px solid ${tokens.colorBrandStroke1}` : 'none',
+                              color:
+                                annualSidebarTab === 'list'
+                                  ? tokens.colorBrandForeground1
+                                  : tokens.colorNeutralForeground2,
+                              fontWeight: annualSidebarTab === 'list' ? 600 : 400,
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Lista ({annualMonthItems.length})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAnnualSidebarTab('details')}
+                            style={{
+                              padding: '8px 16px',
+                              borderBottom:
+                                annualSidebarTab === 'details' ? `2px solid ${tokens.colorBrandStroke1}` : 'none',
+                              color:
+                                annualSidebarTab === 'details'
+                                  ? tokens.colorBrandForeground1
+                                  : tokens.colorNeutralForeground2,
+                              fontWeight: annualSidebarTab === 'details' ? 600 : 400,
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Detalhes
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="flex-1 min-h-0 overflow-auto">
+                        {annualSidebarTab === 'list' ? (
+                          <div className="flex flex-col gap-2">
+                            {annualMonthItems.map((os) => (
+                              <OSCard
+                                key={os.id}
+                                os={os}
+                                onClick={() => setSelectedOsId(os.id)}
+                                isSelected={selectedOsId === os.id}
+                              />
+                            ))}
+                          </div>
+                        ) : selectedAnnualOS ? (
+                          <OSDetailPanel
+                            os={selectedAnnualOS}
+                            comentarios={selectedAnnualComentarios}
+                            onDefinirData={definirDataPrevista}
+                            onConfirmarData={confirmarData}
+                            onRegistrarTentativa={registrarTentativa}
+                            onMarcarSemResposta={marcarSemResposta}
+                            onClienteRetornou={clienteRetornou}
+                          />
+                        ) : null}
+                      </div>
+                    </>
                   )}
                 </div>
               ) : (
