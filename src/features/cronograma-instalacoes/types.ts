@@ -56,6 +56,19 @@ export interface UsuarioBasico {
   email: string;
 }
 
+export interface MonthStats {
+  total: number;
+  porTipo: {
+    instalacao: number;
+    cabeamento: number;
+  };
+  porStatus: {
+    pendentes: number;
+    confirmadas: number;
+    semResposta: number;
+  };
+}
+
 export interface FiltrosCronograma {
   ano: number;
   tipoServico: TipoServicoFiltro;

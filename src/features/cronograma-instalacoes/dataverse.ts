@@ -138,6 +138,25 @@ export const fetchCalendarioMonth = async (params: {
   });
 };
 
+export const fetchCalendarioAno = async (params: {
+  ano: number;
+  tipoServico: TipoServicoFiltro;
+  searchTerm: string;
+}) => {
+  const base = buildBaseFilter();
+  const service = buildServiceFilter(params.tipoServico);
+  const search = buildSearchFilter(params.searchTerm);
+  const yearRange = buildYearRangeFilter(params.ano);
+  const filter = `${base}${service}${search} and ${DATA_CAMPO_PREVISAO} ne null${yearRange}`;
+
+  return NewOrdemdeServicoFieldControlService.getAll({
+    filter,
+    select: selectCalendario,
+    orderBy: [`${DATA_CAMPO_PREVISAO} asc`],
+    maxPageSize: 5000,
+  });
+};
+
 export const fetchComentarios = async (osId: string) => {
   return NewComentariodeOrdemdeServicoService.getAll({
     filter: `statecode eq 0 and _new_ordemdeservico_value eq '${escapeODataValue(osId)}'`,

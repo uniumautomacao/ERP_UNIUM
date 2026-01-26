@@ -4,6 +4,7 @@ import { calcularStatus, formatDateLong, obterAnosDisponiveis } from '../feature
 import { STATUS_LABELS, STATUS_PROGRAMACAO, TIPO_COMENTARIO, TIPO_SERVICO } from '../features/cronograma-instalacoes/constants';
 import {
   fetchAnoBounds,
+  fetchCalendarioAno,
   fetchCalendarioMonth,
   fetchComentarios,
   fetchPendentesGroups,
@@ -97,6 +98,7 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
   });
   const [semResposta, setSemResposta] = useState<CronogramaOS[]>([]);
   const [calendarioItens, setCalendarioItens] = useState<CronogramaOS[]>([]);
+  const [calendarioAnoItens, setCalendarioAnoItens] = useState<CronogramaOS[]>([]);
   const [comentariosPorOs, setComentariosPorOs] = useState<Map<string, ComentarioOS[]>>(new Map());
   const [anosDisponiveis, setAnosDisponiveis] = useState<number[]>([
     new Date().getFullYear(),
@@ -113,10 +115,11 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
     setLoading(true);
     setError(null);
     try {
-      const [pendentesResult, semRespostaResult, calendarioResult, boundsResult] = await Promise.all([
+      const [pendentesResult, semRespostaResult, calendarioResult, calendarioAnoResult, boundsResult] = await Promise.all([
         fetchPendentesGroups({ ano: filtros.ano, tipoServico: filtros.tipoServico, searchTerm: debouncedSearch }),
         fetchSemResposta({ tipoServico: filtros.tipoServico, searchTerm: debouncedSearch }),
         fetchCalendarioMonth({ ano: filtros.ano, mes, tipoServico: filtros.tipoServico, searchTerm: debouncedSearch }),
+        fetchCalendarioAno({ ano: filtros.ano, tipoServico: filtros.tipoServico, searchTerm: debouncedSearch }),
         fetchAnoBounds(),
       ]);
 
@@ -134,8 +137,13 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
         [STATUS_PROGRAMACAO.PendenteReconfirmacao60d]: pend60,
       }));
 
-      setSemResposta(mapList(semRespostaResult));
-      setCalendarioItens(mapList(calendarioResult));
+      const semRespostaList = mapList(semRespostaResult);
+      const calendarioList = mapList(calendarioResult);
+      const calendarioAnoList = mapList(calendarioAnoResult);
+
+      setSemResposta(semRespostaList);
+      setCalendarioItens(calendarioList);
+      setCalendarioAnoItens(calendarioAnoList);
 
       if (boundsResult.minResult.success && boundsResult.maxResult.success) {
         const minDate = boundsResult.minResult.data?.[0]?.new_previsaodeentregadosprodutos;
@@ -146,8 +154,9 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
             ...pend15,
             ...pend30,
             ...pend60,
-            ...semResposta,
-            ...calendarioItens,
+            ...semRespostaList,
+            ...calendarioList,
+            ...calendarioAnoList,
           ].map((os) => ({
             ...os,
             datadaproximaatividade: os.datadaproximaatividade ?? minDate ?? maxDate ?? null,
@@ -366,6 +375,7 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
     pendentes,
     semResposta,
     calendarioItens,
+    calendarioAnoItens,
     comentariosPorOs,
     anosDisponiveis,
     loading,

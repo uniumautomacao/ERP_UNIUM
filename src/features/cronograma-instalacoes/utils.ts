@@ -1,4 +1,4 @@
-import type { CronogramaOS, StatusProgramacao, TipoServicoFiltro } from './types';
+import type { CronogramaOS, MonthStats, StatusProgramacao, TipoServicoFiltro } from './types';
 import { PENDENTES_STATUS, STATUS_PROGRAMACAO } from './constants';
 
 export const parseDate = (value?: string | null): Date | null => {
@@ -182,5 +182,37 @@ export const getConfirmacaoStatus = (os: CronogramaOS) => {
     confirmacao30d: Boolean(os.confirmacao30d),
     confirmacao15d: Boolean(os.confirmacao15d),
   };
+};
+
+export const calcularEstatisticasMensais = (itens: CronogramaOS[], ano: number): MonthStats[] => {
+  const stats: MonthStats[] = Array.from({ length: 12 }, () => ({
+    total: 0,
+    porTipo: { instalacao: 0, cabeamento: 0 },
+    porStatus: { pendentes: 0, confirmadas: 0, semResposta: 0 },
+  }));
+
+  itens.forEach((os) => {
+    const date = parseDate(os.datadaproximaatividade);
+    if (!date || date.getFullYear() !== ano) return;
+
+    const mes = date.getMonth();
+    stats[mes].total += 1;
+
+    if (os.tipodeservico === 'Instalação') {
+      stats[mes].porTipo.instalacao += 1;
+    } else {
+      stats[mes].porTipo.cabeamento += 1;
+    }
+
+    if (isPendencia(os.statusdaprogramacao)) {
+      stats[mes].porStatus.pendentes += 1;
+    } else if (os.statusdaprogramacao === STATUS_PROGRAMACAO.SemResposta) {
+      stats[mes].porStatus.semResposta += 1;
+    } else {
+      stats[mes].porStatus.confirmadas += 1;
+    }
+  });
+
+  return stats;
 };
 

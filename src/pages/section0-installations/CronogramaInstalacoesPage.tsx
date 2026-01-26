@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Text } from '@fluentui/react-components';
+import { Text, tokens } from '@fluentui/react-components';
 import { CalendarClock24Regular } from '@fluentui/react-icons';
 import { CommandBar } from '../../components/layout/CommandBar';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -10,12 +10,13 @@ import { SemRespostaTab } from '../../components/domain/cronograma-instalacoes/S
 import { CalendarioTab } from '../../components/domain/cronograma-instalacoes/CalendarioTab';
 import { OSDetailPanel } from '../../components/domain/cronograma-instalacoes/OSDetailPanel';
 import { OSCard } from '../../components/domain/cronograma-instalacoes/OSCard';
+import { VisaoAnualTab } from '../../components/domain/cronograma-instalacoes/VisaoAnualTab';
 import { useCronogramaInstalacoes } from '../../hooks/useCronogramaInstalacoes';
 import { SEARCH_PLACEHOLDER } from '../../features/cronograma-instalacoes/constants';
 import type { TipoServicoFiltro } from '../../features/cronograma-instalacoes/types';
 import { parseDate } from '../../features/cronograma-instalacoes/utils';
 
-type TabKey = 'pendentes' | 'sem-resposta' | 'calendario';
+type TabKey = 'pendentes' | 'sem-resposta' | 'visao-anual' | 'calendario';
 
 export function CronogramaInstalacoesPage() {
   const [selectedTab, setSelectedTab] = useState<TabKey>('pendentes');
@@ -31,6 +32,7 @@ export function CronogramaInstalacoesPage() {
     pendentes,
     semResposta,
     calendarioItens,
+    calendarioAnoItens,
     comentariosPorOs,
     anosDisponiveis,
     loading,
@@ -53,6 +55,7 @@ export function CronogramaInstalacoesPage() {
     () => [
       { value: 'pendentes', label: `Pendentes (${totalPendentes})` },
       { value: 'sem-resposta', label: `Sem Resposta (${semResposta.length})` },
+      { value: 'visao-anual', label: 'Visão Anual' },
       { value: 'calendario', label: 'Calendário' },
     ],
     [semResposta.length, totalPendentes]
@@ -98,6 +101,12 @@ export function CronogramaInstalacoesPage() {
     }
   }, [selectedTab, selectedDate, ano, calendarMonth]);
 
+  const handleSelectMonth = (mes: number) => {
+    setCalendarMonth(mes);
+    setSelectedTab('calendario');
+    setSelectedDate(new Date(ano, mes, 1));
+  };
+
   const primaryActions = [
     {
       id: 'novo-contato',
@@ -140,6 +149,9 @@ export function CronogramaInstalacoesPage() {
               )}
               {selectedTab === 'sem-resposta' && (
                 <SemRespostaTab itens={semResposta} selectedId={selectedOsId} onSelect={setSelectedOsId} />
+              )}
+              {selectedTab === 'visao-anual' && (
+                <VisaoAnualTab itens={calendarioAnoItens} ano={ano} onSelectMonth={handleSelectMonth} />
               )}
               {selectedTab === 'calendario' && (
                 <div className="flex flex-col gap-4">
@@ -198,6 +210,12 @@ export function CronogramaInstalacoesPage() {
                   onMarcarSemResposta={marcarSemResposta}
                   onClienteRetornou={clienteRetornou}
                 />
+              ) : selectedTab === 'visao-anual' ? (
+                <div className="h-full flex items-center justify-center">
+                  <Text size={300} style={{ color: tokens.colorNeutralForeground3 }}>
+                    Selecione um mês para ver detalhes.
+                  </Text>
+                </div>
               ) : (
                 <OSDetailPanel
                   os={selectedOS}
