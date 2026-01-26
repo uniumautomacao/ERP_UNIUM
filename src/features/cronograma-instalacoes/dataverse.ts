@@ -160,8 +160,8 @@ export const fetchCalendarioAno = async (params: {
 export const fetchComentarios = async (osId: string) => {
   return NewComentariodeOrdemdeServicoService.getAll({
     filter: `statecode eq 0 and _new_ordemdeservico_value eq '${escapeODataValue(osId)}'`,
-    select: ['new_comentariodeordemdeservicoid', 'new_datetime', 'new_tipodecomentario', 'new_comentario', '_new_usuario_value'],
-    orderBy: ['new_datetime desc'],
+    select: ['new_comentariodeordemdeservicoid', 'new_datetime', 'new_tipodecomentario', 'new_comentario', '_new_usuario_value','createdon'],
+    orderBy: ['createdon desc'],
     maxPageSize: 5000,
   });
 };

@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Text, tokens } from '@fluentui/react-components';
-import { CalendarClock24Regular } from '@fluentui/react-icons';
-import { CommandBar } from '../../components/layout/CommandBar';
+import { Text, tokens } from '@fluentui/react-components';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { CronogramaHeader } from '../../components/domain/cronograma-instalacoes/CronogramaHeader';
@@ -144,19 +142,8 @@ export function CronogramaInstalacoesPage() {
     setSelectedAnnualMonth(mes);
   };
 
-  const primaryActions = [
-    {
-      id: 'novo-contato',
-      label: 'Nova OS',
-      icon: <CalendarClock24Regular />,
-      onClick: () => undefined,
-      appearance: 'primary' as const,
-    },
-  ];
-
   return (
     <>
-      <CommandBar primaryActions={primaryActions} />
       <PageHeader title="Cronograma de Instalações" subtitle={`Ano ${ano}`} tabs={tabs} selectedTab={selectedTab} onTabSelect={(value) => setSelectedTab(value as TabKey)} />
       <PageContainer>
         <div className="flex flex-col gap-4 h-full min-h-0">
