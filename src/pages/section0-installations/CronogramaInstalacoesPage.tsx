@@ -14,7 +14,7 @@ import { VisaoAnualTab } from '../../components/domain/cronograma-instalacoes/Vi
 import { useCronogramaInstalacoes } from '../../hooks/useCronogramaInstalacoes';
 import { SEARCH_PLACEHOLDER } from '../../features/cronograma-instalacoes/constants';
 import type { TipoServicoFiltro } from '../../features/cronograma-instalacoes/types';
-import { parseDate } from '../../features/cronograma-instalacoes/utils';
+import { formatMonthYear, parseDate } from '../../features/cronograma-instalacoes/utils';
 
 type TabKey = 'pendentes' | 'sem-resposta' | 'visao-anual' | 'calendario';
 
@@ -26,6 +26,7 @@ export function CronogramaInstalacoesPage() {
   const [selectedOsId, setSelectedOsId] = useState<string | null>(null);
   const [calendarMonth, setCalendarMonth] = useState<number>(new Date().getMonth());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedAnnualMonth, setSelectedAnnualMonth] = useState<number | null>(null);
 
   const {
     itens,
@@ -73,6 +74,14 @@ export function CronogramaInstalacoesPage() {
     return calendarioItens.filter((os) => os.datadaproximaatividade?.startsWith(key));
   }, [calendarioItens, selectedDate]);
 
+  const annualMonthItems = useMemo(() => {
+    if (selectedAnnualMonth === null) return [];
+    return calendarioAnoItens.filter((os) => {
+      const osDate = parseDate(os.datadaproximaatividade);
+      return osDate && osDate.getFullYear() === ano && osDate.getMonth() === selectedAnnualMonth;
+    });
+  }, [ano, calendarioAnoItens, selectedAnnualMonth]);
+
   useEffect(() => {
     if (!selectedOS && itens.length > 0) {
       setSelectedOsId(itens[0].id);
@@ -101,10 +110,15 @@ export function CronogramaInstalacoesPage() {
     }
   }, [selectedTab, selectedDate, ano, calendarMonth]);
 
+  useEffect(() => {
+    if (selectedTab !== 'visao-anual') return;
+    if (selectedAnnualMonth === null) {
+      setSelectedAnnualMonth(new Date().getMonth());
+    }
+  }, [selectedAnnualMonth, selectedTab]);
+
   const handleSelectMonth = (mes: number) => {
-    setCalendarMonth(mes);
-    setSelectedTab('calendario');
-    setSelectedDate(new Date(ano, mes, 1));
+    setSelectedAnnualMonth(mes);
   };
 
   const primaryActions = [
@@ -211,10 +225,25 @@ export function CronogramaInstalacoesPage() {
                   onClienteRetornou={clienteRetornou}
                 />
               ) : selectedTab === 'visao-anual' ? (
-                <div className="h-full flex items-center justify-center">
-                  <Text size={300} style={{ color: tokens.colorNeutralForeground3 }}>
-                    Selecione um mês para ver detalhes.
+                <div className="flex flex-col gap-3">
+                  <Text size={300} weight="semibold">
+                    {selectedAnnualMonth === null
+                      ? 'Selecione um mês'
+                      : `OSs de ${formatMonthYear(new Date(ano, selectedAnnualMonth, 1))}`}
                   </Text>
+                  {selectedAnnualMonth === null ? (
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                      Clique em um mês para visualizar as OSs.
+                    </Text>
+                  ) : annualMonthItems.length === 0 ? (
+                    <Text size={200}>Nenhuma OS neste mês.</Text>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {annualMonthItems.map((os) => (
+                        <OSCard key={os.id} os={os} onClick={() => undefined} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <OSDetailPanel
