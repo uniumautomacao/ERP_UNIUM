@@ -105,7 +105,7 @@ export const filtrarPorBusca = (os: CronogramaOS, term: string): boolean => {
   const normalized = term.trim().toLowerCase();
   if (!normalized) return true;
   return (
-    os.projetoapelido.toLowerCase().includes(normalized) ||
+    (os.projetoapelido?.toLowerCase().includes(normalized) ?? false) ||
     os.cliente.toLowerCase().includes(normalized)
   );
 };
