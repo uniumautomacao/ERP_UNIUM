@@ -27,24 +27,24 @@ const buildTipodeServicoLabel = (value?: number | null, texto?: string | null) =
 
 const mapConfirmacoes = (status?: StatusProgramacao | null) => {
   if (!status) return { confirmacao60d: false, confirmacao30d: false, confirmacao15d: false };
-  const confirm60 = [
+  const confirm60 = ([
     STATUS_PROGRAMACAO.Confirmado60d,
     STATUS_PROGRAMACAO.PendenteReconfirmacao30d,
     STATUS_PROGRAMACAO.Confirmado30d,
     STATUS_PROGRAMACAO.PendenteReconfirmacao15d,
     STATUS_PROGRAMACAO.Confirmado15d,
     STATUS_PROGRAMACAO.ProntoParaAgendar,
-  ].includes(status);
-  const confirm30 = [
+  ] as StatusProgramacao[]).includes(status);
+  const confirm30 = ([
     STATUS_PROGRAMACAO.Confirmado30d,
     STATUS_PROGRAMACAO.PendenteReconfirmacao15d,
     STATUS_PROGRAMACAO.Confirmado15d,
     STATUS_PROGRAMACAO.ProntoParaAgendar,
-  ].includes(status);
-  const confirm15 = [
+  ] as StatusProgramacao[]).includes(status);
+  const confirm15 = ([
     STATUS_PROGRAMACAO.Confirmado15d,
     STATUS_PROGRAMACAO.ProntoParaAgendar,
-  ].includes(status);
+  ] as StatusProgramacao[]).includes(status);
   return { confirmacao60d: confirm60, confirmacao30d: confirm30, confirmacao15d: confirm15 };
 };
 
