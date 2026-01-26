@@ -3,6 +3,12 @@ import { PENDENTES_STATUS, STATUS_PROGRAMACAO } from './constants';
 
 export const parseDate = (value?: string | null): Date | null => {
   if (!value) return null;
+  const isoDateMatch = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(value);
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 };

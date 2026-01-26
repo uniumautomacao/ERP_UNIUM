@@ -83,6 +83,15 @@ export function CronogramaInstalacoesPage() {
 
   useEffect(() => {
     if (selectedTab !== 'calendario') return;
+    calendarItems.forEach((os) => {
+      if (!comentariosPorOs.has(os.id)) {
+        carregarComentarios(os.id);
+      }
+    });
+  }, [calendarItems, carregarComentarios, comentariosPorOs, selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab !== 'calendario') return;
     if (!selectedDate) {
       setSelectedDate(new Date(ano, calendarMonth, 1));
     }
@@ -173,15 +182,36 @@ export function CronogramaInstalacoesPage() {
             </div>
 
             <div className="flex-[35] min-w-[350px] overflow-auto">
-              <OSDetailPanel
-                os={selectedOS}
-                comentarios={selectedComentarios}
-                onDefinirData={definirDataPrevista}
-                onConfirmarData={confirmarData}
-                onRegistrarTentativa={registrarTentativa}
-                onMarcarSemResposta={marcarSemResposta}
-                onClienteRetornou={clienteRetornou}
-              />
+              {selectedTab === 'calendario' ? (
+                calendarItems.length === 0 ? (
+                  <Text size={200}>Nenhuma OS neste dia.</Text>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {calendarItems.map((os) => (
+                      <OSDetailPanel
+                        key={os.id}
+                        os={os}
+                        comentarios={comentariosPorOs.get(os.id) ?? []}
+                        onDefinirData={definirDataPrevista}
+                        onConfirmarData={confirmarData}
+                        onRegistrarTentativa={registrarTentativa}
+                        onMarcarSemResposta={marcarSemResposta}
+                        onClienteRetornou={clienteRetornou}
+                      />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <OSDetailPanel
+                  os={selectedOS}
+                  comentarios={selectedComentarios}
+                  onDefinirData={definirDataPrevista}
+                  onConfirmarData={confirmarData}
+                  onRegistrarTentativa={registrarTentativa}
+                  onMarcarSemResposta={marcarSemResposta}
+                  onClienteRetornou={clienteRetornou}
+                />
+              )}
             </div>
           </div>
         </div>
