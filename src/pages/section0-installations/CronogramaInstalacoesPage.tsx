@@ -9,6 +9,7 @@ import { PendentesTab } from '../../components/domain/cronograma-instalacoes/Pen
 import { SemRespostaTab } from '../../components/domain/cronograma-instalacoes/SemRespostaTab';
 import { CalendarioTab } from '../../components/domain/cronograma-instalacoes/CalendarioTab';
 import { OSDetailPanel } from '../../components/domain/cronograma-instalacoes/OSDetailPanel';
+import { OSCard } from '../../components/domain/cronograma-instalacoes/OSCard';
 import { useCronogramaInstalacoes } from '../../hooks/useCronogramaInstalacoes';
 import { SEARCH_PLACEHOLDER } from '../../features/cronograma-instalacoes/constants';
 import type { TipoServicoFiltro } from '../../features/cronograma-instalacoes/types';
@@ -170,11 +171,16 @@ export function CronogramaInstalacoesPage() {
                     {calendarItems.length === 0 ? (
                       <Text size={200}>Nenhuma OS neste dia.</Text>
                     ) : (
-                      calendarItems.map((os) => (
-                        <Text key={os.id} size={200}>
-                          {os.projetoapelido} · {os.tipodeservico}
-                        </Text>
-                      ))
+                      <div className="flex flex-col gap-2">
+                        {calendarItems.map((os) => (
+                          <OSCard
+                            key={os.id}
+                            os={os}
+                            onClick={() => setSelectedOsId(os.id)}
+                            isSelected={selectedOsId === os.id}
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -183,24 +189,15 @@ export function CronogramaInstalacoesPage() {
 
             <div className="flex-[35] min-w-[350px] overflow-auto">
               {selectedTab === 'calendario' ? (
-                calendarItems.length === 0 ? (
-                  <Text size={200}>Nenhuma OS neste dia.</Text>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {calendarItems.map((os) => (
-                      <OSDetailPanel
-                        key={os.id}
-                        os={os}
-                        comentarios={comentariosPorOs.get(os.id) ?? []}
-                        onDefinirData={definirDataPrevista}
-                        onConfirmarData={confirmarData}
-                        onRegistrarTentativa={registrarTentativa}
-                        onMarcarSemResposta={marcarSemResposta}
-                        onClienteRetornou={clienteRetornou}
-                      />
-                    ))}
-                  </div>
-                )
+                <OSDetailPanel
+                  os={selectedOS}
+                  comentarios={selectedComentarios}
+                  onDefinirData={definirDataPrevista}
+                  onConfirmarData={confirmarData}
+                  onRegistrarTentativa={registrarTentativa}
+                  onMarcarSemResposta={marcarSemResposta}
+                  onClienteRetornou={clienteRetornou}
+                />
               ) : (
                 <OSDetailPanel
                   os={selectedOS}
