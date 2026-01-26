@@ -7,6 +7,7 @@ interface MonthCardProps {
   ano: number;
   stats: MonthStats;
   onClick: () => void;
+  isSelected?: boolean;
 }
 
 const MONTH_NAMES = [
@@ -24,7 +25,7 @@ const MONTH_NAMES = [
   'Dezembro',
 ];
 
-export function MonthCard({ mes, ano, stats, onClick }: MonthCardProps) {
+export function MonthCard({ mes, ano, stats, onClick, isSelected }: MonthCardProps) {
   const hasSemResposta = stats.porStatus.semResposta > 0;
 
   return (
@@ -35,8 +36,8 @@ export function MonthCard({ mes, ano, stats, onClick }: MonthCardProps) {
       style={{
         padding: '16px',
         borderRadius: '12px',
-        border: `1px solid ${tokens.colorNeutralStroke2}`,
-        backgroundColor: tokens.colorNeutralBackground1,
+        border: `1px solid ${isSelected ? tokens.colorBrandStroke1 : tokens.colorNeutralStroke2}`,
+        backgroundColor: isSelected ? tokens.colorBrandBackground2 : tokens.colorNeutralBackground1,
       }}
     >
       <div className="flex items-baseline justify-between gap-3">

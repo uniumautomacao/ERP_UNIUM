@@ -165,7 +165,12 @@ export function CronogramaInstalacoesPage() {
                 <SemRespostaTab itens={semResposta} selectedId={selectedOsId} onSelect={setSelectedOsId} />
               )}
               {selectedTab === 'visao-anual' && (
-                <VisaoAnualTab itens={calendarioAnoItens} ano={ano} onSelectMonth={handleSelectMonth} />
+                <VisaoAnualTab
+                  itens={calendarioAnoItens}
+                  ano={ano}
+                  onSelectMonth={handleSelectMonth}
+                  selectedMonth={selectedAnnualMonth}
+                />
               )}
               {selectedTab === 'calendario' && (
                 <div className="flex flex-col gap-4">
