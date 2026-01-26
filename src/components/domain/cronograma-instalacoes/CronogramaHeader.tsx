@@ -40,7 +40,7 @@ export function CronogramaHeader({
         style={{ width: '120px' }}
       >
         {anos.map((ano) => (
-          <Option key={ano} value={String(ano)}>
+          <Option key={ano} value={String(ano)} text={String(ano)}>
             {ano}
           </Option>
         ))}

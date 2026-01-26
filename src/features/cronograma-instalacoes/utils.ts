@@ -169,7 +169,8 @@ export const agruparPendentes = (items: CronogramaOS[]): Record<StatusProgramaca
     grupos[os.statusdaprogramacao].push(os);
   });
 
-  (Object.keys(grupos) as Array<StatusProgramacao>).forEach((status) => {
+    Object.keys(grupos).forEach((statusKey) => {
+    const status = Number(statusKey) as StatusProgramacao;
     grupos[status] = ordenarPendentes(grupos[status]);
   });
 
