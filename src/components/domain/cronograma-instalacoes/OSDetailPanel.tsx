@@ -9,9 +9,22 @@ import { HistoricoComentarios } from './HistoricoComentarios';
 interface OSDetailPanelProps {
   os: CronogramaOS | null;
   comentarios: ComentarioOS[];
+  onDefinirData?: (os: CronogramaOS, data: string, comentario: string) => Promise<void>;
+  onConfirmarData?: (os: CronogramaOS, comentario: string, manterData: boolean, novaData?: string) => Promise<void>;
+  onRegistrarTentativa?: (os: CronogramaOS, comentario: string) => Promise<void>;
+  onMarcarSemResposta?: (os: CronogramaOS) => Promise<void>;
+  onClienteRetornou?: (os: CronogramaOS) => Promise<void>;
 }
 
-export function OSDetailPanel({ os, comentarios }: OSDetailPanelProps) {
+export function OSDetailPanel({
+  os,
+  comentarios,
+  onDefinirData,
+  onConfirmarData,
+  onRegistrarTentativa,
+  onMarcarSemResposta,
+  onClienteRetornou,
+}: OSDetailPanelProps) {
   if (!os) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -37,7 +50,7 @@ export function OSDetailPanel({ os, comentarios }: OSDetailPanelProps) {
           {os.name}
         </Text>
         <div className="mt-2 flex flex-col gap-1">
-          <Text size={200}>Projeto: {os.projetoapelido}</Text>
+          <Text size={200}>Projeto: {os.projetoapelido || os.cliente}</Text>
           <Text size={200}>Cliente: {os.cliente}</Text>
           <Text size={200}>Serviço: {os.tipodeservico}</Text>
           <Text size={200}>Sistemas: {os.tiposdesistematexto ?? '-'}</Text>
@@ -76,7 +89,16 @@ export function OSDetailPanel({ os, comentarios }: OSDetailPanelProps) {
           backgroundColor: tokens.colorNeutralBackground1,
         }}
       >
-        <ActionForm os={os} />
+        <ActionForm
+          os={os}
+          onSalvarPrevisao={(data, comentario) => onDefinirData?.(os, data, comentario)}
+          onConfirmarData={(comentario, manterData, novaData) =>
+            onConfirmarData?.(os, comentario, manterData, novaData)
+          }
+          onRegistrarTentativa={(comentario) => onRegistrarTentativa?.(os, comentario)}
+          onClienteRetornou={() => onClienteRetornou?.(os)}
+          onMarcarSemResposta={() => onMarcarSemResposta?.(os)}
+        />
       </div>
 
       <div>

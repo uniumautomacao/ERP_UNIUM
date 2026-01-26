@@ -1,6 +1,6 @@
 import { Text, tokens } from '@fluentui/react-components';
 import type { CronogramaOS } from '../../../features/cronograma-instalacoes/types';
-import { SERVICE_COLORS } from '../../../features/cronograma-instalacoes/constants';
+import { SERVICE_COLORS, STATUS_PROGRAMACAO } from '../../../features/cronograma-instalacoes/constants';
 import { formatDateShort, getDiasDesdeCriacao, getDiasRestantes } from '../../../features/cronograma-instalacoes/utils';
 
 interface OSCardProps {
@@ -23,15 +23,26 @@ const buildRestanteLabel = (os: CronogramaOS) => {
 
 const getConfirmacaoLabels = (os: CronogramaOS) => {
   const labels: Array<{ key: '60d' | '30d' | '15d'; label: string; done: boolean }> = [];
-  if (os.statusdaprogramacao === 1) return labels;
+  const status = os.statusdaprogramacao;
+  if (status === STATUS_PROGRAMACAO.AguardandoPrimeiroContato) return labels;
 
   labels.push({ key: '60d', label: 'Conf. 60d', done: Boolean(os.confirmacao60d) });
 
-  if (os.statusdaprogramacao >= 5) {
+  if (
+    status === STATUS_PROGRAMACAO.PendenteReconfirmacao30d ||
+    status === STATUS_PROGRAMACAO.Confirmado30d ||
+    status === STATUS_PROGRAMACAO.PendenteReconfirmacao15d ||
+    status === STATUS_PROGRAMACAO.Confirmado15d ||
+    status === STATUS_PROGRAMACAO.ProntoParaAgendar
+  ) {
     labels.push({ key: '30d', label: 'Conf. 30d', done: Boolean(os.confirmacao30d) });
   }
 
-  if (os.statusdaprogramacao >= 7) {
+  if (
+    status === STATUS_PROGRAMACAO.PendenteReconfirmacao15d ||
+    status === STATUS_PROGRAMACAO.Confirmado15d ||
+    status === STATUS_PROGRAMACAO.ProntoParaAgendar
+  ) {
     labels.push({ key: '15d', label: 'Conf. 15d', done: Boolean(os.confirmacao15d) });
   }
 
@@ -56,9 +67,14 @@ export function OSCard({ os, onClick, isSelected }: OSCardProps) {
         transition: 'border-color 0.2s ease',
       }}
     >
-      <Text size={300} weight="semibold">
-        {os.projetoapelido}
-      </Text>
+      <div className="flex items-baseline justify-between gap-2">
+        <Text size={300} weight="semibold">
+          {os.projetoapelido || os.cliente}
+        </Text>
+        <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+          {os.name}
+        </Text>
+      </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <span

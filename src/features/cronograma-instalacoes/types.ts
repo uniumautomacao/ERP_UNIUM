@@ -1,23 +1,31 @@
 export type TipoServicoFiltro = 'todos' | 'cabeamento' | 'instalacao';
 
 export type StatusProgramacao =
-  | 1
-  | 2
-  | 3
-  | 4
-  | 5
-  | 6
-  | 7
-  | 8
-  | 9
-  | 10;
+  | 100000000
+  | 100000001
+  | 100000002
+  | 100000003
+  | 100000004
+  | 100000005
+  | 100000006
+  | 100000007
+  | 100000008
+  | 100000009;
 
-export type TipoComentario = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type TipoComentario =
+  | 100000000
+  | 100000001
+  | 100000002
+  | 100000003
+  | 100000004
+  | 100000005
+  | 100000006
+  | 100000007;
 
 export interface CronogramaOS {
   id: string;
   name: string;
-  projetoapelido: string;
+  projetoapelido: string | null;
   cliente: string;
   tipodeservico: 'Instalação' | 'Cabeamento';
   tiposdesistematexto?: string | null;

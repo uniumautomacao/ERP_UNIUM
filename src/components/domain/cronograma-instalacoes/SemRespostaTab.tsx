@@ -37,9 +37,14 @@ export function SemRespostaTab({ itens, selectedId, onSelect }: SemRespostaTabPr
               backgroundColor: selectedId === os.id ? tokens.colorBrandBackground2 : tokens.colorNeutralBackground1,
             }}
           >
-            <Text size={300} weight="semibold">
-              {os.projetoapelido}
-            </Text>
+            <div className="flex items-baseline justify-between gap-2">
+              <Text size={300} weight="semibold">
+                {os.projetoapelido || os.cliente}
+              </Text>
+              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                {os.name}
+              </Text>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <span
                 style={{

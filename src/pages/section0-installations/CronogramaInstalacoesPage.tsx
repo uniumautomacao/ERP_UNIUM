@@ -25,8 +25,24 @@ export function CronogramaInstalacoesPage() {
   const [calendarMonth, setCalendarMonth] = useState<number>(new Date().getMonth());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
-  const { itens, pendentes, semResposta, comentariosPorOs, anosDisponiveis } = useCronogramaInstalacoes({
+  const {
+    itens,
+    pendentes,
+    semResposta,
+    calendarioItens,
+    comentariosPorOs,
+    anosDisponiveis,
+    loading,
+    error,
+    carregarComentarios,
+    definirDataPrevista,
+    confirmarData,
+    registrarTentativa,
+    marcarSemResposta,
+    clienteRetornou,
+  } = useCronogramaInstalacoes({
     ano,
+    mes: calendarMonth,
     tipoServico,
     searchTerm,
   });
@@ -50,14 +66,20 @@ export function CronogramaInstalacoesPage() {
   const calendarItems = useMemo(() => {
     if (!selectedDate) return [];
     const key = selectedDate.toISOString().slice(0, 10);
-    return itens.filter((os) => os.datadaproximaatividade?.startsWith(key));
-  }, [itens, selectedDate]);
+    return calendarioItens.filter((os) => os.datadaproximaatividade?.startsWith(key));
+  }, [calendarioItens, selectedDate]);
 
   useEffect(() => {
     if (!selectedOS && itens.length > 0) {
       setSelectedOsId(itens[0].id);
     }
   }, [itens, selectedOS]);
+
+  useEffect(() => {
+    if (selectedOS) {
+      carregarComentarios(selectedOS.id);
+    }
+  }, [carregarComentarios, selectedOS]);
 
   useEffect(() => {
     if (selectedTab !== 'calendario') return;
@@ -95,6 +117,14 @@ export function CronogramaInstalacoesPage() {
 
           <div className="flex flex-1 min-h-0 gap-4">
             <div className="flex-[65] min-w-[500px] overflow-auto">
+              {loading && (
+                <Text size={200}>Carregando dados...</Text>
+              )}
+              {error && (
+                <Text size={200} style={{ color: '#b91c1c' }}>
+                  {error}
+                </Text>
+              )}
               {selectedTab === 'pendentes' && (
                 <PendentesTab grupos={pendentes} selectedId={selectedOsId} onSelect={setSelectedOsId} />
               )}
@@ -104,14 +134,14 @@ export function CronogramaInstalacoesPage() {
               {selectedTab === 'calendario' && (
                 <div className="flex flex-col gap-4">
                   <CalendarioTab
-                    itens={itens}
+                    itens={calendarioItens}
                     ano={ano}
                     mes={calendarMonth}
                     onMesChange={setCalendarMonth}
                     selectedDate={selectedDate}
                     onSelectDate={(date) => {
                       setSelectedDate(date);
-                      const itemForDay = itens.find((os) => {
+                      const itemForDay = calendarioItens.find((os) => {
                         const osDate = parseDate(os.datadaproximaatividade);
                         return (
                           osDate &&
@@ -143,7 +173,15 @@ export function CronogramaInstalacoesPage() {
             </div>
 
             <div className="flex-[35] min-w-[350px] overflow-auto">
-              <OSDetailPanel os={selectedOS} comentarios={selectedComentarios} />
+              <OSDetailPanel
+                os={selectedOS}
+                comentarios={selectedComentarios}
+                onDefinirData={definirDataPrevista}
+                onConfirmarData={confirmarData}
+                onRegistrarTentativa={registrarTentativa}
+                onMarcarSemResposta={marcarSemResposta}
+                onClienteRetornou={clienteRetornou}
+              />
             </div>
           </div>
         </div>

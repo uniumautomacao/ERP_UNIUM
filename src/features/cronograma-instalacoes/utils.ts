@@ -1,5 +1,5 @@
 import type { CronogramaOS, StatusProgramacao, TipoServicoFiltro } from './types';
-import { PENDENTES_STATUS } from './constants';
+import { PENDENTES_STATUS, STATUS_PROGRAMACAO } from './constants';
 
 export const parseDate = (value?: string | null): Date | null => {
   if (!value) return null;
@@ -71,15 +71,23 @@ export const getDiasDesdeData = (data?: string | null, hoje = new Date()): numbe
 export const calcularStatus = (os: CronogramaOS, hoje = new Date()): StatusProgramacao => {
   const dataPrevista = parseDate(os.datadaproximaatividade);
   if (!dataPrevista) {
-    return os.statusdaprogramacao === 10 ? 10 : 1;
+    return os.statusdaprogramacao === STATUS_PROGRAMACAO.SemResposta
+      ? STATUS_PROGRAMACAO.SemResposta
+      : STATUS_PROGRAMACAO.AguardandoPrimeiroContato;
   }
 
   const diasRestantes = differenceInDays(hoje, dataPrevista);
-  if (diasRestantes > 60) return 2;
-  if (diasRestantes > 45) return os.confirmacao60d ? 4 : 3;
-  if (diasRestantes > 20) return os.confirmacao30d ? 6 : 5;
-  if (diasRestantes > 7) return os.confirmacao15d ? 8 : 7;
-  return 9;
+  if (diasRestantes > 60) return STATUS_PROGRAMACAO.Programado;
+  if (diasRestantes > 45) {
+    return os.confirmacao60d ? STATUS_PROGRAMACAO.Confirmado60d : STATUS_PROGRAMACAO.PendenteReconfirmacao60d;
+  }
+  if (diasRestantes > 20) {
+    return os.confirmacao30d ? STATUS_PROGRAMACAO.Confirmado30d : STATUS_PROGRAMACAO.PendenteReconfirmacao30d;
+  }
+  if (diasRestantes > 7) {
+    return os.confirmacao15d ? STATUS_PROGRAMACAO.Confirmado15d : STATUS_PROGRAMACAO.PendenteReconfirmacao15d;
+  }
+  return STATUS_PROGRAMACAO.ProntoParaAgendar;
 };
 
 export const filtrarPorAno = (os: CronogramaOS, ano: number): boolean => {
@@ -104,8 +112,16 @@ export const filtrarPorBusca = (os: CronogramaOS, term: string): boolean => {
 
 export const ordenarPendentes = (items: CronogramaOS[]): CronogramaOS[] => {
   return [...items].sort((a, b) => {
-    if (a.statusdaprogramacao === 1 && b.statusdaprogramacao !== 1) return -1;
-    if (b.statusdaprogramacao === 1 && a.statusdaprogramacao !== 1) return 1;
+    if (
+      a.statusdaprogramacao === STATUS_PROGRAMACAO.AguardandoPrimeiroContato &&
+      b.statusdaprogramacao !== STATUS_PROGRAMACAO.AguardandoPrimeiroContato
+    )
+      return -1;
+    if (
+      b.statusdaprogramacao === STATUS_PROGRAMACAO.AguardandoPrimeiroContato &&
+      a.statusdaprogramacao !== STATUS_PROGRAMACAO.AguardandoPrimeiroContato
+    )
+      return 1;
 
     const dateA = parseDate(a.datadaproximaatividade);
     const dateB = parseDate(b.datadaproximaatividade);
@@ -131,16 +147,16 @@ export const isPendencia = (status: StatusProgramacao): boolean => PENDENTES_STA
 
 export const agruparPendentes = (items: CronogramaOS[]): Record<StatusProgramacao, CronogramaOS[]> => {
   const grupos: Record<StatusProgramacao, CronogramaOS[]> = {
-    1: [],
-    2: [],
-    3: [],
-    4: [],
-    5: [],
-    6: [],
-    7: [],
-    8: [],
-    9: [],
-    10: [],
+    100000000: [],
+    100000001: [],
+    100000002: [],
+    100000003: [],
+    100000004: [],
+    100000005: [],
+    100000006: [],
+    100000007: [],
+    100000008: [],
+    100000009: [],
   };
 
   items.forEach((os) => {

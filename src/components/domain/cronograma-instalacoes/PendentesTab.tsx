@@ -13,16 +13,16 @@ interface PendentesTabProps {
 
 export function PendentesTab({ grupos, selectedId, onSelect }: PendentesTabProps) {
   const [collapsed, setCollapsed] = useState<Record<StatusProgramacao, boolean>>({
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-    5: false,
-    6: false,
-    7: false,
-    8: false,
-    9: false,
-    10: false,
+    100000000: false,
+    100000001: false,
+    100000002: false,
+    100000003: false,
+    100000004: false,
+    100000005: false,
+    100000006: false,
+    100000007: false,
+    100000008: false,
+    100000009: false,
   });
 
   return (
