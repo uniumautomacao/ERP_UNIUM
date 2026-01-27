@@ -1168,7 +1168,11 @@ export function ContagemEstoqueGestaoPage() {
               Sem dados para o período selecionado.
             </Text>
           ) : (
-            <BarChart data={dashboardChartData} dataKey="value" />
+            <BarChart
+              data={dashboardChartData}
+              dataKey="value"
+              valueFormatter={(value) => `${new Intl.NumberFormat('pt-BR').format(value)} un`}
+            />
           )}
         </div>
       </Card>
