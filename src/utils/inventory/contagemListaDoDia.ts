@@ -55,3 +55,10 @@ export const buildDayRange = (now: Date) => {
 };
 
 export const toDateOnlyString = (date: Date) => date.toISOString().slice(0, 10);
+
+export const toDateOnlyKey = (value?: string | null) => (value ? value.slice(0, 10) : '');
+
+export const buildUtcDayRangeFromDateKey = (dateKey: string) => ({
+  start: `${dateKey}T00:00:00.000Z`,
+  end: `${dateKey}T23:59:59.999Z`,
+});

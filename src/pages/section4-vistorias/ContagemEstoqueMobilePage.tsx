@@ -57,6 +57,7 @@ import {
   buildListaDoDiaFilter,
   DEFAULT_CONTAGEM_THRESHOLDS,
   toDateOnlyString,
+  buildUtcDayRangeFromDateKey,
 } from '../../utils/inventory/contagemListaDoDia';
 
 type ViewState = 'home' | 'scanner' | 'form' | 'list' | 'success';
@@ -449,10 +450,8 @@ export function ContagemEstoqueMobilePage() {
   }, [loadContagensHoje, systemUserId]);
 
 
-  const loadListaDoDia = useCallback(async (search?: string, onlyPending?: boolean) => {
-    setListaLoading(true);
-    setListaError(null);
-    try {
+  const fetchListaDoDiaItems = useCallback(
+    async (search?: string, onlyPending?: boolean, thresholdsOverride?: typeof DEFAULT_CONTAGEM_THRESHOLDS) => {
       const now = new Date();
       const todayStart = new Date(now);
       todayStart.setHours(0, 0, 0, 0);
@@ -460,7 +459,8 @@ export function ContagemEstoqueMobilePage() {
       todayEnd.setHours(23, 59, 59, 999);
       const todayStartISO = todayStart.toISOString();
       const todayEndISO = todayEnd.toISOString();
-      const baseFilter = "statecode eq 0 and new_tagconfirmadabool eq true and cr22f_status ne 'Entregue' and new_separado ne true";
+      const baseFilter =
+        "statecode eq 0 and new_tagconfirmadabool eq true and cr22f_status ne 'Entregue' and new_separado ne true";
 
       const select = [
         'cr22f_estoquefromsharepointlistid',
@@ -479,28 +479,25 @@ export function ContagemEstoqueMobilePage() {
         'new_datadaultimaleitura',
       ];
 
-      const countedTodayFilter = `${baseFilter} and new_ultimacontagem ge ${todayStartISO} and new_ultimacontagem le ${todayEndISO}${buildSearchClause(search)}`;
-      const pendingFilter = buildListaDoDiaFilter(now, thresholds, search);
+      const thresholdsToUse = thresholdsOverride ?? thresholds;
+      const countedTodayFilter = `${baseFilter} and new_ultimacontagem ge ${todayStartISO} and new_ultimacontagem le ${todayEndISO}${buildSearchClause(
+        search
+      )}`;
+      const pendingFilter = buildListaDoDiaFilter(now, thresholdsToUse, search);
 
       const countedTodayPromise = onlyPending
         ? Promise.resolve({ data: [] })
         : Cr22fEstoqueFromSharepointListService.getAll({
-          filter: countedTodayFilter,
-          select,
-          orderBy: ['new_ultimacontagem desc'],
-          top: MAX_LISTA_ITENS,
-        });
+            filter: countedTodayFilter,
+            select,
+            orderBy: ['new_ultimacontagem desc'],
+            top: MAX_LISTA_ITENS,
+          });
 
       const pendingPromise = Cr22fEstoqueFromSharepointListService.getAll({
         filter: pendingFilter,
         select,
-        orderBy: [
-          'new_ultimacontagem asc',
-          'new_deposito asc',
-          'new_rua asc',
-          'new_estante asc',
-          'new_prateleira asc',
-        ],
+        orderBy: ['new_ultimacontagem asc', 'new_deposito asc', 'new_rua asc', 'new_estante asc', 'new_prateleira asc'],
         top: MAX_LISTA_ITENS,
       });
 
@@ -526,14 +523,27 @@ export function ContagemEstoqueMobilePage() {
       }
       pushItems(pendingItems);
 
-      setListaDoDia(merged);
-    } catch (err: any) {
-      console.error('[ContagemEstoque] erro ao carregar lista do dia:', err);
-      setListaError(err.message || 'Erro ao carregar lista do dia.');
-    } finally {
-      setListaLoading(false);
-    }
-  }, [thresholds]);
+      return merged;
+    },
+    [thresholds]
+  );
+
+  const loadListaDoDia = useCallback(
+    async (search?: string, onlyPending?: boolean) => {
+      setListaLoading(true);
+      setListaError(null);
+      try {
+        const merged = await fetchListaDoDiaItems(search, onlyPending);
+        setListaDoDia(merged);
+      } catch (err: any) {
+        console.error('[ContagemEstoque] erro ao carregar lista do dia:', err);
+        setListaError(err.message || 'Erro ao carregar lista do dia.');
+      } finally {
+        setListaLoading(false);
+      }
+    },
+    [fetchListaDoDiaItems]
+  );
 
   const ensureDailySnapshot = useCallback(async (): Promise<SnapshotInfo | null> => {
     if (!systemUserId || snapshotLoading || isCreatingSnapshotRef.current) return snapshotInfoRef.current;
@@ -551,8 +561,8 @@ export function ContagemEstoqueMobilePage() {
     try {
       const activeThresholds = await loadThresholds();
       
-      // 1. Verificar se já existe snapshot para hoje (usando range para garantir)
-      const { start, end } = buildDayRange(now);
+      // 1. Verificar se já existe snapshot para hoje (usando range UTC baseado no dateKey)
+      const { start, end } = buildUtcDayRangeFromDateKey(dateKey);
       const existing = await NewContagemDoDiaService.getAll({
         filter: `statecode eq 0 and new_data ge ${start} and new_data le ${end} and _new_usuario_value eq '${systemUserId}'`,
         select: ['new_contagemdodiaid', 'new_esperados', 'new_contados'],
@@ -572,37 +582,7 @@ export function ContagemEstoqueMobilePage() {
       }
 
       // 2. Se não existe, vamos criar baseando-se na mesma lógica da "Lista do Dia"
-      const select = [
-        'cr22f_estoquefromsharepointlistid',
-        'new_referenciadoproduto',
-        'cr22f_title',
-        'cr22f_querytag',
-        'new_ultimacontagem',
-        'new_classecriticidade',
-        'new_quantidade',
-        'new_endereco',
-        'new_depositotexto',
-        'new_ruatexto',
-        'new_estantetexto',
-        'new_prateleiratexto',
-        'new_etiquetaemtextocalculated',
-        'new_datadaultimaleitura',
-      ];
-
-      // Lógica idêntica ao loadListaDoDia: Pendentes + Contados Hoje
-      const pendingFilter = buildListaDoDiaFilter(now, activeThresholds);
-      const countedTodayFilter = `statecode eq 0 and new_tagconfirmadabool eq true and cr22f_status ne 'Entregue' and new_separado ne true and new_ultimacontagem ge ${start} and new_ultimacontagem le ${end}`;
-
-      const [pendingRes, countedRes] = await Promise.all([
-        Cr22fEstoqueFromSharepointListService.getAll({ filter: pendingFilter, select, top: 1000 }),
-        Cr22fEstoqueFromSharepointListService.getAll({ filter: countedTodayFilter, select, top: 1000 })
-      ]);
-
-      const mergedMap = new Map<string, EstoqueItem>();
-      (pendingRes.data ?? []).forEach(item => mergedMap.set(item.cr22f_estoquefromsharepointlistid, item as EstoqueItem));
-      (countedRes.data ?? []).forEach(item => mergedMap.set(item.cr22f_estoquefromsharepointlistid, item as EstoqueItem));
-
-      const expectedList = Array.from(mergedMap.values());
+      const expectedList = await fetchListaDoDiaItems(undefined, false, activeThresholds);
       
       // 3. Buscar quais desses já possuem registro de contagem hoje (Rotina)
       const contagensResult = await NewContagemEstoqueService.getAll({
@@ -629,7 +609,7 @@ export function ContagemEstoqueMobilePage() {
 
       // 4. Criar Cabeçalho
       const snapshotResult = await NewContagemDoDiaService.create({
-        new_data: dateKey,
+        new_data: start,
         new_esperados: esperados,
         new_contados: contados,
         new_percentual: percentual,
@@ -678,7 +658,7 @@ export function ContagemEstoqueMobilePage() {
       setSnapshotLoading(false);
       isCreatingSnapshotRef.current = false;
     }
-  }, [loadThresholds, systemUserId]);
+  }, [fetchListaDoDiaItems, loadThresholds, systemUserId]);
 
   const updateSnapshotForCount = useCallback(
     async (itemId: string, contagemId?: string) => {

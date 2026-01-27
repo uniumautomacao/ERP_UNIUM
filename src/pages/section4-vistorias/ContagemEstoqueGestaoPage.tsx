@@ -30,6 +30,7 @@ import {
   SystemusersService,
 } from '../../generated';
 import type { ChartDataPoint } from '../../types';
+import { buildUtcDayRangeFromDateKey, toDateOnlyKey } from '../../utils/inventory/contagemListaDoDia';
 
 type ContagemRecord = {
   new_contagemestoqueid: string;
@@ -601,10 +602,10 @@ export function ContagemEstoqueGestaoPage() {
     setAderenciaLoading(true);
     setAderenciaError(null);
     try {
-      const start = aderenciaStart;
-      const end = aderenciaEnd;
+      const startRange = buildUtcDayRangeFromDateKey(aderenciaStart);
+      const endRange = buildUtcDayRangeFromDateKey(aderenciaEnd);
       const result = await NewContagemDoDiaService.getAll({
-        filter: `statecode eq 0 and new_data ge ${start} and new_data le ${end}`,
+        filter: `statecode eq 0 and new_data ge ${startRange.start} and new_data le ${endRange.end}`,
         orderBy: ['new_data desc'],
         select: [
           'new_contagemdodiaid',
@@ -629,7 +630,8 @@ export function ContagemEstoqueGestaoPage() {
       const chartData = [...items]
         .sort((a, b) => (a.new_data || '').localeCompare(b.new_data || ''))
         .map((item) => {
-          const date = item.new_data ? new Date(`${item.new_data}T00:00:00`) : new Date();
+          const dateKey = toDateOnlyKey(item.new_data);
+          const date = dateKey ? new Date(`${dateKey}T00:00:00`) : new Date();
           const esperados = item.new_esperados ?? 0;
           const contados = item.new_contados ?? 0;
           const percentual =
@@ -727,7 +729,10 @@ export function ContagemEstoqueGestaoPage() {
         columnId: 'data',
         renderHeaderCell: () => 'Data',
         renderCell: (item) =>
-          item.new_data ? new Date(`${item.new_data}T00:00:00`).toLocaleDateString('pt-BR') : '---',
+          (() => {
+            const dateKey = toDateOnlyKey(item.new_data);
+            return dateKey ? new Date(`${dateKey}T00:00:00`).toLocaleDateString('pt-BR') : '---';
+          })(),
       }),
       createTableColumn<ContagemDiaRecord>({
         columnId: 'esperados',
@@ -1572,9 +1577,10 @@ export function ContagemEstoqueGestaoPage() {
                 <Card key={item.new_contagemdodiaid}>
                   <div className="flex flex-col gap-2 p-3">
                     <Text weight="semibold">
-                      {item.new_data
-                        ? new Date(`${item.new_data}T00:00:00`).toLocaleDateString('pt-BR')
-                        : '---'}
+                      {(() => {
+                        const dateKey = toDateOnlyKey(item.new_data);
+                        return dateKey ? new Date(`${dateKey}T00:00:00`).toLocaleDateString('pt-BR') : '---';
+                      })()}
                     </Text>
                     <Text size={200}>
                       Esperados: {esperados} | Contados: {contados}
@@ -1599,9 +1605,10 @@ export function ContagemEstoqueGestaoPage() {
             <div className="flex items-center justify-between">
               <Text weight="semibold">
                 Faltantes em{' '}
-                {aderenciaSelected.new_data
-                  ? new Date(`${aderenciaSelected.new_data}T00:00:00`).toLocaleDateString('pt-BR')
-                  : '---'}
+                {(() => {
+                  const dateKey = toDateOnlyKey(aderenciaSelected.new_data);
+                  return dateKey ? new Date(`${dateKey}T00:00:00`).toLocaleDateString('pt-BR') : '---';
+                })()}
               </Text>
               <Button appearance="secondary" onClick={exportAderenciaCsv} disabled={aderenciaItens.length === 0}>
                 Exportar CSV
