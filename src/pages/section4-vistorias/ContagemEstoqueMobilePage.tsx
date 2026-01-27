@@ -350,6 +350,7 @@ export function ContagemEstoqueMobilePage() {
   const [snapshotInfo, setSnapshotInfo] = useState<SnapshotInfo | null>(null);
   const snapshotInfoRef = useRef<SnapshotInfo | null>(null);
   const [snapshotLoading, setSnapshotLoading] = useState(false);
+  const isCreatingSnapshotRef = useRef(false);
 
   const [searchText, setSearchText] = useState('');
   const [openItems, setOpenItems] = useState<string[]>([]);
@@ -535,21 +536,29 @@ export function ContagemEstoqueMobilePage() {
   }, [thresholds]);
 
   const ensureDailySnapshot = useCallback(async (): Promise<SnapshotInfo | null> => {
-    if (!systemUserId || snapshotLoading) return snapshotInfoRef.current;
+    if (!systemUserId || snapshotLoading || isCreatingSnapshotRef.current) return snapshotInfoRef.current;
+    
     const now = new Date();
     const dateKey = toDateOnlyString(now);
+    
+    // Check if already in state for today
     if (snapshotInfoRef.current?.dateKey === dateKey && snapshotInfoRef.current?.id) {
       return snapshotInfoRef.current;
     }
 
+    isCreatingSnapshotRef.current = true;
     setSnapshotLoading(true);
     try {
       const activeThresholds = await loadThresholds();
+      
+      // 1. Verificar se já existe snapshot para hoje (usando range para garantir)
+      const { start, end } = buildDayRange(now);
       const existing = await NewContagemDoDiaService.getAll({
-        filter: `statecode eq 0 and new_data eq ${dateKey} and _new_usuario_value eq '${systemUserId}'`,
+        filter: `statecode eq 0 and new_data ge ${start} and new_data le ${end} and _new_usuario_value eq '${systemUserId}'`,
         select: ['new_contagemdodiaid', 'new_esperados', 'new_contados'],
         top: 1,
       });
+      
       const existingRecord = (existing.data ?? [])[0] as any;
       if (existingRecord?.new_contagemdodiaid) {
         const info: SnapshotInfo = {
@@ -562,6 +571,7 @@ export function ContagemEstoqueMobilePage() {
         return info;
       }
 
+      // 2. Se não existe, vamos criar baseando-se na mesma lógica da "Lista do Dia"
       const select = [
         'cr22f_estoquefromsharepointlistid',
         'new_referenciadoproduto',
@@ -579,72 +589,45 @@ export function ContagemEstoqueMobilePage() {
         'new_datadaultimaleitura',
       ];
 
+      // Lógica idêntica ao loadListaDoDia: Pendentes + Contados Hoje
       const pendingFilter = buildListaDoDiaFilter(now, activeThresholds);
-      const expectedItems: EstoqueItem[] = [];
-      let skipToken: string | null = null;
-      do {
-        const result = await Cr22fEstoqueFromSharepointListService.getAll({
-          filter: pendingFilter,
-          select,
-          orderBy: ['new_ultimacontagem asc'],
-          top: 500,
-          ...(skipToken ? { skipToken } : {}),
-        });
-        expectedItems.push(...((result.data ?? []) as EstoqueItem[]));
-        skipToken = extractNextSkipToken(result);
-      } while (skipToken);
+      const countedTodayFilter = `statecode eq 0 and new_tagconfirmadabool eq true and cr22f_status ne 'Entregue' and new_separado ne true and new_ultimacontagem ge ${start} and new_ultimacontagem le ${end}`;
 
-      const { start, end } = buildDayRange(now);
+      const [pendingRes, countedRes] = await Promise.all([
+        Cr22fEstoqueFromSharepointListService.getAll({ filter: pendingFilter, select, top: 1000 }),
+        Cr22fEstoqueFromSharepointListService.getAll({ filter: countedTodayFilter, select, top: 1000 })
+      ]);
+
+      const mergedMap = new Map<string, EstoqueItem>();
+      (pendingRes.data ?? []).forEach(item => mergedMap.set(item.cr22f_estoquefromsharepointlistid, item as EstoqueItem));
+      (countedRes.data ?? []).forEach(item => mergedMap.set(item.cr22f_estoquefromsharepointlistid, item as EstoqueItem));
+
+      const expectedList = Array.from(mergedMap.values());
+      
+      // 3. Buscar quais desses já possuem registro de contagem hoje (Rotina)
       const contagensResult = await NewContagemEstoqueService.getAll({
         filter: `new_datacontagem ge ${start} and new_datacontagem le ${end} and _new_usuario_value eq '${systemUserId}' and new_tipocontagem eq ${TIPO_CONTAGEM.Rotina}`,
         select: ['new_contagemestoqueid', '_new_itemestoque_value'],
-        top: 500,
+        top: 1000,
       });
+      
       const contagensHoje = (contagensResult.data ?? []) as Array<{
         new_contagemestoqueid?: string;
         _new_itemestoque_value?: string;
       }>;
 
-      const contadosSet = new Set<string>();
       const contagemPorItem = new Map<string, string>();
-      contagensHoje.forEach((item) => {
-        if (item._new_itemestoque_value) {
-          contadosSet.add(item._new_itemestoque_value);
-          if (item.new_contagemestoqueid && !contagemPorItem.has(item._new_itemestoque_value)) {
-            contagemPorItem.set(item._new_itemestoque_value, item.new_contagemestoqueid);
-          }
+      contagensHoje.forEach((c) => {
+        if (c._new_itemestoque_value && c.new_contagemestoqueid) {
+          contagemPorItem.set(c._new_itemestoque_value, c.new_contagemestoqueid);
         }
       });
 
-      const expectedMap = new Map<string, EstoqueItem>();
-      expectedItems.forEach((item) => {
-        expectedMap.set(item.cr22f_estoquefromsharepointlistid, item);
-      });
-
-      const missingIds = Array.from(contadosSet).filter((id) => !expectedMap.has(id));
-      if (missingIds.length > 0) {
-        for (let i = 0; i < missingIds.length; i += 50) {
-          const chunk = missingIds.slice(i, i + 50);
-          const filter = buildOrFilter('cr22f_estoquefromsharepointlistid', chunk);
-          if (!filter) continue;
-          const result = await Cr22fEstoqueFromSharepointListService.getAll({
-            filter,
-            select,
-            top: chunk.length,
-          });
-          (result.data ?? []).forEach((item: any) => {
-            if (item?.cr22f_estoquefromsharepointlistid) {
-              expectedMap.set(item.cr22f_estoquefromsharepointlistid, item);
-            }
-          });
-        }
-      }
-
-      const expectedList = Array.from(expectedMap.values());
       const esperados = expectedList.length;
-      const contados = Array.from(contadosSet).filter((id) => expectedMap.has(id)).length;
-      const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
+      const contados = expectedList.filter(item => contagemPorItem.has(item.cr22f_estoquefromsharepointlistid)).length;
+      const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 100;
 
+      // 4. Criar Cabeçalho
       const snapshotResult = await NewContagemDoDiaService.create({
         new_data: dateKey,
         new_esperados: esperados,
@@ -657,12 +640,10 @@ export function ContagemEstoqueMobilePage() {
       });
 
       const snapshotId = snapshotResult.data?.new_contagemdodiaid as string | undefined;
-      if (!snapshotId) {
-        console.error('[ContagemEstoque] Snapshot criado sem ID.');
-        return null;
-      }
+      if (!snapshotId) throw new Error('Falha ao criar cabeçalho do snapshot');
 
-      const batchSize = 50;
+      // 5. Criar Itens (em batches)
+      const batchSize = 25;
       for (let i = 0; i < expectedList.length; i += batchSize) {
         const batch = expectedList.slice(i, i + batchSize);
         await Promise.all(
@@ -677,7 +658,7 @@ export function ContagemEstoqueMobilePage() {
               new_endereco: buildEnderecoCompleto(item),
               new_classecriticidade: item.new_classecriticidade,
               new_ultimacontagemsnapshot: item.new_ultimacontagem,
-              new_contado: contadosSet.has(itemId),
+              new_contado: contagemPorItem.has(itemId),
             };
             if (contagemId) {
               payload['new_Contagem@odata.bind'] = `/new_contagemestoques(${contagemId})`;
@@ -695,8 +676,9 @@ export function ContagemEstoqueMobilePage() {
       return null;
     } finally {
       setSnapshotLoading(false);
+      isCreatingSnapshotRef.current = false;
     }
-  }, [loadThresholds, snapshotLoading, systemUserId]);
+  }, [loadThresholds, systemUserId]);
 
   const updateSnapshotForCount = useCallback(
     async (itemId: string, contagemId?: string) => {
