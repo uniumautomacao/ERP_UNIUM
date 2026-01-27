@@ -1,0 +1,10 @@
+{
+  "name": "dataverse-mcp",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@azure/msal-node": "^2.12.0",
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "zod": "^3.25.76"
+  }
+}

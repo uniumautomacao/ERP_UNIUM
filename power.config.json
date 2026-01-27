@@ -108,6 +108,16 @@
           "logicalName": "new_contagemestoque",
           "isHidden": false
         },
+        "new_contagemdodias": {
+          "entitySetName": "new_contagemdodias",
+          "logicalName": "new_contagemdodia",
+          "isHidden": false
+        },
+        "new_contagemdodiaitems": {
+          "entitySetName": "new_contagemdodiaitems",
+          "logicalName": "new_contagemdodiaitem",
+          "isHidden": false
+        },
         "new_ajustedeestoques": {
           "entitySetName": "new_ajustedeestoques",
           "logicalName": "new_ajustedeestoque",

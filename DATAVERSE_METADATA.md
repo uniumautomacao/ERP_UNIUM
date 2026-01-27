@@ -22,6 +22,8 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Estoque-RMA | `new_estoquerma` | `new_estoquermas` | `new_estoquermaid` |
 | RMA | `new_rma` | `new_rmas` | `new_rmaid` |
 | Contagem Estoque | `new_contagemestoque` | `new_contagemestoques` | `new_contagemestoqueid` |
+| Contagem do Dia | `new_contagemdodia` | `new_contagemdodias` | `new_contagemdodiaid` |
+| Contagem do Dia Item | `new_contagemdodiaitem` | `new_contagemdodiaitems` | `new_contagemdodiaitemid` |
 | Ajuste de Estoque | `new_ajustedeestoque` | `new_ajustedeestoques` | `new_ajustedeestoqueid` |
 | Solicitação de Ajuste de Estoque | `new_solicitacaodeajustedeestoque` | `new_solicitacaodeajustedeestoques` | `new_solicitacaodeajustedeestoqueid` |
 | Registro de Leitura de Mercadoria em Estoque | `new_registrodeleiturademercadoriaemestoque` | `new_registrodeleiturademercadoriaemestoques` | `new_registrodeleiturademercadoriaemestoqueid` |
@@ -55,6 +57,42 @@ PrimaryKey:                       new_contagemestoqueid
 |------------------------------|---------------------|------------------|
 | new_itemestoque | new_ItemEstoque | cr22f_estoquefromsharepointlists |
 | new_usuario | new_Usuario | systemusers |
+
+---
+
+## 🔵 new_contagemdodia (Contagem do Dia)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_contagemdodia
+EntityLogicalCollectionName:      new_contagemdodias
+EntitySetName:                    new_contagemdodias
+PrimaryKey:                       new_contagemdodiaid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_usuario | new_Usuario | systemusers |
+
+---
+
+## 🔵 new_contagemdodiaitem (Contagem do Dia Item)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_contagemdodiaitem
+EntityLogicalCollectionName:      new_contagemdodiaitems
+EntitySetName:                    new_contagemdodiaitems
+PrimaryKey:                       new_contagemdodiaitemid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_snapshot | new_Snapshot | new_contagemdodias |
+| new_itemestoque | new_ItemEstoque | cr22f_estoquefromsharepointlists |
+| new_contagem | new_Contagem | new_contagemestoques |
 
 ---
 
