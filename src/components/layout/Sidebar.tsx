@@ -14,6 +14,7 @@ import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobile } from '../../hooks/useMediaQuery';
 import { useTheme } from '../../hooks/useTheme';
 import { useAccessControl } from '../../security/AccessControlContext';
+import { useCurrentSystemUser } from '../../hooks/useCurrentSystemUser';
 import { SidebarSection } from './SidebarSection';
 import { ThemeToggle } from './ThemeToggle';
 import { navigation } from '../../config/navigation';
@@ -25,6 +26,7 @@ export function Sidebar() {
   const isMobile = useIsMobile();
   const { isDark } = useTheme();
   const { canAccessPath } = useAccessControl();
+  const { fullName, email, loading: userLoading } = useCurrentSystemUser();
 
   const filteredNavigation = useMemo(
     () => filterNavigationByAccess(navigation, canAccessPath),
@@ -95,19 +97,25 @@ export function Sidebar() {
       <div style={{ borderTop: `1px solid ${tokens.colorNeutralStroke2}`, padding: '12px' }}>
         {isExpanded ? (
           <div className="flex items-center gap-3">
-            <Avatar name="Bruno Santos" size={40} color="colorful" />
+            <Avatar name={fullName || 'Usuário'} size={40} color="colorful" />
             <div className="flex-grow">
               <Text weight="semibold" size={300} block>
-                Bruno Santos
+                {userLoading ? 'Carregando...' : fullName || 'Usuário'}
               </Text>
-              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                bruno@unium.com.br
-              </Text>
+              {email && !userLoading ? (
+                <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                  {email}
+                </Text>
+              ) : (
+                <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                  {userLoading ? 'Carregando...' : 'Email indisponível'}
+                </Text>
+              )}
             </div>
           </div>
         ) : (
           <div className="flex justify-center">
-            <Avatar name="Bruno Santos" size={32} color="colorful" />
+            <Avatar name={fullName || 'Usuário'} size={32} color="colorful" />
           </div>
         )}
       </div>

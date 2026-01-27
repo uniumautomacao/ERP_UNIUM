@@ -5,6 +5,7 @@ import { SystemusersService } from '../generated';
 interface CurrentSystemUserState {
   systemUserId?: string;
   fullName?: string;
+  email?: string;
   loading: boolean;
   error?: string;
 }
@@ -26,7 +27,7 @@ export function useCurrentSystemUser() {
 
       const result = await SystemusersService.getAll({
         filter: `azureactivedirectoryobjectid eq '${aadObjectId}'`,
-        select: ['systemuserid', 'fullname'],
+      select: ['systemuserid', 'fullname', 'internalemailaddress'],
       });
 
       if (!result.data || result.data.length === 0) {
@@ -41,6 +42,7 @@ export function useCurrentSystemUser() {
       setState({
         systemUserId: user.systemuserid,
         fullName: user.fullname,
+      email: user.internalemailaddress,
         loading: false,
       });
     } catch (err: any) {
