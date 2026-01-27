@@ -45,9 +45,19 @@ import { useCurrentSystemUser } from '../../hooks/useCurrentSystemUser';
 import {
   Cr22fEstoqueFromSharepointListService,
   NewContagemEstoqueService,
+  NewContagemDoDiaItemService,
+  NewContagemDoDiaService,
+  NewAppPreferenceService,
   NewRegistrodeLeituradeMercadoriaemEstoqueService,
 } from '../../generated';
 import { parseEnderecoCodigo } from '../../utils/inventory/enderecoParser';
+import {
+  buildDayRange,
+  buildSearchClause,
+  buildListaDoDiaFilter,
+  DEFAULT_CONTAGEM_THRESHOLDS,
+  toDateOnlyString,
+} from '../../utils/inventory/contagemListaDoDia';
 
 type ViewState = 'home' | 'scanner' | 'form' | 'list' | 'success';
 
@@ -75,10 +85,18 @@ type PendingItem = {
   timestamp: Date;
 };
 
-const CLASS_THRESHOLDS: Record<number, number> = {
-  100000000: 20,
-  100000001: 40,
-  100000002: 60,
+type SnapshotInfo = {
+  id: string;
+  dateKey: string;
+  esperados: number;
+  contados: number;
+};
+
+type SnapshotItemRecord = {
+  new_contagemdodiaitemid: string;
+  new_contado?: boolean;
+  _new_snapshot_value?: string;
+  _new_itemestoque_value?: string;
 };
 
 const TIPO_CONTAGEM = {
@@ -231,19 +249,52 @@ const buildEnderecoCompleto = (item: EstoqueItem) => {
   return parts.length ? parts.join('-') : 'Endereço não informado';
 };
 
-const getClassThreshold = (classe?: number) => {
-  if (!classe) return 60;
-  return CLASS_THRESHOLDS[classe] ?? 60;
+const extractNextSkipToken = (result: any) => {
+  const directToken =
+    result?.skipToken ??
+    result?.skiptoken ??
+    result?.SkipToken ??
+    result?.['@odata.skipToken'];
+  if (typeof directToken === 'string' && directToken) {
+    return directToken;
+  }
+
+  const nextLink =
+    result?.nextLink ??
+    result?.nextlink ??
+    result?.NextLink ??
+    result?.['@odata.nextLink'] ??
+    result?.['odata.nextLink'];
+  if (typeof nextLink === 'string' && nextLink) {
+    const match = nextLink.match(/(?:\\$skiptoken|%24skiptoken)=([^&]+)/i);
+    if (match?.[1]) {
+      return decodeURIComponent(match[1]);
+    }
+  }
+
+  return null;
 };
 
-const getDueLimitDate = (now: Date, classe?: number) => {
-  const threshold = getClassThreshold(classe);
+const buildOrFilter = (field: string, ids: string[]) => {
+  if (!ids.length) return '';
+  return ids.map((id) => `${field} eq '${id}'`).join(' or ');
+};
+
+const getClassThreshold = (classe: number | undefined, thresholds: typeof DEFAULT_CONTAGEM_THRESHOLDS) => {
+  if (!classe) return thresholds.C;
+  if (classe === 100000000) return thresholds.A;
+  if (classe === 100000001) return thresholds.B;
+  return thresholds.C;
+};
+
+const getDueLimitDate = (now: Date, classe: number | undefined, thresholds: typeof DEFAULT_CONTAGEM_THRESHOLDS) => {
+  const threshold = getClassThreshold(classe, thresholds);
   const limit = new Date(now);
   limit.setDate(limit.getDate() - threshold);
   return limit;
 };
 
-const getCountStatus = (item: EstoqueItem, now: Date) => {
+const getCountStatus = (item: EstoqueItem, now: Date, thresholds: typeof DEFAULT_CONTAGEM_THRESHOLDS) => {
   if (!item.new_ultimacontagem) {
     return { label: 'Atrasado', color: tokens.colorPaletteRedForeground1, overdueDays: 999, countedToday: false };
   }
@@ -251,7 +302,7 @@ const getCountStatus = (item: EstoqueItem, now: Date) => {
   if (isSameDay(last, now)) {
     return { label: 'Contado hoje', color: tokens.colorPaletteGreenForeground1, overdueDays: 0, countedToday: true };
   }
-  const threshold = getClassThreshold(item.new_classecriticidade);
+  const threshold = getClassThreshold(item.new_classecriticidade, thresholds);
   const atraso = daysDiff(last, now) - threshold;
   if (atraso > 5) {
     return { label: `${atraso} dias de atraso`, color: tokens.colorPaletteRedForeground1, overdueDays: atraso, countedToday: false };
@@ -260,43 +311,6 @@ const getCountStatus = (item: EstoqueItem, now: Date) => {
 };
 
 const MAX_LISTA_ITENS = 200;
-
-const buildSearchClause = (search?: string) => {
-  if (!search) return '';
-  const escaped = search.replace(/'/g, "''");
-  let searchPart = `contains(new_referenciadoproduto, '${escaped}')`;
-  const asNum = Number(search);
-  if (!Number.isNaN(asNum) && Number.isInteger(asNum)) {
-    searchPart = `(${searchPart} or cr22f_querytag eq ${asNum})`;
-  }
-  return ` and (${searchPart})`;
-};
-
-// Filtro base de pendentes (não inclui contados hoje)
-const buildListaDoDiaFilter = (now: Date, search?: string) => {
-  const limitA = getDueLimitDate(now, 100000000).toISOString();
-  const limitB = getDueLimitDate(now, 100000001).toISOString();
-  const limitC = getDueLimitDate(now, 100000002).toISOString();
-  const filter = [
-    'statecode eq 0',
-    'and new_tagconfirmadabool eq true and cr22f_status ne \'Entregue\' and new_separado ne true and (new_contemrma ne true or new_rmaaprovadoparavenda eq true) and (',
-    'new_ultimacontagem eq null',
-    `or (new_classecriticidade eq 100000000 and new_ultimacontagem le ${limitA})`,
-    `or (new_classecriticidade eq 100000001 and new_ultimacontagem le ${limitB})`,
-    `or (new_classecriticidade eq 100000002 and new_ultimacontagem le ${limitC})`,
-    ')'
-  ].join(' ');
-
-  return `${filter}${buildSearchClause(search)}`;
-};
-
-const buildDayRange = (now: Date) => {
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(now);
-  end.setHours(23, 59, 59, 999);
-  return { start: start.toISOString(), end: end.toISOString() };
-};
 
 // Verifica se o código é um endereço (formato CD-DEP-RUA-EST-PRAT)
 const isEnderecoCodigo = (codigo: string): boolean => {
@@ -332,6 +346,10 @@ export function ContagemEstoqueMobilePage() {
 
   const [contagensHoje, setContagensHoje] = useState(0);
   const [contagensLoading, setContagensLoading] = useState(false);
+  const [thresholds, setThresholds] = useState(DEFAULT_CONTAGEM_THRESHOLDS);
+  const [snapshotInfo, setSnapshotInfo] = useState<SnapshotInfo | null>(null);
+  const snapshotInfoRef = useRef<SnapshotInfo | null>(null);
+  const [snapshotLoading, setSnapshotLoading] = useState(false);
 
   const [searchText, setSearchText] = useState('');
   const [openItems, setOpenItems] = useState<string[]>([]);
@@ -378,6 +396,34 @@ export function ContagemEstoqueMobilePage() {
     };
   }, [stopScan]);
 
+  useEffect(() => {
+    snapshotInfoRef.current = snapshotInfo;
+  }, [snapshotInfo]);
+
+  const loadThresholds = useCallback(async () => {
+    try {
+      const result = await NewAppPreferenceService.getAll({
+        filter: "startswith(new_preferencekey, 'contagem_threshold_')",
+        select: ['new_preferencekey', 'new_integervalue'],
+      });
+      const next = { ...DEFAULT_CONTAGEM_THRESHOLDS };
+      (result.data ?? []).forEach((item: any) => {
+        if (item.new_preferencekey === 'contagem_threshold_A') next.A = item.new_integervalue ?? next.A;
+        if (item.new_preferencekey === 'contagem_threshold_B') next.B = item.new_integervalue ?? next.B;
+        if (item.new_preferencekey === 'contagem_threshold_C') next.C = item.new_integervalue ?? next.C;
+      });
+      setThresholds(next);
+      return next;
+    } catch (err) {
+      console.warn('[ContagemEstoque] Falha ao carregar thresholds. Usando padrão.');
+      return DEFAULT_CONTAGEM_THRESHOLDS;
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadThresholds();
+  }, [loadThresholds]);
+
   const loadContagensHoje = useCallback(async () => {
     if (!systemUserId) return;
     setContagensLoading(true);
@@ -400,6 +446,7 @@ export function ContagemEstoqueMobilePage() {
       void loadContagensHoje();
     }
   }, [loadContagensHoje, systemUserId]);
+
 
   const loadListaDoDia = useCallback(async (search?: string, onlyPending?: boolean) => {
     setListaLoading(true);
@@ -432,7 +479,7 @@ export function ContagemEstoqueMobilePage() {
       ];
 
       const countedTodayFilter = `${baseFilter} and new_ultimacontagem ge ${todayStartISO} and new_ultimacontagem le ${todayEndISO}${buildSearchClause(search)}`;
-      const pendingFilter = buildListaDoDiaFilter(now, search);
+      const pendingFilter = buildListaDoDiaFilter(now, thresholds, search);
 
       const countedTodayPromise = onlyPending
         ? Promise.resolve({ data: [] })
@@ -485,7 +532,217 @@ export function ContagemEstoqueMobilePage() {
     } finally {
       setListaLoading(false);
     }
-  }, []);
+  }, [thresholds]);
+
+  const ensureDailySnapshot = useCallback(async (): Promise<SnapshotInfo | null> => {
+    if (!systemUserId || snapshotLoading) return snapshotInfoRef.current;
+    const now = new Date();
+    const dateKey = toDateOnlyString(now);
+    if (snapshotInfoRef.current?.dateKey === dateKey && snapshotInfoRef.current?.id) {
+      return snapshotInfoRef.current;
+    }
+
+    setSnapshotLoading(true);
+    try {
+      const activeThresholds = await loadThresholds();
+      const existing = await NewContagemDoDiaService.getAll({
+        filter: `statecode eq 0 and new_data eq ${dateKey} and _new_usuario_value eq '${systemUserId}'`,
+        select: ['new_contagemdodiaid', 'new_esperados', 'new_contados'],
+        top: 1,
+      });
+      const existingRecord = (existing.data ?? [])[0] as any;
+      if (existingRecord?.new_contagemdodiaid) {
+        const info: SnapshotInfo = {
+          id: existingRecord.new_contagemdodiaid,
+          dateKey,
+          esperados: existingRecord.new_esperados ?? 0,
+          contados: existingRecord.new_contados ?? 0,
+        };
+        setSnapshotInfo(info);
+        return info;
+      }
+
+      const select = [
+        'cr22f_estoquefromsharepointlistid',
+        'new_referenciadoproduto',
+        'cr22f_title',
+        'cr22f_querytag',
+        'new_ultimacontagem',
+        'new_classecriticidade',
+        'new_quantidade',
+        'new_endereco',
+        'new_depositotexto',
+        'new_ruatexto',
+        'new_estantetexto',
+        'new_prateleiratexto',
+        'new_etiquetaemtextocalculated',
+        'new_datadaultimaleitura',
+      ];
+
+      const pendingFilter = buildListaDoDiaFilter(now, activeThresholds);
+      const expectedItems: EstoqueItem[] = [];
+      let skipToken: string | null = null;
+      do {
+        const result = await Cr22fEstoqueFromSharepointListService.getAll({
+          filter: pendingFilter,
+          select,
+          orderBy: ['new_ultimacontagem asc'],
+          top: 500,
+          ...(skipToken ? { skipToken } : {}),
+        });
+        expectedItems.push(...((result.data ?? []) as EstoqueItem[]));
+        skipToken = extractNextSkipToken(result);
+      } while (skipToken);
+
+      const { start, end } = buildDayRange(now);
+      const contagensResult = await NewContagemEstoqueService.getAll({
+        filter: `new_datacontagem ge ${start} and new_datacontagem le ${end} and _new_usuario_value eq '${systemUserId}' and new_tipocontagem eq ${TIPO_CONTAGEM.Rotina}`,
+        select: ['new_contagemestoqueid', '_new_itemestoque_value'],
+        top: 500,
+      });
+      const contagensHoje = (contagensResult.data ?? []) as Array<{
+        new_contagemestoqueid?: string;
+        _new_itemestoque_value?: string;
+      }>;
+
+      const contadosSet = new Set<string>();
+      const contagemPorItem = new Map<string, string>();
+      contagensHoje.forEach((item) => {
+        if (item._new_itemestoque_value) {
+          contadosSet.add(item._new_itemestoque_value);
+          if (item.new_contagemestoqueid && !contagemPorItem.has(item._new_itemestoque_value)) {
+            contagemPorItem.set(item._new_itemestoque_value, item.new_contagemestoqueid);
+          }
+        }
+      });
+
+      const expectedMap = new Map<string, EstoqueItem>();
+      expectedItems.forEach((item) => {
+        expectedMap.set(item.cr22f_estoquefromsharepointlistid, item);
+      });
+
+      const missingIds = Array.from(contadosSet).filter((id) => !expectedMap.has(id));
+      if (missingIds.length > 0) {
+        for (let i = 0; i < missingIds.length; i += 50) {
+          const chunk = missingIds.slice(i, i + 50);
+          const filter = buildOrFilter('cr22f_estoquefromsharepointlistid', chunk);
+          if (!filter) continue;
+          const result = await Cr22fEstoqueFromSharepointListService.getAll({
+            filter,
+            select,
+            top: chunk.length,
+          });
+          (result.data ?? []).forEach((item: any) => {
+            if (item?.cr22f_estoquefromsharepointlistid) {
+              expectedMap.set(item.cr22f_estoquefromsharepointlistid, item);
+            }
+          });
+        }
+      }
+
+      const expectedList = Array.from(expectedMap.values());
+      const esperados = expectedList.length;
+      const contados = Array.from(contadosSet).filter((id) => expectedMap.has(id)).length;
+      const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
+
+      const snapshotResult = await NewContagemDoDiaService.create({
+        new_data: dateKey,
+        new_esperados: esperados,
+        new_contados: contados,
+        new_percentual: percentual,
+        new_thresholda: activeThresholds.A,
+        new_thresholdb: activeThresholds.B,
+        new_thresholdc: activeThresholds.C,
+        'new_Usuario@odata.bind': `/systemusers(${systemUserId})`,
+      });
+
+      const snapshotId = snapshotResult.data?.new_contagemdodiaid as string | undefined;
+      if (!snapshotId) {
+        console.error('[ContagemEstoque] Snapshot criado sem ID.');
+        return null;
+      }
+
+      const batchSize = 50;
+      for (let i = 0; i < expectedList.length; i += batchSize) {
+        const batch = expectedList.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (item) => {
+            const itemId = item.cr22f_estoquefromsharepointlistid;
+            const contagemId = contagemPorItem.get(itemId);
+            const payload: Record<string, any> = {
+              'new_Snapshot@odata.bind': `/new_contagemdodias(${snapshotId})`,
+              'new_ItemEstoque@odata.bind': `/cr22f_estoquefromsharepointlists(${itemId})`,
+              new_sku: item.new_referenciadoproduto ?? item.cr22f_title,
+              new_querytag: item.cr22f_querytag,
+              new_endereco: buildEnderecoCompleto(item),
+              new_classecriticidade: item.new_classecriticidade,
+              new_ultimacontagemsnapshot: item.new_ultimacontagem,
+              new_contado: contadosSet.has(itemId),
+            };
+            if (contagemId) {
+              payload['new_Contagem@odata.bind'] = `/new_contagemestoques(${contagemId})`;
+            }
+            await NewContagemDoDiaItemService.create(payload);
+          })
+        );
+      }
+
+      const info: SnapshotInfo = { id: snapshotId, dateKey, esperados, contados };
+      setSnapshotInfo(info);
+      return info;
+    } catch (err) {
+      console.error('[ContagemEstoque] erro ao gerar snapshot do dia:', err);
+      return null;
+    } finally {
+      setSnapshotLoading(false);
+    }
+  }, [loadThresholds, snapshotLoading, systemUserId]);
+
+  const updateSnapshotForCount = useCallback(
+    async (itemId: string, contagemId?: string) => {
+      const snapshot = await ensureDailySnapshot();
+      if (!snapshot?.id) return;
+
+      try {
+        const itemResult = await NewContagemDoDiaItemService.getAll({
+          filter: `_new_snapshot_value eq '${snapshot.id}' and _new_itemestoque_value eq '${itemId}'`,
+          select: ['new_contagemdodiaitemid', 'new_contado'],
+          top: 1,
+        });
+        const item = (itemResult.data ?? [])[0] as SnapshotItemRecord | undefined;
+        if (!item?.new_contagemdodiaitemid || item.new_contado) return;
+
+        const updatePayload: Record<string, any> = { new_contado: true };
+        if (contagemId) {
+          updatePayload['new_Contagem@odata.bind'] = `/new_contagemestoques(${contagemId})`;
+        }
+        await NewContagemDoDiaItemService.update(item.new_contagemdodiaitemid, updatePayload);
+
+        const current = snapshotInfoRef.current;
+        if (!current || current.id !== snapshot.id) return;
+        const nextContados = current.contados + 1;
+        const nextPercentual = current.esperados > 0 ? Math.round((nextContados / current.esperados) * 100) : 0;
+        setSnapshotInfo({
+          ...current,
+          contados: nextContados,
+        });
+
+        await NewContagemDoDiaService.update(snapshot.id, {
+          new_contados: nextContados,
+          new_percentual: nextPercentual,
+        });
+      } catch (err) {
+        console.error('[ContagemEstoque] erro ao atualizar snapshot:', err);
+      }
+    },
+    [ensureDailySnapshot]
+  );
+
+  useEffect(() => {
+    if (systemUserId) {
+      void ensureDailySnapshot();
+    }
+  }, [ensureDailySnapshot, systemUserId]);
 
   // Busca item por tag
   const fetchItemByTag = useCallback(async (tag: string): Promise<EstoqueItem | null> => {
@@ -552,7 +809,7 @@ export function ContagemEstoqueMobilePage() {
           const enderecoAtual = buildEnderecoCompleto(item);
           const esperada = item.new_quantidade ?? 0;
           const divergencia = quantidadeContada - esperada;
-          const limite = getDueLimitDate(now, item.new_classecriticidade);
+          const limite = getDueLimitDate(now, item.new_classecriticidade, thresholds);
           const inLista = !item.new_ultimacontagem || new Date(item.new_ultimacontagem) <= limite;
           const tipoContagem = inLista ? TIPO_CONTAGEM.Rotina : TIPO_CONTAGEM.Surpresa;
           const situacao = divergencia === 0 ? SITUACAO_CONTAGEM.Validada : SITUACAO_CONTAGEM.Pendente;
@@ -570,7 +827,8 @@ export function ContagemEstoqueMobilePage() {
             new_situacao: situacao,
           };
 
-          await NewContagemEstoqueService.create(contagemPayload);
+          const contagemResult = await NewContagemEstoqueService.create(contagemPayload);
+          const contagemId = contagemResult.data?.new_contagemestoqueid as string | undefined;
 
           // Atualizar item de estoque
           const updatePayload: Record<string, any> = {
@@ -597,6 +855,10 @@ export function ContagemEstoqueMobilePage() {
             new_dataehora: now.toISOString(),
             new_endereco: enderecoConfirmado,
           });
+
+          if (contagemId) {
+            await updateSnapshotForCount(item.cr22f_estoquefromsharepointlistid, contagemId);
+          }
         }
 
         const count = pendingItems.length;
@@ -663,7 +925,7 @@ export function ContagemEstoqueMobilePage() {
       setFeedbackMessage({ intent: 'success', text: `${item.new_referenciadoproduto || 'Produto'} adicionado (Qtd: 1). Bipe o endereço para confirmar.` });
       navigator.vibrate?.(50);
     }
-  }, [fetchItemByTag, loadContagensHoje, loadListaDoDia, pendingItems, searchText, showOnlyPending, systemUserId]);
+  }, [fetchItemByTag, loadContagensHoje, loadListaDoDia, pendingItems, searchText, showOnlyPending, systemUserId, thresholds, updateSnapshotForCount]);
 
   // Confirma quantidade no modal
   const handleQuantityConfirm = useCallback(() => {
@@ -823,7 +1085,7 @@ export function ContagemEstoqueMobilePage() {
       const endereco = buildEnderecoCompleto(selectedItem);
       const esperada = selectedItem.new_quantidade ?? 0;
       const divergencia = quantidadeNumero - esperada;
-      const limite = getDueLimitDate(now, selectedItem.new_classecriticidade);
+      const limite = getDueLimitDate(now, selectedItem.new_classecriticidade, thresholds);
       const inLista = !selectedItem.new_ultimacontagem || new Date(selectedItem.new_ultimacontagem) <= limite;
       const tipoContagem = inLista ? TIPO_CONTAGEM.Rotina : TIPO_CONTAGEM.Surpresa;
       const situacao = divergencia === 0 ? SITUACAO_CONTAGEM.Validada : SITUACAO_CONTAGEM.Pendente;
@@ -841,10 +1103,15 @@ export function ContagemEstoqueMobilePage() {
         new_observacao: observacao || undefined,
       };
 
-      await NewContagemEstoqueService.create(payload);
+      const contagemResult = await NewContagemEstoqueService.create(payload);
+      const contagemId = contagemResult.data?.new_contagemestoqueid as string | undefined;
       await Cr22fEstoqueFromSharepointListService.update(selectedItem.cr22f_estoquefromsharepointlistid, {
         new_ultimacontagem: now.toISOString(),
       });
+
+      if (contagemId) {
+        await updateSnapshotForCount(selectedItem.cr22f_estoquefromsharepointlistid, contagemId);
+      }
 
       setConfirmacao({ sku: sku || 'SKU', quantidade: quantidadeNumero });
       setView('success');
@@ -863,7 +1130,7 @@ export function ContagemEstoqueMobilePage() {
     } finally {
       setIsSaving(false);
     }
-  }, [loadContagensHoje, observacao, quantidade, resetFlow, selectedItem, systemUserId]);
+  }, [loadContagensHoje, observacao, quantidade, resetFlow, selectedItem, systemUserId, thresholds, updateSnapshotForCount]);
 
   const groupedLista = useMemo(() => {
     const now = new Date();
@@ -882,12 +1149,12 @@ export function ContagemEstoqueMobilePage() {
       const [, itensB] = b;
       
       // Calcular atraso máximo de cada endereço
-      const maxAtrasaA = Math.max(...itensA.map(item => getCountStatus(item, now).overdueDays));
-      const maxAtrasaB = Math.max(...itensB.map(item => getCountStatus(item, now).overdueDays));
+      const maxAtrasaA = Math.max(...itensA.map(item => getCountStatus(item, now, thresholds).overdueDays));
+      const maxAtrasaB = Math.max(...itensB.map(item => getCountStatus(item, now, thresholds).overdueDays));
       
       return maxAtrasaB - maxAtrasaA;
     });
-  }, [listaDoDia]);
+  }, [listaDoDia, thresholds]);
 
   useEffect(() => {
     if (expandAll && groupedLista.length > 0) {
@@ -1265,7 +1532,7 @@ export function ContagemEstoqueMobilePage() {
               >
                 {groupedLista.map(([endereco, itens]) => {
                   // Calcular estatísticas do endereço
-                  const statusList = itens.map(item => getCountStatus(item, now));
+                  const statusList = itens.map(item => getCountStatus(item, now, thresholds));
                   const atrasados = statusList.filter(s => s.overdueDays > 5).length;
                   const noPrazo = statusList.filter(s => s.overdueDays <= 5 && s.overdueDays > 0).length;
                   const contadosHoje = statusList.filter(s => s.countedToday).length;
@@ -1305,7 +1572,7 @@ export function ContagemEstoqueMobilePage() {
                       <AccordionPanel>
                         <div className="flex flex-col gap-2">
                           {itens.map((item) => {
-                            const status = getCountStatus(item, now);
+                            const status = getCountStatus(item, now, thresholds);
                             const isPending = pendingItems.some(p => p.item.cr22f_estoquefromsharepointlistid === item.cr22f_estoquefromsharepointlistid);
                             
                             return (

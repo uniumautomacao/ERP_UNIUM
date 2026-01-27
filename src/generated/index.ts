@@ -24,6 +24,8 @@ export * as Cr22fEstoqueFromSharepointListModel from './models/Cr22fEstoqueFromS
 export * as NewEstoqueRMAModel from './models/NewEstoqueRMAModel';
 export * as NewRMAModel from './models/NewRMAModel';
 export * as NewContagemEstoqueModel from './models/NewContagemEstoqueModel';
+export * as NewContagemDoDiaModel from './models/NewContagemDoDiaModel';
+export * as NewContagemDoDiaItemModel from './models/NewContagemDoDiaItemModel';
 export * as NewAjustedeEstoqueModel from './models/NewAjustedeEstoqueModel';
 export * as NewSolicitacaodeAjustedeEstoqueModel from './models/NewSolicitacaodeAjustedeEstoqueModel';
 export * as NewRegistrodeLeituradeMercadoriaemEstoqueModel from './models/NewRegistrodeLeituradeMercadoriaemEstoqueModel';
@@ -60,6 +62,8 @@ export * from './services/Cr22fEstoqueFromSharepointListService';
 export * from './services/NewEstoqueRMAService';
 export * from './services/NewRMAService';
 export * from './services/NewContagemEstoqueService';
+export * from './services/NewContagemDoDiaService';
+export * from './services/NewContagemDoDiaItemService';
 export * from './services/NewAjustedeEstoqueService';
 export * from './services/NewSolicitacaodeAjustedeEstoqueService';
 export * from './services/NewRegistrodeLeituradeMercadoriaemEstoqueService';

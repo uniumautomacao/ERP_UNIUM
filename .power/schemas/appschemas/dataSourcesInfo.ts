@@ -138,6 +138,20 @@ export const dataSourcesInfo = {
     "dataSourceType": "Dataverse",
     "apis": {}
   },
+  "new_contagemdodias": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_contagemdodiaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_contagemdodiaitems": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_contagemdodiaitemid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
   "new_ajustedeestoques": {
     "tableId": "",
     "version": "",
