@@ -1,4 +1,4 @@
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { tokens } from '@fluentui/react-components';
 import { ChartDataPoint } from '../../types';
 
@@ -34,9 +34,20 @@ interface LineChartProps {
   height?: number;
   valueFormatter?: (value: number) => string;
   onPointClick?: (data: ChartDataPoint, meta: { dataKey: string }) => void;
+  referenceValue?: number;
+  referenceLabel?: string;
 }
 
-export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueFormatter, onPointClick }: LineChartProps) {
+export function LineChart({
+  data,
+  lines,
+  xAxisKey = 'date',
+  height = 300,
+  valueFormatter,
+  onPointClick,
+  referenceValue,
+  referenceLabel,
+}: LineChartProps) {
   const defaultColors = [
     tokens.colorBrandBackground,
     tokens.colorPaletteBlueForeground2,
@@ -83,6 +94,19 @@ export function LineChart({ data, lines, xAxisKey = 'date', height = 300, valueF
             color: tokens.colorNeutralForeground2,
           }}
         />
+        {referenceValue !== undefined && (
+          <ReferenceLine
+            y={referenceValue}
+            label={{
+              value: referenceLabel,
+              position: 'insideBottomRight',
+              fill: tokens.colorPaletteGreenForeground1,
+              fontSize: 10,
+            }}
+            stroke={tokens.colorPaletteGreenForeground1}
+            strokeDasharray="3 3"
+          />
+        )}
         {lines.map((line, index) => (
           <Line
             key={line.dataKey}

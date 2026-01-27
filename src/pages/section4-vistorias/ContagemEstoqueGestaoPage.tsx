@@ -18,6 +18,7 @@ import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { DataGrid, createTableColumn } from '../../components/shared/DataGrid';
 import { BarChart } from '../../components/charts/BarChart';
+import { LineChart } from '../../components/charts/LineChart';
 import { useCurrentSystemUser } from '../../hooks/useCurrentSystemUser';
 import {
   Cr22fEstoqueFromSharepointListService,
@@ -1620,11 +1621,19 @@ export function ContagemEstoqueGestaoPage() {
               Sem snapshots para o período selecionado.
             </Text>
           ) : (
-            <BarChart
+            <LineChart
               data={aderenciaChartData}
-              dataKey="value"
+              lines={[
+                {
+                  dataKey: 'value',
+                  name: 'Aderência',
+                  color: tokens.colorBrandBackground,
+                },
+              ]}
               valueFormatter={(value) => `${value}%`}
-              onBarClick={(data) => {
+              referenceValue={100}
+              referenceLabel="Meta"
+              onPointClick={(data) => {
                 const target = aderenciaData.find((item) => item.new_contagemdodiaid === data.id);
                 if (target) {
                   handleAderenciaSelect(target);
