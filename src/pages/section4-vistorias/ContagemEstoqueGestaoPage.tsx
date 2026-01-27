@@ -77,6 +77,7 @@ type PreferenceRecord = {
 type ContagemDiaRecord = {
   new_contagemdodiaid: string;
   new_data?: string;
+  createdon?: string;
   new_esperados?: number;
   new_contados?: number;
   new_percentual?: number;
@@ -98,6 +99,11 @@ const SITUACAO_CONTAGEM = {
   Pendente: 100000000,
   Validada: 100000001,
   Ajustada: 100000002,
+};
+
+const TIPO_CONTAGEM = {
+  Rotina: 100000000,
+  Surpresa: 100000001,
 };
 
 const STATUS_PROCESSAMENTO = {
@@ -610,6 +616,7 @@ export function ContagemEstoqueGestaoPage() {
         select: [
           'new_contagemdodiaid',
           'new_data',
+          'createdon',
           'new_esperados',
           'new_contados',
           'new_percentual',
@@ -618,16 +625,67 @@ export function ContagemEstoqueGestaoPage() {
         top: 500,
       });
 
-      const items = (result.data ?? []) as ContagemDiaRecord[];
-      setAderenciaData(items);
-      setAderenciaSelected(null);
-      setAderenciaItens([]);
-      if (items.length === 0) {
+      const snapshots = (result.data ?? []) as ContagemDiaRecord[];
+      if (snapshots.length === 0) {
+        setAderenciaData([]);
+        setAderenciaSelected(null);
+        setAderenciaItens([]);
         setAderenciaChartData([]);
         return;
       }
 
-      const chartData = [...items]
+      const contagensResult = await NewContagemEstoqueService.getAll({
+        filter: `statecode eq 0 and ((new_datacontagem ge ${startRange.start} and new_datacontagem le ${endRange.end}) or (new_datacontagem eq null and createdon ge ${startRange.start} and createdon le ${endRange.end}))`,
+        select: ['new_datacontagem', 'createdon', '_new_itemestoque_value'],
+        top: 2000,
+      });
+
+      const contadosPorDia = new Map<string, Set<string>>();
+      (contagensResult.data ?? []).forEach((contagem: any) => {
+        const dateKey = toDateOnlyKey(contagem?.new_datacontagem ?? contagem?.createdon);
+        if (!dateKey || !contagem?._new_itemestoque_value) return;
+        if (!contadosPorDia.has(dateKey)) {
+          contadosPorDia.set(dateKey, new Set<string>());
+        }
+        contadosPorDia.get(dateKey)!.add(contagem._new_itemestoque_value);
+      });
+
+      const snapshotPorDia = new Map<string, ContagemDiaRecord>();
+      snapshots.forEach((item) => {
+        const dateKey = toDateOnlyKey(item.new_data);
+        if (!dateKey) return;
+        const current = snapshotPorDia.get(dateKey);
+        if (!current) {
+          snapshotPorDia.set(dateKey, item);
+          return;
+        }
+        if (item.createdon && current.createdon) {
+          if (item.createdon < current.createdon) {
+            snapshotPorDia.set(dateKey, item);
+          }
+          return;
+        }
+        if (item.createdon && !current.createdon) {
+          snapshotPorDia.set(dateKey, item);
+        }
+      });
+
+      const consolidated = Array.from(snapshotPorDia.entries()).map(([dateKey, item]) => {
+        const contados = contadosPorDia.get(dateKey)?.size ?? 0;
+        const esperados = item.new_esperados ?? 0;
+        const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
+        return {
+          ...item,
+          new_contados: contados,
+          new_percentual: percentual,
+        };
+      });
+
+      setAderenciaData(consolidated);
+      setAderenciaSelected(null);
+      setAderenciaItens([]);
+
+      const chartData = [...consolidated]
         .sort((a, b) => (a.new_data || '').localeCompare(b.new_data || ''))
         .map((item) => {
           const dateKey = toDateOnlyKey(item.new_data);
@@ -655,12 +713,19 @@ export function ContagemEstoqueGestaoPage() {
     }
   }, [aderenciaEnd, aderenciaStart]);
 
-  const loadAderenciaItens = useCallback(async (snapshotId: string) => {
+  const loadAderenciaItens = useCallback(async (snapshotId: string, snapshotDate?: string) => {
     setAderenciaItensLoading(true);
     setAderenciaItensError(null);
     try {
+      const dateKey = toDateOnlyKey(snapshotDate);
+      if (!dateKey) {
+        setAderenciaItens([]);
+        setAderenciaItensError('Snapshot sem data válida para calcular faltantes.');
+        return;
+      }
+      const { start, end } = buildUtcDayRangeFromDateKey(dateKey);
       const result = await NewContagemDoDiaItemService.getAll({
-        filter: `_new_snapshot_value eq '${snapshotId}' and (new_contado ne true)`,
+        filter: `_new_snapshot_value eq '${snapshotId}'`,
         orderBy: ['new_endereco asc'],
         select: [
           'new_contagemdodiaitemid',
@@ -674,7 +739,22 @@ export function ContagemEstoqueGestaoPage() {
         ],
         top: 500,
       });
-      setAderenciaItens((result.data ?? []) as ContagemDiaItemRecord[]);
+      const contagensResult = await NewContagemEstoqueService.getAll({
+        filter: `statecode eq 0 and ((new_datacontagem ge ${start} and new_datacontagem le ${end}) or (new_datacontagem eq null and createdon ge ${start} and createdon le ${end}))`,
+        select: ['_new_itemestoque_value'],
+        top: 2000,
+      });
+      const contadosSet = new Set<string>();
+      (contagensResult.data ?? []).forEach((contagem: any) => {
+        if (contagem?._new_itemestoque_value) {
+          contadosSet.add(contagem._new_itemestoque_value);
+        }
+      });
+      const itens = (result.data ?? []) as ContagemDiaItemRecord[];
+      const faltantes = itens.filter(
+        (item) => !item._new_itemestoque_value || !contadosSet.has(item._new_itemestoque_value)
+      );
+      setAderenciaItens(faltantes.map((item) => ({ ...item, new_contado: false })));
     } catch (err: any) {
       console.error('[GestaoContagem] erro aderencia itens', err);
       setAderenciaItensError(err.message || 'Erro ao carregar itens pendentes.');
@@ -686,7 +766,7 @@ export function ContagemEstoqueGestaoPage() {
   const handleAderenciaSelect = useCallback(
     (item: ContagemDiaRecord) => {
       setAderenciaSelected(item);
-      void loadAderenciaItens(item.new_contagemdodiaid);
+      void loadAderenciaItens(item.new_contagemdodiaid, item.new_data);
     },
     [loadAderenciaItens]
   );

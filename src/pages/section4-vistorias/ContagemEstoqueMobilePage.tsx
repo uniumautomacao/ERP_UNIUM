@@ -93,13 +93,6 @@ type SnapshotInfo = {
   contados: number;
 };
 
-type SnapshotItemRecord = {
-  new_contagemdodiaitemid: string;
-  new_contado?: boolean;
-  _new_snapshot_value?: string;
-  _new_itemestoque_value?: string;
-};
-
 const TIPO_CONTAGEM = {
   Rotina: 100000000,
   Surpresa: 100000001,
@@ -432,10 +425,16 @@ export function ContagemEstoqueMobilePage() {
     try {
       const { start, end } = buildDayRange(new Date());
       const result = await NewContagemEstoqueService.getAll({
-        filter: `new_datacontagem ge ${start} and new_datacontagem le ${end} and _new_usuario_value eq '${systemUserId}'`,
-        select: ['new_contagemestoqueid'],
+        filter: `new_datacontagem ge ${start} and new_datacontagem le ${end} and _new_usuario_value eq '${systemUserId}' and new_tipocontagem eq ${TIPO_CONTAGEM.Rotina}`,
+        select: ['new_contagemestoqueid', '_new_itemestoque_value'],
       });
-      setContagensHoje(result.data?.length ?? 0);
+      const distinctItems = new Set<string>();
+      (result.data ?? []).forEach((item: any) => {
+        if (item?._new_itemestoque_value) {
+          distinctItems.add(item._new_itemestoque_value);
+        }
+      });
+      setContagensHoje(distinctItems.size);
     } catch (err: any) {
       console.error('[ContagemEstoque] erro ao carregar contagens do dia:', err);
     } finally {
@@ -564,8 +563,9 @@ export function ContagemEstoqueMobilePage() {
       // 1. Verificar se já existe snapshot para hoje (usando range UTC baseado no dateKey)
       const { start, end } = buildUtcDayRangeFromDateKey(dateKey);
       const existing = await NewContagemDoDiaService.getAll({
-        filter: `statecode eq 0 and new_data ge ${start} and new_data le ${end} and _new_usuario_value eq '${systemUserId}'`,
-        select: ['new_contagemdodiaid', 'new_esperados', 'new_contados'],
+        filter: `statecode eq 0 and new_data ge ${start} and new_data le ${end}`,
+        orderBy: ['createdon asc'],
+        select: ['new_contagemdodiaid', 'new_esperados', 'new_contados', 'createdon'],
         top: 1,
       });
       
@@ -586,7 +586,7 @@ export function ContagemEstoqueMobilePage() {
       
       // 3. Buscar quais desses já possuem registro de contagem hoje (Rotina)
       const contagensResult = await NewContagemEstoqueService.getAll({
-        filter: `new_datacontagem ge ${start} and new_datacontagem le ${end} and _new_usuario_value eq '${systemUserId}' and new_tipocontagem eq ${TIPO_CONTAGEM.Rotina}`,
+        filter: `new_datacontagem ge ${start} and new_datacontagem le ${end} and new_tipocontagem eq ${TIPO_CONTAGEM.Rotina}`,
         select: ['new_contagemestoqueid', '_new_itemestoque_value'],
         top: 1000,
       });
@@ -598,13 +598,16 @@ export function ContagemEstoqueMobilePage() {
 
       const contagemPorItem = new Map<string, string>();
       contagensHoje.forEach((c) => {
-        if (c._new_itemestoque_value && c.new_contagemestoqueid) {
+        if (!c._new_itemestoque_value || !c.new_contagemestoqueid) return;
+        if (!contagemPorItem.has(c._new_itemestoque_value)) {
           contagemPorItem.set(c._new_itemestoque_value, c.new_contagemestoqueid);
         }
       });
 
       const esperados = expectedList.length;
-      const contados = expectedList.filter(item => contagemPorItem.has(item.cr22f_estoquefromsharepointlistid)).length;
+      const contados = expectedList.filter((item) =>
+        contagemPorItem.has(item.cr22f_estoquefromsharepointlistid)
+      ).length;
       const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 100;
 
       // 4. Criar Cabeçalho
@@ -660,45 +663,32 @@ export function ContagemEstoqueMobilePage() {
     }
   }, [fetchListaDoDiaItems, loadThresholds, systemUserId]);
 
-  const updateSnapshotForCount = useCallback(
-    async (itemId: string, contagemId?: string) => {
-      const snapshot = await ensureDailySnapshot();
-      if (!snapshot?.id) return;
+  const refreshSnapshotProgress = useCallback(async () => {
+    if (!systemUserId) return;
+    const snapshot = await ensureDailySnapshot();
+    if (!snapshot?.dateKey || !snapshot.id) return;
 
-      try {
-        const itemResult = await NewContagemDoDiaItemService.getAll({
-          filter: `_new_snapshot_value eq '${snapshot.id}' and _new_itemestoque_value eq '${itemId}'`,
-          select: ['new_contagemdodiaitemid', 'new_contado'],
-          top: 1,
-        });
-        const item = (itemResult.data ?? [])[0] as SnapshotItemRecord | undefined;
-        if (!item?.new_contagemdodiaitemid || item.new_contado) return;
-
-        const updatePayload: Record<string, any> = { new_contado: true };
-        if (contagemId) {
-          updatePayload['new_Contagem@odata.bind'] = `/new_contagemestoques(${contagemId})`;
+    try {
+      const { start, end } = buildUtcDayRangeFromDateKey(snapshot.dateKey);
+      const result = await NewContagemEstoqueService.getAll({
+        filter: `statecode eq 0 and new_datacontagem ge ${start} and new_datacontagem le ${end} and _new_usuario_value eq '${systemUserId}' and new_tipocontagem eq ${TIPO_CONTAGEM.Rotina}`,
+        select: ['_new_itemestoque_value'],
+        top: 2000,
+      });
+      const distinctItems = new Set<string>();
+      (result.data ?? []).forEach((item: any) => {
+        if (item?._new_itemestoque_value) {
+          distinctItems.add(item._new_itemestoque_value);
         }
-        await NewContagemDoDiaItemService.update(item.new_contagemdodiaitemid, updatePayload);
-
-        const current = snapshotInfoRef.current;
-        if (!current || current.id !== snapshot.id) return;
-        const nextContados = current.contados + 1;
-        const nextPercentual = current.esperados > 0 ? Math.round((nextContados / current.esperados) * 100) : 0;
-        setSnapshotInfo({
-          ...current,
-          contados: nextContados,
-        });
-
-        await NewContagemDoDiaService.update(snapshot.id, {
-          new_contados: nextContados,
-          new_percentual: nextPercentual,
-        });
-      } catch (err) {
-        console.error('[ContagemEstoque] erro ao atualizar snapshot:', err);
-      }
-    },
-    [ensureDailySnapshot]
-  );
+      });
+      setSnapshotInfo((current) => {
+        if (!current || current.id !== snapshot.id) return current;
+        return { ...current, contados: distinctItems.size };
+      });
+    } catch (err) {
+      console.error('[ContagemEstoque] erro ao recalcular progresso do snapshot:', err);
+    }
+  }, [ensureDailySnapshot, systemUserId]);
 
   useEffect(() => {
     if (systemUserId) {
@@ -819,7 +809,7 @@ export function ContagemEstoqueMobilePage() {
           });
 
           if (contagemId) {
-            await updateSnapshotForCount(item.cr22f_estoquefromsharepointlistid, contagemId);
+            await refreshSnapshotProgress();
           }
         }
 
@@ -887,7 +877,7 @@ export function ContagemEstoqueMobilePage() {
       setFeedbackMessage({ intent: 'success', text: `${item.new_referenciadoproduto || 'Produto'} adicionado (Qtd: 1). Bipe o endereço para confirmar.` });
       navigator.vibrate?.(50);
     }
-  }, [fetchItemByTag, loadContagensHoje, loadListaDoDia, pendingItems, searchText, showOnlyPending, systemUserId, thresholds, updateSnapshotForCount]);
+  }, [fetchItemByTag, loadContagensHoje, loadListaDoDia, pendingItems, refreshSnapshotProgress, searchText, showOnlyPending, systemUserId, thresholds]);
 
   // Confirma quantidade no modal
   const handleQuantityConfirm = useCallback(() => {
@@ -1072,7 +1062,7 @@ export function ContagemEstoqueMobilePage() {
       });
 
       if (contagemId) {
-        await updateSnapshotForCount(selectedItem.cr22f_estoquefromsharepointlistid, contagemId);
+        await refreshSnapshotProgress();
       }
 
       setConfirmacao({ sku: sku || 'SKU', quantidade: quantidadeNumero });
@@ -1092,7 +1082,7 @@ export function ContagemEstoqueMobilePage() {
     } finally {
       setIsSaving(false);
     }
-  }, [loadContagensHoje, observacao, quantidade, resetFlow, selectedItem, systemUserId, thresholds, updateSnapshotForCount]);
+  }, [loadContagensHoje, observacao, quantidade, refreshSnapshotProgress, resetFlow, selectedItem, systemUserId, thresholds]);
 
   const groupedLista = useMemo(() => {
     const now = new Date();
