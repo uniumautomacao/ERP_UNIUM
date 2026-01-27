@@ -166,6 +166,30 @@ export const fetchComentarios = async (osId: string) => {
   });
 };
 
+export const fetchComentariosRecentes = async (params: { days: number; top?: number }) => {
+  const dias = Math.max(params.days, 1);
+  const limite = params.top ?? 500;
+  const start = new Date();
+  start.setDate(start.getDate() - dias);
+  const filter = `statecode eq 0 and createdon ge ${start.toISOString()}`;
+
+  return NewComentariodeOrdemdeServicoService.getAll({
+    filter,
+    select: [
+      'new_comentariodeordemdeservicoid',
+      'new_datetime',
+      'new_tipodecomentario',
+      'new_comentario',
+      '_new_usuario_value',
+      '_new_ordemdeservico_value',
+      'createdon',
+    ],
+    orderBy: ['createdon desc'],
+    top: limite,
+    maxPageSize: limite,
+  });
+};
+
 export const fetchAnoBounds = async () => {
   const base = buildBaseFilter();
   const filter = `${base} and ${DATA_CAMPO_PREVISAO} ne null`;
@@ -209,6 +233,33 @@ export const fetchUsuariosByIds = async (ids: string[]) => {
     (result.data || []).forEach((row: any) => {
       if (row.systemuserid) {
         map.set(row.systemuserid, row.fullname || 'Usuário');
+      }
+    });
+  });
+  return map;
+};
+
+export const fetchOrdensServicoByIds = async (ids: string[]) => {
+  const uniqueIds = Array.from(new Set(ids)).filter(Boolean);
+  if (uniqueIds.length === 0) return new Map<string, string>();
+
+  const chunks = chunkIds(uniqueIds, 20);
+  const results = await Promise.all(
+    chunks.map((chunk) =>
+      NewOrdemdeServicoFieldControlService.getAll({
+        filter: chunk
+          .map((id) => `new_ordemdeservicofieldcontrolid eq '${escapeODataValue(id)}'`)
+          .join(' or '),
+        select: ['new_ordemdeservicofieldcontrolid', 'new_name'],
+      })
+    )
+  );
+
+  const map = new Map<string, string>();
+  results.forEach((result) => {
+    (result.data || []).forEach((row: any) => {
+      if (row.new_ordemdeservicofieldcontrolid) {
+        map.set(row.new_ordemdeservicofieldcontrolid, row.new_name || row.new_id || 'OS');
       }
     });
   });

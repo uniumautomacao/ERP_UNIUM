@@ -9,12 +9,15 @@ import { CalendarioTab } from '../../components/domain/cronograma-instalacoes/Ca
 import { OSDetailPanel } from '../../components/domain/cronograma-instalacoes/OSDetailPanel';
 import { OSCard } from '../../components/domain/cronograma-instalacoes/OSCard';
 import { VisaoAnualTab } from '../../components/domain/cronograma-instalacoes/VisaoAnualTab';
+import { HistoricoComentariosKpisTab } from '../../components/domain/cronograma-instalacoes/HistoricoComentariosKpisTab';
 import { useCronogramaInstalacoes } from '../../hooks/useCronogramaInstalacoes';
 import { SEARCH_PLACEHOLDER } from '../../features/cronograma-instalacoes/constants';
 import type { TipoServicoFiltro } from '../../features/cronograma-instalacoes/types';
 import { formatMonthYear, parseDate } from '../../features/cronograma-instalacoes/utils';
 
-type TabKey = 'pendentes' | 'sem-resposta' | 'visao-anual' | 'calendario';
+type TabKey = 'pendentes' | 'sem-resposta' | 'visao-anual' | 'calendario' | 'historico';
+
+const HISTORICO_DIAS = 90;
 
 export function CronogramaInstalacoesPage() {
   const [selectedTab, setSelectedTab] = useState<TabKey>('pendentes');
@@ -34,15 +37,18 @@ export function CronogramaInstalacoesPage() {
     calendarioItens,
     calendarioAnoItens,
     comentariosPorOs,
+    historicoComentarios,
     anosDisponiveis,
     loading,
     error,
     carregarComentarios,
+    carregarHistoricoComentarios,
     definirDataPrevista,
     confirmarData,
     registrarTentativa,
     marcarSemResposta,
     clienteRetornou,
+    historicoLoading,
   } = useCronogramaInstalacoes({
     ano,
     mes: calendarMonth,
@@ -57,6 +63,7 @@ export function CronogramaInstalacoesPage() {
       { value: 'sem-resposta', label: `Sem Resposta (${semResposta.length})` },
       { value: 'visao-anual', label: 'Visão Anual' },
       { value: 'calendario', label: 'Calendário' },
+      { value: 'historico', label: 'Histórico & KPIs' },
     ],
     [semResposta.length, totalPendentes]
   );
@@ -124,6 +131,11 @@ export function CronogramaInstalacoesPage() {
       setSelectedAnnualMonth(new Date().getMonth());
     }
   }, [selectedAnnualMonth, selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab !== 'historico') return;
+    carregarHistoricoComentarios(HISTORICO_DIAS);
+  }, [carregarHistoricoComentarios, selectedTab]);
 
   useEffect(() => {
     if (selectedTab !== 'visao-anual') return;
@@ -226,6 +238,13 @@ export function CronogramaInstalacoesPage() {
                   </div>
                 </div>
               )}
+              {selectedTab === 'historico' && (
+                <HistoricoComentariosKpisTab
+                  comentarios={historicoComentarios}
+                  loading={historicoLoading}
+                  dias={HISTORICO_DIAS}
+                />
+              )}
             </div>
 
             <div className="flex-[35] min-w-[350px] overflow-auto">
@@ -323,6 +342,19 @@ export function CronogramaInstalacoesPage() {
                       </div>
                     </>
                   )}
+                </div>
+              ) : selectedTab === 'historico' ? (
+                <div
+                  style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    border: `1px solid ${tokens.colorNeutralStroke2}`,
+                    backgroundColor: tokens.colorNeutralBackground1,
+                  }}
+                >
+                  <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                    Esta aba mostra um histórico consolidado de comentários. Para detalhes por OS, use as outras abas.
+                  </Text>
                 </div>
               ) : (
                 <OSDetailPanel

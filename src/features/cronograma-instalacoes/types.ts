@@ -50,6 +50,11 @@ export interface ComentarioOS {
   datetime: string;
 }
 
+export interface ComentarioHistorico extends ComentarioOS {
+  osLabel?: string;
+  createdOn?: string;
+}
+
 export interface UsuarioBasico {
   id: string;
   nome: string;

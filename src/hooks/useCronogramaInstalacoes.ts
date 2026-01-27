@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ComentarioOS, CronogramaOS, FiltrosCronograma, StatusProgramacao } from '../features/cronograma-instalacoes/types';
+import type {
+  ComentarioHistorico,
+  ComentarioOS,
+  CronogramaOS,
+  FiltrosCronograma,
+  StatusProgramacao,
+} from '../features/cronograma-instalacoes/types';
 import { calcularStatus, formatDateLong, obterAnosDisponiveis } from '../features/cronograma-instalacoes/utils';
 import { STATUS_LABELS, STATUS_PROGRAMACAO, TIPO_COMENTARIO, TIPO_SERVICO } from '../features/cronograma-instalacoes/constants';
 import {
@@ -7,6 +13,8 @@ import {
   fetchCalendarioAno,
   fetchCalendarioMonth,
   fetchComentarios,
+  fetchComentariosRecentes,
+  fetchOrdensServicoByIds,
   fetchPendentesGroups,
   fetchSemResposta,
   fetchUsuariosByIds,
@@ -100,6 +108,8 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
   const [calendarioItens, setCalendarioItens] = useState<CronogramaOS[]>([]);
   const [calendarioAnoItens, setCalendarioAnoItens] = useState<CronogramaOS[]>([]);
   const [comentariosPorOs, setComentariosPorOs] = useState<Map<string, ComentarioOS[]>>(new Map());
+  const [historicoComentarios, setHistoricoComentarios] = useState<ComentarioHistorico[]>([]);
+  const [historicoLoading, setHistoricoLoading] = useState(false);
   const [anosDisponiveis, setAnosDisponiveis] = useState<number[]>([
     new Date().getFullYear(),
     new Date().getFullYear() + 1,
@@ -210,6 +220,43 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
       return next;
     });
   }, [comentariosPorOs]);
+
+  const carregarHistoricoComentarios = useCallback(async (dias = 90) => {
+    if (historicoComentarios.length > 0) return;
+    setHistoricoLoading(true);
+    try {
+      const result = await fetchComentariosRecentes({ days: dias, top: 500 });
+      if (!result.success || !result.data) {
+        setHistoricoComentarios([]);
+        return;
+      }
+
+      const userIds = Array.from(new Set(result.data.map((item: any) => item._new_usuario_value).filter(Boolean)));
+      const usersMap = await fetchUsuariosByIds(userIds);
+      const osIds = Array.from(new Set(result.data.map((item: any) => item._new_ordemdeservico_value).filter(Boolean)));
+      const osMap = await fetchOrdensServicoByIds(osIds);
+
+      const comentarios: ComentarioHistorico[] = result.data.map((item: any) => {
+        const formattedUser = item['new_Usuario@OData.Community.Display.V1.FormattedValue'];
+        const userName = formattedUser || usersMap.get(item._new_usuario_value) || 'Usuário';
+        const osLabel = osMap.get(item._new_ordemdeservico_value) || item._new_ordemdeservico_value || 'OS';
+        return {
+          id: item.new_comentariodeordemdeservicoid,
+          ordemdeservico: item._new_ordemdeservico_value,
+          tipodecomentario: item.new_tipodecomentario,
+          comentario: item.new_comentario ?? '',
+          usuario: userName,
+          datetime: item.new_datetime ?? item.createdon,
+          osLabel,
+          createdOn: item.createdon,
+        };
+      });
+
+      setHistoricoComentarios(comentarios);
+    } finally {
+      setHistoricoLoading(false);
+    }
+  }, [historicoComentarios.length]);
 
   const updateOs = useCallback(async (osId: string, payload: any) => {
     // Limpar payload de campos nulos ou indefinidos que não devem ser enviados se não alterados
@@ -377,16 +424,19 @@ export function useCronogramaInstalacoes({ mes, ...filtros }: CronogramaHookOpti
     calendarioItens,
     calendarioAnoItens,
     comentariosPorOs,
+    historicoComentarios,
     anosDisponiveis,
     loading,
     error,
     reload: loadData,
     carregarComentarios,
+    carregarHistoricoComentarios,
     definirDataPrevista,
     confirmarData,
     registrarTentativa,
     marcarSemResposta,
     clienteRetornou,
+    historicoLoading,
   };
 }
 

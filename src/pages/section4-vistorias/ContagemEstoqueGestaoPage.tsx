@@ -408,7 +408,7 @@ export function ContagemEstoqueGestaoPage() {
       });
       const start = toIsoStart(dashboardStart);
       const end = toIsoEnd(dashboardEnd);
-      const dateFilter = `new_datacontagem ge ${start} and new_datacontagem le ${end}`;
+      const dateFilter = `new_datacontagem ge ${start} and new_datacontagem le ${end}`; 
 
       const [totalResult, pendenteResult, validadaResult, listResult] = await Promise.all([
         NewContagemEstoqueService.getAll({
