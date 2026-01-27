@@ -37,6 +37,8 @@ export * as NewCotacaotemporariadeprodutoModel from './models/NewCotacaotemporar
 export * as NewRegimedecotacaotemporariaModel from './models/NewRegimedecotacaotemporariaModel';
 export * as NewTipodeservicoregimedecotacaotemporariaModel from './models/NewTipodeservicoregimedecotacaotemporariaModel';
 export * as NewComentariodeOrdemdeServicoModel from './models/NewComentariodeOrdemdeServicoModel';
+export * as NewRemessaModel from './models/NewRemessaModel';
+export * as NewTransportadoraModel from './models/NewTransportadoraModel';
 
 // Services
 export * from './services/RolesService';
@@ -71,3 +73,5 @@ export * from './services/NewCotacaotemporariadeprodutoService';
 export * from './services/NewRegimedecotacaotemporariaService';
 export * from './services/NewTipodeservicoregimedecotacaotemporariaService';
 export * from './services/NewComentariodeOrdemdeServicoService';
+export * from './services/NewRemessaService';
+export * from './services/NewTransportadoraService';

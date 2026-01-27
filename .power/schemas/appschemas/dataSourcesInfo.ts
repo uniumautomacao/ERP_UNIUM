@@ -228,5 +228,19 @@ export const dataSourcesInfo = {
     "primaryKey": "new_comentariodeordemdeservicoid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_remessas": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_remessaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_transportadoras": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_transportadoraid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

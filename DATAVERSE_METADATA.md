@@ -35,6 +35,8 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Regime de Cotação Temporária | `new_regimedecotacaotemporaria` | `new_regimedecotacaotemporarias` | `new_regimedecotacaotemporariaid` |
 | Tipo de Serviço Regime de Cotação Temporária | `new_tipodeservicoregimedecotacaotemporaria` | `new_tipodeservicoregimedecotacaotemporarias` | `new_tipodeservicoregimedecotacaotemporariaid` |
 | Comentário de Ordem de Serviço | `new_comentariodeordemdeservico` | `new_comentariodeordemdeservicos` | `new_comentariodeordemdeservicoid` |
+| Remessa | `new_remessa` | `new_remessas` | `new_remessaid` |
+| Transportadora | `new_transportadora` | `new_transportadoras` | `new_transportadoraid` |
 
 ---
 
@@ -572,6 +574,36 @@ PrimaryKey:                       new_comentariodeordemdeservicoid
 |------------------------------|---------------------|------------------|
 | new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
 | new_usuario | new_Usuario | systemusers |
+
+---
+
+## 🔵 new_remessa (Remessa)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_remessa
+EntityLogicalCollectionName:      new_remessas
+EntitySetName:                    new_remessas
+PrimaryKey:                       new_remessaid
+```
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_fornecedor | new_Fornecedor | cr22f_fornecedoresfromsharepointlists |
+| new_transportadora | new_Transportadora | new_transportadoras |
+
+---
+
+## 🔵 new_transportadora (Transportadora)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_transportadora
+EntityLogicalCollectionName:      new_transportadoras
+EntitySetName:                    new_transportadoras
+PrimaryKey:                       new_transportadoraid
+```
 
 ---
 

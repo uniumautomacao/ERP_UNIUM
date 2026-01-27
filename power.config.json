@@ -172,6 +172,16 @@
           "entitySetName": "new_comentariodeordemdeservicos",
           "logicalName": "new_comentariodeordemdeservico",
           "isHidden": false
+        },
+        "new_remessas": {
+          "entitySetName": "new_remessas",
+          "logicalName": "new_remessa",
+          "isHidden": false
+        },
+        "new_transportadoras": {
+          "entitySetName": "new_transportadoras",
+          "logicalName": "new_transportadora",
+          "isHidden": false
         }
       },
       "actions": null
