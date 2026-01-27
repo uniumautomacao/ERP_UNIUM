@@ -34,7 +34,7 @@ export class NewContagemDoDiaItemService {
     return await NewContagemDoDiaItemService.client.retrieveMultipleRecordsAsync(NewContagemDoDiaItemService.dataSourceName, options);
   }
 
-  public static getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
+  public static async getMetadata(options: GetEntityMetadataOptions<any> = {}): Promise<IOperationResult<Partial<EntityMetadata>>> {
     return await NewContagemDoDiaItemService.client.executeAsync({
       dataverseRequest: {
         action: 'getEntityMetadata',
