@@ -294,7 +294,8 @@ export function GestaoRemessasPage() {
           const result = await NewRemessaService.getAll({
             select: selectRemessaFields,
             filter,
-            orderBy: ['new_previsaodechegada asc'],
+            orderBy: stage.value === REMESSA_STAGE_ENTREGUE ? ['new_dataderecebimento desc'] : ['new_previsaodechegada asc'],
+            top: 100
           });
           return {
             stageValue: stage.value,
