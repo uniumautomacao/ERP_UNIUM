@@ -32,6 +32,7 @@ import { ProjectPlannerPage } from '../pages/section2-operations/ProjectPlannerP
 import { TeamManagementPage } from '../pages/section2-operations/TeamManagementPage';
 import { RMAsKanbanPage } from '../pages/section2-operations/RMAsKanbanPage';
 import { GestaoRemessasPage } from '../pages/section2-operations/GestaoRemessasPage';
+import { GestaoComprasPage } from '../pages/section2-operations/GestaoComprasPage';
 import { ContagemEstoqueMobilePage } from '../pages/section4-vistorias/ContagemEstoqueMobilePage';
 import { ContagemEstoqueGestaoPage } from '../pages/section4-vistorias/ContagemEstoqueGestaoPage';
 import { LeitorMercadoriasPage } from '../pages/section4-vistorias/LeitorMercadoriasPage';
@@ -138,6 +139,20 @@ export const navigation: NavSection[] = [
         icon: <Board24Regular />,
         path: '/logistica/remessas',
         component: GestaoRemessasPage,
+      },
+    ],
+  },
+  {
+    id: 'compras',
+    label: 'Compras',
+    description: 'Gestão de compras e cotações',
+    items: [
+      {
+        id: 'gestao-compras',
+        label: 'Gestão de Compras',
+        icon: <DocumentBulletList24Regular />,
+        path: '/compras/gestao',
+        component: GestaoComprasPage,
       },
     ],
   },

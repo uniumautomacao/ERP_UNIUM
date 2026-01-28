@@ -20,7 +20,7 @@ const stringAttribute = (schemaName: string, displayName: string, maxLength = 20
   FormatName: { Value: 'Text' },
 });
 
-const integerAttribute = (schemaName: string, displayName: string) => ({
+export const integerAttribute = (schemaName: string, displayName: string) => ({
   '@odata.type': 'Microsoft.Dynamics.CRM.IntegerAttributeMetadata',
   SchemaName: schemaName,
   DisplayName: label(displayName),
@@ -152,6 +152,49 @@ const relationshipExists = async (schemaName: string) => {
   } catch {
     return false;
   }
+};
+
+type GlobalOptionSetOption = {
+  label: string;
+  value: number;
+};
+
+export const buildGlobalOptionSetPayload = (input: {
+  name: string;
+  displayName: string;
+  description?: string;
+  options: GlobalOptionSetOption[];
+}) => ({
+  '@odata.type': 'Microsoft.Dynamics.CRM.OptionSetMetadata',
+  Name: input.name,
+  DisplayName: label(input.displayName),
+  Description: label(input.description ?? input.displayName),
+  OptionSetType: 'Picklist',
+  Options: input.options.map((option) => ({
+    Value: option.value,
+    Label: label(option.label),
+  })),
+});
+
+export const globalOptionSetExists = async (name: string) => {
+  try {
+    await dataverseRequest({
+      method: 'GET',
+      path: `GlobalOptionSetDefinitions(Name='${name}')?$select=Name`,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const createGlobalOptionSet = async (payload: ReturnType<typeof buildGlobalOptionSetPayload>) => {
+  await dataverseRequest({
+    method: 'POST',
+    path: 'GlobalOptionSetDefinitions',
+    body: payload,
+    useSolution: true,
+  });
 };
 
 const createLookupRelationship = async (input: {

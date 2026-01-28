@@ -232,6 +232,12 @@ EntitySetName:                    cr22f_fornecedoresfromsharepointlists
 PrimaryKey:                       cr22f_fornecedoresfromsharepointlistid
 ```
 
+### Campos adicionais (Gestão de Compras)
+| AttributeLogicalName | Type | Notas |
+|----------------------|------|-------|
+| new_prazofrete | Integer | Prazo de frete (dias) |
+| new_leadtimetotal | Integer | Calculada (prazo padrão + frete) |
+
 ---
 
 ## 🔵 new_tiposervicoprecodeproduto (TipoServiço-PreçodeProduto)
@@ -610,6 +616,13 @@ EntityLogicalCollectionName:      new_produtoservicos
 EntitySetName:                    new_produtoservicos
 PrimaryKey:                       new_produtoservicoid
 ```
+
+### Campos adicionais (Gestão de Compras)
+| AttributeLogicalName | Type | Notas |
+|----------------------|------|-------|
+| new_datalimiteparapedido | DateOnly | Calculada (data limite do pedido) |
+| new_diasparapedido | Integer | Calculada (dias até a data limite) |
+| new_faixadeprazo | Picklist | Calculada (urgência) |
 
 ### ⚡ Campos de Lookup (Navigation Properties)
 | Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |

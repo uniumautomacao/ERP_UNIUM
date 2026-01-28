@@ -1,7 +1,16 @@
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createColumn, createContagemSnapshotTables, createTable, listEntities, publishAll } from './schema';
+import {
+  buildGlobalOptionSetPayload,
+  createColumn,
+  createContagemSnapshotTables,
+  createGlobalOptionSet,
+  createTable,
+  globalOptionSetExists,
+  listEntities,
+  publishAll,
+} from './schema';
 
 const server = new McpServer({
   name: 'dataverse-schema-mcp',
@@ -56,6 +65,35 @@ server.tool(
   async (input) => {
     await createColumn(input.tableLogicalName, input.payload);
     return { content: [{ type: 'text', text: 'Coluna criada.' }] };
+  }
+);
+
+server.tool(
+  'dataverse_schema_create_global_optionset',
+  'Cria um Choice global (Global OptionSet).',
+  {
+    name: z.string(),
+    displayName: z.string(),
+    description: z.string().optional(),
+    options: z.array(z.object({
+      label: z.string(),
+      value: z.number().int(),
+    })),
+  },
+  async (input) => {
+    if (await globalOptionSetExists(input.name)) {
+      return { content: [{ type: 'text', text: 'Global choice já existe.' }] };
+    }
+
+    const payload = buildGlobalOptionSetPayload({
+      name: input.name,
+      displayName: input.displayName,
+      description: input.description,
+      options: input.options,
+    });
+
+    await createGlobalOptionSet(payload);
+    return { content: [{ type: 'text', text: 'Global choice criado.' }] };
   }
 );
 

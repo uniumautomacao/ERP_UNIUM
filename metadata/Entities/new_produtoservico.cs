@@ -1339,24 +1339,5 @@ public partial class new_ProdutoServico : Microsoft.Xrm.Sdk.Entity, System.Compo
 			return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
 		}
 	}
-	
-	/// <summary>
-	/// N:1 new_produtoservico_Remessa_new_remessa
-	/// </summary>
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_remessa")]
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_produtoservico_Remessa_new_remessa")]
-	public new_Remessa new_produtoservico_Remessa_new_remessa
-	{
-		get
-		{
-			return this.GetRelatedEntity<new_Remessa>("new_produtoservico_Remessa_new_remessa", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_produtoservico_Remessa_new_remessa");
-			this.SetRelatedEntity<new_Remessa>("new_produtoservico_Remessa_new_remessa", null, value);
-			this.OnPropertyChanged("new_produtoservico_Remessa_new_remessa");
-		}
-	}
 }
 #pragma warning restore CS1591

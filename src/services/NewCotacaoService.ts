@@ -21,6 +21,14 @@ export class NewCotacaoService {
   private static readonly dataSourceName = 'new_cotacaos';
   private static readonly client = getClient(dataSourcesInfo);
 
+  public static async create(record: Partial<NewCotacao>): Promise<IOperationResult<NewCotacao>> {
+    return await NewCotacaoService.client.createRecordAsync(NewCotacaoService.dataSourceName, record);
+  }
+
+  public static async update(id: string, changedFields: Partial<NewCotacao>): Promise<IOperationResult<NewCotacao>> {
+    return await NewCotacaoService.client.updateRecordAsync(NewCotacaoService.dataSourceName, id, changedFields);
+  }
+
   public static async get(id: string, options?: IGetOptions): Promise<IOperationResult<NewCotacao>> {
     return await NewCotacaoService.client.retrieveRecordAsync(NewCotacaoService.dataSourceName, id, options);
   }
