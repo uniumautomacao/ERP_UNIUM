@@ -1312,14 +1312,14 @@
     {
       "IsControlSpecific": true,
       "LoadingOrder": 11,
-      "ModifiedPath": "https://docserverpwaprodsbr.blob.core.windows.net/ab677e51-d476-420f-bcbb-c091e3bef949-1/appdynamicresources/D%253a0SvcFab0_App0PowerApps.WebAuthoringType_App670work0p0muoswf.3xa020S0Resources0Controls0CanvizLLCPCF.PCFCopyTextComponent.bundle.js?skoid=58690ece-ec83-4ce2-9ce8-883d4d6a54ee&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2024-10-17T20%3A18%3A41Z&ske=2024-10-18T20%3A33%3A41Z&sks=b&skv=2023-01-03&sv=2023-01-03&spr=https&se=2024-10-18T20%3A33%3A41Z&sr=b&sp=r&sig=8flND%2BJDf7QyM0wQPym1kqlvLT1u1StUPhM42%2BCo90Y%3D",
+      "ModifiedPath": "https://dsprdil102sbr.blob.core.windows.net/08dada3e-a135-4d6e-b838-e6035d482a22-1/appdynamicresources/D%253a0SvcFab0_App0PowerApps.WebAuthoringType_App670work0l0bbmu4l.d43020S0Resources0Controls0CanvizLLCPCF.PCFCopyTextComponent.bundle.js?skoid=58690ece-ec83-4ce2-9ce8-883d4d6a54ee&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2025-07-07T20%3A46%3A20Z&ske=2025-07-08T21%3A01%3A20Z&sks=b&skv=2023-01-03&sv=2023-01-03&spr=https&se=2025-07-08T21%3A01%3A20Z&sr=b&sp=r&sig=l1FkOaveLT2u64A51fANfE7PsWUDFmZKMyQNpmCDUQM%3D",
       "Path": "/PCFControls/tbag_CanvizLLCPCF.PCFCopyTextComponent/CanvizLLCPCF.PCFCopyTextComponent.bundle.js",
       "Type": 0
     },
     {
       "IsControlSpecific": true,
       "LoadingOrder": 11,
-      "ModifiedPath": "https://docserverpwaprodsbr.blob.core.windows.net/ab677e51-d476-420f-bcbb-c091e3bef949-1/appdynamicresources/D%253a0SvcFab0_App0PowerApps.WebAuthoringType_App670work0p0muoswf.3xa020S0Resources0Controls0css%252fCanvizLLCPCF.PCFCopyTextComponent.PCFCopyTextComponent.css?skoid=58690ece-ec83-4ce2-9ce8-883d4d6a54ee&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2024-10-17T20%3A18%3A41Z&ske=2024-10-18T20%3A33%3A41Z&sks=b&skv=2023-01-03&sv=2023-01-03&spr=https&se=2024-10-18T20%3A33%3A41Z&sr=b&sp=r&sig=jPB%2BLGBcICndv2K82dwAPJ1BDKZsUVrBSYx%2B3pHg%2F74%3D",
+      "ModifiedPath": "https://dsprdil102sbr.blob.core.windows.net/08dada3e-a135-4d6e-b838-e6035d482a22-1/appdynamicresources/D%253a0SvcFab0_App0PowerApps.WebAuthoringType_App670work0l0bbmu4l.d43020S0Resources0Controls0css%252fCanvizLLCPCF.PCFCopyTextComponent.PCFCopyTextComponent.css?skoid=58690ece-ec83-4ce2-9ce8-883d4d6a54ee&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2025-07-07T20%3A46%3A21Z&ske=2025-07-08T21%3A01%3A21Z&sks=b&skv=2023-01-03&sv=2023-01-03&spr=https&se=2025-07-08T21%3A01%3A21Z&sr=b&sp=r&sig=k9RO7aD0v3okQUfVfkvYN68MDA%2BurRDJtFiWWa%2F2d30%3D",
       "Path": "/PCFControls/tbag_CanvizLLCPCF.PCFCopyTextComponent/css/CanvizLLCPCF.PCFCopyTextComponent.PCFCopyTextComponent.css",
       "Type": 1
     },
@@ -1333,7 +1333,7 @@
     {
       "IsControlSpecific": true,
       "LoadingOrder": 14,
-      "ModifiedPath": "https://docserverpwaprodsbr.blob.core.windows.net/ab677e51-d476-420f-bcbb-c091e3bef949-1/appdynamicresources/D%253a0SvcFab0_App0PowerApps.WebAuthoringType_App670work0p0muoswf.3xa020S0Resources0Controls0strings%252fCanvizLLCPCF.PCFCopyTextComponent.PCFCopyTextComponent.1033.json?skoid=58690ece-ec83-4ce2-9ce8-883d4d6a54ee&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2024-10-17T20%3A18%3A41Z&ske=2024-10-18T20%3A33%3A41Z&sks=b&skv=2023-01-03&sv=2023-01-03&spr=https&se=2024-10-18T20%3A33%3A41Z&sr=b&sp=r&sig=wcSJ9wzNrBTWDzJo9s3xfNeUn7ExrkFQRKIU6dZUULU%3D",
+      "ModifiedPath": "https://dsprdil102sbr.blob.core.windows.net/08dada3e-a135-4d6e-b838-e6035d482a22-1/appdynamicresources/D%253a0SvcFab0_App0PowerApps.WebAuthoringType_App670work0l0bbmu4l.d43020S0Resources0Controls0strings%252fCanvizLLCPCF.PCFCopyTextComponent.PCFCopyTextComponent.1033.json?skoid=58690ece-ec83-4ce2-9ce8-883d4d6a54ee&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2025-07-07T20%3A46%3A21Z&ske=2025-07-08T21%3A01%3A21Z&sks=b&skv=2023-01-03&sv=2023-01-03&spr=https&se=2025-07-08T21%3A01%3A21Z&sr=b&sp=r&sig=HU9X1saKQy1Udzr7cssuonrbIMyUFgONczhwKKAMlIs%3D",
       "Path": "/PCFControls/tbag_CanvizLLCPCF.PCFCopyTextComponent/strings/CanvizLLCPCF.PCFCopyTextComponent.PCFCopyTextComponent.1033.json",
       "Type": 5
     },

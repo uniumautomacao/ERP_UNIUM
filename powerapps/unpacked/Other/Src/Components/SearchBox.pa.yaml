@@ -58,16 +58,15 @@ ComponentDefinitions:
             Fill: =RGBA(0, 0, 0, 0)
             FocusedBorderColor: =txtSearchInput_1.BorderColor
             FocusedBorderThickness: =2
-            Font: =Font.'Segoe UI'
-            Height: =Parent.Height
+            Font: =Font.Lato
+            Height: =32
             HintText: ="Pesquisar"
             HoverBorderColor: =ColorFade(RGBA(0, 120, 212, 1), -30%)
             HoverColor: =RGBA(51, 51, 51, 1)
             HoverFill: =RGBA(255, 255, 255, 1)
-            PaddingBottom: =0.00
-            PaddingLeft: =26.24
-            PaddingRight: =4.01
-            PaddingTop: =0.00
+            PaddingBottom: =0
+            PaddingLeft: =40
+            PaddingTop: =0
             PressedBorderColor: =RGBA(0, 120, 212, 1)
             PressedColor: =RGBA(51, 51, 51, 1)
             PressedFill: =RGBA(255, 255, 255, 1)
@@ -75,10 +74,10 @@ ComponentDefinitions:
             RadiusBottomRight: =2
             RadiusTopLeft: =2
             RadiusTopRight: =2
-            Size: =9
-            Width: =Parent.Width
-            X: =0.80
-            Y: =0.66
+            Size: =LookUp(SearchBox.Styles, Name = "TextBodyFontSizeValue").Value
+            Width: =SearchBox.Width - 3
+            X: =1
+            Y: =1
       - imgSearch_1:
           Control: Image@2.2.3
           Properties:
@@ -88,7 +87,7 @@ ComponentDefinitions:
             DisabledFill: =RGBA(0, 0, 0, 0)
             FocusedBorderColor: =imgSearch_1.BorderColor
             FocusedBorderThickness: =4
-            Height: =Parent.Height/10*7
+            Height: =32
             HoverBorderColor: =RGBA(0, 0, 0, 0)
             HoverFill: =RGBA(0, 0, 0, 0)
             Image: |-
@@ -102,13 +101,12 @@ ComponentDefinitions:
 
               </svg>"
               )
-            PaddingBottom: =3.94
-            PaddingLeft: =3.94
-            PaddingRight: =4.81
-            PaddingTop: =4.81
+            PaddingBottom: =6
+            PaddingLeft: =6
+            PaddingRight: =6
+            PaddingTop: =6
             PressedBorderColor: =RGBA(0, 0, 0, 0)
             PressedFill: =RGBA(0, 0, 0, 0)
-            Width: =Self.Height
-            X: |
-              =0
-            Y: =(Parent.Height-Self.Height)/2
+            Width: =33
+            X: =1
+            Y: =1

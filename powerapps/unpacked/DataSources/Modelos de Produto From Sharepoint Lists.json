@@ -393,6 +393,10 @@
       "OptionSetReferenceItem0": {
         "OptionSetReferenceColumnName": "new_tipodesistemapadrao",
         "OptionSetReferenceEntityName": "Modelos de Produto From Sharepoint Lists"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_tipodesistema",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
       }
     },
     "OptionSetTypeKey": "PicklistType",

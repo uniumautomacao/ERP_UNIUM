@@ -332,18 +332,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Guia de Conexões Page",
-      "Value": "custompage:new_guiadeconexespage_6e45d"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Quadro de Oportunidades",
-      "Value": "custompage:new_quadrodeoportunidades_b10b7"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Recibos Page",
-      "Value": "custompage:new_recibospage_d528f"
+      "Name": "Recibos e Emissão de NF Page",
+      "Value": "custompage:new_reciboseemissodenfpage_c16a8"
     },
     {
       "Kind": "Page",
@@ -357,8 +347,13 @@
     },
     {
       "Kind": "Page",
-      "Name": "Tarefas Coordenador",
-      "Value": "custompage:new_tarefascoordenador_9345e"
+      "Name": "Quadro de Oportunidades",
+      "Value": "custompage:new_quadrodeoportunidades_b10b7"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Guia de Conexões Page",
+      "Value": "custompage:new_guiadeconexespage_6e45d"
     },
     {
       "Kind": "Page",
@@ -372,13 +367,18 @@
     },
     {
       "Kind": "Page",
-      "Name": "Speec To Text Playground",
-      "Value": "custompage:new_speectotextplayground_fba64"
+      "Name": "Recibos Page",
+      "Value": "custompage:new_recibospage_d528f"
     },
     {
       "Kind": "Page",
-      "Name": "Ajustes de Localização Page",
-      "Value": "custompage:new_ajustesdelocalizaopage_71983"
+      "Name": "Tarefas Coordenador",
+      "Value": "custompage:new_tarefascoordenador_9345e"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Speec To Text Playground",
+      "Value": "custompage:new_speectotextplayground_fba64"
     },
     {
       "Kind": "Page",
@@ -397,13 +397,28 @@
     },
     {
       "Kind": "Page",
-      "Name": "Recibos e Emissão de NF Page",
-      "Value": "custompage:new_reciboseemissodenfpage_c16a8"
+      "Name": "Quadro de RMAs",
+      "Value": "custompage:new_quadrodermas_00b05"
     },
     {
       "Kind": "Page",
-      "Name": "Quadro de RMAs",
-      "Value": "custompage:new_quadrodermas_00b05"
+      "Name": "Lista de Inspeção Page",
+      "Value": "custompage:new_listadeinspeopage_0bbcf"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Ajustes de Localização Page",
+      "Value": "custompage:new_ajustesdelocalizaopage_71983"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Aprovações de Compra Clara Card",
+      "Value": "custompage:new_aprovaesdecompraclaracard_379cb"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Cadastro Catalogo Page",
+      "Value": "custompage:new_cadastrocatalogopage_a7ac6"
     },
     {
       "Kind": "Page",
@@ -417,53 +432,13 @@
     },
     {
       "Kind": "Page",
-      "Name": "Playground",
-      "Value": "custompage:new_playground_a1347"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Compras e Cotações V2 Page",
-      "Value": "custompage:new_comprasecotaesv2page_9fec1"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Lista de Inspeção Page",
-      "Value": "custompage:new_listadeinspeopage_0bbcf"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Aprovações de Compra Clara Card",
-      "Value": "custompage:new_aprovaesdecompraclaracard_379cb"
-    },
-    {
-      "Kind": "Page",
-      "Name": "CriarClientesAPP",
-      "Value": "custompage:new_criarclientesapp_4eef6"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Cadastro Catalogo Page",
-      "Value": "custompage:new_cadastrocatalogopage_a7ac6"
-    },
-    {
-      "Kind": "Page",
-      "Name": "CF_Produtos",
-      "Value": "custompage:new_cfprodutos_80d6a"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Compras Page",
-      "Value": "custompage:new_compraspage_cd238"
-    },
-    {
-      "Kind": "Page",
       "Name": "Linha do Tempo V3",
       "Value": "custompage:new_linhadotempov3_67b27"
     },
     {
       "Kind": "Page",
-      "Name": "Cotações Page",
-      "Value": "custompage:new_cotaespage_bfa2b"
+      "Name": "Playground",
+      "Value": "custompage:new_playground_a1347"
     },
     {
       "Kind": "Page",
@@ -472,18 +447,33 @@
     },
     {
       "Kind": "Page",
+      "Name": "Compras e Cotações V2 Page",
+      "Value": "custompage:new_comprasecotaesv2page_9fec1"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Compras Page",
+      "Value": "custompage:new_compraspage_cd238"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Cotações Page",
+      "Value": "custompage:new_cotaespage_bfa2b"
+    },
+    {
+      "Kind": "Page",
+      "Name": "CriarClientesAPP",
+      "Value": "custompage:new_criarclientesapp_4eef6"
+    },
+    {
+      "Kind": "Page",
+      "Name": "CF_Produtos",
+      "Value": "custompage:new_cfprodutos_80d6a"
+    },
+    {
+      "Kind": "Page",
       "Name": "Aplicativo",
       "Value": "custompage:new_aplicativo_38686"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Conferências de Instalação Pendentes Page",
-      "Value": "custompage:new_confernciasdeinstalaopendentespage_fa954"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Resultado do Instalador Page",
-      "Value": "custompage:new_resultadodoinstaladorpage_dae5c"
     },
     {
       "Kind": "Page",
@@ -492,8 +482,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Mapa de Instalação Page",
-      "Value": "custompage:new_mapadeinstalaopage_ff2aa"
+      "Name": "Conferências de Instalação Pendentes Page",
+      "Value": "custompage:new_confernciasdeinstalaopendentespage_fa954"
     },
     {
       "Kind": "Page",
@@ -502,18 +492,28 @@
     },
     {
       "Kind": "Page",
-      "Name": "Enviar PDF Comprovante de Pagamento",
-      "Value": "custompage:new_enviarpdfcomprovantedepagamento_04eb4"
+      "Name": "Resultado do Instalador Page",
+      "Value": "custompage:new_resultadodoinstaladorpage_dae5c"
     },
     {
       "Kind": "Page",
-      "Name": "Cadastro Rápido de Produto Page",
-      "Value": "custompage:new_cadastrorpidodeprodutopage_25f69"
+      "Name": "Desagrupar Itens de Estoque",
+      "Value": "custompage:new_desagruparitensdeestoque_8b90d"
     },
     {
       "Kind": "Page",
       "Name": "Gerador de Etiquetas de Endereço de Armazém",
       "Value": "custompage:new_geradordeetiquetasdeendereodearmazm_5799a"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Enviar PDF Comprovante de Pagamento",
+      "Value": "custompage:new_enviarpdfcomprovantedepagamento_04eb4"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Tarefas de Desagrupamento Page",
+      "Value": "custompage:new_tarefasdedesagrupamentopage_b831c"
     },
     {
       "Kind": "Page",
@@ -527,8 +527,18 @@
     },
     {
       "Kind": "Page",
+      "Name": "Gerador de Etiquetas de Endereço V2",
+      "Value": "custompage:new_geradordeetiquetasdeendereov2_e540e"
+    },
+    {
+      "Kind": "Page",
       "Name": "Operador 3_1 Page",
       "Value": "custompage:new_operador31page_78b2e"
+    },
+    {
+      "Kind": "Page",
+      "Name": "Cadastro Rápido de Produto Page",
+      "Value": "custompage:new_cadastrorpidodeprodutopage_25f69"
     },
     {
       "Kind": "Page",
@@ -542,18 +552,8 @@
     },
     {
       "Kind": "Page",
-      "Name": "Desagrupar Itens de Estoque",
-      "Value": "custompage:new_desagruparitensdeestoque_8b90d"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Tarefas de Desagrupamento Page",
-      "Value": "custompage:new_tarefasdedesagrupamentopage_b831c"
-    },
-    {
-      "Kind": "Page",
-      "Name": "Gerador de Etiquetas de Endereço V2",
-      "Value": "custompage:new_geradordeetiquetasdeendereov2_e540e"
+      "Name": "Mapa de Instalação Page",
+      "Value": "custompage:new_mapadeinstalaopage_ff2aa"
     }
   ]
 }

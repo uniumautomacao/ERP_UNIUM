@@ -194,7 +194,7 @@
         "OptimizeForDevices": "Off",
         "Parent": "SearchBox",
         "PersistMetaDataIDKey": false,
-        "PublishOrderIndex": 132,
+        "PublishOrderIndex": 37,
         "Rules": [
           {
             "Category": "Data",
@@ -228,31 +228,31 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "26.24",
+            "InvariantScript": "40",
             "Property": "PaddingLeft",
             "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "0.80",
+            "InvariantScript": "1",
             "Property": "X",
             "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "Parent.Height",
+            "InvariantScript": "32",
             "Property": "Height",
-            "RuleProviderType": "User"
+            "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "Parent.Width",
+            "InvariantScript": "SearchBox.Width - 3",
             "Property": "Width",
-            "RuleProviderType": "User"
+            "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "0.00",
+            "InvariantScript": "0",
             "Property": "PaddingBottom",
             "RuleProviderType": "Unknown"
           },
@@ -276,7 +276,7 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "9",
+            "InvariantScript": "LookUp(SearchBox.Styles, Name = \"TextBodyFontSizeValue\").Value",
             "Property": "Size",
             "RuleProviderType": "Unknown"
           },
@@ -378,13 +378,13 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "4.01",
+            "InvariantScript": "5",
             "Property": "PaddingRight",
             "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "0.00",
+            "InvariantScript": "0",
             "Property": "PaddingTop",
             "RuleProviderType": "Unknown"
           },
@@ -402,7 +402,7 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "Font.'Segoe UI'",
+            "InvariantScript": "Font.Lato",
             "Property": "Font",
             "RuleProviderType": "Unknown"
           },
@@ -456,7 +456,7 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "0.66",
+            "InvariantScript": "1",
             "Property": "Y",
             "RuleProviderType": "Unknown"
           },
@@ -602,7 +602,7 @@
         "OptimizeForDevices": "Off",
         "Parent": "SearchBox",
         "PersistMetaDataIDKey": false,
-        "PublishOrderIndex": 133,
+        "PublishOrderIndex": 38,
         "Rules": [
           {
             "Category": "Data",
@@ -624,25 +624,25 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "3.94",
+            "InvariantScript": "6",
             "Property": "PaddingLeft",
             "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "3.94",
+            "InvariantScript": "6",
             "Property": "PaddingBottom",
             "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "4.81",
+            "InvariantScript": "6",
             "Property": "PaddingRight",
             "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "4.81",
+            "InvariantScript": "6",
             "Property": "PaddingTop",
             "RuleProviderType": "Unknown"
           },
@@ -714,9 +714,9 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "Self.Height",
+            "InvariantScript": "33",
             "Property": "Width",
-            "RuleProviderType": "User"
+            "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
@@ -756,21 +756,21 @@
           },
           {
             "Category": "Design",
-            "InvariantScript": "Parent.Height/10*7",
+            "InvariantScript": "32",
             "Property": "Height",
-            "RuleProviderType": "User"
+            "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "(Parent.Height-Self.Height)/2",
+            "InvariantScript": "1",
             "Property": "Y",
-            "RuleProviderType": "User"
+            "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
-            "InvariantScript": "0\n",
+            "InvariantScript": "1",
             "Property": "X",
-            "RuleProviderType": "User"
+            "RuleProviderType": "Unknown"
           },
           {
             "Category": "Design",
@@ -833,7 +833,7 @@
         "NameMapSourceSchema": "?"
       }
     ],
-    "LastModifiedTimestamp": "639047233774750365",
+    "LastModifiedTimestamp": "639052157845018812",
     "Name": "SearchBox",
     "Rules": [
       {
@@ -923,7 +923,7 @@
   "IsPcfControl": false,
   "IsPremiumPcfControl": false,
   "IsWidgetTemplate": false,
-  "LastModifiedTimestamp": "639047233774750365",
+  "LastModifiedTimestamp": "639052157845018812",
   "Name": "a7b4c150851e48cd9135da59f99e01ba",
   "OverridableProperties": {},
   "TemplateOriginalName": "380b369471b04e0ba2ab3681096aaab4",

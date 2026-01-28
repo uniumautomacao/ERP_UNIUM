@@ -9,13 +9,7 @@
 Screens:
   Home Screen:
     Properties:
-      Fill: |-
-        =RGBA(
-            255,
-            255,
-            255,
-            1
-        )
+      Fill: =RGBA(255, 255, 255, 1)
       LoadingSpinnerColor: =RGBA(0, 120, 212, 1)
       OnVisible: |-
         =If(
@@ -29,22 +23,15 @@ Screens:
           Properties:
             DropShadow: =DropShadow.None
             Fill: =RGBA(250, 250, 250, 1)
-            Height: =Parent.Height
+            Height: =App.Height
             LayoutAlignItems: =LayoutAlignItems.Stretch
             LayoutDirection: =LayoutDirection.Vertical
-            LayoutGap: =10
             LayoutOverflowY: =LayoutOverflow.Scroll
-            PaddingBottom: =0.00
-            PaddingLeft: =0.00
-            PaddingRight: =0.00
-            PaddingTop: =0.00
             RadiusBottomLeft: =0
             RadiusBottomRight: =0
             RadiusTopLeft: =0
             RadiusTopRight: =0
-            Width: =Parent.Width
-            X: =0.00
-            Y: =0.00
+            Width: =App.Width
           Children:
             - CommandContainer_HS:
                 Control: GroupContainer@1.4.0
@@ -53,313 +40,232 @@ Screens:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =28.86
+                  Height: =44
                   LayoutAlignItems: =LayoutAlignItems.Center
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutMaxHeight: =
                   LayoutMaxWidth: =
-                  PaddingBottom: =0.00
-                  PaddingLeft: =0.00
-                  PaddingRight: =0.00
-                  PaddingTop: =0.00
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
-                  Width: =1095.04
-                  X: =0.00
-                  Y: =0.00
                 Children:
                   - CommandBar1:
                       Control: CodeComponent
                       ComponentName: cat_PowerCAT.CommandBar
                       Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
                         FillPortions: =1
-                        Height: =131.19
                         Items: |-
                           =Table(
                               {
-                                  ItemKey: "Close",
-                                  ItemIconName: "ChromeClose",
-                                  ItemDisplayName: "Fechar Guia"
-                              },
-                              {
-                                  ItemKey: "NewDevice",
-                                  ItemIconName: "Add",
-                                  ItemDisplayName: "Novo Equipamento"
-                              },
-                              {
-                                  ItemKey: "Plot",
-                                  ItemIconName: "PDF",
-                                  ItemDisplayName: "Plotar"
-                              },
-                              {
-                                  ItemKey: "Report",
-                                  ItemIconName: "PDF",
-                                  ItemDisplayName: "Relatório"
-                              },
-                              {
-                                  ItemKey: "PrintAllTags",
-                                  ItemIconName: "Print",
-                                  ItemDisplayName: "Imprimir Etiquetas Equipamentos " & SelectedDeviceTab.DisplayName
-                              },
-                              {
-                                  ItemKey: "PrintAllConTags",
-                                  ItemIconName: "Print",
-                                  ItemDisplayName: "Imprimir Etiquetas Conexões " & SelectedDeviceTab.DisplayName,
-                                  ItemEnabled: GroupByDropdownSelectedOption = GroupByConTypeDropdownOption
-                              },
-                              {
-                                  ItemKey: "CSVTags",
-                                  ItemIconName: "Tag",
-                                  ItemDisplayName: "Gerar Etiquetas (CSV)"
-                              },
-                              {
-                                  ItemKey: "Diagram",
-                                  ItemIconName: "VisioDiagram",
-                                  ItemDisplayName: "Gerar Diagrama"
-                              },
-                              {
-                                  ItemKey: "Concluir",
-                                  ItemIconName: "Accept",
-                                  ItemDisplayName: "Marcar guia como concluído"
+                                  ItemKey: "Refresh",
+                                  ItemIconName: "Refresh",
+                                  ItemDisplayName: "Atualizar"
                               }
                           )
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =Select(btn_refreshProdutos)
+                        Theme: =AppThemeJson
+                        Width: '=600 '
+                  - CapacityText:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        Font: =Font.Lato
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Text: |-
+                          ="Capacidade: " & RoundUp(((CountRows(ProdutosPedido) / 2000) * 100),1) & "%"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Width: =150
+                  - btn_iniciarcotacao:
+                      Control: FluentV8/Button@1.5.13
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        FillPortions: =1
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
                         OnSelect: |-
                           =UpdateContext({SpinCounter: SpinCounter + 1});
-                          Switch(
-                              Self.Selected.ItemKey,
-                              "NewDevice",
-                              UpdateContext({ShowAddNewDeviceWindow: true}),
-                              "Close",
-                              Set(
-                                  CurrentProjeto,
-                                  Blank()
-                              ),
-                              "Report",
-                              Navigate(
-                                  ReportScreen,
-                                  ScreenTransition.Cover,
-                                  {
-                                      InputDevices: Filter(
-                                          ConnectionsReport As Con,
-                                          Con.new_deviceid in Distinct(
-                                              VisibleDevicesList As D,
-                                              D.DeviceIO
-                                          )
-                                      )
-                                  }
-                              ),
-                              "Plot",
-                              Select(PlotButton),
-                              "Tags",
-                              ForAll(
-                                  VisibleDevicesList As Dev,
-                                  Patch(
-                                      'Impressão de Etiquetas',
-                                      Defaults('Impressão de Etiquetas'),
-                                      {
-                                          'Nome do Projeto': CurrentProjeto.Apelido,
-                                          Texto: Dev.Name
-                                      }
-                                  );
-                                  ForAll(
-                                      Filter(
-                                          'Device IO Connections' As Con,
-                                          Con.Device.DeviceIO = Dev.DeviceIO,
-                                          Con.Status = 'Status (Device IO Connections)'.Active
-                                      ) As Con,
-                                      If(
-                                          Or(
-                                              !IsBlank(Con.'Connected To'),
-                                              !IsBlank(Con.'Connected To (Manual)'),
-                                              Len(Con.'Connected To (Manual)') > 0
-                                          ),
-                                          Patch(
-                                              'Impressão de Etiquetas',
-                                              Defaults('Impressão de Etiquetas'),
-                                              {
-                                                  'Nome do Projeto': CurrentProjeto.Apelido,
-                                                  Texto: Con.Device.Name & " - " & Con.Name,
-                                                  'Texto B': If(
-                                                      IsBlank(Con.'Connected To'),
-                                                      Con.'Connected To (Manual)',
-                                                      Con.'Connected To'.Device.Name & " - " & Con.'Connected To'.Name & " | " & Con.'Connected To'.Localização
-                                                  )
-                                              }
-                                          )
-                                      )
+                          With(
+                              {
+                                  Result: ForAll(
+                                      Distinct(
+                                          ProdutosSelecionados,
+                                          new_produtoservicoid
+                                      ),
+                                      {Result: ThisRecord.Value}
                                   )
-                              ),
-                              "Diagram",
-                              Select(GenerateGraphButton);
-                              UpdateContext({ShowDiagramText: true}),
-                              "CSVTags",
-                              Select(GenerateCSVButtonCanvas),
-                              "Concluir",
-                              Patch(
-                                  Projetos,
+                              } As ProdIds,
+                              With(
                                   {
-                                      Projeto: CurrentProjeto.Projeto,
-                                      'Data de Conclusão do Guia de Conexões': Now()
-                                  }
-                              ),
-                              "PrintAllTags",
-                              UpdateContext({SpinCounter: SpinCounter + 1});
-                              ForAll(
-                                  DevicesGallery.AllItems As Device,
-                                  With(
-                                      LookUp(
-                                          'Device IO' As D,
-                                          D.DeviceIO = Device.DeviceIO
-                                      ) As Device,
-                                      '(ImpressãodeEtiqueta)-Imprimiretiquetadeequipamento'.Run(
-                                          Device.Name,
-                                          Device.Localização
+                                      Result: Filter(
+                                          'Produtos-Serviço' As P,
+                                          P.'Produto-Serviço' in ProdIds.Result && IsBlank(P.Cotação)
                                       )
-                                  )
-                              );
-                              UpdateContext({SpinCounter: SpinCounter - 1}),
-                              "PrintAllConTags",
-                              UpdateContext({SpinCounter: SpinCounter + 1});
-                              ForAll(
-                                  DevicesGallery.AllItems As Device,
-                                  With(
-                                      {
-                                          Value: SortByColumns(
-                                              Filter(
-                                                  'Device IO Connections' As C,
-                                                  C.Device.DeviceIO = Device.DeviceIO,
-                                                  C.'Tipo de Conexão' = SelectedDeviceTab.Option2
-                                              ),
-                                              "new_tipodeconexao",
-                                              SortOrder.Ascending,
-                                              "new_name",
-                                              SortOrder.Ascending
-                                          )
-                                      } As Cons,
-                                      Notify(
-                                          CountRows(
-                                              Filter(
-                                                  Cons.Value As C,
-                                                  Or(
-                                                      !IsBlank(C.'Connected To'.'Device IO Connection'),
-                                                      Len(TrimEnds(C.'Connected To (Manual)')) > 0
-                                                  )
-                                              )
-                                          )
-                                      );
-                                      ForAll(
-                                          Filter(
-                                              Cons.Value As C,
-                                              Or(
-                                                  !IsBlank(C.'Connected To'),
-                                                  Len(TrimEnds(C.'Connected To (Manual)')) > 0
-                                              )
-                                          ) As Con,
-                                          '(ImpressãodeEtiqueta)-Imprimiretiquetadecabo'.Run(
-                                              Con.Device.Name & " - " & Con.Name,
-                                              If(
-                                                  IsBlank(Con.'Connected To'),
-                                                  Con.'Connected To (Manual)',
-                                                  If(
-                                                      And(
-                                                          Con.'Tipo de Conexão' = 'Tipo de Conexão'.Speaker,
-                                                          Con.Direção = 'Direção de Conexão'.Input
-                                                      ),
-                                                      With(
-                                                          LookUp(
-                                                              ConsCol As ColCon,
-                                                              ColCon.new_deviceioconnectionid = Con.'Device IO Connection'
-                                                          ) As IndexedConInfo,
-                                                          LookUp(
-                                                              'Device IO Connections' As RootCon,
-                                                              RootCon.'Device IO Connection' = IndexedConInfo.local_rootcon,
-                                                              RootCon.Device.Name & " - " & RootCon.Name & " | " & RootCon.Localização
-                                                          )
-                                                      ),
-                                                      If(
-                                                          And(
-                                                              Con.'Tipo de Conexão' = 'Tipo de Conexão'.Speaker,
-                                                              Con.Direção = 'Direção de Conexão'.Output,
-                                                              Con.'Device IO Connection' in Distinct(
-                                                                  ConsCol As ColCon,
-                                                                  ColCon.local_rootcon
-                                                              )
-                                                          ),
-                                                          With(
-                                                              {
-                                                                  Value: Distinct(
-                                                                      Filter(
-                                                                          ConsCol As ColCon,
-                                                                          ColCon.local_rootcon = Con.'Device IO Connection',
-                                                                          ColCon.new_deviceioconnectionid <> Con.'Device IO Connection'
-                                                                      )As Nei,
-                                                                      Nei.new_deviceioconnectionid
-                                                                  )
-                                                              } As NeighborConsIds,
-                                                              Concat(
-                                                                  Filter(
-                                                                      'Device IO Connections' As Con,
-                                                                      Con.'Device IO Connection' in NeighborConsIds.Value
-                                                                  ) As Con,
-                                                                  Con.Device.Name,
-                                                                  "+"
-                                                              )
-                                                          ),
-                                                          LookUp(
-                                                              'Device IO Connections' As Con2,
-                                                              Con2.'Device IO Connection' = Con.'Device IO Connection',
-                                                              Con2.'Connected To'.Device.Name & " - " & Con2.'Connected To'.Name & " | " & Con2.'Connected To'.Localização
-                                                          )
+                                  } As ProdServs,
+                                  If(
+                                      CountRows(ProdServs.Result) > 0,
+                                      With(
+                                          {
+                                              Result: Patch(
+                                                  Cotações,
+                                                  Defaults(Cotações),
+                                                  {
+                                                      Fornecedor: LookUp(
+                                                          'Fornecedores From Sharepoint Lists' As F,
+                                                          F.ID = FornecedorSelecionadoId
                                                       )
+                                                  }
+                                              ).Cotação
+                                          } As NovaCotacaoId,
+                                          If(
+                                              !IsBlank(NovaCotacaoId),
+                                              With(
+                                                  {
+                                                      NovaCotacao: LookUp(
+                                                          Cotações,
+                                                          Cotação = NovaCotacaoId.Result
+                                                      ),
+                                                      Fornecedor: LookUp(
+                                                          'Fornecedores From Sharepoint Lists' As F,
+                                                          F.ID = FornecedorSelecionadoId
+                                                      )
+                                                  } As Results,
+                                                  /*Relate(
+                                                      Results.Fornecedor.Cotações,
+                                                      Results.NovaCotacao
+                                                  );*/
+                                                  ForAll(
+                                                      ProdServs.Result As ProdServ,
+                                                      /*Relate(
+                                                          Results.NovaCotacao.'Produtos-Serviço',
+                                                          ProdServ
+                                                      )*/
+                                                      Patch(
+                                                          'Produtos-Serviço',
+                                                          {
+                                                              'Produto-Serviço': ProdServ.'Produto-Serviço',
+                                                              Cotação: Results.NovaCotacao
+                                                          }
+                                                      )
+                                                  );
+                                                  Patch(
+                                                      Cotações,
+                                                      Results.NovaCotacao,
+                                                      {
+                                                          'Valor Total': With(
+                                                              {
+                                                                  Result: Filter(
+                                                                      'Produtos-Serviço',
+                                                                      Cotação.Cotação = NovaCotacaoId.Result
+                                                                  )
+                                                              } As ProdServRelacionados,
+                                                              Sum(
+                                                                  ProdServRelacionados.Result As Cur,
+                                                                  Cur.Quantidade * LookUp(
+                                                                      'Preços de Produtos',
+                                                                      Status = 'Status (Preços de Produtos)'.Active && 'Modelo de Produto'.'Modelos de Produto From Sharepoint List' = Cur.Produto.'Modelos de Produto From Sharepoint List'
+                                                                  ).'Preço de Compra'
+                                                              )
+                                                          )
+                                                      }
+                                                  );
+                                                  Select(btn_refreshProdutos);
+                                                  Clear(IdsSelecionados);
+                                                  Launch(
+                                                      "https://unium.crm2.dynamics.com/main.aspx?appid=3ec4d8a9-2a8e-ee11-8179-002248de6f66&forceUCI=1&pagetype=entityrecord&etn=new_cotacao&id=" & NovaCotacaoId.Result,
+                                                      Blank(),
+                                                      LaunchTarget.New
                                                   )
                                               )
                                           )
                                       )
                                   )
-                              );
-                              UpdateContext({SpinCounter: SpinCounter - 1})
+                              )
                           );
                           UpdateContext({SpinCounter: SpinCounter - 1})
-                          /**/
-                        Theme: =AppThemeJson
-                        Width: =480.99
-                        X: =0.00
-                        Y: =-51.16
+                        Text: ="btn_iniciarcotacao"
+                        Visible: =false
+                  - btn_refreshProdutos:
+                      Control: Button@0.0.45
+                      Properties:
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: |-
+                          =Concurrent(
+                              Refresh('Produtos-Serviço'),
+                              Refresh('Modelos de Produto From Sharepoint Lists'),
+                              Refresh('Fabricantes From Sharpoint Lists'),
+                              Refresh('Preços de Produtos'),
+                              Refresh(Cotações),
+                              Refresh(AppPreferences),
+                              Refresh(Users)
+                          );/*
+                          ClearCollect(
+                              ProdutosFornecedor,
+                              AddColumns(
+                                  GroupBy(
+                                      Filter(
+                                          ProdutosPedido As P,
+                                          P.new_fornecedorprincipalid = FornecedorSelecionadoId
+                                      ),
+                                      new_nomedoclientefx,
+                                      new_referenciadoproduto,
+                                      new_entregaproxima,
+                                      new_produtoservicoid,
+                                      new_previsaodeentrega,
+                                      new_descricao,
+                                      new_fornecedorprincipalid,
+                                      new_nomedofabricantev2,
+                                      Produtos
+                                  ) As Prods,
+                                  new_quantidade,
+                                  Sum(
+                                      Prods.Produtos As P,
+                                      P.new_quantidade
+                                  ),
+                                  DataEntrega,
+                                  Text(
+                                      Prods.new_previsaodeentrega,
+                                      DateTimeFormat.ShortDate,
+                                      "pt-BR"
+                                  ),
+                                  Selecionado,
+                                  false
+                              )
+                          )*/
+                        Visible: =false
                   - VersionText:
                       Control: Text@0.0.51
                       Properties:
                         Align: ='TextCanvas.Align'.Center
+                        Font: =Font.Lato
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
-                        Text: ="V1.27"
+                        Text: ="V0.17"
                         VerticalAlign: =VerticalAlign.Middle
-                        Width: =40
             - SubheaderContainer_HS:
                 Control: GroupContainer@1.4.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =45.92
+                  Height: =70
                   LayoutAlignItems: =LayoutAlignItems.Center
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutMaxHeight: =
                   LayoutMaxWidth: =
-                  PaddingBottom: =0.00
-                  PaddingLeft: =6.56
-                  PaddingRight: =8.02
-                  PaddingTop: =0.00
+                  PaddingLeft: =10
+                  PaddingRight: =10
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
-                  Width: =1095.04
-                  X: =0.00
-                  Y: =28.86
                 Children:
                   - lbTitleCodeReview:
                       Control: Label@2.5.1
@@ -373,75 +279,21 @@ Screens:
                         FocusedBorderThickness: =4
                         Font: =Font.Lato
                         FontWeight: =FontWeight.Semibold
-                        Height: =45.92
+                        Height: =70
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
-                        PaddingBottom: =3.28
-                        PaddingLeft: =13.12
-                        PaddingRight: =4.01
-                        PaddingTop: =4.01
-                        Size: |
-                          =12
-                        Text: ="Guia de Conexões"
-                        Width: =838.52
-                        X: =8.02
-                        Y: =0.00
-                  - lbTitleCodeReview_1:
-                      Control: Label@2.5.1
-                      Properties:
-                        Align: =Align.Right
-                        BorderColor: =RGBA(0, 0, 0, 0)
-                        BorderStyle: =BorderStyle.None
-                        BorderThickness: =2
-                        Color: =RGBA(20, 0, 0, 1)
-                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                        FillPortions: =1
-                        FocusedBorderThickness: =4
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Lighter
-                        Height: =45.92
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        PaddingBottom: =3.28
-                        PaddingLeft: =13.12
-                        PaddingRight: =4.01
-                        PaddingTop: =4.01
-                        Size: =9
-                        Text: =CurrentProjeto.Apelido
-                        Width: =838.52
-                        X: =8.02
-                        Y: =0.00
-            - ContentContainer_HS:
-                Control: GroupContainer@1.4.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  Height: =428.98
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  PaddingBottom: =5
-                  PaddingLeft: =5
-                  PaddingRight: =5
-                  PaddingTop: =5
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                  Width: =1095.04
-                  X: =0.00
-                  Y: =74.78
-                Children:
+                        PaddingLeft: =20
+                        Size: =14
+                        Text: ="Compras"
+                        Width: =240
+                        Y: =241
                   - SearchBox_1:
                       Control: CanvasComponent
                       ComponentName: SearchBox
                       Properties:
-                        Height: =30
+                        Height: =36
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
-                        LayoutMinWidth: =0
                         Styles: |-
                           =Table({Name: "PrimaryColor1Value", Value: "#ffffff"},
                           {Name: "PrimaryColor1TextValue", Value: "#292929"},
@@ -456,7 +308,7 @@ Screens:
                           {Name: "PaddingValue", Value: "8"},
                           {Name: "TextEmphasisFontSizeValue", Value: "16"},
                           {Name: "TextEmphasisFontSizePhoneValue", Value: "24"},
-                          {Name: "TextBodyFontSizeValue", Value: "11"},
+                          {Name: "TextBodyFontSizeValue", Value: "12"},
                           {Name: "TextBodyFontSizePhoneValue", Value: "21"},
                           {Name: "BackgroundColorValue", Value: "#ffffff"},
                           {Name: "BorderThicknessValue", Value: "0"},
@@ -465,2194 +317,561 @@ Screens:
                           {Name: "BackgroundColorValue", Value :"#FFFFFF"}
                           )
                         Width: =300
-                  - GroupByDropdownCanvas:
-                      Control: DropDown@0.0.45
+            - ContentContainer_HS:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - BodyContainer:
+                      Control: GroupContainer@1.4.0
+                      Variant: AutoLayout
                       Properties:
-                        DefaultSelectedItems: =[GroupByDefaultDropdownOption]
-                        Items: |-
-                          =[
-                              GroupByTypeDropdownOption,
-                              GroupByLocalDropdownOption,
-                              GroupByConTypeDropdownOption,
-                              AllDevicesDropdownOption
-                          ]
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =20
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
                         LayoutMaxHeight: =
                         LayoutMaxWidth: =
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
                       Children:
-                        - Value1:
-                            Control: DropDownDataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="Value"
-                              FieldName: ="Value"
-                              FieldType: ="s"
-                              Order: =1
-                  - DeviceTabsPivot:
-                      Control: CodeComponent
-                      ComponentName: cat_PowerCAT.Pivot
-                      Properties:
-                        Height: =45
-                        ItemDisplayName: ="DisplayName"
-                        Items: =DeviceTabs
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Theme: =AppThemeJson
-                        Visible: =CountRows(DeviceTabs) > 0
-                      Children:
-                        - DisplayName3:
-                            Control: DataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="DisplayName"
-                              FieldName: ="DisplayName"
-                              FieldType: ="s"
-                              Order: =1
-                        - Option1:
-                            Control: DataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="Option"
-                              FieldName: ="Option"
-                              FieldType: ="l"
-                              Order: =2
-                        - Option21:
-                            Control: DataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="Option2"
-                              FieldName: ="Option2"
-                              FieldType: ="l"
-                              Order: =3
-                  - DevicesGallery:
-                      Control: Gallery@2.15.0
-                      Variant: BrowseLayout_Vertical_ThreeTextVariant_pcfCore
-                      Properties:
-                        AlignInContainer: =AlignInContainer.SetByContainer
-                        BorderColor: =RGBA(166, 166, 166, 1)
-                        Fill: =ColorValue(AppTheme.palette.neutralLighter)
-                        FocusedBorderColor: =RGBA(0, 120, 212, 1)
-                        FocusedBorderThickness: =2
-                        Items: =VisibleDevicesList
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        OnSelect: |-
-                          =Set(
-                              SelectedDevice,
-                              LookUp(
-                                  'Device IO' As D,
-                                  D.DeviceIO = ThisItem.DeviceIO
-                              )
-                          );
-                          Navigate(
-                              DeviceScreen,
-                              ScreenTransition.Cover,
-                              {
-                                  ExpandedConnectionType: Blank(),
-                                  SettingsSelected: false
-                              }
-                          )
-                        TemplatePadding: =5
-                        TemplateSize: =150
-                        WrapCount: =RoundUp(Self.Width/500,0)
-                      Children:
-                        - Rectangle2:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              BorderColor: =ColorValue(AppTheme.palette.neutralLight)
-                              DisabledFill: =RGBA(0,0,0,0)
-                              Fill: =RGBA(0,0,0,0)
-                              FocusedBorderColor: =RGBA(0, 120, 212, 1)
-                              Height: =Parent.TemplateHeight
-                              HoverFill: =RGBA(0,0,0,0)
-                              OnSelect: =Select(Parent)
-                              PressedFill: =RGBA(0,0,0,0)
-                              TabIndex: =0
-                              Width: =Parent.TemplateWidth
-                        - DeviceTemplateContainer:
+                        - FirstLaneContainer:
                             Control: GroupContainer@1.4.0
                             Variant: AutoLayout
                             Properties:
-                              Fill: =ColorValue(AppTheme.palette.white)
-                              Height: =Parent.TemplateHeight
+                              Fill: =ColorValue(AppTheme.palette.neutralLighter)
                               LayoutAlignItems: =LayoutAlignItems.Stretch
                               LayoutDirection: =LayoutDirection.Vertical
                               LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              PaddingBottom: =10
                               PaddingLeft: =10
-                              PaddingRight: =20
-                              Width: =Parent.TemplateWidth
+                              PaddingRight: =10
+                              PaddingTop: =10
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
                             Children:
-                              - Title2:
-                                  Control: FluentV8/Label@1.8.6
+                              - FornecedoresText:
+                                  Control: Text@0.0.51
                                   Properties:
-                                    FillPortions: =1
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =24
+                                    Align: ='TextCanvas.Align'.Center
+                                    Font: =Font.Lato
                                     LayoutMaxHeight: =
                                     LayoutMaxWidth: =
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                    OnSelect: =Select(Rectangle2)
-                                    TabIndex: =-1
-                                    Text: =ThisItem.Name
-                                    VerticalAlignment: =VerticalAlign.Middle
-                                    Width: =
-                                    X: =12
-                                    Y: =
-                              - Subtitle2:
-                                  Control: FluentV8/Label@1.8.6
+                                    Size: =16
+                                    Text: ="Fornecedores"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Semibold
+                              - FornecedoresGallery:
+                                  Control: Gallery@2.15.0
+                                  Variant: BrowseLayout_Vertical_ThreeTextVariant_pcfCore
                                   Properties:
-                                    FillPortions: =1
-                                    FontSize: =9
-                                    FontWeight: =FontWeight.Normal
-                                    Height: =24
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    BorderColor: =RGBA(166, 166, 166, 1)
+                                    Fill: =RGBA(255, 255, 255, 0)
+                                    FocusedBorderColor: =RGBA(0, 120, 212, 1)
+                                    FocusedBorderThickness: =2
+                                    Items: |-
+                                      =Search(
+                                          Fornecedores,
+                                          SearchBox_1.SearchText,
+                                          NomeFantasia,
+                                          RazãoSocial,
+                                          ID
+                                      )
                                     LayoutMaxHeight: =
                                     LayoutMaxWidth: =
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                    OnSelect: =Select(Rectangle2)
-                                    TabIndex: =-1
-                                    Text: =ThisItem.'Modelo de Produto'.Referência
-                                    VerticalAlignment: =VerticalAlign.Middle
-                                    Width: =Title2.Width
-                                    X: =Title2.X
-                                    Y: =Title2.Y + Title2.Height - 6
-                              - Container1:
+                                    OnSelect: |-
+                                      =UpdateContext({SpinCounter: SpinCounter + 1});
+                                      If(
+                                          FornecedorSelecionadoId <> ThisItem.ID,
+                                          Clear(IdsSelecionados)
+                                      );
+                                      Set(
+                                          FornecedorSelecionadoId,
+                                          ThisItem.ID
+                                      );
+                                      Select(btn_refreshProdutos);
+                                      UpdateContext({SpinCounter: SpinCounter - 1})
+                                    TemplatePadding: =10
+                                    TemplateSize: =40
+                                  Children:
+                                    - FornecedorContainer:
+                                        Control: GroupContainer@1.4.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorValue(AppTheme.palette.neutralLight)
+                                          BorderThickness: =1
+                                          Fill: |-
+                                            =If(
+                                                And(
+                                                    ThisItem.ID = FornecedorSelecionadoId,
+                                                    !IsBlank(FornecedorSelecionadoId)
+                                                ),
+                                                ColorValue(AppTheme.palette.neutralLight),
+                                                ColorValue(AppTheme.palette.white)
+                                            )
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                          PaddingLeft: =10
+                                          PaddingRight: =10
+                                          Width: =Parent.TemplateWidth
+                                        Children:
+                                          - FornecedorTitle:
+                                              Control: FluentV8/Label@1.8.6
+                                              Properties:
+                                                Alignment: =Align.Left
+                                                AutoHeight: =true
+                                                FillPortions: =1
+                                                Font: =Font.Lato
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =24
+                                                LayoutMaxHeight: =
+                                                LayoutMaxWidth: =
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: =
+                                                TabIndex: =-1
+                                                Text: =Coalesce(ThisItem.NomeFantasia,ThisItem.RazãoSocial)
+                                                VerticalAlignment: =VerticalAlign.Middle
+                                                Width: =
+                                                X: =12
+                                                Y: =
+                                          - FornecedorCounter:
+                                              Control: FluentV8/Label@1.8.6
+                                              Properties:
+                                                Alignment: =Align.Right
+                                                AutoHeight: =true
+                                                FillPortions: =1
+                                                Font: =Font.Lato
+                                                FontWeight: =FontWeight.Normal
+                                                Height: =24
+                                                LayoutMaxHeight: =
+                                                LayoutMaxWidth: =
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: =
+                                                TabIndex: =-1
+                                                Text: =ThisItem.Counter
+                                                VerticalAlignment: =VerticalAlign.Middle
+                                                Width: =
+                                                X: =12
+                                                Y: =
+                                    - Rectangle2:
+                                        Control: Rectangle@2.3.0
+                                        Properties:
+                                          BorderColor: =RGBA(166, 166, 166, 1)
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =2
+                                          DisabledFill: =RGBA(166, 166, 166, 0)
+                                          Fill: =RGBA(0, 0, 0, 0)
+                                          FocusedBorderColor: =RGBA(0, 120, 212, 1)
+                                          Height: =Parent.TemplateHeight
+                                          HoverFill: =RGBA(0, 120, 212, 0)
+                                          OnSelect: =Select(Parent)
+                                          PressedFill: =RGBA(0, 120, 212, 0)
+                                          Width: =Parent.TemplateWidth
+                        - SecondLaneContainer:
+                            Control: GroupContainer@1.4.0
+                            Variant: AutoLayout
+                            Properties:
+                              Fill: =ColorValue(AppTheme.palette.neutralLighter)
+                              FillPortions: =2
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              PaddingBottom: =10
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              PaddingTop: =10
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                            Children:
+                              - ProdutosText:
+                                  Control: Text@0.0.51
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    Font: =Font.Lato
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    Size: =16
+                                    Text: ="Produtos p/ pedido"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Visible: =!IsBlank(FornecedorSelecionadoId)
+                                    Weight: ='TextCanvas.Weight'.Semibold
+                              - ProdutosContainer:
                                   Control: GroupContainer@1.4.0
                                   Variant: AutoLayout
                                   Properties:
                                     DropShadow: =DropShadow.None
-                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =10
+                                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
                                     LayoutMaxHeight: =
                                     LayoutMaxWidth: =
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                    Visible: =ProdutosText.Visible
                                   Children:
-                                    - Subtitle2_1:
-                                        Control: FluentV8/Label@1.8.6
+                                    - CommandBar2:
+                                        Control: CodeComponent
+                                        ComponentName: cat_PowerCAT.CommandBar
                                         Properties:
-                                          FillPortions: =1
-                                          FontSize: =9
-                                          FontWeight: =FontWeight.Normal
-                                          Height: =24
-                                          LayoutMaxHeight: =
-                                          LayoutMaxWidth: =
-                                          LayoutMinHeight: =0
-                                          LayoutMinWidth: =0
-                                          OnSelect: =Select(Rectangle2)
-                                          TabIndex: =-1
-                                          Text: =ThisItem.Localização
-                                          VerticalAlignment: =VerticalAlign.Middle
-                                          Width: =Title2.Width
-                                          X: =Title2.X
-                                          Y: =Title2.Y + Title2.Height - 6
-                                    - Subtitle2_2:
-                                        Control: FluentV8/Label@1.8.6
-                                        Properties:
-                                          Alignment: =Align.Right
-                                          FillPortions: =1
-                                          FontSize: =9
-                                          FontWeight: =FontWeight.Normal
-                                          Height: =24
-                                          LayoutMaxHeight: =
-                                          LayoutMaxWidth: =
-                                          LayoutMinHeight: =0
-                                          LayoutMinWidth: =0
-                                          OnSelect: =Select(Rectangle2)
-                                          TabIndex: =-1
-                                          Text: |-
-                                            =With(
+                                          Height: =32
+                                          Items: |-
+                                            =Table(
                                                 {
-                                                    Value: CountRows(
-                                                        Filter(
-                                                            'Device IO Connections' As C,
-                                                            C.Device.DeviceIO = ThisItem.DeviceIO,
-                                                            Or(
-                                                                !IsBlank(C.'Connected To'),
-                                                                And(
-                                                                    !IsBlank(C.'Connected To (Manual)'),
-                                                                    C.'Connected To (Manual)' <> "",
-                                                                    C.'Connected To (Manual)' <> " ",
-                                                                    C.'Connected To (Manual)' <> "  "
-                                                                )
-                                                            ),
-                                                            Or(
-                                                                GroupByDropdownSelectedOption <> GroupByConTypeDropdownOption,
-                                                                C.'Tipo de Conexão' = SelectedDeviceTab.Option2
-                                                            )
-                                                        )
+                                                    ItemKey: "Fechar",
+                                                    ItemIconName: "Cancel",
+                                                    ItemDisplayName: "Fechar",
+                                                    ItemVisible: true
+                                                },
+                                                {
+                                                    ItemKey: "SelecionarTudo",
+                                                    ItemIconName: "SelectAll",
+                                                    ItemDisplayName: "Selecionar Tudo",
+                                                    ItemVisible: CountRows(ProdutosSelecionados) <> CountRows(ProdutosFornecedor)
+                                                },
+                                                {
+                                                    ItemKey: "DeselecionarTudo",
+                                                    ItemIconName: "ClearSelection",
+                                                    ItemDisplayName: "Limpar Seleção",
+                                                    ItemVisible: CountRows(ProdutosSelecionados) > 0
+                                                },
+                                                {
+                                                    ItemKey: "Iniciar Cotação",
+                                                    ItemIconName: "ShoppingCart",
+                                                    ItemDisplayName: "Iniciar Cotação",
+                                                    ItemVisible: And(
+                                                        CountRows(ProdutosSelecionados) > 0,
+                                                        ProdutosDList.Visible
                                                     )
-                                                } As Counter,
-                                                Switch(
-                                                    Counter.Value,
-                                                    0,
-                                                    "",
-                                                    1,
-                                                    Counter.Value & " conexão existente",
-                                                    Counter.Value & " conexões existentes"
-                                                )
+                                                }
                                             )
-                                          VerticalAlignment: =VerticalAlign.Middle
-                                          Width: =Title2.Width
-                                          X: =Title2.X
-                                          Y: =Title2.Y + Title2.Height - 6
-                              - DeviceInstalacaoContainer:
-                                  Control: GroupContainer@1.4.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    LayoutDirection: =LayoutDirection.Horizontal
-                                    LayoutMaxHeight: =
-                                    LayoutMaxWidth: =
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - InstalaçãoToggle:
-                                        Control: Toggle@1.1.5
-                                        Properties:
-                                          Checked: =ThisItem.'Será Instalado'
-                                          DisplayMode: |-
-                                            =If(
-                                                IsBlank(ThisItem.Produto),
-                                                DisplayMode.Edit,
-                                                DisplayMode.View
-                                            )
-                                          FillPortions: =1
-                                          Font: =Font.Lato
-                                          Label: =If(Self.Checked,"Será Instalado","Ñ Será Instalado")
                                           LayoutMaxHeight: =
                                           LayoutMaxWidth: =
-                                          LayoutMinWidth: =120
-                                          OnCheck: |-
-                                            =Patch(
-                                                'Device IO',
-                                                {
-                                                    DeviceIO: ThisItem.DeviceIO,
-                                                    'Será Instalado (Base)': true
-                                                }
+                                          OnSelect: |-
+                                            =Switch(
+                                                Self.Selected.ItemKey,
+                                                "Iniciar Cotação",
+                                                Select(btn_iniciarcotacao),
+                                                "Fechar",
+                                                Concurrent(
+                                                    Set(
+                                                        FornecedorSelecionadoId,
+                                                        Blank()
+                                                    ),
+                                                    Clear(IdsSelecionados)
+                                                ),
+                                                "SelecionarTudo",
+                                                ClearCollect(
+                                                    IdsSelecionados,
+                                                    ForAll(
+                                                        ProdutosFornecedor As P,
+                                                        P.new_produtoservicoid
+                                                    )
+                                                ),
+                                                "DeselecionarTudo",
+                                                Clear(IdsSelecionados),
+                                                false
                                             )
-                                          OnUncheck: |-
-                                            =Patch(
-                                                'Device IO',
-                                                {
-                                                    DeviceIO: ThisItem.DeviceIO,
-                                                    'Será Instalado (Base)': false
-                                                }
-                                            )
-                                    - DropdownCanvas2:
-                                        Control: DropDown@0.0.45
+                                          Theme: =AppThemeJson
+                                          X: =40
+                                          Y: =40
+                                    - ProdutosDList:
+                                        Control: CodeComponent
+                                        ComponentName: cat_PowerCAT.FluentDetailsList
                                         Properties:
-                                          DefaultSelectedItems: |-
-                                            =AddColumns(
-                                                [ThisItem.Produto] As P,
-                                                Label,
-                                                P.new_quantidade & "x " & P.new_referenciadoproduto & " " & If(Len(TrimEnds(P.new_localizacao)) > 0,"(" & P.new_localizacao & ")")
-                                            )
-                                            /*AddColumns(
-
-                                                Filter(
-
-                                                    'Produtos-Serviço' As P,
-
-                                                    P.'Produto-Serviço' = ThisItem.Produto.'Produto-Serviço'
-
-                                                ) As P,
-
-                                                Label,
-
-                                                P.Quantidade & "x " & P.'Referência do Produto' & " " & If(Len(TrimEnds(P.Localização)) > 0,"(" & P.Localização & ")")
-
-                                            )*/
-                                          DisplayMode: |-
-                                            =If(
-                                                ThisItem.Instalado = true,
-                                                DisplayMode.Disabled,
-                                                DisplayMode.Edit
-                                            )
                                           FillPortions: =1
                                           Items: |-
-                                            =ProdutosDisponiveisParaVinculo/*With(
-                                                {
-                                                    Value: Filter(
-                                                        'Produtos-Serviço' As P,
-                                                        P.Status = 'Status (Produtos-Serviço)'.Active,
-                                                        P.Projeto.Projeto = CurrentProjeto.Projeto,
-                                                        !IsBlank(P.'Ordem de Serviço')
-                                                    )
-                                                } As List,
-                                                Filter(
-                                                    List.Value As P,
-                                                    CountRows(
-                                                        Filter(
-                                                            'Device IO' As D,
-                                                            D.Produto.'Produto-Serviço' = P.'Produto-Serviço'
-                                                        )
-                                                    ) <= P.Quantidade
+                                            =AddColumns(
+                                                ProdutosFornecedor As P,
+                                                IconeSelecionado,
+                                                If(
+                                                    P.Selecionado,
+                                                    "icon:SkypeCircleCheck",
+                                                    "icon:CircleRing"
+                                                ),
+                                                TagColor,
+                                                If(
+                                                    P.Selecionado,
+                                                    AppTheme.palette.themePrimary,
+                                                    AppTheme.palette.neutralPrimary
+                                                ),
+                                                PrevisaoEntrega,
+                                                Text(
+                                                    P.new_previsaodeentrega,
+                                                    DateTimeFormat.ShortDate,
+                                                    "pt-BR"
                                                 )
-                                            )*/
+                                            )
                                           LayoutMaxHeight: =
                                           LayoutMaxWidth: =
-                                          LayoutMinWidth: =120
                                           OnChange: |-
-                                            =With(
-                                                Self.Selected As Selecionado,
-                                                If(
-                                                    Selecionado.Label = "nenhum",
-                                                    Patch(
-                                                        'Device IO',
-                                                        {
-                                                            DeviceIO: ThisItem.DeviceIO,
-                                                            Produto: Blank(),
-                                                            'Modelo de Produto': Blank()
-                                                        }
-                                                    ),
-                                                    With(
-                                                        LookUp(
-                                                            'Produtos-Serviço' As P,
-                                                            P.'Produto-Serviço' = Selecionado.'Produto-Serviço'
-                                                        ) As ProdServ,
-                                                        Patch(
-                                                            'Device IO',
-                                                            {
-                                                                DeviceIO: ThisItem.DeviceIO,
-                                                                Produto: ProdServ,
-                                                                'Modelo de Produto': LookUp(
-                                                                    'Modelos de Produto From Sharepoint Lists' As M,
-                                                                    M.'Modelos de Produto From Sharepoint List' = ProdServ.Produto.'Modelos de Produto From Sharepoint List'
-                                                                )
-                                                            }
+                                            =Set(
+                                                Debug,
+                                                Self.EventRowKey
+                                            );
+                                            If(
+                                                And(
+                                                    Self.EventName = "CellAction",
+                                                    Self.EventColumn = "IconeSelecionado",
+                                                    !IsBlank(Self.EventRowKey)
+                                                ),
+                                                With(
+                                                    {Value: GUID(Self.EventRowKey)} As Key,
+                                                    If(
+                                                        IsBlank(
+                                                            LookUp(
+                                                                IdsSelecionados As Id,
+                                                                Id.Value = Key.Value
+                                                            )
+                                                        ),
+                                                        Collect(
+                                                            IdsSelecionados,
+                                                            Key
+                                                        ),
+                                                        Remove(
+                                                            IdsSelecionados,
+                                                            Key
                                                         )
                                                     )
                                                 )
                                             )
+                                          OnSelect: =
+                                          RecordKey: ="new_produtoservicoid"
+                                          RecordSelected: ="Selecionado"
+                                          SelectRowsOnFocus: =true
+                                          SelectionType: ='PowerCAT.FluentDetailsList.SelectionType'.None
+                                          columns_Items: |-
+                                            =[
+                                                {
+                                                    ColName: "IconeSelecionado",
+                                                    ColDisplayName: "",
+                                                    ColCellType: "clickableimage",
+                                                    ColWidth: 40,
+                                                    ColTagColorColumn: "TagColor",
+                                                    ColVerticalAlign: "Center",
+                                                    ColHorizontalAlign: "Center",
+                                                    ColResizable: true
+                                                },
+                                                {
+                                                    ColDisplayName: "Quant.",
+                                                    ColName: "new_quantidade",
+                                                    ColWidth: 100
+                                                },
+                                                {
+                                                    ColDisplayName: "Cliente",
+                                                    ColName: "new_nomedoclientefx",
+                                                    ColWidth: 100
+                                                },
+                                                {
+                                                    ColDisplayName: "Ref",
+                                                    ColName: "new_referenciadoproduto",
+                                                    ColWidth: 100
+                                                },
+                                                {
+                                                    ColDisplayName: "Descrição",
+                                                    ColName: "new_descricao",
+                                                    ColWidth: Self.Width - 400 - 140
+                                                },
+                                                {
+                                                    ColDisplayName: "Previsão",
+                                                    ColName: "PrevisaoEntrega",
+                                                    ColWidth: 100
+                                                }
+                                            ]
                                         Children:
-                                          - Label2:
-                                              Control: DropDownDataField@1.5.0
+                                          - new_quantidade2:
+                                              Control: DataField@1.5.0
                                               Variant: textualColumn
                                               IsLocked: true
                                               Properties:
-                                                FieldDisplayName: ="Label"
-                                                FieldName: ="Label"
-                                                FieldType: ="e"
+                                                FieldDisplayName: ="new_quantidade"
+                                                FieldName: ="new_quantidade"
+                                                FieldType: ="n"
+                                                Order: =1
+                                          - new_nomedoclientefx2:
+                                              Control: DataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="new_nomedoclientefx"
+                                                FieldName: ="new_nomedoclientefx"
+                                                FieldType: ="s"
                                                 Order: =2
-                        - PrintCableLabelButtonCanvas_1:
-                            Control: Button@0.0.45
-                            Properties:
-                              Appearance: ='ButtonCanvas.Appearance'.Transparent
-                              Icon: ="Print"
-                              Layout: ='ButtonCanvas.Layout'.IconOnly
-                              OnSelect: |-
-                                =UpdateContext({SpinCounter: SpinCounter + 1});
-                                With(
-                                    LookUp(
-                                        'Device IO' As D,
-                                        D.DeviceIO = ThisItem.DeviceIO
-                                    ) As Device,
-                                    '(ImpressãodeEtiqueta)-Imprimiretiquetadeequipamento'.Run(
-                                        Device.Name,
-                                        Device.Localização
-                                    )
-                                );
-                                UpdateContext({SpinCounter: SpinCounter - 1})
-                              Width: =Self.Height
-                              X: =Parent.TemplateWidth-Self.Width-5
-                              Y: |
-                                =5
-                        - RootCheckbox:
-                            Control: CheckBox@0.0.30
-                            Properties:
-                              Checked: =RootDeviceId = ThisItem.DeviceIO
-                              Font: =Font.Lato
-                              Label: ="Raiz?"
-                              OnCheck: =UpdateContext({RootDeviceId:ThisItem.DeviceIO})
-                              OnSelect: =
-                              Width: =70
-                              X: =PrintCableLabelButtonCanvas_1.X-Self.Width
-                              Y: =PrintCableLabelButtonCanvas_1.Y
-            - GeneratePendingDevicesButton:
-                Control: FluentV8/Button@1.5.13
-                Properties:
-                  BorderRadius: =10
-                  FillColor: =ColorValue(AppTheme.palette.themePrimary)
-                  FontWeight: =FontWeight.Semibold
-                  Height: =40
-                  HoverFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  LayoutMinWidth: =0
-                  OnSelect: |-
-                    =ClearCollect(
-                        ProgressCol,
-                        true
-                    );
-                    Clear(ProgressCol);
-                    UpdateContext(
-                        {
-                            SpinCounter: SpinCounter + 1,
-                            ProgressMax: CountRows(PendingProducts)
-                        }
-                    );
-                    If(
-                        CountRows(PendingProducts) > 0,
-                        ForAll(
-                            PendingProducts As Prod,
-                            Collect(
-                                ProgressCol,
-                                true
-                            );
-                            With(
-                                {
-                                    Raw: ParseJSON(
-                                        LookUp(
-                                            'Modelos de Produto From Sharepoint Lists' As M,
-                                            M.'Modelos de Produto From Sharepoint List' = Prod.Produto.'Modelos de Produto From Sharepoint List',
-                                            M.'Device IO Template (JSON)'
-                                        )
-                                    )
-                                } As RawTemplate,
-                                With(
-                                    {
-                                        Connections: ForAll(
-                                            Table(RawTemplate.Raw.Connections) As Item,
-                                            {
-                                                Name: Text(Item.Value.Name),
-                                                Type: Switch(
-                                                    Value(Item.Value.Type),
-                                                    100000000,
-                                                    [@'Tipo de Conexão'].HDMI,
-                                                    100000001,
-                                                    [@'Tipo de Conexão'].'Áudio Analógico',
-                                                    100000002,
-                                                    [@'Tipo de Conexão'].Toslink,
-                                                    100000003,
-                                                    [@'Tipo de Conexão'].'Trigger 12V',
-                                                    100000004,
-                                                    [@'Tipo de Conexão'].Speaker,
-                                                    100000005,
-                                                    [@'Tipo de Conexão'].Ethernet,
-                                                    100000006,
-                                                    [@'Tipo de Conexão'].IR,
-                                                    100000007,
-                                                    [@'Tipo de Conexão'].Serial,
-                                                    100000008,
-                                                    [@'Tipo de Conexão'].RF,
-                                                    100000009,
-                                                    [@'Tipo de Conexão'].RNET,
-                                                    100000010,
-                                                    [@'Tipo de Conexão'].ACNET,
-                                                    100000011,
-                                                    [@'Tipo de Conexão'].PNET,
-                                                    100000012,
-                                                    [@'Tipo de Conexão'].'Luz ON/OFF',
-                                                    100000013,
-                                                    [@'Tipo de Conexão'].'Luz Triac Dimmer',
-                                                    100000014,
-                                                    [@'Tipo de Conexão'].'Luz PWM Dimmer',
-                                                    100000015,
-                                                    [@'Tipo de Conexão'].Motor,
-                                                    100000016,
-                                                    [@'Tipo de Conexão'].GPIO,
-                                                    100000017,
-                                                    'Tipo de Conexão'.'Power 110V',
-                                                    100000018,
-                                                    'Tipo de Conexão'.'Power 220V'
-                                                ),
-                                                Direction: Switch(
-                                                    Value(Item.Value.Direction),
-                                                    100000000,
-                                                    [@'Direção de Conexão'].Input,
-                                                    100000001,
-                                                    [@'Direção de Conexão'].Output,
-                                                    100000002,
-                                                    [@'Direção de Conexão'].Bidirectional,
-                                                    100000003,
-                                                    [@'Direção de Conexão'].Bus
-                                                )
-                                            }
-                                        )
-                                    } As Template,
-                                    ForAll(
-                                        Sequence(
-                                            Prod.Quantidade - Prod.IOCount,
-                                            1,
-                                            1
-                                        ),
-                                        With(
-                                            With(
-                                                LookUp(
-                                                    'Modelos de Produto From Sharepoint Lists' As M,
-                                                    M.'Modelos de Produto From Sharepoint List' = Prod.Produto.'Modelos de Produto From Sharepoint List'
-                                                ) As Modelo,
-                                                Patch(
-                                                    'Device IO',
-                                                    Defaults('Device IO'),
-                                                    {
-                                                        'Modelo de Produto': Modelo,
-                                                        Name: Modelo.Referência & " (" & Text(
-                                                            CountRows(
-                                                                Filter(
-                                                                    'Device IO' As D,
-                                                                    D.Projeto.Projeto = CurrentProjeto.Projeto,
-                                                                    D.'Modelo de Produto'.'Modelos de Produto From Sharepoint List' = Modelo.'Modelos de Produto From Sharepoint List'
+                                          - new_referenciadoproduto2:
+                                              Control: DataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="new_referenciadoproduto"
+                                                FieldName: ="new_referenciadoproduto"
+                                                FieldType: ="s"
+                                                Order: =3
+                                          - new_descricao2:
+                                              Control: DataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="new_descricao"
+                                                FieldName: ="new_descricao"
+                                                FieldType: ="s"
+                                                Order: =4
+                                          - IconeSelecionado1:
+                                              Control: DataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="IconeSelecionado"
+                                                FieldName: ="IconeSelecionado"
+                                                FieldType: ="s"
+                                                Order: =5
+                                          - TagColor1:
+                                              Control: DataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="TagColor"
+                                                FieldName: ="TagColor"
+                                                FieldType: ="s"
+                                                Order: =6
+                                          - PrevisaoEntrega1:
+                                              Control: DataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="PrevisaoEntrega"
+                                                FieldName: ="PrevisaoEntrega"
+                                                FieldType: ="s"
+                                                Order: =7
+                                          - DataEntrega1:
+                                              Control: DataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="DataEntrega"
+                                                FieldName: ="DataEntrega"
+                                                FieldType: ="s"
+                                                Order: =8
+                                    - lbl_produtosParaCompra_ValorTotal:
+                                        Control: FluentV8/Label@1.8.6
+                                        Properties:
+                                          Alignment: =Align.Left
+                                          AutoHeight: =true
+                                          Color: =RGBA(0, 0, 0, 1)
+                                          FontSize: =12
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          OnSelect: =
+                                          PaddingStart: =10
+                                          Text: |-
+                                            ="Valor Total: "&With(
+                                                            {
+                                                                Result: ForAll(Distinct(
+                                                                    ProdutosSelecionados As X,
+                                                                    X.new_produtoservicoid
+                                                                ), {Result: ThisRecord.Value})
+                                                            } As SelecaoIds,
+                                                            With(
+                                                                {
+                                                                    Result: Filter(
+                                                                        'Produtos-Serviço',
+                                                                        'Produto-Serviço' in SelecaoIds.Result
+                                                                    )
+                                                                } As Selecao,
+                                                                Text(
+                                                                    Sum(
+                                                                        Selecao.Result As Prod,
+                                                                        LookUp(
+                                                                            'Preços de Produtos' As Prec,
+                                                                            Prec.'Modelo de Produto'.'Modelos de Produto From Sharepoint List' = Prod.Produto.'Modelos de Produto From Sharepoint List'
+                                                                        ).'Preço de Compra' * Prod.Quantidade
+                                                                    ),
+                                                                    "[$-pt-BR]R$#.##0,00"
                                                                 )
-                                                            ) + 1,
-                                                            "00"
-                                                        ) & ")",
-                                                        Localização: NewDeviceLocalTextBox.Value,
-                                                        Projeto: LookUp(
-                                                            Projetos As P,
-                                                            P.Projeto = CurrentProjeto.Projeto
-                                                        ),
-                                                        Produto: LookUp(
-                                                            'Produtos-Serviço' As P,
-                                                            P.'Produto-Serviço' = Prod.'Produto-Serviço'
-                                                        )
-                                                    }
-                                                )
-                                            ) As NewDeviceRaw,
-                                            With(
-                                                LookUp(
-                                                    'Device IO' As D,
-                                                    D.DeviceIO = NewDeviceRaw.DeviceIO
-                                                ) As NewDevice,
-                                                ForAll(
-                                                    Template.Connections As C,
-                                                    Patch(
-                                                        'Device IO Connections',
-                                                        Defaults('Device IO Connections'),
-                                                        {
-                                                            Device: NewDevice,
-                                                            'Tipo de Conexão': C.Type,
-                                                            Direção: C.Direction,
-                                                            Name: C.Name,
-                                                            Projeto: LookUp(
-                                                                Projetos As P,
-                                                                P.Projeto = CurrentProjeto.Projeto
                                                             )
-                                                        }
+                                                        )
+                                          Visible: =CountRows(ProdutosSelecionados) > 0
+                                    - SummaryButton:
+                                        Control: FluentV8/Button@1.5.13
+                                        Properties:
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          OnSelect: |-
+                                            =UpdateContext({ShowPrintSummaryWindow: If(ShowPrintSummaryWindow,false,true)})
+                                          Text: ="Imprimir Resumo"
+                                          Visible: =lbl_produtosParaCompra_ValorTotal.Visible
+                                    - PCFCopyTextComponent1:
+                                        Control: CodeComponent
+                                        ComponentName: tbag_CanvizLLCPCF.PCFCopyTextComponent
+                                        Properties:
+                                          Height: =40
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          OnChange: |-
+                                            =UpdateContext({ShowPrintSummaryWindow: If(ShowPrintSummaryWindow,false,true)})
+                                          Value: |-
+                                            =Concat(
+                                                ForAll(
+                                                    SortByColumns(
+                                                        GroupBy(
+                                                            ProdutosSelecionados,
+                                                            new_referenciadoproduto,
+                                                            Items
+                                                        ),
+                                                        "new_referenciadoproduto",
+                                                        SortOrder.Ascending
+                                                    ) As Group,
+                                                    Concatenate(
+                                                        Sum(
+                                                            Group.Items As I,
+                                                            I.new_quantidade
+                                                        ),
+                                                        "x ",
+                                                        Group.new_referenciadoproduto
                                                     )
-                                                )
+                                                ) As Cur,
+                                                Cur.Value,
+                                                Char(13)
                                             )
-                                        )
-                                    )
-                                )
-                            )
-                        ),
-                        false
-                    );
-                    UpdateContext(
-                        {
-                            SpinCounter: SpinCounter - 1,
-                            ProgressMax: 0
-                        }
-                    );
-                    Clear(ProgressCol)
-                  PressedFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                  Text: ="Gerar " & CountRows(PendingProducts)&" Produtos Pendentes"
-                  Visible: =CountRows(PendingProducts) > 0
-            - TextCanvas1:
-                Control: Text@0.0.51
-                Properties:
-                  Align: ='TextCanvas.Align'.Center
-                  FillPortions: =10
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  LayoutMinWidth: =0
-                  Text: |-
-                    =Concat(
-                        Distinct(
-                            PendingProducts As P,
-                            P.Produto.Referência
-                        ),
-                        Value,
-                        "
-                    "
-                    )
-                  Visible: =ShowPendingDevicesList
-            - ShowPendingDevicesButton:
-                Control: FluentV8/Button@1.5.13
-                Properties:
-                  BorderRadius: =10
-                  FillColor: =ColorValue(AppTheme.palette.themePrimary)
-                  FontWeight: =FontWeight.Semibold
-                  Height: =40
-                  HoverFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                  LayoutMaxHeight: =
-                  LayoutMaxWidth: =
-                  LayoutMinWidth: =0
-                  OnSelect: |-
-                    =UpdateContext(
-                        {
-                            ShowPendingDevicesList: If(
-                                ShowPendingDevicesList = true,
-                                false,
-                                true
-                            )
-                        }
-                    )
-                  PressedFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                  Text: ="Mostrar " & CountRows(PendingProducts)&" Produtos Pendentes"
-                  Visible: =CountRows(PendingProducts) > 0
-      - AddNewDeviceBackgroundContainer:
-          Control: GroupContainer@1.4.0
-          Variant: ManualLayout
-          Properties:
-            Fill: |-
-              =RGBA(0, 0, 0, 0.5
-              )
-            Height: =Parent.Height
-            Visible: =ShowAddNewDeviceWindow = true
-            Width: =Parent.Width
-          Children:
-            - AddNewDeviceContainer:
-                Control: GroupContainer@1.4.0
-                Variant: AutoLayout
-                Properties:
-                  Fill: =ColorValue(AppTheme.palette.white)
-                  Height: =420
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =10
-                  LayoutJustifyContent: =LayoutJustifyContent.Center
-                  PaddingBottom: =20
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =20
-                  RadiusBottomLeft: =10
-                  RadiusBottomRight: =10
-                  RadiusTopLeft: =10
-                  RadiusTopRight: =10
-                  Width: =Parent.Width-40
-                  X: =(Parent.Width-Self.Width)/2
-                  Y: =(Parent.Height-Self.Height)/2
-                Children:
-                  - SelectDeviceModelLabel:
-                      Control: FluentV8/Label@1.8.6
-                      Properties:
-                        Alignment: =Align.Center
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Semibold
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Text: ="Adicionar Produto"
-                        X: =47
-                        Y: =446
-                  - NewDeviceModelLabel:
-                      Control: FluentV8/Label@1.8.6
-                      Properties:
-                        Alignment: =Align.Left
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Semibold
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Text: ="Modelo do Produto"
-                        X: =47
-                        Y: =446
-                  - ProdutoPicker:
-                      Control: CodeComponent
-                      ComponentName: cat_PowerCAT.Picker
-                      Properties:
-                        Height: =32
-                        HintText: ="Pesquisar produtos"
-                        Items: |
-                          =ProdutoPickerSelectedCollection
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        MaxTags: =1
-                        MinimumSearchTermLength: =2
-                        NoSuggestionFoundMessage: ="Nenhum sugestão encontrada"
-                        OnChange: |-
-                          =Switch(
-                              Self.TagEvent,
-                              "Add",
-                              If(
-                                  !IsBlank(Self.TagKey),
-                                  ClearCollect(
-                                      ProdutoPickerSelectedCollection,
-                                      {
-                                          cr22f_modelosdeprodutofromsharepointlistid: Self.TagKey,
-                                          cr22f_title: Self.TagDisplayName
-                                      }
-                                  )
-                              ),
-                              "Remove",
-                              Clear(ProdutoPickerSelectedCollection)
-                          )
-                        OnSelect: =
-                        SearchTermToShortMessage: ="Continue Digitando..."
-                        SuggestionsDisplayName: ="cr22f_title"
-                        SuggestionsKey: ="cr22f_modelosdeprodutofromsharepointlistid"
-                        SuggestionsSubDisplayName: ="new_descricao"
-                        Suggestions_Items: |-
-                          =Filter(
-                              Search(
-                                  'Modelos de Produto From Sharepoint Lists',
-                                  Self.SearchTerm,
-                                  Descrição,
-                                  Referência,
-                                  'Nome do Fabricante',
-                                  'Fabricante (Nome)'
-                              ) As P,
-                              //!IsBlank(P.'Device IO Template (JSON)'),
-                              P.Status = 'Status (Modelos de Produto From Sharepoint Lists)'.Active
-                          )
-                        TagsDisplayName: ="cr22f_title"
-                        Theme: =AppThemeJson
-                      Children:
-                        - cr22f_title1:
-                            Control: DataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="cr22f_title"
-                              FieldName: ="cr22f_title"
-                              FieldType: ="s"
-                              Order: =2
-                        - cr22f_modelosdeprodutofromsharepointlistid1:
-                            Control: DataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="cr22f_modelosdeprodutofromsharepointlistid"
-                              FieldName: ="cr22f_modelosdeprodutofromsharepointlistid"
-                              FieldType: ="s"
-                              Order: =2
-                  - NewDeviceLocalLabel:
-                      Control: FluentV8/Label@1.8.6
-                      Properties:
-                        Alignment: =Align.Left
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Semibold
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Text: ="Localização"
-                        X: =47
-                        Y: =446
-                  - NewDeviceLocalTextBox:
-                      Control: FluentV8/TextBox@1.7.2
-                      Properties:
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Value: =Coalesce(LastAddedDeviceLocation,"")
-                  - NewDeviceQuantLabel:
-                      Control: FluentV8/Label@1.8.6
-                      Properties:
-                        Alignment: =Align.Left
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Semibold
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Text: ="Quantidade"
-                        X: =47
-                        Y: =446
-                  - NewDeviceQuantNumberInput:
-                      Control: NumberInput@2.9.12
-                      Properties:
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Max: =100
-                        Min: =1
-                        Precision: ='NumberInput.Precision'.'0'
-                  - AddDeviceButton:
-                      Control: FluentV8/Button@1.5.13
-                      Properties:
-                        BorderRadius: =10
-                        DisplayMode: |-
-                          =If(
-                              CountRows(ProdutoPickerSelectedCollection) <= 0,
-                              DisplayMode.Disabled,
-                              DisplayMode.Edit
-                          )
-                        FillColor: =ColorValue(AppTheme.palette.themePrimary)
-                        FontWeight: =FontWeight.Semibold
-                        Height: =40
-                        HoverFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinWidth: =0
-                        OnSelect: |-
-                          =UpdateContext({SpinCounter: SpinCounter + 1});
-                          If(
-                              CountRows(ProdutoPickerSelectedCollection) > 0,
-                              ForAll(
-                                  Sequence(
-                                      Max(
-                                          NewDeviceQuantNumberInput.Value,
-                                          1
-                                      ),
-                                      0,
-                                      0
-                                  ),
-                                  With(
-                                      {
-                                          Raw: ParseJSON(
-                                              Coalesce(
-                                                  LookUp(
-                                                      'Modelos de Produto From Sharepoint Lists' As M,
-                                                      M.'Modelos de Produto From Sharepoint List' = GUID(First(ProdutoPickerSelectedCollection).cr22f_modelosdeprodutofromsharepointlistid),
-                                                      If(
-                                                          Len(M.'Device IO Template (JSON)') < 2,
-                                                          Blank(),
-                                                          M.'Device IO Template (JSON)'
-                                                      )
-                                                  ),
-                                                  "{}"
-                                              )
-                                          )
-                                      } As RawTemplate,
-                                      With(
-                                          {
-                                              Connections: ForAll(
-                                                  Table(RawTemplate.Raw.Connections) As Item,
-                                                  {
-                                                      Name: Text(Item.Value.Name),
-                                                      Type: Switch(
-                                                          Value(Item.Value.Type),
-                                                          100000000,
-                                                          [@'Tipo de Conexão'].HDMI,
-                                                          100000001,
-                                                          [@'Tipo de Conexão'].'Áudio Analógico',
-                                                          100000002,
-                                                          [@'Tipo de Conexão'].Toslink,
-                                                          100000003,
-                                                          [@'Tipo de Conexão'].'Trigger 12V',
-                                                          100000004,
-                                                          [@'Tipo de Conexão'].Speaker,
-                                                          100000005,
-                                                          [@'Tipo de Conexão'].Ethernet,
-                                                          100000006,
-                                                          [@'Tipo de Conexão'].IR,
-                                                          100000007,
-                                                          [@'Tipo de Conexão'].Serial,
-                                                          100000008,
-                                                          [@'Tipo de Conexão'].RF,
-                                                          100000009,
-                                                          [@'Tipo de Conexão'].RNET,
-                                                          100000010,
-                                                          [@'Tipo de Conexão'].ACNET,
-                                                          100000011,
-                                                          [@'Tipo de Conexão'].PNET,
-                                                          100000012,
-                                                          [@'Tipo de Conexão'].'Luz ON/OFF',
-                                                          100000013,
-                                                          [@'Tipo de Conexão'].'Luz Triac Dimmer',
-                                                          100000014,
-                                                          [@'Tipo de Conexão'].'Luz PWM Dimmer',
-                                                          100000015,
-                                                          [@'Tipo de Conexão'].Motor,
-                                                          100000016,
-                                                          [@'Tipo de Conexão'].GPIO,
-                                                          100000017,
-                                                          'Tipo de Conexão'.'Power 110V',
-                                                          100000018,
-                                                          'Tipo de Conexão'.'Power 220V'
-                                                      ),
-                                                      Direction: Switch(
-                                                          Value(Item.Value.Direction),
-                                                          100000000,
-                                                          [@'Direção de Conexão'].Input,
-                                                          100000001,
-                                                          [@'Direção de Conexão'].Output,
-                                                          100000002,
-                                                          [@'Direção de Conexão'].Bidirectional,
-                                                          100000003,
-                                                          [@'Direção de Conexão'].Bus
-                                                      )
-                                                  }
-                                              )
-                                          } As Template,
-                                          With(
-                                              With(
-                                                  LookUp(
-                                                      'Modelos de Produto From Sharepoint Lists' As M,
-                                                      M.'Modelos de Produto From Sharepoint List' = GUID(First(ProdutoPickerSelectedCollection).cr22f_modelosdeprodutofromsharepointlistid)
-                                                  ) As Modelo,
-                                                  Patch(
-                                                      'Device IO',
-                                                      Defaults('Device IO'),
-                                                      {
-                                                          'Modelo de Produto': Modelo,
-                                                          Name: Modelo.Referência & " (" & Text(
-                                                              CountRows(
-                                                                  Filter(
-                                                                      'Device IO' As D,
-                                                                      D.Projeto.Projeto = CurrentProjeto.Projeto,
-                                                                      D.'Modelo de Produto'.'Modelos de Produto From Sharepoint List' = Modelo.'Modelos de Produto From Sharepoint List'
-                                                                  )
-                                                              ) + 1,
-                                                              "00"
-                                                          ) & ")",
-                                                          Localização: NewDeviceLocalTextBox.Value,
-                                                          Projeto: LookUp(
-                                                              Projetos As P,
-                                                              P.Projeto = CurrentProjeto.Projeto
-                                                          )
-                                                      }
-                                                  )
-                                              ) As NewDeviceRaw,
-                                              With(
-                                                  LookUp(
-                                                      'Device IO' As D,
-                                                      D.DeviceIO = NewDeviceRaw.DeviceIO
-                                                  ) As NewDevice,
-                                                  ForAll(
-                                                      Template.Connections As C,
-                                                      Patch(
-                                                          'Device IO Connections',
-                                                          Defaults('Device IO Connections'),
-                                                          {
-                                                              Device: NewDevice,
-                                                              'Tipo de Conexão': C.Type,
-                                                              Direção: C.Direction,
-                                                              Name: C.Name,
-                                                              Projeto: LookUp(
-                                                                  Projetos As P,
-                                                                  P.Projeto = CurrentProjeto.Projeto
-                                                              )
-                                                          }
-                                                      )
-                                                  )
-                                              )
-                                          );
-                                      );
-                                  )
-                              ),
-                              false
-                          );
-                          //Clear(ProdutoPickerSelectedCollection);
-                          UpdateContext(
-                              {
-                                  ShowAddNewDeviceWindow: false,
-                                  LastAddedDeviceLocation: NewDeviceLocalTextBox.Value,
-                                  SpinCounter: SpinCounter - 1
-                              }
-                          );
-                          Reset(NewDeviceQuantNumberInput)
-                        PressedFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        Text: ="Confirmar"
-                  - CloseAddDevicesButton:
-                      Control: FluentV8/Button@1.5.13
-                      Properties:
-                        BorderColor: =ColorValue(AppTheme.palette.neutralTertiary)
-                        BorderRadius: =10
-                        BorderStyle: =BorderStyle.Solid
-                        BorderThickness: =2
-                        DisabledTextColor: =ColorValue(AppTheme.palette.white)
-                        FillColor: =ColorValue(AppTheme.palette.white)
-                        FontWeight: =FontWeight.Semibold
-                        Height: =40
-                        HoverBorderColor: =ColorValue(AppTheme.palette.white)
-                        HoverFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinWidth: =0
-                        OnSelect: |-
-                          =//Clear(ProdutoPickerSelectedCollection);
-                          UpdateContext(
-                              {
-                                  ShowAddNewDeviceWindow: false
-                              }
-                          );
-                          Reset(NewDeviceQuantNumberInput)
-                        PressedFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        Text: ="Fechar"
-                        TextColor: =ColorValue(AppTheme.palette.neutralSecondary)
-      - OpenProjectBackgroundContainer:
-          Control: GroupContainer@1.4.0
-          Variant: ManualLayout
-          Properties:
-            Fill: |-
-              =RGBA(0, 0, 0, 0.5
-              )
-            Height: =Parent.Height
-            Visible: =IsBlank(CurrentProjeto)
-            Width: =Parent.Width
-          Children:
-            - OpenProjectContainer:
-                Control: GroupContainer@1.4.0
-                Variant: AutoLayout
-                Properties:
-                  Fill: =ColorValue(AppTheme.palette.white)
-                  Height: =250
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =20
-                  LayoutJustifyContent: =LayoutJustifyContent.Center
-                  PaddingBottom: =20
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =20
-                  RadiusBottomLeft: =10
-                  RadiusBottomRight: =10
-                  RadiusTopLeft: =10
-                  RadiusTopRight: =10
-                  Width: =Parent.Width-40
-                  X: =(Parent.Width-Self.Width)/2
-                  Y: =(Parent.Height-Self.Height)/2
-                Children:
-                  - SelectProjectLabel:
-                      Control: FluentV8/Label@1.8.6
-                      Properties:
-                        Alignment: =Align.Center
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Semibold
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Text: ="Selecione o Projeto Desejado"
-                        X: =47
-                        Y: =446
-                  - ProjetoPicker:
-                      Control: CodeComponent
-                      ComponentName: cat_PowerCAT.Picker
-                      Properties:
-                        Height: =32
-                        HintText: ="Pesquisar projetos"
-                        Items: |
-                          =ProjetoPickerSelectedCollection
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        MaxTags: =1
-                        MinimumSearchTermLength: =2
-                        NoSuggestionFoundMessage: ="Nenhum sugestão encontrada"
-                        OnChange: |-
-                          =Switch(
-                              Self.TagEvent,
-                              "Add",
-                              If(
-                                  !IsBlank(Self.TagKey),
-                                  ClearCollect(
-                                      ProjetoPickerSelectedCollection,
-                                      {
-                                          cr22f_projetoid: Self.TagKey,
-                                          cr22f_apelido: Self.TagDisplayName
-                                      }
-                                  )
-                              ),
-                              "Remove",
-                              Clear(ProjetoPickerSelectedCollection)
-                          )
-                        OnSelect: =
-                        SearchTermToShortMessage: ="Continue Digitando..."
-                        SuggestionsDisplayName: ="cr22f_apelido"
-                        SuggestionsKey: ="cr22f_projetoid"
-                        SuggestionsSubDisplayName: ="new_nomedoclientefx"
-                        Suggestions_Items: |-
-                          =SortByColumns(
-                              Search(
-                                  Projetos,
-                                  Self.SearchTerm,
-                                  Apelido,
-                                  'Nome do Cliente (Fx)',
-                                  'Email do Cliente',
-                                  'Endereço Completo (Fx)'
-                              ),
-                              "cr22f_apelido",
-                              SortOrder.Ascending
-                          )
-                        TagsDisplayName: ="cr22f_apelido"
-                        Theme: =AppThemeJson
-                      Children:
-                        - cr22f_apelido1:
-                            Control: DataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="cr22f_apelido"
-                              FieldName: ="cr22f_apelido"
-                              FieldType: ="s"
-                              Order: =1
-                        - cr22f_projetoid1:
-                            Control: DataField@1.5.0
-                            Variant: textualColumn
-                            IsLocked: true
-                            Properties:
-                              FieldDisplayName: ="cr22f_projetoid"
-                              FieldName: ="cr22f_projetoid"
-                              FieldType: ="s"
-                              Order: =2
-                  - OpenProjectButton:
-                      Control: FluentV8/Button@1.5.13
-                      Properties:
-                        BorderRadius: =10
-                        DisplayMode: |-
-                          =If(
-                              IsBlank(First(ProjetoPickerSelectedCollection).cr22f_projetoid),
-                              DisplayMode.Disabled,
-                              DisplayMode.Edit
-                          )
-                        FillColor: =ColorValue(AppTheme.palette.themePrimary)
-                        FontWeight: =FontWeight.Semibold
-                        Height: =40
-                        HoverFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinWidth: =0
-                        OnSelect: |-
-                          =If(
-                              !IsBlank(First(ProjetoPickerSelectedCollection).cr22f_projetoid),
-                              Set(
-                                  CurrentProjeto,
-                                  LookUp(
-                                      Projetos As P,
-                                      P.Projeto = GUID(First(ProjetoPickerSelectedCollection).cr22f_projetoid)
-                                  )
-                              ),
-                              Set(
-                                  CurrentProjeto,
-                                  Blank()
-                              )
-                          );
-                          Clear(ProjetoPickerSelectedCollection)
-                        PressedFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        Text: ="Abrir Projeto"
-                  - CloseRecibosWindowButton:
-                      Control: FluentV8/Button@1.5.13
-                      Properties:
-                        BorderColor: =ColorValue(AppTheme.palette.neutralTertiary)
-                        BorderRadius: =10
-                        BorderStyle: =BorderStyle.Solid
-                        BorderThickness: =2
-                        DisabledTextColor: =ColorValue(AppTheme.palette.white)
-                        DisplayMode: =DisplayMode.Disabled
-                        FillColor: =ColorValue(AppTheme.palette.white)
-                        FontWeight: =FontWeight.Semibold
-                        Height: =40
-                        HoverBorderColor: =ColorValue(AppTheme.palette.white)
-                        HoverFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinWidth: =0
-                        OnSelect: |-
-                          =UpdateContext(
-                              {
-                                  ShowRecibosWindow: false,
-                                  SelectedTaskId: Blank()
-                              }
-                          )
-                        PressedFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        Text: ="Fechar"
-                        TextColor: =ColorValue(AppTheme.palette.neutralSecondary)
-      - CopyCSVBackgroundContainer:
-          Control: GroupContainer@1.4.0
-          Variant: ManualLayout
-          Properties:
-            Fill: |-
-              =RGBA(0, 0, 0, 0.5
-              )
-            Height: =Parent.Height
-            Visible: =Len(CSVConexoes)> 0 || Len(CSVEquipamentos) > 0
-            Width: =Parent.Width
-          Children:
-            - CopyCSVContainer:
-                Control: GroupContainer@1.4.0
-                Variant: AutoLayout
-                Properties:
-                  Fill: =ColorValue(AppTheme.palette.white)
-                  Height: =350
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =20
-                  LayoutJustifyContent: =LayoutJustifyContent.Center
-                  PaddingBottom: =20
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =20
-                  RadiusBottomLeft: =10
-                  RadiusBottomRight: =10
-                  RadiusTopLeft: =10
-                  RadiusTopRight: =10
-                  Width: =Parent.Width-40
-                  X: =(Parent.Width-Self.Width)/2
-                  Y: =(Parent.Height-Self.Height)/2
-                Children:
-                  - CopyCSVConLabel:
-                      Control: FluentV8/Label@1.8.6
-                      Properties:
-                        Alignment: =Align.Center
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Semibold
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Text: ="Copiar Arquivo CSV de Conexões"
-                        X: =47
-                        Y: =446
-                  - PCFCopyTextComponent1:
-                      Control: CodeComponent
-                      ComponentName: tbag_CanvizLLCPCF.PCFCopyTextComponent
-                      Properties:
-                        FillPortions: =1
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinHeight: =0
-                        MaxLength: =10000000000000
-                        MultiLine: =true
-                        ReadOnly: =true
-                        Value: =CSVConexoes
-                  - CopyCSVEquipLabel:
-                      Control: FluentV8/Label@1.8.6
-                      Properties:
-                        Alignment: =Align.Center
-                        Font: =Font.Lato
-                        FontWeight: =FontWeight.Semibold
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        Text: ="Copiar Arquivo CSV de Equipamentos"
-                        X: =47
-                        Y: =446
-                  - PCFCopyTextComponent2:
-                      Control: CodeComponent
-                      ComponentName: tbag_CanvizLLCPCF.PCFCopyTextComponent
-                      Properties:
-                        FillPortions: =1
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinHeight: =0
-                        MaxLength: =10000000000000
-                        MultiLine: =true
-                        ReadOnly: =true
-                        Value: =CSVEquipamentos
-                  - CloseCopyCSVWindowButton:
-                      Control: FluentV8/Button@1.5.13
-                      Properties:
-                        BorderColor: =ColorValue(AppTheme.palette.neutralTertiary)
-                        BorderRadius: =10
-                        BorderStyle: =BorderStyle.Solid
-                        BorderThickness: =2
-                        DisabledTextColor: =ColorValue(AppTheme.palette.white)
-                        FillColor: =ColorValue(AppTheme.palette.white)
-                        FontWeight: =FontWeight.Semibold
-                        Height: =40
-                        HoverBorderColor: =ColorValue(AppTheme.palette.white)
-                        HoverFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        LayoutMaxHeight: =
-                        LayoutMaxWidth: =
-                        LayoutMinWidth: =0
-                        OnSelect: |-
-                          =UpdateContext({CSVConexoes: "",CSVEquipamentos:""})
-                        PressedFillColor: =ColorFade(ColorValue(AppTheme.palette.themePrimary),20%)
-                        Text: ="Fechar"
-                        TextColor: =ColorValue(AppTheme.palette.neutralSecondary)
+                                          Visible: =And(ShowPrintSummaryWindow,SummaryButton.Visible)
       - Spinner1:
           Control: CodeComponent
           ComponentName: cat_PowerCAT.Spinner
           Properties:
             BackgroundColor: ="#00000050"
             Height: =Parent.Height
-            Label: |-
-              ="Carregando" & If(
-                  ProgressMax > 0,
-                  " " & CountRows(ProgressCol) & "/" & ProgressMax & " ",
-                  ""
-              ) & "..."
+            Label: ="Carregando..."
             SpinnerSize: ='PowerCAT.Spinner.SpinnerSize'.Large
             Theme: =AppThemeJson
-            Visible: =SpinCounter > 0
+            Visible: =Or(SpinCounter > 0, Not(CountRows(Fornecedores) > 0))
             Width: =Parent.Width
-            X: =0.00
-            Y: =0.00
-      - GenerateCSVButtonCanvas:
-          Control: Button@0.0.45
-          Properties:
-            OnSelect: |-
-              =UpdateContext({SpinCounter: SpinCounter + 1});
-              // start index connections by root devices
-              ClearCollect(
-                  ConsCol,
-                  AddColumns(
-                      ShowColumns(
-                          FirstN(
-                              'Device IO Connections',
-                              2
-                          ),
-                          //Device,
-              //'Connected To',
-                          'Display Name',
-                          Direção,
-                          'Device IO Connection'
-                      ),
-                      //local_index,
-              // 0,
-                      local_root,
-                      GUID(),
-                      local_rootcon,
-                      GUID(),
-                      local_deviceid,
-                      GUID(),
-                      local_connectedtoid,
-                      GUID()
-                  )
-              );
-              Clear(ConsCol);
-              With(
-                  {
-                      Value: Distinct(
-                          DeviceIOs As Dev,
-                          Dev.DeviceIO
-                      )
-                  } As AllDeviceIOsIds,
-                  With(
-                      {
-                          Value: DropColumns(
-                              AddColumns(
-                                  ShowColumns(
-                                      Filter(
-                                          'Device IO Connections' As Con,
-                                          Con.'Tipo de Conexão' = 'Tipo de Conexão'.Speaker,
-                                          !IsBlank(Con.'Connected To'),
-                                          !IsBlank(Con.Device),
-                                          Con.Device.Projeto.Projeto = CurrentProjeto.Projeto,
-                                          Con.Device.DeviceIO in AllDeviceIOsIds.Value
-                                      ),
-                                      Device,
-                                      'Connected To',
-                                      'Display Name',
-                                      Direção,
-                                      'Device IO Connection'
-                                  ) As Con,
-                                  local_deviceid,
-                                  Con.new_Device.DeviceIO,
-                                  local_connectedtoid,
-                                  Con.new_ConnectedTo.'Device IO Connection'
-                              ),
-                              new_Device,
-                              new_ConnectedTo
-                          )
-                      } As SpeakerCons,
-                      With(
-                          {
-                              Value: Distinct(
-                                  SpeakerCons.Value As Con,
-                                  Con.local_deviceid
-                              )
-                          } As SpeakerDevicesIds,
-                          With(
-                              {
-                                  Value: Filter(
-                                      SpeakerDevicesIds.Value As DevId,
-                                      CountRows(
-                                          Filter(
-                                              SpeakerCons.Value As Con,
-                                              Con.local_deviceid = DevId.Value,
-                                              Con.new_direcao = 'Direção de Conexão'.Input
-                                          )
-                                      ) = 0,
-                                      CountRows(
-                                          Filter(
-                                              SpeakerCons.Value As Con,
-                                              Con.local_deviceid = DevId.Value,
-                                              Con.new_direcao = 'Direção de Conexão'.Output
-                                          )
-                                      ) > 0
-                                  )
-                              } As RootSpeakerDevicesIds,
-                              ForAll(
-                                  RootSpeakerDevicesIds.Value As CurrentRootDevice,
-                                  With(
-                                      {
-                                          Value: Filter(
-                                              SpeakerCons.Value As Con,
-                                              Con.local_deviceid = CurrentRootDevice.Value
-                                          )
-                                      } As RootCons,
-                                      ForAll(
-                                          RootCons.Value As CurrentRootCon,
-                                          Collect(
-                                              ConsCol,
-                                              Patch(
-                                                  CurrentRootCon,
-                                                  {
-                                                      //local_index: 0,
-                                                      local_root: CurrentRootDevice.Value,
-                                                      local_rootcon: CurrentRootCon.new_deviceioconnectionid
-                                                  }
-                                              )
-                                          )
-                                      );
-                                      ForAll(
-                                          RootCons.Value As CurrentRootCon,
-                                          ForAll(
-                                              Filter(
-                                                  SpeakerCons.Value As Con,
-                                                  Not(
-                                                      Con.new_deviceioconnectionid in ForAll(
-                                                          ConsCol As ColCon,
-                                                          ColCon.new_deviceioconnectionid
-                                                      )
-                                                  )
-                                              ) As NewCon,
-                                              With(
-                                                  LookUp(
-                                                      ConsCol As ColCon,
-                                                      And(
-                                                          Or(
-                                                              ColCon.local_connectedtoid = NewCon.new_deviceioconnectionid,
-                                                              ColCon.local_deviceid = NewCon.local_deviceid
-                                                          ),
-                                                          !IsBlank(ColCon.local_root)
-                                                      )
-                                                  ) As NeighborColCon,
-                                                  If(
-                                                      IsBlank(NeighborColCon.new_deviceioconnectionid),
-                                                      Collect(
-                                                          ConsCol,
-                                                          Patch(
-                                                              NewCon,
-                                                              {
-                                                                  // local_index: 0,
-                                                                  local_root: Blank(),
-                                                                  local_rootcon: Blank()
-                                                              }
-                                                          )
-                                                      ),
-                                                      Collect(
-                                                          ConsCol,
-                                                          Patch(
-                                                              NewCon,
-                                                              {
-                                                                  /*local_index: NeighborColCon.local_index + If(
-                                                                      NewCon.new_direcao = 'Direção de Conexão'.Input,
-                                                                      1,
-                                                                      -1
-                                                                  ),*/
-                                                                  local_root: NeighborColCon.local_root,
-                                                                  local_rootcon: NeighborColCon.local_rootcon
-                                                              }
-                                                          )
-                                                      )
-                                                  )
-                                              )
-                                          );
-                                          ForAll(
-                                              Sequence(
-                                                  CountRows(SpeakerCons.Value),
-                                                  0,
-                                                  1
-                                              ),
-                                              With(
-                                                  {
-                                                      Value: Filter(
-                                                          ConsCol As Con,
-                                                          IsBlank(Con.local_root)
-                                                      )
-                                                  } As UnpairedConnections,
-                                                  ForAll(
-                                                      UnpairedConnections.Value As UnpairedCon,
-                                                      With(
-                                                          LookUp(
-                                                              ConsCol As ColCon,
-                                                              And(
-                                                                  Or(
-                                                                      ColCon.local_connectedtoid = UnpairedCon.new_deviceioconnectionid,
-                                                                      ColCon.local_deviceid = UnpairedCon.local_deviceid
-                                                                  ),
-                                                                  !IsBlank(ColCon.local_root)
-                                                              )
-                                                          ) As NeighborColCon,
-                                                          If(
-                                                              !IsBlank(NeighborColCon.new_deviceioconnectionid),
-                                                              Collect(
-                                                                  ConsCol,
-                                                                  Patch(
-                                                                      UnpairedCon,
-                                                                      {
-                                                                          /*local_index: NeighborColCon.local_index + If(
-                                                                      NewCon.new_direcao = 'Direção de Conexão'.Input,
-                                                                      1,
-                                                                      -1
-                                                                  ),*/
-                                                                          local_root: NeighborColCon.local_root,
-                                                                          local_rootcon: NeighborColCon.local_rootcon
-                                                                      }
-                                                                  )
-                                                              )
-                                                          )
-                                                      )
-                                                  )
-                                              )
-                                          )
-                                      )
-                                  )
-                              )
-                          )
-                      )
-                  )
-              );
-              // end index connections by root devices
-              // start generate csv text
-              UpdateContext(
-                  {
-                      CSVConexoes: "Texto,Texto B,Nome do Projeto,Created On
-              " & Concat(
-                          Filter(
-                              ForAll(
-                                  VisibleDevicesList As Dev,
-                                  Concat(
-                                      Filter(
-                                          ForAll(
-                                              Filter(
-                                                  'Device IO Connections' As Con,
-                                                  Con.Device.DeviceIO = Dev.DeviceIO,
-                                                  Con.Status = 'Status (Device IO Connections)'.Active
-                                              ) As Con,
-                                              If(
-                                                  And(
-                                                      Or(
-                                                          !IsBlank(Con.'Connected To'),
-                                                          !IsBlank(Con.'Connected To (Manual)'),
-                                                          Len(Con.'Connected To (Manual)') > 0
-                                                      ),
-                                                      Not(
-                                                          And(
-                                                              Con.'Tipo de Conexão' = 'Tipo de Conexão'.Speaker,
-                                                              Con.Direção = 'Direção de Conexão'.Output,
-                                                              Not(
-                                                                  Con.'Device IO Connection' in Distinct(
-                                                                      ConsCol As ColCon,
-                                                                      ColCon.local_rootcon
-                                                                  )
-                                                              )
-                                                          )
-                                                      )
-                                                  ),
-                                                  Substitute(
-                                                      Con.Device.Name & " - " & Con.Name,
-                                                      ",",
-                                                      "."
-                                                  ) & "," & Substitute(
-                                                      If(
-                                                          IsBlank(Con.'Connected To'),
-                                                          Con.'Connected To (Manual)',
-                                                          If(
-                                                              And(
-                                                                  Con.'Tipo de Conexão' = 'Tipo de Conexão'.Speaker,
-                                                                  Con.Direção = 'Direção de Conexão'.Input
-                                                              ),
-                                                              With(
-                                                                  LookUp(
-                                                                      ConsCol As ColCon,
-                                                                      ColCon.new_deviceioconnectionid = Con.'Device IO Connection'
-                                                                  ) As IndexedConInfo,
-                                                                  LookUp(
-                                                                      'Device IO Connections' As RootCon,
-                                                                      RootCon.'Device IO Connection' = IndexedConInfo.local_rootcon,
-                                                                      RootCon.Device.Name & " - " & RootCon.Name & " | " & RootCon.Localização
-                                                                  )
-                                                              ),
-                                                              If(
-                                                                  And(
-                                                                      Con.'Tipo de Conexão' = 'Tipo de Conexão'.Speaker,
-                                                                      Con.Direção = 'Direção de Conexão'.Output,
-                                                                      Con.'Device IO Connection' in Distinct(
-                                                                          ConsCol As ColCon,
-                                                                          ColCon.local_rootcon
-                                                                      )
-                                                                  ),
-                                                                  With(
-                                                                      {
-                                                                          Value: Distinct(
-                                                                              Filter(
-                                                                                  ConsCol As ColCon,
-                                                                                  ColCon.local_rootcon = Con.'Device IO Connection',
-                                                                                  ColCon.new_deviceioconnectionid <> Con.'Device IO Connection'
-                                                                              )As Nei,
-                                                                              Nei.new_deviceioconnectionid
-                                                                          )
-                                                                      } As NeighborConsIds,
-                                                                      Concat(
-                                                                          Filter(
-                                                                              'Device IO Connections' As Con,
-                                                                              Con.'Device IO Connection' in NeighborConsIds.Value
-                                                                          ) As Con,
-                                                                          Con.Device.Name,
-                                                                          "+"
-                                                                      )
-                                                                  ),
-                                                                  Con.'Connected To'.Device.Name & " - " & Con.'Connected To'.Name & " | " & Con.'Connected To'.Localização
-                                                              )
-                                                          )
-                                                      ),
-                                                      ",",
-                                                      "."
-                                                  ) & "," & Substitute(
-                                                      CurrentProjeto.Apelido,
-                                                      ",",
-                                                      "."
-                                                  )
-                                              )
-                                          ) As V,
-                                          Len(V.Value) > 2
-                                      ),
-                                      Value,
-                                      "
-              "
-                                  )
-                              ) As V,
-                              Len(V.Value) > 2
-                          ),
-                          Value,
-                          "
-              "
-                      ) & "
-              ",
-                      CSVEquipamentos: "Texto,Texto B,Nome do Projeto,Created On
-              " & Concat(
-                          Filter(
-                              ForAll(
-                                  VisibleDevicesList As Dev,
-                                  Dev.Name & ",," & CurrentProjeto.Apelido
-                              ) As V,
-                              Len(V.Value) > 2
-                          ),
-                          Value,
-                          "
-              "
-                      ) & "
-              "
-                  }
-              );
-              UpdateContext({SpinCounter: SpinCounter - 1})
-            Visible: =false
-            X: =180
-            Y: =56
-      - PlotButton:
-          Control: Button@0.0.45
-          Properties:
-            OnSelect: "=UpdateContext({SpinCounter: SpinCounter + 1});\nWith(\n    {\n        nomeProjeto: Coalesce(\n            CurrentProjeto.Apelido,\n            \" \"\n        ),\n        produtos: With(\n            {\n                Value: Filter(\n                    ConnectionsReport As Con,\n                    Con.new_deviceid in Distinct(\n                        VisibleDevicesList As D,\n                        D.DeviceIO\n                    )\n                )\n            } As InputDevices,\n            With(\n                {\n                    Value: SortByColumns(\n                        AddColumns(\n                            InputDevices.Value As Cur,\n                            DeviceName,\n                            First(Cur.Connections).new_Device.Name,\n                            TipoDeSistema,\n                            With(\n                                {Value: GUID(Cur.new_deviceid)} As Id,\n                                LookUp(\n                                    DeviceIOs As D,\n                                    D.DeviceIO = Id.Value,\n                                    D.'Modelo de Produto'.'Tipo de Sistema Padrão'\n                                )\n                            )\n                        ),\n                        \"new_localizacao\",\n                        SortOrder.Ascending,\n                        \"TipoDeSistema\",\n                        SortOrder.Ascending\n                    )\n                } As Produtos,\n                ForAll(\n                    Produtos.Value As P,\n                    {\n                        nome: Coalesce(\n                            P.DeviceName,\n                            \" \"\n                        ),\n                        localizacao: Coalesce(\n                            P.new_localizacao,\n                            \" \"\n                        ),\n                        conexoes: ForAll(\n                            P.Connections As C,\n                            {\n                                origem: Coalesce(\n                                    C.new_name,\n                                    \" \"\n                                ),\n                                tipo: Coalesce(\n                                    Text(C.new_tipodeconexao),\n                                    \" \"\n                                ),\n                                direcao: Coalesce(\n                                    Text(C.new_direcao),\n                                    \" \"\n                                ),\n                                localDestino: Coalesce(\n                                    C.ConnectedToLocation,\n                                    \" \"\n                                ),\n                                dispositivoDestino: Coalesce(\n                                    C.ConnectedToDeviceName,\n                                    \" \"\n                                ),\n                                portaDestino: Coalesce(\n                                    C.ConnectedToName,\n                                    \" \"\n                                )\n                            }\n                        )\n                    }\n                )\n            )\n        )\n    } As Payload,\n    With(\n        '(PDF)-PlotarGuiadeConexões'.Run(JSON(Payload)) As Response,\n        Download(\"https://0fe81aea6a5fe3278de31c56d9ac4e.ee.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/68800ad1aa084f27b94e613327e689de/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eAes3l7eaI5YNZ17a1aJI6kX3XaED_ZVJWwysOm4gzk&downloadUri=\" & Response.uri & \"&filename=guia_\" & Now() & \".pdf\")\n    );\n    \n);\nUpdateContext({SpinCounter: SpinCounter - 1})"
-            Visible: =false
-            X: =47
-            Y: =56
-      - PCFCopyTextComponent4:
-          Control: CodeComponent
-          ComponentName: tbag_CanvizLLCPCF.PCFCopyTextComponent
-          Properties:
-            Height: =Parent.Height
-            OnChange: |-
-              =UpdateContext({ShowDiagramText:false});
-              Clear(FinalGraph);
-              Launch("https://mermaid.live/edit",Blank(),LaunchTarget.New)
-            Value: |-
-              =Concat(FinalGraph,Value,"")
-              /*If(
-                  Self.Visible = true,
-                  With(
-                      {DeviceIO: RootDeviceId} As RootDevice,
-                      With(
-                          {
-                              Value: SortByColumns(
-                                  Filter(
-                                      VisibleDevicesList As D,
-                                      D.Status = 'Status (Device IO)'.Active,
-                                      D.Projeto.Projeto = CurrentProjeto.Projeto
-                                  ),
-                                  "new_localizacao",
-                                  SortOrder.Ascending
-                              )
-                          } As DeviceList,
-                          With(
-                              {
-                                  Value: With(
-                                      {
-                                          Value: SortByColumns(
-                                              Filter(
-                                                  'Device IO Connections' As Con,
-                                                  Con.Status = 'Status (Device IO Connections)'.Active,
-                                                  Con.Device.Projeto.Projeto = CurrentProjeto.Projeto,
-                                                  !IsBlank(Con.'Connected To'),
-                                                  !IsBlank(Con.Device)
-                                              ),
-                                              "new_direcaorawtext",
-                                              SortOrder.Ascending
-                                          )
-                                      } As CL,
-                                      Filter(
-                                          CL.Value As C,
-                                          C.Device.DeviceIO in ForAll(
-                                              DeviceList.Value As D,
-                                              D.DeviceIO
-                                          )
-                                      )
-                                  )
-                              } As ConList,
-                              Concatenate(
-                                  "graph LR
-                  %% ====== Nós por ambiente ======
-              ",
-                                  Concat(
-                                      Distinct(
-                                          DeviceList.Value As D,
-                                          Proper(
-                                              If(
-                                                  Len(TrimEnds(D.Localização)) = 0,
-                                                  "NãoIdentificado",
-                                                  D.Localização
-                                              )
-                                          )
-                                      ) As Local,
-                                      Concatenate(
-                                          "    subgraph ",
-                                          Substitute(
-                                              Substitute(
-                                                  Substitute(
-                                                      TrimEnds(Local.Value),
-                                                      " ",
-                                                      ""
-                                                  ),
-                                                  ")",
-                                                  ""
-                                              ),
-                                              "(",
-                                              ""
-                                          ),
-                                          "
-              ",
-                                          Concat(
-                                              ForAll(
-                                                  Filter(
-                                                      DeviceList.Value As D,
-                                                      Proper(D.Localização) = Local.Value
-                                                  ) As D,
-                                                  "        " & D.DeviceIO & "[" & """" & D.Name & """" & "]"
-                                              ),
-                                              Value,
-                                              "
-              "
-                                          ),
-                                          "
-                  end
-              ",
-                                          "
-                  style " & Substitute(
-                                              Substitute(
-                                                  Substitute(
-                                                      TrimEnds(Local.Value),
-                                                      " ",
-                                                      ""
-                                                  ),
-                                                  ")",
-                                                  ""
-                                              ),
-                                              "(",
-                                              ""
-                                          ) & " fill:#fff00,stroke:#333,stroke-width:2px
-              "
-                                      )
-                                  ),
-                                  "
-                  %% ====== Ligações (rótulos entre aspas; nada de colchetes) ======
-                  ",
-                                  With(
-                                      {
-                                          Value: Distinct(
-                                              ConList.Value As Con,
-                                              With(
-                                                  {
-                                                      Value: Sort(
-                                                          [
-                                                              Con.'Device IO Connection',
-                                                              Con.'Connected To'.'Device IO Connection'
-                                                          ],
-                                                          Value,
-                                                          SortOrder.Ascending
-                                                      )
-                                                  } As Combo,
-                                                  If(
-                                                      LookUp(
-                                                          ConList.Value As C,
-                                                          C.'Device IO Connection' = Last(Combo.Value).Value
-                                                      ).Device.DeviceIO = RootDevice.DeviceIO,
-                                                      [
-                                                          Last(Combo.Value).Value,
-                                                          First(Combo.Value).Value
-                                                      ],
-                                                      [
-                                                          First(Combo.Value).Value,
-                                                          Last(Combo.Value).Value
-                                                      ]
-                                                  )
-                                              )
-                                          )
-                                      } As SelectedCons,
-                                      Concat(
-                                          SelectedCons.Value As Con,
-                                          If(
-                                              And(
-                                                  Len(
-                                                      LookUp(
-                                                          ConList.Value As C,
-                                                          C.'Device IO Connection' = First(Con.Value).Value,
-                                                          C.Device.DeviceIO
-                                                      )
-                                                  ) > 0,
-                                                  Len(
-                                                      LookUp(
-                                                          ConList.Value As C,
-                                                          C.'Device IO Connection' = Last(Con.Value).Value,
-                                                          C.Device.DeviceIO
-                                                      )
-                                                  ) > 0
-                                              ),
-                                              "
-                  " & LookUp(
-                                                  ConList.Value As C,
-                                                  C.'Device IO Connection' = First(Con.Value).Value,
-                                                  C.Device.DeviceIO
-                                              ) & " -- """ & LookUp(
-                                                  ConList.Value As C,
-                                                  C.'Device IO Connection' = First(Con.Value).Value,
-                                                  C.Name
-                                              ) & "
-              →
-              " & LookUp(
-                                                  ConList.Value As C,
-                                                  C.'Device IO Connection' = Last(Con.Value).Value,
-                                                  C.Name
-                                              ) & """ --> " & LookUp(
-                                                  ConList.Value As C,
-                                                  C.'Device IO Connection' = Last(Con.Value).Value,
-                                                  C.Device.DeviceIO
-                                              ),
-                                              ""
-                                          )
-                                      )
-                                  )
-                              )
-                          )
-                      )
-                  )
-              )*/
-            Visible: =ShowDiagramText
-            Width: =Parent.Width
-      - GenerateGraphButton:
-          Control: Button@0.0.45
-          Properties:
-            OnSelect: |-
-              =Clear(FinalGraph);
-              Clear(_SavedCons);
-              Clear(_ConQueue);
-              Clear(_InsertedCons);
-              Clear(_NodeDevicesIds);
-              ForAll(
-                  VisibleDevicesList As Dev,
-                  ForAll(
-                      Filter(
-                          'Device IO Connections' As Con,
-                          Con.Status = 'Status (Device IO Connections)'.Active,
-                          Con.Device.DeviceIO = Dev.DeviceIO,
-                          !IsBlank(Con.'Connected To'),
-                          !IsBlank(Con.Device),
-                          Or(
-                              GroupByDropdownSelectedOption <> GroupByConTypeDropdownOption,
-                              Con.'Tipo de Conexão' = SelectedDeviceTab.Option2
-                          )
-                      ) As Con,
-                      Collect(
-                          _NodeDevicesIds,
-                          Con.Device.DeviceIO
-                      );
-                      Collect(
-                          _NodeDevicesIds,
-                          Con.'Connected To'.Device.DeviceIO
-                      )
-                  )
-              );
-              ClearCollect(
-                  _NodeDevicesIds,
-                  Distinct(
-                      _NodeDevicesIds,
-                      Value
-                  )
-              );
-              With(
-                  {DeviceIO: RootDeviceId} As RootDevice,
-                  With(
-                      {
-                          Value: Sort(
-                              SortByColumns(
-                                  Filter(
-                                      'Device IO' As D,//VisibleDevicesList As D,
-                                      D.Status = 'Status (Device IO)'.Active,
-                                      D.Projeto.Projeto = CurrentProjeto.Projeto,
-                                      D.DeviceIO in _NodeDevicesIds
-                                  ),
-                                  "new_localizacao",
-                                  SortOrder.Ascending,
-                                  "new_deviceioid",
-                                  SortOrder.Ascending
-                              ) As D,
-                              D.DeviceIO = RootDevice.DeviceIO,
-                              SortOrder.Descending
-                          )
-                      } As DeviceList,
-                      With(
-                          {
-                              Value: With(
-                                  {
-                                      Value: SortByColumns(
-                                          AddColumns(
-                                              SortByColumns(
-                                                  Filter(
-                                                      'Device IO Connections' As Con,
-                                                      Con.Status = 'Status (Device IO Connections)'.Active,
-                                                      Con.Device.Projeto.Projeto = CurrentProjeto.Projeto,
-                                                      !IsBlank(Con.'Connected To'),
-                                                      !IsBlank(Con.Device),
-                                                      !IsBlank(Con.Device),
-                                                      Or(
-                                                          GroupByDropdownSelectedOption <> GroupByConTypeDropdownOption,
-                                                          Con.'Tipo de Conexão' = SelectedDeviceTab.Option2
-                                                      )
-                                                  ),
-                                                  "new_direcaorawtext",
-                                                  SortOrder.Ascending
-                                              ) As C,
-                                              Local,
-                                              C.Device.Localização,
-                                              DevId,
-                                              C.Device.DeviceIO
-                                          ),
-                                          "Local",
-                                          SortOrder.Ascending,
-                                          "DevId",
-                                          SortOrder.Ascending
-                                      )
-                                  } As CL,
-                                  Filter(
-                                      CL.Value As C,
-                                      C.Device.DeviceIO in ForAll(
-                                          VisibleDevicesList As D,
-                                          D.DeviceIO
-                                      )
-                                  )
-                              )
-                          } As ConList,
-                          Collect(
-                              FinalGraph,
-                              "%%{init: {'flowchart': {'rankSpacing': 190, 'nodeSpacing':40, 'curve': 'linear','defaultRenderer': 'elk'}} }%%
-              graph LR"
-                          );
-                          // Agrupar por localizações
-              With(
-                              {
-                                  Value: Sort(
-                                      GroupBy(
-                                          DeviceList.Value,
-                                          Localização,
-                                          Devices
-                                      ) As L,
-                                      L.new_localizacao = LookUp(
-                                          DeviceList.Value As D,
-                                          D.DeviceIO = RootDevice.DeviceIO,
-                                          D.Localização
-                                      ),
-                                      SortOrder.Descending
-                                  )
-                              } As Locations,
-                                  // Loop por cada localização
-                              ForAll(
-                                  Locations.Value As Location,
-                                  Collect(
-                                      FinalGraph,
-                                      "
-                  subgraph " & Substitute(
-                                          Substitute(
-                                              Substitute(
-                                                  Substitute(
-                                                      Substitute(
-                                                          Coalesce(
-                                                              TrimEnds(Location.new_localizacao),
-                                                              "Sem Localização"
-                                                          ),
-                                                          "]",
-                                                          ""
-                                                      ),
-                                                      "[",
-                                                      ""
-                                                  ),
-                                                  ")",
-                                                  ""
-                                              ),
-                                              "(",
-                                              ""
-                                          ),
-                                          " ",
-                                          ""
-                                      ) & "[""" & Substitute(
-                                          Substitute(
-                                              Coalesce(
-                                                  TrimEnds(Location.new_localizacao),
-                                                  "Sem Localização"
-                                              ),
-                                              "[",
-                                              ""
-                                          ),
-                                          "]",
-                                          ""
-                                      ) & """]"
-                                  );
-                                  ForAll(
-                                      Location.Devices As D,
-                                      Collect(
-                                          FinalGraph,
-                                          "
-                      " & D.DeviceIO & "[""" & Substitute(
-                                              Substitute(
-                                                  D.Name,
-                                                  "[",
-                                                  ""
-                                              ),
-                                              "]",
-                                              ""
-                                          ) & """]"
-                                      )
-                                  );
-                                  Collect(
-                                      FinalGraph,
-                                      "
-                  end"
-                                  );
-                                  Collect(
-                                      FinalGraph,
-                                      "
-                  "
-                                  );
-                                  ForAll(
-                                      Filter(
-                                          ConList.Value As Con,
-                                          Con.DevId = RootDevice.DeviceIO
-                                      ) As Con,
-                                      If(
-                                          IsBlank(
-                                              LookUp(
-                                                  _SavedCons As SCon,
-                                                  Or(
-                                                      And(
-                                                          SCon.A = Con.DevId,
-                                                          SCon.B = Con.'Connected To'.Device.DeviceIO
-                                                      ),
-                                                      And(
-                                                          SCon.B = Con.DevId,
-                                                          SCon.A = Con.'Connected To'.Device.DeviceIO
-                                                      )
-                                                  )
-                                              )
-                                          ),
-                                          Collect(
-                                              FinalGraph,
-                                              Con.DevId & " -- """ & Con.'Display Name' & "-" & Con.'Connected To'.Name & """ --- " & Con.'Connected To'.Device.DeviceIO & "; "
-                                          );
-                                          Collect(
-                                              _SavedCons,
-                                              {
-                                                  A: Con.DevId,
-                                                  B: Con.'Connected To'.Device.DeviceIO
-                                              }
-                                          );
-                                          If(
-                                              IsBlank(
-                                                  LookUp(
-                                                      _ConQueue As Q,
-                                                      Q.Value = Con.'Connected To'.Device.DeviceIO
-                                                  )
-                                              ),
-                                              Collect(
-                                                  _ConQueue,
-                                                  Con.'Connected To'.Device.DeviceIO
-                                              )
-                                          )
-                                      )
-                                  );
-                                  ForAll(
-                                      Location.Devices As D,
-                                      Collect(
-                                          FinalGraph,
-                                          "
-                  "
-                                      );
-                                      With(
-                                          {
-                                              Value: Coalesce(
-                                                  First(
-                                                      Filter(
-                                                          _ConQueue As CQ,
-                                                          Not(CQ.Value in _InsertedCons)
-                                                      )
-                                                  ).Value,
-                                                  First(
-                                                      Filter(
-                                                          DeviceList.Value As Dev,
-                                                          Not(Dev.DeviceIO in _InsertedCons),
-                                                          Not(Dev.DeviceIO in _ConQueue)
-                                                      )
-                                                  ).DeviceIO
-                                              )
-                                          } As CurDev,
-                                          If(
-                                              !IsBlank(CurDev.Value),
-                                              ForAll(
-                                                  Filter(
-                                                      ConList.Value As Con,
-                                                      Con.DevId = CurDev.Value
-                                                  ) As Con,
-                                                  If(
-                                                      IsBlank(
-                                                          LookUp(
-                                                              _SavedCons As SCon,
-                                                              Or(
-                                                                  And(
-                                                                      SCon.A = Con.DevId,
-                                                                      SCon.B = Con.'Connected To'.Device.DeviceIO
-                                                                  ),
-                                                                  And(
-                                                                      SCon.B = Con.DevId,
-                                                                      SCon.A = Con.'Connected To'.Device.DeviceIO
-                                                                  )
-                                                              )
-                                                          )
-                                                      ),
-                                                      Collect(
-                                                          FinalGraph,
-                                                          Con.DevId & " -- """ & Con.'Display Name' & "-" & Con.'Connected To'.Name & """---" & Con.'Connected To'.Device.DeviceIO & "; "
-                                                      );
-                                                      Collect(
-                                                          _SavedCons,
-                                                          {
-                                                              A: Con.DevId,
-                                                              B: Con.'Connected To'.Device.DeviceIO
-                                                          }
-                                                      );
-                                                      If(
-                                                          IsBlank(
-                                                              LookUp(
-                                                                  _ConQueue As Q,
-                                                                  Q.Value = Con.'Connected To'.Device.DeviceIO
-                                                              )
-                                                          ),
-                                                          Collect(
-                                                              _ConQueue,
-                                                              Con.'Connected To'.Device.DeviceIO
-                                                          )
-                                                      )
-                                                  )
-                                              );
-                                              Collect(
-                                                  _InsertedCons,
-                                                  CurDev.Value
-                                              )
-                                          )
-                                      )
-                                  )
-                              )
-                          )
-                      )
-                  )
-              );
-              Clear(_SavedCons);
-              Clear(_ConQueue);
-              Clear(_InsertedCons);
-              Clear(_NodeDevicesIds)
-            Visible: =false
-            X: =159
-            Y: =56

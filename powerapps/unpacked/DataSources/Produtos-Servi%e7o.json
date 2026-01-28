@@ -237,6 +237,10 @@
       "OptionSetReferenceItem0": {
         "OptionSetReferenceColumnName": "new_opcaodeentrega",
         "OptionSetReferenceEntityName": "Produtos-Serviço"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_opcaodeentrega",
+        "OptionSetReferenceEntityName": "Cotações"
       }
     },
     "OptionSetTypeKey": "PicklistType",
@@ -289,6 +293,18 @@
       "OptionSetReferenceItem0": {
         "OptionSetReferenceColumnName": "new_prazodeenvio",
         "OptionSetReferenceEntityName": "Produtos-Serviço"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_prazopadrao",
+        "OptionSetReferenceEntityName": "Fornecedores From Sharepoint Lists"
+      },
+      "OptionSetReferenceItem2": {
+        "OptionSetReferenceColumnName": "new_prazodeenvio",
+        "OptionSetReferenceEntityName": "Cotações"
+      },
+      "OptionSetReferenceItem3": {
+        "OptionSetReferenceColumnName": "new_prazodeenviofinal",
+        "OptionSetReferenceEntityName": "Cotações"
       }
     },
     "OptionSetTypeKey": "PicklistType",

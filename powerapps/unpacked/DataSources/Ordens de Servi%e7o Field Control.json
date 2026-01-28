@@ -32,6 +32,7 @@
       "new_contadordepesquisasdesatisfacao": "Contador de Pesquisas de Satisfação",
       "new_contadordepesquisasdesatisfacao_date": "Contador de Pesquisas de Satisfação (Last Updated On)",
       "new_contadordepesquisasdesatisfacao_state": "Contador de Pesquisas de Satisfação (State)",
+      "new_contagemdetentativasdecontato": "Contagem de Tentativas de Contato",
       "new_Coordenador": "Coordenador",
       "new_cr22f_estoquefromsharepointlist_OrdemdeSe": "Estoque From SharepointLists",
       "new_cr22f_uniumpedidoempdf_OrdemdeServico_new": "UNIUM - Pedidos em PDF",
@@ -52,6 +53,7 @@
       "new_datadaultimaatividadefinalizada_date": "Data da Última Atividade Finalizada (Last Updated On)",
       "new_datadaultimaatividadefinalizada_state": "Data da Última Atividade Finalizada (State)",
       "new_datadaultimaconferenciadecabeamentoexecutada": "Data da Última Conferência de Cabeamento Executada",
+      "new_datadaultimaconfirmacao": "Data da Última Confirmação",
       "new_datadaultimatentativadecontato": "Data da Última Tentativa de Contato",
       "new_datadeconclusao": "Data de Conclusão",
       "new_datadeconclusaodoguiadeconexoesfx": "Data de Conclusão do Guia de Conexões (Fx)",
@@ -171,6 +173,7 @@
       "new_solicitacaodeinclusaodeproduto_OrdemdeServico_new_ordemdeservicofieldcontrol": "Solicitação de Inclusão de Produtos",
       "new_solicitcaodemescladeoss_OrdemdeServicodeDestino_new_ordemdeservicofieldcontrol": "Solicitcao de Mescla de OSses (new_solicitcaodemescladeoss_OrdemdeServicodeDestino_new_ordemdeservicofieldcontrol)",
       "new_solicitcaodemescladeoss_OrdemdeServicodeOrigem_new_ordemdeservicofieldcontrol": "Solicitcao de Mescla de OSses (new_solicitcaodemescladeoss_OrdemdeServicodeOrigem_new_ordemdeservicofieldcontrol)",
+      "new_statusdaprogramacao": "Status da Programação",
       "new_TecnicoSiteOmada": "Técnico Site Omada",
       "new_tipodeservico": "Tipo de Serviço",
       "new_tipodeservicotagcolor": "Tipo de Serviço Tag Color",
@@ -593,6 +596,34 @@
     },
     "OptionSetTypeKey": "StatusType",
     "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Ordens de Serviço Field Control",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status da Programação",
+    "Name": "new_statusdaprogramacao",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Aguardando 1º Contato",
+      "100000001": "Programado",
+      "100000002": "Pendente Reconfirmação 60d",
+      "100000003": "Confirmado 60d",
+      "100000004": "Pendente Reconfirmação 30d",
+      "100000005": "Confirmado 30d",
+      "100000006": "Pendente Reconfirmação 15d",
+      "100000007": "Confirmado 15d",
+      "100000008": "Pronto para Agendar",
+      "100000009": "Sem Resposta"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_statusdaprogramacao",
+        "OptionSetReferenceEntityName": "Ordens de Serviço Field Control"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_statusdaprogramacao",
     "RelatedEntityName": "Ordens de Serviço Field Control",
     "Type": "OptionSetInfo"
   }

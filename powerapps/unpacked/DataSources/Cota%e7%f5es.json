@@ -1,0 +1,157 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_cotacaos",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_cotacao",
+    "MaxGetRowsCount": 2000,
+    "Name": "Cotações",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Data de Criação",
+      "createdonbehalfby": "Created By (Delegate)",
+      "exchangerate": "Exchange Rate",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_aprovarcotacao": "Aprovar Cotação",
+      "new_cotacao_AsyncOperations": "System Jobs",
+      "new_cotacao_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_cotacao_DuplicateBaseRecord": "Duplicate Records (new_cotacao_DuplicateBaseRecord)",
+      "new_cotacao_DuplicateMatchingRecord": "Duplicate Records (new_cotacao_DuplicateMatchingRecord)",
+      "new_cotacao_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_cotacao_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_cotacao_ProcessSession": "Process Sessions",
+      "new_cotacao_SyncErrors": "Sync Errors",
+      "new_cotacaoid": "Cotação",
+      "new_datadeaprovacao": "Data de Aprovação",
+      "new_enderecodeentrega": "Endereço de Entrega",
+      "new_faturamentodireto": "Faturamento Direto",
+      "new_Fornecedor": "Fornecedor",
+      "new_name": "Name",
+      "new_new_cotacaofornecedor_Cotacao_new_cotacao": "Cotações-Fornecedores",
+      "new_new_cotacaoprodserv_Cotacao_new_cotacao": "Cotação-ProdServs",
+      "new_new_produtoservico_Cotacao_new_cotacao": "Produtos-Serviço",
+      "new_nomedofornecedor": "Nome do Fornecedor",
+      "new_notafiscal_Cotacao_new_cotacao": "Nota Fiscals",
+      "new_observacoes": "Observações",
+      "new_opcaodeentrega": "Opção de Entrega",
+      "new_prazodeenvio": "Prazo de Envio",
+      "new_prazodeenviofinal": "Prazo de Envio Final",
+      "new_previsaodeenvio": "Previsão de Envio",
+      "new_valortotal": "Valor Total",
+      "new_valortotal_base": "Valor Total (Base)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "transactioncurrencyid": "Currency",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Cotações",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Cotações (Views)",
+    "Name": "_new_cotacao_views",
+    "RelatedEntityName": "Cotações",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "1286e938-e75c-4db1-b36d-d8671606b93e": "Cotação Advanced Find View",
+      "5983da2d-ee94-ec11-b400-00224837c810": "Cotações Associadas a OC",
+      "62e92511-f395-44a6-88e4-bc8e6e61ac08": "Cotação Lookup View",
+      "a0d49941-f2bf-4327-bf45-4270500d4007": "Cotações Ativas",
+      "fb3adf94-c955-43f7-b99d-289205fa0c4d": "Cotação Associated View",
+      "fd6569d0-758a-48db-9be4-3c222a55018b": "Inactive Cotações"
+    }
+  },
+  {
+    "DisplayName": "Faturamento Direto (Cotações)",
+    "Name": "new_cotacao_new_faturamentodireto",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_faturamentodireto",
+        "OptionSetReferenceEntityName": "Cotações"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_faturamentodireto",
+    "RelatedEntityName": "Cotações",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (Cotações)",
+    "Name": "new_cotacao_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Cotações"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Cotações",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Cotações)",
+    "Name": "new_cotacao_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Cotações"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Cotações",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Aprovar Cotação (Cotações)",
+    "Name": "new_new_cotacao_aprovar",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_aprovarcotacao",
+        "OptionSetReferenceEntityName": "Cotações"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_aprovarcotacao",
+    "RelatedEntityName": "Cotações",
+    "Type": "OptionSetInfo"
+  }
+]

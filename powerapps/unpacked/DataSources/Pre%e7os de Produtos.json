@@ -1,0 +1,288 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "new_precodeprodutos",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "new_precodeproduto",
+    "MaxGetRowsCount": 2000,
+    "Name": "Preços de Produtos",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "exchangerate": "Exchange Rate",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "new_aceitadesconto": "Aceita Desconto",
+      "new_AtividadedeCopiadeProduto": "Atividade de Cópia de Produto",
+      "new_AtividadedeTrocadeItemdeKit": "Atividade de Troca de Item de Kit",
+      "new_AtividadeTrocadePalavras": "Atividade Troca de Palavras",
+      "new_cadastro": "Cadastro",
+      "new_categoriadeprodutofx": "Categoria de Produto (Fx)",
+      "new_categoriadeprodutoid": "Categoria de Produto Id",
+      "new_CotacaoTemporaria": "Cotação Temporária",
+      "new_datadaultimaatualizacaodeprecosautomatica": "Data da Última Atualização de Preços Automática",
+      "new_descontodekitefetivo": "Desconto de Kit Efetivo",
+      "new_descontodekitpercentual": "Desconto de Kit (Percentual)",
+      "new_descontopercentualdecompra": "Desconto Percentual de Compra",
+      "new_descricao": "Descrição",
+      "new_Fornecedor": "Fornecedor",
+      "new_guiacomercialurl": "Guia Comercial (Url)",
+      "new_imagem": "Imagem",
+      "new_imagemid": "new_ImagemId",
+      "new_ItemdeKit_Kit_new_PrecodeProduto": "Itens de Kit (new_ItemdeKit_Kit_new_PrecodeProduto)",
+      "new_ItemdeKit_Produto_new_PrecodeProduto": "Itens de Kit (new_ItemdeKit_Produto_new_PrecodeProduto)",
+      "new_ItemdeOrcamento_Produto_new_PrecodePr": "Item de Orçamentos",
+      "new_kit": "Kit",
+      "new_mappedmodified": "MappedModified",
+      "new_markup": "Markup",
+      "new_ModelodeProduto": "Modelo de Produto",
+      "new_name": "Produto",
+      "new_new_atividadedetrocadeitemdekit_Antigo_ne": "Atividades de Troca de Item de Kit (new_new_atividadedetrocadeitemdekit_Antigo_ne)",
+      "new_new_atividadedetrocadeitemdekit_Novo_new_": "Atividades de Troca de Item de Kit (new_new_atividadedetrocadeitemdekit_Novo_new_)",
+      "new_new_modularsystems_Module_new_precodeprod": "Modular Systems (new_new_modularsystems_Module_new_precodeprod)",
+      "new_new_modularsystems_RequiredItem_new_preco": "Modular Systems (new_new_modularsystems_RequiredItem_new_preco)",
+      "new_new_similaridadedeproduto_One_new_precode": "Similaridades de Produto (new_new_similaridadedeproduto_One_new_precode)",
+      "new_new_similaridadedeproduto_Two_new_precode": "Similaridades de Produto (new_new_similaridadedeproduto_Two_new_precode)",
+      "new_new_tiposervicoprecodeproduto_PrecodeProd": "TipoServiço-PreçodeProdutos",
+      "new_nomedofabricante": "Nome do Fabricante",
+      "new_nomedoproduto": "Produto (Nome Calculado)",
+      "new_novadescricaoflag": "Nova Descrição Flag",
+      "new_organizacaoproprietaria": "Organização Proprietária",
+      "new_organizacaoproprietariakit": "Organização Proprietária (Kit)",
+      "new_parent": "Parent",
+      "new_precobase": "Preço Base",
+      "new_precobase_base": "Preço Base (Base)",
+      "new_precocominstalacao": "Preço com Instalação",
+      "new_precocominstalacao_base": "Preço com Instalação (Base)",
+      "new_precodecompra": "Preço de Compra",
+      "new_precodecompra_base": "Preço de Compra (Base)",
+      "new_precodeproduto_AsyncOperations": "System Jobs",
+      "new_precodeproduto_BulkDeleteFailures": "Bulk Delete Failures",
+      "new_precodeproduto_DuplicateBaseRecord": "Duplicate Records (new_precodeproduto_DuplicateBaseRecord)",
+      "new_precodeproduto_DuplicateMatchingRecord": "Duplicate Records (new_precodeproduto_DuplicateMatchingRecord)",
+      "new_precodeproduto_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "new_precodeproduto_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "new_precodeproduto_ProcessSession": "Process Sessions",
+      "new_precodeproduto_SyncErrors": "Sync Errors",
+      "new_precodeprodutoid": "Preço de Produto",
+      "new_precodeservicodeinstalacao": "Preço de Serviço de Instalação",
+      "new_precodeservicodeinstalacao_base": "Preço de Serviço de Instalação (Base)",
+      "new_precodeservicodeinstalacaodecimalfx": "Preço de Serviço de Instalação Decimal (Fx)",
+      "new_precodevenda": "Preço de Venda",
+      "new_precodevenda_base": "Preço de Venda (Base)",
+      "new_ProdutoDesigner": "Produto Designer",
+      "new_Promocao": "Promoção",
+      "new_referenciadoproduto": "Referência do Produto",
+      "new_registrodevenda_PrecodeProduto_new_precodeproduto": "Registro de Vendas",
+      "new_requerinstalacao": "Requer Instalação",
+      "new_servicoadicionado": "Serviço Adicionado",
+      "new_ServicoparaadicionarDEV": "Serviço para adicionar (DEV)",
+      "new_taxadeservico": "Taxa de Serviço",
+      "new_taxafixadeservico": "Taxa Fixa de Serviço",
+      "new_taxafixadeservico_base": "Taxa Fixa de Serviço (Base)",
+      "new_tipodesistema": "Tipo de Sistema",
+      "new_validade": "Validade",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "transactioncurrencyid": "Currency",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Preços de Produtos",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Preços de Produtos (Views)",
+    "Name": "_new_precodeproduto_views",
+    "RelatedEntityName": "Preços de Produtos",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "0a6cb7ca-c5da-ec11-a7b5-002248368cf4": "Tabela de Preços UNIUM (Para atualização)",
+      "2149e0f1-f8a6-ec11-9840-002248dea648": "Preços de Produtos para orçamento",
+      "58dfaa13-a503-ed11-82e5-00224837125e": "Kits de Produtos UNIUM",
+      "70a4a654-d8a4-494d-a03e-8df634b0f241": "Preço de Produto Advanced Find View",
+      "71aa82db-f5b3-41da-aac5-cefbf847b22a": "Tabela de Preços UNIUM",
+      "7f893878-f505-ed11-82e5-00224836bb4b": "Produtos Similares UNIUM",
+      "a74fb010-e26d-43ab-bfc5-a1eef01f6b56": "Inactive Preços de Produtos",
+      "e08d3ce0-9bca-467f-8017-d3affca8f5f7": "Preço de Produto Associated View",
+      "ed81cda2-be09-ed11-82e5-00224836bb4b": "Tabela de Preços UNIUM (visão de atualização de preços)",
+      "fb771e89-a01b-4038-a868-798bbc58f3ea": "Preço de Produto Lookup View"
+    }
+  },
+  {
+    "DisplayName": "Aceita Desconto (Preços de Produtos)",
+    "Name": "new_new_precodeproduto_aceitadesconto",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_aceitadesconto",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_aceitadesconto",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Kit (Preços de Produtos)",
+    "Name": "new_new_precodeproduto_kit",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_kit",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_kit",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Requer Instalação (Preços de Produtos)",
+    "Name": "new_new_precodeproduto_requerinstalacao",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_requerinstalacao",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_requerinstalacao",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Organização Proprietária",
+    "Name": "new_organizacaoproprietaria",
+    "OptionSetInfoNameMapping": {
+      "100000000": "Iluminart",
+      "100000001": "UNIUM"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_organizacaoproprietaria",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "new_organizacaoproprietariakit",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "new_organizacaoproprietaria",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Nova Descrição Flag (Preços de Produtos)",
+    "Name": "new_precodeproduto_new_novadescricaoflag",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_novadescricaoflag",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_novadescricaoflag",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Serviço Adicionado (Preços de Produtos)",
+    "Name": "new_precodeproduto_new_servicoadicionado",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "new_servicoadicionado",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "new_servicoadicionado",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (Preços de Produtos)",
+    "Name": "new_precodeproduto_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Preços de Produtos)",
+    "Name": "new_precodeproduto_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Preços de Produtos"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Preços de Produtos",
+    "Type": "OptionSetInfo"
+  }
+]
