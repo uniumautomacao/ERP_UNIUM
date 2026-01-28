@@ -7,8 +7,6 @@ export interface NewContagemDoDiaBase {
   new_contagemdodiaid: string;
   new_data?: string;
   new_esperados?: number;
-  new_contados?: number;
-  new_percentual?: number;
   new_thresholda?: number;
   new_thresholdb?: number;
   new_thresholdc?: number;

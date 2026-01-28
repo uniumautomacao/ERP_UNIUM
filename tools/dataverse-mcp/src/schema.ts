@@ -29,17 +29,6 @@ const integerAttribute = (schemaName: string, displayName: string) => ({
   MaxValue: 2147483647,
 });
 
-const booleanAttribute = (schemaName: string, displayName: string) => ({
-  '@odata.type': 'Microsoft.Dynamics.CRM.BooleanAttributeMetadata',
-  SchemaName: schemaName,
-  DisplayName: label(displayName),
-  RequiredLevel: requiredLevel('None'),
-  OptionSet: {
-    TrueOption: { Label: label('Yes'), Value: 1 },
-    FalseOption: { Label: label('No'), Value: 0 },
-  },
-});
-
 const dateAttribute = (schemaName: string, displayName: string, format: 'DateOnly' | 'DateAndTime') => ({
   '@odata.type': 'Microsoft.Dynamics.CRM.DateTimeAttributeMetadata',
   SchemaName: schemaName,
@@ -232,8 +221,6 @@ export const createContagemSnapshotTables = async () => {
   const contagemDiaColumns = [
     { logical: 'new_data', payload: dateAttribute('new_Data', 'Data', 'DateOnly') },
     { logical: 'new_esperados', payload: integerAttribute('new_Esperados', 'Esperados') },
-    { logical: 'new_contados', payload: integerAttribute('new_Contados', 'Contados') },
-    { logical: 'new_percentual', payload: integerAttribute('new_Percentual', 'Percentual') },
     { logical: 'new_thresholda', payload: integerAttribute('new_ThresholdA', 'Threshold A') },
     { logical: 'new_thresholdb', payload: integerAttribute('new_ThresholdB', 'Threshold B') },
     { logical: 'new_thresholdc', payload: integerAttribute('new_ThresholdC', 'Threshold C') },
@@ -246,7 +233,6 @@ export const createContagemSnapshotTables = async () => {
   }
 
   const contagemDiaItemColumns = [
-    { logical: 'new_contado', payload: booleanAttribute('new_Contado', 'Contado') },
     { logical: 'new_sku', payload: stringAttribute('new_Sku', 'SKU', 200) },
     { logical: 'new_querytag', payload: integerAttribute('new_QueryTag', 'Query Tag') },
     { logical: 'new_endereco', payload: stringAttribute('new_Endereco', 'Endereco', 200) },
@@ -290,14 +276,6 @@ export const createContagemSnapshotTables = async () => {
       referencedEntity: 'cr22f_estoquefromsharepointlist',
       referencedAttribute: 'cr22f_estoquefromsharepointlistid',
       displayName: 'Item Estoque',
-    },
-    {
-      schemaName: 'new_ContagemDoDiaItem_Contagem',
-      lookupSchemaName: 'new_Contagem',
-      referencingEntity: contagemDiaItemLogical,
-      referencedEntity: 'new_contagemestoque',
-      referencedAttribute: 'new_contagemestoqueid',
-      displayName: 'Contagem',
     },
   ];
 

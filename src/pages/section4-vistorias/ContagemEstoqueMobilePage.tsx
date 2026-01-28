@@ -565,7 +565,7 @@ export function ContagemEstoqueMobilePage() {
       const existing = await NewContagemDoDiaService.getAll({
         filter: `statecode eq 0 and new_data ge ${start} and new_data le ${end}`,
         orderBy: ['createdon asc'],
-        select: ['new_contagemdodiaid', 'new_esperados', 'new_contados', 'createdon'],
+        select: ['new_contagemdodiaid', 'new_esperados', 'createdon'],
         top: 1,
       });
       
@@ -575,7 +575,7 @@ export function ContagemEstoqueMobilePage() {
           id: existingRecord.new_contagemdodiaid,
           dateKey,
           esperados: existingRecord.new_esperados ?? 0,
-          contados: existingRecord.new_contados ?? 0,
+          contados: 0,
         };
         setSnapshotInfo(info);
         return info;
@@ -596,11 +596,10 @@ export function ContagemEstoqueMobilePage() {
         _new_itemestoque_value?: string;
       }>;
 
-      const contagemPorItem = new Map<string, string>();
+      const contagemPorItem = new Set<string>();
       contagensHoje.forEach((c) => {
-        if (!c._new_itemestoque_value || !c.new_contagemestoqueid) return;
-        if (!contagemPorItem.has(c._new_itemestoque_value)) {
-          contagemPorItem.set(c._new_itemestoque_value, c.new_contagemestoqueid);
+        if (c._new_itemestoque_value) {
+          contagemPorItem.add(c._new_itemestoque_value);
         }
       });
 
@@ -608,14 +607,11 @@ export function ContagemEstoqueMobilePage() {
       const contados = expectedList.filter((item) =>
         contagemPorItem.has(item.cr22f_estoquefromsharepointlistid)
       ).length;
-      const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 100;
 
       // 4. Criar Cabeçalho
       const snapshotResult = await NewContagemDoDiaService.create({
         new_data: start,
         new_esperados: esperados,
-        new_contados: contados,
-        new_percentual: percentual,
         new_thresholda: activeThresholds.A,
         new_thresholdb: activeThresholds.B,
         new_thresholdc: activeThresholds.C,
@@ -632,7 +628,6 @@ export function ContagemEstoqueMobilePage() {
         await Promise.all(
           batch.map(async (item) => {
             const itemId = item.cr22f_estoquefromsharepointlistid;
-            const contagemId = contagemPorItem.get(itemId);
             const payload: Record<string, any> = {
               'new_Snapshot@odata.bind': `/new_contagemdodias(${snapshotId})`,
               'new_ItemEstoque@odata.bind': `/cr22f_estoquefromsharepointlists(${itemId})`,
@@ -641,11 +636,7 @@ export function ContagemEstoqueMobilePage() {
               new_endereco: buildEnderecoCompleto(item),
               new_classecriticidade: item.new_classecriticidade,
               new_ultimacontagemsnapshot: item.new_ultimacontagem,
-              new_contado: contagemPorItem.has(itemId),
             };
-            if (contagemId) {
-              payload['new_Contagem@odata.bind'] = `/new_contagemestoques(${contagemId})`;
-            }
             await NewContagemDoDiaItemService.create(payload);
           })
         );

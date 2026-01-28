@@ -5,7 +5,6 @@
 
 export interface NewContagemDoDiaItemBase {
   new_contagemdodiaitemid: string;
-  new_contado?: boolean;
   new_sku?: string;
   new_querytag?: number;
   new_endereco?: string;
@@ -13,7 +12,6 @@ export interface NewContagemDoDiaItemBase {
   new_ultimacontagemsnapshot?: string;
   "new_Snapshot@odata.bind"?: string;
   "new_ItemEstoque@odata.bind"?: string;
-  "new_Contagem@odata.bind"?: string;
   statecode?: number;
   statuscode?: number;
 }
@@ -21,5 +19,4 @@ export interface NewContagemDoDiaItemBase {
 export interface NewContagemDoDiaItem extends NewContagemDoDiaItemBase {
   _new_snapshot_value?: string;
   _new_itemestoque_value?: string;
-  _new_contagem_value?: string;
 }

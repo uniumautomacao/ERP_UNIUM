@@ -185,39 +185,6 @@ public partial class new_ContagemDoDiaItem : Microsoft.Xrm.Sdk.Entity, System.Co
 		}
 	}
 	
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_contado")]
-	public System.Nullable<bool> new_Contado
-	{
-		get
-		{
-			return this.GetAttributeValue<System.Nullable<bool>>("new_contado");
-		}
-		set
-		{
-			this.OnPropertyChanging("new_Contado");
-			this.SetAttributeValue("new_contado", value);
-			this.OnPropertyChanged("new_Contado");
-		}
-	}
-	
-	/// <summary>
-	/// Contagem
-	/// </summary>
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_contagem")]
-	public Microsoft.Xrm.Sdk.EntityReference new_Contagem
-	{
-		get
-		{
-			return this.GetAttributeValue<Microsoft.Xrm.Sdk.EntityReference>("new_contagem");
-		}
-		set
-		{
-			this.OnPropertyChanging("new_Contagem");
-			this.SetAttributeValue("new_contagem", value);
-			this.OnPropertyChanged("new_Contagem");
-		}
-	}
-	
 	/// <summary>
 	/// Unique identifier for entity instances
 	/// </summary>

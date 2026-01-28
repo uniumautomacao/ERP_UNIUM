@@ -170,21 +170,6 @@ public partial class new_ContagemDoDia : Microsoft.Xrm.Sdk.Entity, System.Compon
 		}
 	}
 	
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_contados")]
-	public System.Nullable<int> new_Contados
-	{
-		get
-		{
-			return this.GetAttributeValue<System.Nullable<int>>("new_contados");
-		}
-		set
-		{
-			this.OnPropertyChanging("new_Contados");
-			this.SetAttributeValue("new_contados", value);
-			this.OnPropertyChanged("new_Contados");
-		}
-	}
-	
 	/// <summary>
 	/// Unique identifier for entity instances
 	/// </summary>
@@ -266,21 +251,6 @@ public partial class new_ContagemDoDia : Microsoft.Xrm.Sdk.Entity, System.Compon
 			this.OnPropertyChanging("new_Name");
 			this.SetAttributeValue("new_name", value);
 			this.OnPropertyChanged("new_Name");
-		}
-	}
-	
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_percentual")]
-	public System.Nullable<int> new_Percentual
-	{
-		get
-		{
-			return this.GetAttributeValue<System.Nullable<int>>("new_percentual");
-		}
-		set
-		{
-			this.OnPropertyChanging("new_Percentual");
-			this.SetAttributeValue("new_percentual", value);
-			this.OnPropertyChanged("new_Percentual");
 		}
 	}
 	

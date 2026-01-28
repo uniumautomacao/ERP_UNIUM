@@ -80,14 +80,19 @@ type ContagemDiaRecord = {
   new_data?: string;
   createdon?: string;
   new_esperados?: number;
-  new_contados?: number;
-  new_percentual?: number;
   _new_usuario_value?: string;
+};
+
+type AderenciaResumoRecord = {
+  snapshotId: string;
+  snapshotDate?: string;
+  esperados: number;
+  contados: number;
+  percentual: number;
 };
 
 type ContagemDiaItemRecord = {
   new_contagemdodiaitemid: string;
-  new_contado?: boolean;
   new_sku?: string;
   new_querytag?: number;
   new_endereco?: string;
@@ -100,11 +105,6 @@ const SITUACAO_CONTAGEM = {
   Pendente: 100000000,
   Validada: 100000001,
   Ajustada: 100000002,
-};
-
-const TIPO_CONTAGEM = {
-  Rotina: 100000000,
-  Surpresa: 100000001,
 };
 
 const STATUS_PROCESSAMENTO = {
@@ -297,9 +297,9 @@ export function ContagemEstoqueGestaoPage() {
   const [aderenciaEnd, setAderenciaEnd] = useState(() => new Date().toISOString().slice(0, 10));
   const [aderenciaLoading, setAderenciaLoading] = useState(false);
   const [aderenciaError, setAderenciaError] = useState<string | null>(null);
-  const [aderenciaData, setAderenciaData] = useState<ContagemDiaRecord[]>([]);
+  const [aderenciaData, setAderenciaData] = useState<AderenciaResumoRecord[]>([]);
   const [aderenciaChartData, setAderenciaChartData] = useState<ChartDataPoint[]>([]);
-  const [aderenciaSelected, setAderenciaSelected] = useState<ContagemDiaRecord | null>(null);
+  const [aderenciaSelected, setAderenciaSelected] = useState<AderenciaResumoRecord | null>(null);
   const [aderenciaItensLoading, setAderenciaItensLoading] = useState(false);
   const [aderenciaItensError, setAderenciaItensError] = useState<string | null>(null);
   const [aderenciaItens, setAderenciaItens] = useState<ContagemDiaItemRecord[]>([]);
@@ -619,8 +619,6 @@ export function ContagemEstoqueGestaoPage() {
           'new_data',
           'createdon',
           'new_esperados',
-          'new_contados',
-          'new_percentual',
           '_new_usuario_value',
         ],
         top: 500,
@@ -676,10 +674,12 @@ export function ContagemEstoqueGestaoPage() {
         const esperados = item.new_esperados ?? 0;
         const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
         return {
-          ...item,
-          new_contados: contados,
-          new_percentual: percentual,
-        };
+          snapshotId: item.new_contagemdodiaid,
+          snapshotDate: item.new_data,
+          esperados,
+          contados,
+          percentual,
+        } as AderenciaResumoRecord;
       });
 
       setAderenciaData(consolidated);
@@ -687,18 +687,17 @@ export function ContagemEstoqueGestaoPage() {
       setAderenciaItens([]);
 
       const chartData = [...consolidated]
-        .sort((a, b) => (a.new_data || '').localeCompare(b.new_data || ''))
+        .sort((a, b) => (a.snapshotDate || '').localeCompare(b.snapshotDate || ''))
         .map((item) => {
-          const dateKey = toDateOnlyKey(item.new_data);
+          const dateKey = toDateOnlyKey(item.snapshotDate);
           const date = dateKey ? new Date(`${dateKey}T00:00:00`) : new Date();
-          const esperados = item.new_esperados ?? 0;
-          const contados = item.new_contados ?? 0;
-          const percentual =
-            item.new_percentual ?? (esperados > 0 ? Math.round((contados / esperados) * 100) : 0);
+          const esperados = item.esperados ?? 0;
+          const contados = item.contados ?? 0;
+          const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
           return {
             date: formatChartLabel(date),
             value: percentual,
-            id: item.new_contagemdodiaid,
+            id: item.snapshotId,
             esperados,
             contados,
             percentual,
@@ -730,7 +729,6 @@ export function ContagemEstoqueGestaoPage() {
         orderBy: ['new_endereco asc'],
         select: [
           'new_contagemdodiaitemid',
-          'new_contado',
           'new_sku',
           'new_querytag',
           'new_endereco',
@@ -755,7 +753,7 @@ export function ContagemEstoqueGestaoPage() {
       const faltantes = itens.filter(
         (item) => !item._new_itemestoque_value || !contadosSet.has(item._new_itemestoque_value)
       );
-      setAderenciaItens(faltantes.map((item) => ({ ...item, new_contado: false })));
+      setAderenciaItens(faltantes);
     } catch (err: any) {
       console.error('[GestaoContagem] erro aderencia itens', err);
       setAderenciaItensError(err.message || 'Erro ao carregar itens pendentes.');
@@ -765,9 +763,9 @@ export function ContagemEstoqueGestaoPage() {
   }, []);
 
   const handleAderenciaSelect = useCallback(
-    (item: ContagemDiaRecord) => {
+    (item: AderenciaResumoRecord) => {
       setAderenciaSelected(item);
-      void loadAderenciaItens(item.new_contagemdodiaid, item.new_data);
+      void loadAderenciaItens(item.snapshotId, item.snapshotDate);
     },
     [loadAderenciaItens]
   );
@@ -797,8 +795,7 @@ export function ContagemEstoqueGestaoPage() {
       createTableColumn<ContagemDiaItemRecord>({
         columnId: 'status',
         renderHeaderCell: () => 'Status',
-        renderCell: (item) =>
-          item.new_contado ? <Badge color="success">Contado</Badge> : <Badge color="danger">Faltante</Badge>,
+        renderCell: () => <Badge color="danger">Faltante</Badge>,
       }),
     ],
     []
@@ -806,49 +803,48 @@ export function ContagemEstoqueGestaoPage() {
 
   const aderenciaResumoColumns = useMemo(
     () => [
-      createTableColumn<ContagemDiaRecord>({
+      createTableColumn<AderenciaResumoRecord>({
         columnId: 'data',
         renderHeaderCell: () => 'Data',
         renderCell: (item) =>
           (() => {
-            const dateKey = toDateOnlyKey(item.new_data);
+            const dateKey = toDateOnlyKey(item.snapshotDate);
             return dateKey ? new Date(`${dateKey}T00:00:00`).toLocaleDateString('pt-BR') : '---';
           })(),
       }),
-      createTableColumn<ContagemDiaRecord>({
+      createTableColumn<AderenciaResumoRecord>({
         columnId: 'esperados',
         renderHeaderCell: () => 'Esperados',
-        renderCell: (item) => item.new_esperados ?? 0,
+        renderCell: (item) => item.esperados ?? 0,
       }),
-      createTableColumn<ContagemDiaRecord>({
+      createTableColumn<AderenciaResumoRecord>({
         columnId: 'contados',
         renderHeaderCell: () => 'Contados',
-        renderCell: (item) => item.new_contados ?? 0,
+        renderCell: (item) => item.contados ?? 0,
       }),
-      createTableColumn<ContagemDiaRecord>({
+      createTableColumn<AderenciaResumoRecord>({
         columnId: 'percentual',
         renderHeaderCell: () => '%',
         renderCell: (item) => {
-          const esperados = item.new_esperados ?? 0;
-          const contados = item.new_contados ?? 0;
-          const percentual =
-            item.new_percentual ?? (esperados > 0 ? Math.round((contados / esperados) * 100) : 0);
+          const esperados = item.esperados ?? 0;
+          const contados = item.contados ?? 0;
+          const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
           return `${percentual}%`;
         },
       }),
-      createTableColumn<ContagemDiaRecord>({
+      createTableColumn<AderenciaResumoRecord>({
         columnId: 'status',
         renderHeaderCell: () => 'Status',
         renderCell: (item) => {
-          const esperados = item.new_esperados ?? 0;
-          const contados = item.new_contados ?? 0;
+          const esperados = item.esperados ?? 0;
+          const contados = item.contados ?? 0;
           if (esperados > 0 && contados >= esperados) {
             return <Badge color="success">Completo</Badge>;
           }
           return <Badge color="warning">Incompleto</Badge>;
         },
       }),
-      createTableColumn<ContagemDiaRecord>({
+      createTableColumn<AderenciaResumoRecord>({
         columnId: 'acoes',
         renderHeaderCell: () => 'Ações',
         renderCell: (item) => (
@@ -1391,14 +1387,14 @@ export function ContagemEstoqueGestaoPage() {
 
   const exportAderenciaCsv = useCallback(() => {
     if (!aderenciaSelected || aderenciaItens.length === 0) return;
-    const dateLabel = aderenciaSelected.new_data ?? 'sem_data';
+    const dateLabel = aderenciaSelected.snapshotDate ?? 'sem_data';
     const headers = ['SKU', 'Tag', 'Endereço', 'Classe', 'Status'];
     const rows = aderenciaItens.map((item) => [
       item.new_sku || '',
       String(item.new_querytag ?? ''),
       item.new_endereco || '',
       formatClasseCriticidade(item.new_classecriticidade),
-      item.new_contado ? 'Contado' : 'Faltante',
+      'Faltante',
     ]);
     const csv = [headers, ...rows]
       .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
@@ -1634,7 +1630,7 @@ export function ContagemEstoqueGestaoPage() {
               referenceValue={100}
               referenceLabel="Meta"
               onPointClick={(data) => {
-                const target = aderenciaData.find((item) => item.new_contagemdodiaid === data.id);
+                const target = aderenciaData.find((item) => item.snapshotId === data.id);
                 if (target) {
                   handleAderenciaSelect(target);
                 }
@@ -1657,17 +1653,16 @@ export function ContagemEstoqueGestaoPage() {
           </div>
           <div className={styles.cardList}>
             {aderenciaData.map((item) => {
-              const esperados = item.new_esperados ?? 0;
-              const contados = item.new_contados ?? 0;
-              const percentual =
-                item.new_percentual ?? (esperados > 0 ? Math.round((contados / esperados) * 100) : 0);
+              const esperados = item.esperados ?? 0;
+              const contados = item.contados ?? 0;
+              const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
               const status = esperados > 0 && contados >= esperados ? 'Completo' : 'Incompleto';
               return (
-                <Card key={item.new_contagemdodiaid}>
+                <Card key={item.snapshotId}>
                   <div className="flex flex-col gap-2 p-3">
                     <Text weight="semibold">
                       {(() => {
-                        const dateKey = toDateOnlyKey(item.new_data);
+                        const dateKey = toDateOnlyKey(item.snapshotDate);
                         return dateKey ? new Date(`${dateKey}T00:00:00`).toLocaleDateString('pt-BR') : '---';
                       })()}
                     </Text>
@@ -1695,7 +1690,7 @@ export function ContagemEstoqueGestaoPage() {
               <Text weight="semibold">
                 Faltantes em{' '}
                 {(() => {
-                  const dateKey = toDateOnlyKey(aderenciaSelected.new_data);
+                const dateKey = toDateOnlyKey(aderenciaSelected.snapshotDate);
                   return dateKey ? new Date(`${dateKey}T00:00:00`).toLocaleDateString('pt-BR') : '---';
                 })()}
               </Text>
@@ -1721,9 +1716,7 @@ export function ContagemEstoqueGestaoPage() {
                     <Text size={200}>Tag: {item.new_querytag ?? '---'}</Text>
                     <Text size={200}>{item.new_endereco || 'Endereço não informado'}</Text>
                     <Text size={200}>Classe: {formatClasseCriticidade(item.new_classecriticidade)}</Text>
-                    <Badge color={item.new_contado ? 'success' : 'danger'}>
-                      {item.new_contado ? 'Contado' : 'Faltante'}
-                    </Badge>
+                    <Badge color="danger">Faltante</Badge>
                   </div>
                 </Card>
               ))}
