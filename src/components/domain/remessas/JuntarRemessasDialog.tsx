@@ -50,8 +50,13 @@ export function JuntarRemessasDialog({
 
   useEffect(() => {
     if (!principalId) return;
-    setSelectedIds((prev) => prev.filter((id) => id !== principalId));
-  }, [principalId]);
+    const principalFornecedor = options.find((opt) => opt.id === principalId)?.fornecedor ?? null;
+    setSelectedIds((prev) => prev.filter((id) => {
+      if (id === principalId) return false;
+      const fornecedor = options.find((opt) => opt.id === id)?.fornecedor ?? null;
+      return fornecedor === principalFornecedor;
+    }));
+  }, [options, principalId]);
 
   const stages = useMemo(
     () => REMESSA_STAGES.filter((stage) => stage.value !== REMESSA_STAGE_ENTREGUE),
@@ -81,6 +86,11 @@ export function JuntarRemessasDialog({
     }
     if (id === principalId) {
       setPrincipalId('');
+      return;
+    }
+    const principalFornecedor = options.find((opt) => opt.id === principalId)?.fornecedor ?? null;
+    const clickedFornecedor = options.find((opt) => opt.id === id)?.fornecedor ?? null;
+    if (principalFornecedor !== clickedFornecedor) {
       return;
     }
     setSelectedIds((prev) => (

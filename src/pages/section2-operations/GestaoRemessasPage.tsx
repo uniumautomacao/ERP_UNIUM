@@ -910,6 +910,11 @@ export function GestaoRemessasPage() {
       )));
       setDialogs((prev) => ({ ...prev, juntar: false }));
       await refreshAll();
+      if (selectedRemessa?.id) {
+        await loadRemessaDetails(selectedRemessa.id);
+        await loadProdutos(selectedRemessa.id);
+        await loadHistorico(selectedRemessa.id);
+      }
       await loadRemessaOptions();
       showSuccess('Remessas juntadas', 'As remessas foram consolidadas com sucesso.');
     } catch (err) {
@@ -918,7 +923,18 @@ export function GestaoRemessasPage() {
     } finally {
       setSaving(false);
     }
-  }, [loadRemessaOptions, refreshAll, registerHistorico, remessaOptions, showError, showSuccess]);
+  }, [
+    loadHistorico,
+    loadProdutos,
+    loadRemessaDetails,
+    loadRemessaOptions,
+    refreshAll,
+    registerHistorico,
+    remessaOptions,
+    selectedRemessa?.id,
+    showError,
+    showSuccess,
+  ]);
 
   const handleMoverProdutos = useCallback(async (destinoId: string) => {
     if (!destinoId || selectedProdutos.length === 0) return;
