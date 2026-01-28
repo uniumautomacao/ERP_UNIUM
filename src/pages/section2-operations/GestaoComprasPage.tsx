@@ -20,7 +20,7 @@ import {
   useId,
   useToastController,
 } from '@fluentui/react-components';
-import { ArrowSync24Regular, CheckmarkCircle24Regular, ClipboardText24Regular, DocumentBulletList24Regular, Share24Regular } from '@fluentui/react-icons';
+import { ArrowSync24Regular, CheckmarkCircle24Regular, Copy24Regular, DocumentBulletList24Regular, Share24Regular } from '@fluentui/react-icons';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { FilterBar } from '../../components/shared/FilterBar';
@@ -837,7 +837,7 @@ export function GestaoComprasPage() {
                         </Text>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button appearance="secondary" icon={<ClipboardText24Regular />} onClick={() => {
+                        <Button appearance="secondary" icon={<Copy24Regular />} onClick={() => {
                           setSelectedFornecedorId(fornecedor.id);
                           handleCopyResumo();
                         }}>
@@ -893,7 +893,7 @@ export function GestaoComprasPage() {
             {selectedProdutos.length} item{selectedProdutos.length === 1 ? '' : 's'} selecionado{selectedProdutos.length === 1 ? '' : 's'} • {formatCurrency(totalSelecionado)}
           </Text>
           <div className="flex items-center gap-2">
-            <Button appearance="secondary" icon={<ClipboardText24Regular />} onClick={handleCopyResumo} disabled={processing}>
+            <Button appearance="secondary" icon={<Copy24Regular />} onClick={handleCopyResumo} disabled={processing}>
               Copiar resumo
             </Button>
             <Button appearance="secondary" icon={<Share24Regular />} onClick={handleExportCsv} disabled={processing}>
