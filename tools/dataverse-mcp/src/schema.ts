@@ -142,7 +142,7 @@ const attributeExists = async (logicalName: string, attributeLogicalName: string
   }
 };
 
-const relationshipExists = async (schemaName: string) => {
+export const relationshipExists = async (schemaName: string) => {
   try {
     const result = await dataverseRequest<{ value?: Array<{ SchemaName?: string }> }>({
       method: 'GET',
@@ -197,7 +197,7 @@ export const createGlobalOptionSet = async (payload: ReturnType<typeof buildGlob
   });
 };
 
-const createLookupRelationship = async (input: {
+export const createLookupRelationship = async (input: {
   schemaName: string;
   lookupSchemaName: string;
   referencingEntity: string;
