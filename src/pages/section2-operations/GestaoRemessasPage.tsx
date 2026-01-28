@@ -7,6 +7,10 @@ import {
   DialogContent,
   DialogSurface,
   DialogTitle,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerHeaderTitle,
   Dropdown,
   Field,
   Option,
@@ -21,7 +25,7 @@ import {
 } from '@fluentui/react-components';
 import { DndContext, DragEndEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ArrowSync24Regular, Box24Regular, CalendarClock24Regular, Warning24Regular } from '@fluentui/react-icons';
+import { ArrowSync24Regular, Box24Regular, CalendarClock24Regular, Dismiss24Regular, Warning24Regular } from '@fluentui/react-icons';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { FilterBar } from '../../components/shared/FilterBar';
@@ -1023,68 +1027,92 @@ export function GestaoRemessasPage() {
           </Button>
         </div>
 
+        <Drawer
+          open={selectedRemessaId !== null}
+          position="end"
+          size="large"
+          onOpenChange={(_, data) => {
+            if (!data.open) {
+              setSelectedRemessaId(null);
+            }
+          }}
+        >
+          <DrawerHeader>
+            <DrawerHeaderTitle
+              action={
+                <Button
+                  appearance="subtle"
+                  icon={<Dismiss24Regular />}
+                  onClick={() => setSelectedRemessaId(null)}
+                  aria-label="Fechar painel"
+                />
+              }
+            >
+              Detalhes da Remessa
+            </DrawerHeaderTitle>
+          </DrawerHeader>
+          <DrawerBody>
+            <RemessaDetailsPanel
+              remessa={selectedRemessa}
+              saving={saving}
+              transportadoras={transportadoras}
+              produtos={produtos}
+              produtosLoading={produtosLoading}
+              historico={historico}
+              historicoLoading={historicoLoading}
+              onSalvar={handleSalvarDetalhes}
+              onSelecionarProdutos={setSelectedProdutos}
+              onOpenDividir={async () => {
+                await loadRemessaOptions();
+                setDialogs((prev) => ({ ...prev, dividir: true }));
+              }}
+              onOpenJuntar={async () => {
+                await loadRemessaOptions();
+                setDialogs((prev) => ({ ...prev, juntar: true }));
+              }}
+              onOpenMover={async () => {
+                await loadRemessaOptions();
+                setDialogs((prev) => ({ ...prev, mover: true }));
+              }}
+            />
+          </DrawerBody>
+        </Drawer>
+
         {selectedTab === 'kanban' && (
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(320px, 1fr)' }}>
-            <div>
-              {loading ? (
-                <LoadingState />
-              ) : (
-                <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-                  <KanbanBoard>
-                    {effectiveStages.map((stage) => (
-                      <KanbanColumn
-                        key={stage.value}
-                        stageValue={stage.value}
-                        title={stage.label}
-                        count={(columns[stage.value] || []).length}
-                        lateCount={(columns[stage.value] || []).filter(isRemessaAtrasada).length}
+          <div>
+            {loading ? (
+              <LoadingState />
+            ) : (
+              <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+                <KanbanBoard>
+                  {effectiveStages.map((stage) => (
+                    <KanbanColumn
+                      key={stage.value}
+                      stageValue={stage.value}
+                      title={stage.label}
+                      count={(columns[stage.value] || []).length}
+                      lateCount={(columns[stage.value] || []).filter(isRemessaAtrasada).length}
+                    >
+                      <SortableContext
+                        items={(columns[stage.value] || []).map((item) => item.id)}
+                        strategy={verticalListSortingStrategy}
                       >
-                        <SortableContext
-                          items={(columns[stage.value] || []).map((item) => item.id)}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          {(columns[stage.value] || []).map((item) => (
-                            <RemessaCard
-                              key={item.id}
-                              item={item}
-                              title={`${item.codigo ?? item.id} - ${item.fornecedor ?? 'Fornecedor'}`}
-                              isSelected={item.id === selectedRemessaId}
-                              onSelect={handleCardSelect}
-                              onOpen={handleOpenRemessa}
-                            />
-                          ))}
-                        </SortableContext>
-                      </KanbanColumn>
-                    ))}
-                  </KanbanBoard>
-                </DndContext>
-              )}
-            </div>
-            <div style={{ minHeight: 0, overflow: 'auto' }}>
-              <RemessaDetailsPanel
-                remessa={selectedRemessa}
-                saving={saving}
-                transportadoras={transportadoras}
-                produtos={produtos}
-                produtosLoading={produtosLoading}
-                historico={historico}
-                historicoLoading={historicoLoading}
-                onSalvar={handleSalvarDetalhes}
-                onSelecionarProdutos={setSelectedProdutos}
-                onOpenDividir={async () => {
-                  await loadRemessaOptions();
-                  setDialogs((prev) => ({ ...prev, dividir: true }));
-                }}
-                onOpenJuntar={async () => {
-                  await loadRemessaOptions();
-                  setDialogs((prev) => ({ ...prev, juntar: true }));
-                }}
-                onOpenMover={async () => {
-                  await loadRemessaOptions();
-                  setDialogs((prev) => ({ ...prev, mover: true }));
-                }}
-              />
-            </div>
+                        {(columns[stage.value] || []).map((item) => (
+                          <RemessaCard
+                            key={item.id}
+                            item={item}
+                            title={`${item.codigo ?? item.id} - ${item.fornecedor ?? 'Fornecedor'}`}
+                            isSelected={item.id === selectedRemessaId}
+                            onSelect={handleCardSelect}
+                            onOpen={handleOpenRemessa}
+                          />
+                        ))}
+                      </SortableContext>
+                    </KanbanColumn>
+                  ))}
+                </KanbanBoard>
+              </DndContext>
+            )}
           </div>
         )}
 

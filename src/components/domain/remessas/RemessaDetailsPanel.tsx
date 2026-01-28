@@ -110,39 +110,39 @@ export function RemessaDetailsPanel({
     return REMESSA_PRIORITIES.find((item) => item.value === Number(prioridade))?.label ?? '';
   }, [prioridade]);
 
-  if (!remessa) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <EmptyState title="Selecione uma remessa" description="Para ver detalhes, produtos e histórico." />
-      </div>
-    );
-  }
+  if (!remessa) return null;
 
   return (
     <div className="flex flex-col gap-4 h-full">
       <div
         style={{
-          padding: '16px',
+          padding: '24px',
           borderRadius: '8px',
           border: `1px solid ${tokens.colorNeutralStroke2}`,
           backgroundColor: tokens.colorNeutralBackground1,
         }}
       >
-        <Text size={300} weight="semibold" block>
+        <Text size={400} weight="semibold" block>
           {remessa.codigo || remessa.id}
         </Text>
-        <Text size={200} style={{ color: tokens.colorNeutralForeground2 }} block>
-          Fornecedor: {remessa.fornecedor || '-'}
-        </Text>
-        <Text size={200} style={{ color: tokens.colorNeutralForeground2 }} block>
-          Transportadora: {remessa.transportadora || '-'}
-        </Text>
-        <div className="mt-3">
+        <div className="flex flex-col gap-1 mt-1">
+          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }} block>
+            Fornecedor: {remessa.fornecedor || '-'}
+          </Text>
+          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }} block>
+            Transportadora: {remessa.transportadora || '-'}
+          </Text>
+        </div>
+        <div className="mt-4">
           <RemessaProgressTracker stageValue={remessa.stageValue} />
         </div>
       </div>
 
-      <TabList selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(data.value as string)}>
+      <TabList
+        selectedValue={activeTab}
+        onTabSelect={(_, data) => setActiveTab(data.value as string)}
+        style={{ margin: '4px 0' }}
+      >
         <Tab value="detalhes">Detalhes</Tab>
         <Tab value="produtos">Produtos ({produtos.length})</Tab>
         <Tab value="historico">Histórico</Tab>
@@ -151,13 +151,13 @@ export function RemessaDetailsPanel({
       {activeTab === 'detalhes' && (
         <div
           style={{
-            padding: '16px',
+            padding: '24px',
             borderRadius: '8px',
             border: `1px solid ${tokens.colorNeutralStroke2}`,
             backgroundColor: tokens.colorNeutralBackground1,
           }}
         >
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+          <div className="grid gap-x-6 gap-y-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
             <Field label="Estágio">
               <Dropdown
                 value={stageLabel}
@@ -261,8 +261,8 @@ export function RemessaDetailsPanel({
       )}
 
       {activeTab === 'produtos' && (
-        <div>
-          <Text size={300} weight="semibold" block style={{ marginBottom: '8px' }}>
+        <div style={{ padding: '8px 4px' }}>
+          <Text size={400} weight="semibold" block style={{ marginBottom: '16px' }}>
             Produtos da remessa
           </Text>
           <ProdutosDaRemessaList
@@ -274,9 +274,9 @@ export function RemessaDetailsPanel({
       )}
 
       {activeTab === 'historico' && (
-        <div>
-          <Text size={300} weight="semibold" block style={{ marginBottom: '8px' }}>
-            Histórico
+        <div style={{ padding: '8px 4px' }}>
+          <Text size={400} weight="semibold" block style={{ marginBottom: '16px' }}>
+            Histórico de movimentações
           </Text>
           <HistoricoRemessaTimeline items={historico} loading={historicoLoading} />
         </div>
