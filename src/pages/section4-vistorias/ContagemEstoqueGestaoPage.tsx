@@ -272,6 +272,7 @@ export function ContagemEstoqueGestaoPage() {
   const styles = useStyles();
   const { systemUserId } = useCurrentSystemUser();
   const [selectedTab, setSelectedTab] = useState('dashboard');
+  const [aderenciaPeriodo, setAderenciaPeriodo] = useState('15');
 
   const [dashboardStart, setDashboardStart] = useState(() => {
     const date = new Date();
@@ -291,7 +292,7 @@ export function ContagemEstoqueGestaoPage() {
 
   const [aderenciaStart, setAderenciaStart] = useState(() => {
     const date = new Date();
-    date.setDate(date.getDate() - 7);
+    date.setDate(date.getDate() - 15);
     return date.toISOString().slice(0, 10);
   });
   const [aderenciaEnd, setAderenciaEnd] = useState(() => new Date().toISOString().slice(0, 10));
@@ -1606,7 +1607,36 @@ export function ContagemEstoqueGestaoPage() {
     <div className={styles.container}>
       <Card>
         <div className="flex flex-col gap-4 p-4">
-          <Text weight="semibold">Período</Text>
+          <div className="flex items-center justify-between">
+            <Text weight="semibold">Período</Text>
+            <div className="flex items-center gap-2">
+              <Text size={200}>Exibir últimos:</Text>
+              <select
+                value={aderenciaPeriodo}
+                onChange={(e) => {
+                  const dias = e.target.value;
+                  setAderenciaPeriodo(dias);
+                  const date = new Date();
+                  date.setDate(date.getDate() - Number(dias));
+                  setAderenciaStart(date.toISOString().slice(0, 10));
+                  setAderenciaEnd(new Date().toISOString().slice(0, 10));
+                }}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: `1px solid ${tokens.colorNeutralStroke2}`,
+                  backgroundColor: tokens.colorNeutralBackground1,
+                  fontSize: '12px',
+                }}
+              >
+                <option value="7">7 dias</option>
+                <option value="15">15 dias</option>
+                <option value="30">30 dias</option>
+                <option value="60">60 dias</option>
+                <option value="90">90 dias</option>
+              </select>
+            </div>
+          </div>
           <div className={styles.formRow}>
             <Field label="De">
               <Input type="date" value={aderenciaStart} onChange={(e) => setAderenciaStart(e.target.value)} />
@@ -2054,6 +2084,12 @@ export function ContagemEstoqueGestaoPage() {
       </Card>
     </div>
   );
+
+  useEffect(() => {
+    if (selectedTab === 'aderencia') {
+      void loadAderencia();
+    }
+  }, [aderenciaStart, aderenciaEnd, selectedTab, loadAderencia]);
 
   useEffect(() => {
     void loadDashboard();
