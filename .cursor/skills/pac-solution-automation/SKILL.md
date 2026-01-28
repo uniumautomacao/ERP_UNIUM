@@ -40,51 +40,51 @@ CERT_PASSWORD=...
 
 ## Workflow (managed export + import)
 
-1) Auth in source environment:
+1) Auth once (single profile):
 
 ```
-/Users/bschron/.dotnet/tools/pac auth create --name "src-b52c-spn" \
-  --environment b52cf2e9-4b61-e3d6-8fae-c290205ed8e5 \
+/Users/bschron/.dotnet/tools/pac auth create --name "unium-spn" \
   --tenant "$TENANT_ID" \
   --applicationId "$APP_ID" \
   --clientSecret "$CLIENT_SECRET"
 ```
 
-2) Export managed solution to /tmp:
+2) Select source environment:
+
+```
+/Users/bschron/.dotnet/tools/pac env select \
+  --environment b52cf2e9-4b61-e3d6-8fae-c290205ed8e5
+```
+
+3) Export managed solution to /tmp:
 
 ```
 /Users/bschron/.dotnet/tools/pac solution export \
-  --environment b52cf2e9-4b61-e3d6-8fae-c290205ed8e5 \
   --name UNIUMCodeApps \
   --path "/tmp/UNIUMCodeApps_managed.zip" \
   --managed \
   --overwrite
 ```
 
-3) Auth in target environment:
+4) Select target environment:
 
 ```
-/Users/bschron/.dotnet/tools/pac auth create --name "tgt-0fe8-spn" \
-  --environment 0fe81aea-6a5f-e327-8de3-1c56d9ac4eee \
-  --tenant "$TENANT_ID" \
-  --applicationId "$APP_ID" \
-  --clientSecret "$CLIENT_SECRET"
+/Users/bschron/.dotnet/tools/pac env select \
+  --environment 0fe81aea-6a5f-e327-8de3-1c56d9ac4eee
 ```
 
-4) Import and publish:
+5) Import and publish:
 
 ```
 /Users/bschron/.dotnet/tools/pac solution import \
-  --environment 0fe81aea-6a5f-e327-8de3-1c56d9ac4eee \
   --path "/tmp/UNIUMCodeApps_managed.zip" \
   --publish-changes
 ```
 
-5) Verify in target:
+6) Verify in target:
 
 ```
 /Users/bschron/.dotnet/tools/pac solution list \
-  --environment 0fe81aea-6a5f-e327-8de3-1c56d9ac4eee \
   --json
 ```
 
@@ -109,7 +109,8 @@ Then import with:
 - If auth fails, check SPN permissions in both environments.
 - If token expires, re-run pac auth create.
 - If SPN is not available, fall back to interactive auth:
-  `pac auth create --environment <env-id> --deviceCode`
+  `pac auth create --name "unium-user" --deviceCode`
+  Then run `pac env select --environment <env-id>` before export and import.
 
 ## Additional resources
 

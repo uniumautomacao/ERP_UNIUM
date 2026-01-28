@@ -20,13 +20,31 @@ export APP_ID="11111111-1111-1111-1111-111111111111"
 export CERT_PATH="/secure/path/spn.pfx"
 export CERT_PASSWORD="***"
 
-/Users/bschron/.dotnet/tools/pac auth create --name "src-b52c-spn" \
-  --environment b52cf2e9-4b61-e3d6-8fae-c290205ed8e5 \
+/Users/bschron/.dotnet/tools/pac auth create --name "unium-spn" \
   --tenant "$TENANT_ID" \
   --applicationId "$APP_ID" \
   --certificateDiskPath "$CERT_PATH" \
   --certificatePassword "$CERT_PASSWORD"
 ```
+
+## Single-auth + environment switch (recommended)
+
+Authenticate once, then switch environments as needed:
+
+```
+/Users/bschron/.dotnet/tools/pac auth create --name "unium-spn" \
+  --tenant "$TENANT_ID" \
+  --applicationId "$APP_ID" \
+  --clientSecret "$CLIENT_SECRET"
+
+/Users/bschron/.dotnet/tools/pac env select \
+  --environment b52cf2e9-4b61-e3d6-8fae-c290205ed8e5
+
+/Users/bschron/.dotnet/tools/pac env select \
+  --environment 0fe81aea-6a5f-e327-8de3-1c56d9ac4eee
+```
+
+Note: From pac CLI v1.32, `pac org` was renamed to `pac env`. `pac org` still works, but prefer `pac env`.
 
 ## Optional import flags
 
