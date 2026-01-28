@@ -31,6 +31,7 @@ import { InventoryPage } from '../pages/section2-operations/InventoryPage';
 import { ProjectPlannerPage } from '../pages/section2-operations/ProjectPlannerPage';
 import { TeamManagementPage } from '../pages/section2-operations/TeamManagementPage';
 import { RMAsKanbanPage } from '../pages/section2-operations/RMAsKanbanPage';
+import { GestaoRemessasPage } from '../pages/section2-operations/GestaoRemessasPage';
 import { ContagemEstoqueMobilePage } from '../pages/section4-vistorias/ContagemEstoqueMobilePage';
 import { ContagemEstoqueGestaoPage } from '../pages/section4-vistorias/ContagemEstoqueGestaoPage';
 import { LeitorMercadoriasPage } from '../pages/section4-vistorias/LeitorMercadoriasPage';
@@ -130,7 +131,14 @@ export const navigation: NavSection[] = [
         icon: <Board24Regular />,
         path: '/rmas',
         component: RMAsKanbanPage,
-      }
+      },
+      {
+        id: 'remessas',
+        label: 'Gestão de Remessas',
+        icon: <Board24Regular />,
+        path: '/logistica/remessas',
+        component: GestaoRemessasPage,
+      },
     ],
   },
   {

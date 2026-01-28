@@ -1,0 +1,98 @@
+import { useMemo } from 'react';
+import { Badge, Button, Card, Text, tokens } from '@fluentui/react-components';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Open24Regular } from '@fluentui/react-icons';
+import { RemessaCardData } from '../../../features/remessas/types';
+import { REMESSA_PRIORITIES } from '../../../features/remessas/constants';
+
+interface RemessaCardProps {
+  item: RemessaCardData;
+  title: string;
+  isSelected?: boolean;
+  onOpen: (id: string) => void;
+  onSelect: (id: string) => void;
+}
+
+export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: RemessaCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+
+  const cardStyle = useMemo(() => ({
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRadius: 6,
+    boxShadow: isDragging ? `0 8px 18px ${tokens.colorNeutralShadowAmbient}` : undefined,
+    backgroundColor: isSelected ? tokens.colorNeutralBackground3 : tokens.colorNeutralBackground1,
+  }), [transform, transition, isDragging, isSelected]);
+
+  const prioridadeLabel = useMemo(() => {
+    if (item.prioridade === null || item.prioridade === undefined) return null;
+    return REMESSA_PRIORITIES.find((p) => p.value === item.prioridade)?.label ?? String(item.prioridade);
+  }, [item.prioridade]);
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={{
+        ...cardStyle,
+        padding: '12px',
+        minHeight: 120,
+        cursor: 'pointer',
+      }}
+      onClick={() => onSelect(item.id)}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-col gap-2">
+          <div
+            className="flex flex-wrap items-center gap-2"
+            {...attributes}
+            {...listeners}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          >
+            <Text
+              size={300}
+              weight="semibold"
+              block
+              style={{
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {title}
+            </Text>
+            {prioridadeLabel && (
+              <Badge appearance="filled" color="warning">
+                {prioridadeLabel}
+              </Badge>
+            )}
+          </div>
+          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
+            Fornecedor: {item.fornecedor || '-'}
+          </Text>
+          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
+            Transportadora: {item.transportadora || '-'}
+          </Text>
+          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
+            Previsão chegada: {item.previsaoChegada ? new Date(item.previsaoChegada).toLocaleDateString() : '-'}
+          </Text>
+        </div>
+        <Button
+          size="small"
+          appearance="subtle"
+          icon={<Open24Regular />}
+          aria-label="Abrir remessa"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpen(item.id);
+          }}
+        />
+      </div>
+    </Card>
+  );
+}

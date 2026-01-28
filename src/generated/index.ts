@@ -41,6 +41,7 @@ export * as NewTipodeservicoregimedecotacaotemporariaModel from './models/NewTip
 export * as NewComentariodeOrdemdeServicoModel from './models/NewComentariodeOrdemdeServicoModel';
 export * as NewRemessaModel from './models/NewRemessaModel';
 export * as NewTransportadoraModel from './models/NewTransportadoraModel';
+export * as NewHistoricoRemessaModel from './models/NewHistoricoRemessaModel';
 
 // Services
 export * from './services/RolesService';
@@ -79,3 +80,4 @@ export * from './services/NewTipodeservicoregimedecotacaotemporariaService';
 export * from './services/NewComentariodeOrdemdeServicoService';
 export * from './services/NewRemessaService';
 export * from './services/NewTransportadoraService';
+export * from './services/NewHistoricoRemessaService';

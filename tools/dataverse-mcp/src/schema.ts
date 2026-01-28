@@ -45,6 +45,35 @@ const lookupAttribute = (schemaName: string, displayName: string, targets: strin
   Targets: targets,
 });
 
+const choiceAttribute = (schemaName: string, displayName: string, options: Array<{ label: string; value: number }>) => ({
+  '@odata.type': 'Microsoft.Dynamics.CRM.PicklistAttributeMetadata',
+  SchemaName: schemaName,
+  DisplayName: label(displayName),
+  RequiredLevel: requiredLevel('None'),
+  OptionSet: {
+    IsGlobal: false,
+    OptionSetType: 'Picklist',
+    Options: options.map((opt) => ({
+      Value: opt.value,
+      Label: label(opt.label),
+    })),
+  },
+});
+
+const booleanAttribute = (schemaName: string, displayName: string) => ({
+  '@odata.type': 'Microsoft.Dynamics.CRM.BooleanAttributeMetadata',
+  SchemaName: schemaName,
+  DisplayName: label(displayName),
+  RequiredLevel: requiredLevel('None'),
+  OptionSet: {
+    OptionSetType: 'Boolean',
+    Options: [
+      { Value: 0, Label: label('No') },
+      { Value: 1, Label: label('Yes') },
+    ],
+  },
+});
+
 const buildPrimaryAttribute = (input: { schemaName: string; logicalName: string; displayName: string }) => ({
   '@odata.type': 'Microsoft.Dynamics.CRM.StringAttributeMetadata',
   SchemaName: input.schemaName,
@@ -282,6 +311,122 @@ export const createContagemSnapshotTables = async () => {
   for (const relationship of relationships) {
     if (!(await relationshipExists(relationship.schemaName))) {
       await createLookupRelationship(relationship);
+    }
+  }
+
+  await publishAll();
+};
+
+export const createRemessaSchema = async () => {
+  const remessaLogical = 'new_remessa';
+  const produtoServicoLogical = 'new_produtoservico';
+  const historicoRemessaLogical = 'new_historicoremessa';
+
+  // 1. Campos em new_remessa
+  const remessaColumns = [
+    { logical: 'new_codigoderastreio', payload: stringAttribute('new_CodigoDeRastreio', 'Código de Rastreio', 200) },
+    {
+      logical: 'new_prioridade',
+      payload: choiceAttribute('new_Prioridade', 'Prioridade', [
+        { label: 'Alta', value: 100000000 },
+        { label: 'Normal', value: 100000001 },
+        { label: 'Baixa', value: 100000002 },
+      ]),
+    },
+  ];
+
+  for (const column of remessaColumns) {
+    if (!(await attributeExists(remessaLogical, column.logical))) {
+      await createColumn(remessaLogical, column.payload);
+    }
+  }
+
+  // Lookup new_remessaorigem em new_remessa
+  if (!(await relationshipExists('new_remessa_remessa_origem'))) {
+    await createLookupRelationship({
+      schemaName: 'new_remessa_remessa_origem',
+      lookupSchemaName: 'new_RemessaOrigem',
+      referencingEntity: remessaLogical,
+      referencedEntity: remessaLogical,
+      referencedAttribute: 'new_remessaid',
+      displayName: 'Remessa Origem',
+    });
+  }
+
+  // 2. Lookup new_remessa em new_produtoservico
+  if (!(await attributeExists(produtoServicoLogical, 'new_remessa')) && !(await relationshipExists('new_produtoservico_remessa'))) {
+    await createLookupRelationship({
+      schemaName: 'new_produtoservico_remessa',
+      lookupSchemaName: 'new_Remessa',
+      referencingEntity: produtoServicoLogical,
+      referencedEntity: remessaLogical,
+      referencedAttribute: 'new_remessaid',
+      displayName: 'Remessa',
+    });
+  }
+
+  // 3. Tabela new_historicoremessa
+  if (!(await entityExists(historicoRemessaLogical))) {
+    const entity = buildEntityPayload({
+      schemaName: 'new_HistoricoRemessa',
+      logicalName: historicoRemessaLogical,
+      entitySetName: 'new_historicoremessas',
+      displayName: 'Histórico da Remessa',
+      displayCollectionName: 'Históricos da Remessa',
+      primaryNameSchema: 'new_Name',
+      primaryNameLogical: 'new_name',
+      primaryNameDisplay: 'Nome',
+    });
+    await createTable(entity);
+  }
+
+  const historicoColumns = [
+    { logical: 'new_campoalterado', payload: stringAttribute('new_CampoAlterado', 'Campo Alterado', 200) },
+    { logical: 'new_valoranterior', payload: stringAttribute('new_ValorAnterior', 'Valor Anterior', 4000) },
+    { logical: 'new_valornovo', payload: stringAttribute('new_ValorNovo', 'Valor Novo', 4000) },
+    { logical: 'new_dataalteracao', payload: dateAttribute('new_DataAlteracao', 'Data da Alteração', 'DateAndTime') },
+    {
+      logical: 'new_tipoacao',
+      payload: choiceAttribute('new_TipoAcao', 'Tipo de Ação', [
+        { label: 'Criação', value: 100000000 },
+        { label: 'Alteração', value: 100000001 },
+        { label: 'Exclusão', value: 100000002 },
+        { label: 'Movimentação', value: 100000003 },
+        { label: 'Divisão', value: 100000004 },
+        { label: 'Junção', value: 100000005 },
+      ]),
+    },
+  ];
+
+  for (const column of historicoColumns) {
+    if (!(await attributeExists(historicoRemessaLogical, column.logical))) {
+      await createColumn(historicoRemessaLogical, column.payload);
+    }
+  }
+
+  // Lookups em new_historicoremessa
+  const historicoRelationships = [
+    {
+      schemaName: 'new_historicoremessa_remessa',
+      lookupSchemaName: 'new_Remessa',
+      referencingEntity: historicoRemessaLogical,
+      referencedEntity: remessaLogical,
+      referencedAttribute: 'new_remessaid',
+      displayName: 'Remessa',
+    },
+    {
+      schemaName: 'new_historicoremessa_alteradopor',
+      lookupSchemaName: 'new_AlteradoPor',
+      referencingEntity: historicoRemessaLogical,
+      referencedEntity: 'systemuser',
+      referencedAttribute: 'systemuserid',
+      displayName: 'Alterado Por',
+    },
+  ];
+
+  for (const rel of historicoRelationships) {
+    if (!(await relationshipExists(rel.schemaName))) {
+      await createLookupRelationship(rel);
     }
   }
 

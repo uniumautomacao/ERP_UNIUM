@@ -256,5 +256,12 @@ export const dataSourcesInfo = {
     "primaryKey": "new_transportadoraid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "new_historicoremessas": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_historicoremessaid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   }
 };

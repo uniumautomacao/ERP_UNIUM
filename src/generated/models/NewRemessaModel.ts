@@ -17,8 +17,11 @@ export interface NewRemessaBase {
   new_notas?: string;
   new_previsaodechegada?: string;
   new_previsaodeenvio?: string;
+  new_codigoderastreio?: string;
+  new_prioridade?: number;
   "new_Fornecedor@odata.bind"?: string;
   "new_Transportadora@odata.bind"?: string;
+  "new_RemessaOrigem@odata.bind"?: string;
   statecode?: number;
   statuscode?: number;
 }
@@ -26,4 +29,5 @@ export interface NewRemessaBase {
 export interface NewRemessa extends NewRemessaBase {
   _new_fornecedor_value?: string;
   _new_transportadora_value?: string;
+  _new_remessaorigem_value?: string;
 }

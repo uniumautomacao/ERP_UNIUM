@@ -79,5 +79,15 @@ server.tool(
   }
 );
 
+server.tool(
+  'unium_create_remessa_schema',
+  'Cria/atualiza schema de remessas no Dataverse.',
+  {},
+  async () => {
+    await (await import('./schema')).createRemessaSchema();
+    return { content: [{ type: 'text', text: 'Schema de remessas atualizado e publicado.' }] };
+  }
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);

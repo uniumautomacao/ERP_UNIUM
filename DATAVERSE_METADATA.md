@@ -39,6 +39,7 @@ Este arquivo contém a documentação resumida das tabelas do Dataverse usadas n
 | Comentário de Ordem de Serviço | `new_comentariodeordemdeservico` | `new_comentariodeordemdeservicos` | `new_comentariodeordemdeservicoid` |
 | Remessa | `new_remessa` | `new_remessas` | `new_remessaid` |
 | Transportadora | `new_transportadora` | `new_transportadoras` | `new_transportadoraid` |
+| Histórico da Remessa | `new_historicoremessa` | `new_historicoremessas` | `new_historicoremessaid` |
 
 ---
 
@@ -577,6 +578,29 @@ PrimaryKey:                       new_ordemdeservicofieldcontrolid
 
 ---
 
+## 🔵 new_remessa (Remessa)
+
+### Informações Básicas
+```
+EntityLogicalName:                new_remessa
+EntityLogicalCollectionName:      new_remessas
+EntitySetName:                    new_remessas
+PrimaryKey:                       new_remessaid
+```
+
+### ⚡ Campos Adicionais (Atualizados)
+*   `new_codigoderastreio`: Código de rastreio da remessa.
+*   `new_prioridade`: Prioridade (Alta/Normal/Baixa).
+
+### ⚡ Campos de Lookup (Navigation Properties)
+| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+|------------------------------|---------------------|------------------|
+| new_fornecedor | new_Fornecedor | cr22f_fornecedoresfromsharepointlists |
+| new_transportadora | new_Transportadora | new_transportadoras |
+| new_remessaorigem | new_RemessaOrigem | new_remessas |
+
+---
+
 ## 🔵 new_produtoservico (Produto-Serviço)
 
 ### Informações Básicas
@@ -594,42 +618,25 @@ PrimaryKey:                       new_produtoservicoid
 | new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
 | new_projeto | new_Projeto | cr22f_projetos |
 | new_produto | new_Produto | products |
+| new_remessa | new_Remessa | new_remessas |
 
 ---
 
-## 🔵 new_comentariodeordemdeservico (Comentário de Ordem de Serviço)
+## 🔵 new_historicoremessa (Histórico da Remessa)
 
 ### Informações Básicas
 ```
-EntityLogicalName:                new_comentariodeordemdeservico
-EntityLogicalCollectionName:      new_comentariodeordemdeservicos
-EntitySetName:                    new_comentariodeordemdeservicos
-PrimaryKey:                       new_comentariodeordemdeservicoid
+EntityLogicalName:                new_historicoremessa
+EntityLogicalCollectionName:      new_historicoremessas
+EntitySetName:                    new_historicoremessas
+PrimaryKey:                       new_historicoremessaid
 ```
 
 ### ⚡ Campos de Lookup (Navigation Properties)
 | Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
 |------------------------------|---------------------|------------------|
-| new_ordemdeservico | new_OrdemdeServico | new_ordemdeservicofieldcontrols |
-| new_usuario | new_Usuario | systemusers |
-
----
-
-## 🔵 new_remessa (Remessa)
-
-### Informações Básicas
-```
-EntityLogicalName:                new_remessa
-EntityLogicalCollectionName:      new_remessas
-EntitySetName:                    new_remessas
-PrimaryKey:                       new_remessaid
-```
-
-### ⚡ Campos de Lookup (Navigation Properties)
-| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
-|------------------------------|---------------------|------------------|
-| new_fornecedor | new_Fornecedor | cr22f_fornecedoresfromsharepointlists |
-| new_transportadora | new_Transportadora | new_transportadoras |
+| new_remessa | new_Remessa | new_remessas |
+| new_alteradopor | new_AlteradoPor | systemusers |
 
 ---
 

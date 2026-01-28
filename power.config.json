@@ -192,6 +192,11 @@
           "entitySetName": "new_transportadoras",
           "logicalName": "new_transportadora",
           "isHidden": false
+        },
+        "new_historicoremessas": {
+          "entitySetName": "new_historicoremessas",
+          "logicalName": "new_historicoremessa",
+          "isHidden": false
         }
       },
       "actions": null

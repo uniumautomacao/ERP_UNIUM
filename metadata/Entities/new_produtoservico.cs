@@ -1341,40 +1341,21 @@ public partial class new_ProdutoServico : Microsoft.Xrm.Sdk.Entity, System.Compo
 	}
 	
 	/// <summary>
-	/// N:1 new_new_produtoservico_OrdemdeServico_new_ord
+	/// N:1 new_produtoservico_Remessa_new_remessa
 	/// </summary>
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_ordemdeservico")]
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_new_produtoservico_OrdemdeServico_new_ord")]
-	public new_OrdemdeServicoFieldControl new_new_produtoservico_OrdemdeServico_new_ord
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_remessa")]
+	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_produtoservico_Remessa_new_remessa")]
+	public new_Remessa new_produtoservico_Remessa_new_remessa
 	{
 		get
 		{
-			return this.GetRelatedEntity<new_OrdemdeServicoFieldControl>("new_new_produtoservico_OrdemdeServico_new_ord", null);
+			return this.GetRelatedEntity<new_Remessa>("new_produtoservico_Remessa_new_remessa", null);
 		}
 		set
 		{
-			this.OnPropertyChanging("new_new_produtoservico_OrdemdeServico_new_ord");
-			this.SetRelatedEntity<new_OrdemdeServicoFieldControl>("new_new_produtoservico_OrdemdeServico_new_ord", null, value);
-			this.OnPropertyChanged("new_new_produtoservico_OrdemdeServico_new_ord");
-		}
-	}
-	
-	/// <summary>
-	/// N:1 new_new_produtoservico_Projeto_cr22f_projeto
-	/// </summary>
-	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_projeto")]
-	[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("new_new_produtoservico_Projeto_cr22f_projeto")]
-	public cr22f_Projeto new_new_produtoservico_Projeto_cr22f_projeto
-	{
-		get
-		{
-			return this.GetRelatedEntity<cr22f_Projeto>("new_new_produtoservico_Projeto_cr22f_projeto", null);
-		}
-		set
-		{
-			this.OnPropertyChanging("new_new_produtoservico_Projeto_cr22f_projeto");
-			this.SetRelatedEntity<cr22f_Projeto>("new_new_produtoservico_Projeto_cr22f_projeto", null, value);
-			this.OnPropertyChanged("new_new_produtoservico_Projeto_cr22f_projeto");
+			this.OnPropertyChanging("new_produtoservico_Remessa_new_remessa");
+			this.SetRelatedEntity<new_Remessa>("new_produtoservico_Remessa_new_remessa", null, value);
+			this.OnPropertyChanged("new_produtoservico_Remessa_new_remessa");
 		}
 	}
 }

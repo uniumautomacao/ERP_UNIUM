@@ -12,6 +12,7 @@ export interface NewProdutoServicoBase {
   "new_OrdemdeServico@odata.bind"?: string;
   "new_Projeto@odata.bind"?: string;
   "new_Produto@odata.bind"?: string;
+  "new_Remessa@odata.bind"?: string;
   statecode?: number;
   statuscode?: number;
 }
@@ -21,4 +22,5 @@ export interface NewProdutoServico extends NewProdutoServicoBase {
   _new_ordemdeservico_value?: string;
   _new_projeto_value?: string;
   _new_produto_value?: string;
+  _new_remessa_value?: string;
 }
