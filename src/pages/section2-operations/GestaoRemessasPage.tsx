@@ -352,8 +352,18 @@ export function GestaoRemessasPage() {
 
   const loadRemessaOptions = useCallback(async () => {
     const result = await NewRemessaService.getAll({
-      filter: 'statecode eq 0',
-      select: ['new_remessaid', 'new_id', 'new_nomedofornecedorfx'],
+      filter: `statecode eq 0 and new_estagiodamovimentacao ne ${REMESSA_STAGE_ENTREGUE} and (new_entregue ne true or new_entregue eq null)`,
+      select: [
+        'new_remessaid',
+        'new_id',
+        'new_nomedofornecedorfx',
+        'new_nomedatransportadora',
+        'new_previsaodechegada',
+        'new_codigoderastreio',
+        'new_prioridade',
+        'new_entregue',
+        'new_estagiodamovimentacao',
+      ],
       orderBy: ['new_id asc'],
       top: 200,
     });
@@ -361,6 +371,12 @@ export function GestaoRemessasPage() {
       id: item.new_remessaid,
       label: `${item.new_id ?? item.new_remessaid} - ${item.new_nomedofornecedorfx ?? 'Fornecedor não informado'}`,
       fornecedor: item.new_nomedofornecedorfx ?? null,
+      transportadora: item.new_nomedatransportadora ?? null,
+      previsaoChegada: item.new_previsaodechegada ?? null,
+      codigoRastreio: item.new_codigoderastreio ?? null,
+      prioridade: item.new_prioridade ?? null,
+      entregue: Boolean(item.new_entregue),
+      stageValue: item.new_estagiodamovimentacao ?? null,
     }));
     setRemessaOptions(options);
   }, []);
@@ -1257,6 +1273,7 @@ export function GestaoRemessasPage() {
         open={dialogs.juntar}
         loading={saving}
         options={remessaOptions}
+        defaultPrincipalId={selectedRemessa?.id ?? null}
         onOpenChange={(open) => setDialogs((prev) => ({ ...prev, juntar: open }))}
         onConfirm={handleJuntar}
       />

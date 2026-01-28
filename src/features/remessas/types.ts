@@ -49,6 +49,12 @@ export interface RemessaLookupOption {
   id: string;
   label: string;
   fornecedor?: string | null;
+  stageValue?: number | null;
+  transportadora?: string | null;
+  previsaoChegada?: string | null;
+  codigoRastreio?: string | null;
+  prioridade?: number | null;
+  entregue?: boolean;
 }
 
 export interface TransportadoraOption {

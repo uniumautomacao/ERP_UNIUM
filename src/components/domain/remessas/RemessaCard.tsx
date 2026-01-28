@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { CSSProperties, useMemo } from 'react';
 import { Badge, Button, Card, Text, Tooltip, tokens } from '@fluentui/react-components';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -19,21 +19,33 @@ interface RemessaCardProps {
   onSelect: (id: string) => void;
 }
 
-export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: RemessaCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: item.id,
-  });
+type RemessaCardViewProps = {
+  item: RemessaCardData;
+  title: string;
+  isSelected?: boolean;
+  onSelect: (id: string) => void;
+  onOpen?: (id: string) => void;
+  showOpenButton?: boolean;
+  showCopyButton?: boolean;
+  cardRef?: (node: HTMLDivElement | null) => void;
+  cardStyle?: CSSProperties;
+  dragHandleProps?: Record<string, unknown>;
+  isDragging?: boolean;
+};
 
-  const cardStyle = useMemo(() => ({
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.6 : 1,
-    border: `1px solid ${tokens.colorNeutralStroke2}`,
-    borderRadius: 6,
-    boxShadow: isDragging ? `0 8px 18px ${tokens.colorNeutralShadowAmbient}` : undefined,
-    backgroundColor: isSelected ? tokens.colorNeutralBackground3 : tokens.colorNeutralBackground1,
-  }), [transform, transition, isDragging, isSelected]);
-
+export function RemessaCardView({
+  item,
+  title,
+  isSelected,
+  onOpen,
+  onSelect,
+  showOpenButton = Boolean(onOpen),
+  showCopyButton = true,
+  cardRef,
+  cardStyle,
+  dragHandleProps,
+  isDragging,
+}: RemessaCardViewProps) {
   const prioridadeLabel = useMemo(() => {
     if (item.prioridade === null || item.prioridade === undefined) return null;
     return REMESSA_PRIORITIES.find((p) => p.value === item.prioridade)?.label ?? String(item.prioridade);
@@ -70,24 +82,30 @@ export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: Remes
     }
   };
 
+  const mergedStyle: CSSProperties = {
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRadius: 6,
+    backgroundColor: isSelected ? tokens.colorNeutralBackground3 : tokens.colorNeutralBackground1,
+    padding: '12px',
+    minHeight: 120,
+    cursor: 'pointer',
+    ...cardStyle,
+  };
+
+  const dragCursor = dragHandleProps ? (isDragging ? 'grabbing' : 'grab') : 'default';
+
   return (
     <Card
-      ref={setNodeRef}
-      style={{
-        ...cardStyle,
-        padding: '12px',
-        minHeight: 120,
-        cursor: 'pointer',
-      }}
+      ref={cardRef}
+      style={mergedStyle}
       onClick={() => onSelect(item.id)}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-2">
           <div
             className="flex flex-wrap items-center gap-2"
-            {...attributes}
-            {...listeners}
-            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+            {...dragHandleProps}
+            style={{ cursor: dragCursor }}
           >
             <Text
               size={300}
@@ -126,7 +144,7 @@ export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: Remes
           </Text>
         </div>
         <div className="flex flex-col items-end gap-1">
-          {item.codigoRastreio && (
+          {showCopyButton && item.codigoRastreio && (
             <Tooltip content={`Copiar rastreio: ${item.codigoRastreio}`} relationship="description">
               <Button
                 size="small"
@@ -140,18 +158,49 @@ export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: Remes
               />
             </Tooltip>
           )}
-          <Button
-            size="small"
-            appearance="subtle"
-            icon={<Open24Regular />}
-            aria-label="Abrir remessa"
-            onClick={(event) => {
-              event.stopPropagation();
-              onOpen(item.id);
-            }}
-          />
+          {showOpenButton && onOpen && (
+            <Button
+              size="small"
+              appearance="subtle"
+              icon={<Open24Regular />}
+              aria-label="Abrir remessa"
+              onClick={(event) => {
+                event.stopPropagation();
+                onOpen(item.id);
+              }}
+            />
+          )}
         </div>
       </div>
     </Card>
+  );
+}
+
+export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: RemessaCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+
+  const cardStyle = useMemo(() => ({
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    boxShadow: isDragging ? `0 8px 18px ${tokens.colorNeutralShadowAmbient}` : undefined,
+  }), [transform, transition, isDragging]);
+
+  return (
+    <RemessaCardView
+      item={item}
+      title={title}
+      isSelected={isSelected}
+      onOpen={onOpen}
+      onSelect={onSelect}
+      showOpenButton
+      showCopyButton
+      cardRef={setNodeRef}
+      cardStyle={cardStyle}
+      dragHandleProps={{ ...attributes, ...listeners }}
+      isDragging={isDragging}
+    />
   );
 }

@@ -25,11 +25,20 @@ interface KanbanColumnProps {
   children: ReactNode;
 }
 
-export function KanbanColumn({ stageValue, title, count, lateCount = 0, children }: KanbanColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: `column-${stageValue}`,
-  });
+interface KanbanColumnViewProps extends KanbanColumnProps {
+  columnRef?: (node: HTMLDivElement | null) => void;
+  isOver?: boolean;
+}
 
+export function KanbanColumnView({
+  stageValue,
+  title,
+  count,
+  lateCount = 0,
+  children,
+  columnRef,
+  isOver,
+}: KanbanColumnViewProps) {
   const stageConfig = useMemo(() => {
     const base = { icon: null as ReactNode, accent: tokens.colorNeutralStroke2 };
     switch (stageValue) {
@@ -52,7 +61,7 @@ export function KanbanColumn({ stageValue, title, count, lateCount = 0, children
 
   return (
     <div
-      ref={setNodeRef}
+      ref={columnRef}
       style={{
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         borderRadius: 6,
@@ -98,5 +107,24 @@ export function KanbanColumn({ stageValue, title, count, lateCount = 0, children
         {children}
       </div>
     </div>
+  );
+}
+
+export function KanbanColumn({ stageValue, title, count, lateCount = 0, children }: KanbanColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `column-${stageValue}`,
+  });
+
+  return (
+    <KanbanColumnView
+      stageValue={stageValue}
+      title={title}
+      count={count}
+      lateCount={lateCount}
+      columnRef={setNodeRef}
+      isOver={isOver}
+    >
+      {children}
+    </KanbanColumnView>
   );
 }

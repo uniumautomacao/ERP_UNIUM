@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogTitle, Dropdown, Option } from '@fluentui/react-components';
+import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, Dropdown, Option } from '@fluentui/react-components';
 import { RemessaLookupOption } from '../../../features/remessas/types';
 
 interface MoverProdutosDialogProps {
@@ -29,35 +29,37 @@ export function MoverProdutosDialog({
 
   return (
     <Dialog open={open} onOpenChange={(_, data) => onOpenChange(data.open)}>
-      <DialogBody>
-        <DialogTitle>Mover itens da remessa</DialogTitle>
-        <DialogContent className="flex flex-col gap-3">
-          <div>Itens selecionados: <strong>{selectedCount}</strong></div>
-          <Dropdown
-            placeholder="Selecione a remessa destino"
-            value={options.find((opt) => opt.id === destinoId)?.label ?? ''}
-            onOptionSelect={(_, data) => setDestinoId(data.optionValue as string)}
-          >
-            {options.map((opt) => (
-              <Option key={opt.id} value={opt.id}>
-                {opt.label}
-              </Option>
-            ))}
-          </Dropdown>
-        </DialogContent>
-        <DialogActions>
-          <Button appearance="secondary" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button
-            appearance="primary"
-            onClick={() => onConfirm(destinoId)}
-            disabled={!destinoId || selectedCount === 0 || loading}
-          >
-            Mover itens
-          </Button>
-        </DialogActions>
-      </DialogBody>
+      <DialogSurface>
+        <DialogBody>
+          <DialogTitle>Mover itens da remessa</DialogTitle>
+          <DialogContent className="flex flex-col gap-3">
+            <div>Itens selecionados: <strong>{selectedCount}</strong></div>
+            <Dropdown
+              placeholder="Selecione a remessa destino"
+              value={options.find((opt) => opt.id === destinoId)?.label ?? ''}
+              onOptionSelect={(_, data) => setDestinoId(data.optionValue as string)}
+            >
+              {options.map((opt) => (
+                <Option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </Option>
+              ))}
+            </Dropdown>
+          </DialogContent>
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button
+              appearance="primary"
+              onClick={() => onConfirm(destinoId)}
+              disabled={!destinoId || selectedCount === 0 || loading}
+            >
+              Mover itens
+            </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
     </Dialog>
   );
 }
