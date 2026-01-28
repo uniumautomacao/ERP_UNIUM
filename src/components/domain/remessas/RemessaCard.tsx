@@ -1,10 +1,15 @@
 import { useMemo } from 'react';
-import { Badge, Button, Card, Text, tokens } from '@fluentui/react-components';
+import { Badge, Button, Card, Text, Tooltip, tokens } from '@fluentui/react-components';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Open24Regular } from '@fluentui/react-icons';
+import { Copy24Regular, Open24Regular, Warning24Regular } from '@fluentui/react-icons';
 import { RemessaCardData } from '../../../features/remessas/types';
-import { REMESSA_PRIORITIES } from '../../../features/remessas/constants';
+import {
+  REMESSA_PRIORITY_ALTA,
+  REMESSA_PRIORITY_BAIXA,
+  REMESSA_PRIORITY_NORMAL,
+  REMESSA_PRIORITIES,
+} from '../../../features/remessas/constants';
 
 interface RemessaCardProps {
   item: RemessaCardData;
@@ -33,6 +38,37 @@ export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: Remes
     if (item.prioridade === null || item.prioridade === undefined) return null;
     return REMESSA_PRIORITIES.find((p) => p.value === item.prioridade)?.label ?? String(item.prioridade);
   }, [item.prioridade]);
+
+  const prioridadeColor = useMemo(() => {
+    if (item.prioridade === REMESSA_PRIORITY_ALTA) return 'danger';
+    if (item.prioridade === REMESSA_PRIORITY_NORMAL) return 'brand';
+    if (item.prioridade === REMESSA_PRIORITY_BAIXA) return 'informative';
+    return 'warning';
+  }, [item.prioridade]);
+
+  const atrasoInfo = useMemo(() => {
+    if (!item.previsaoChegada || item.entregue) return null;
+    const previsao = new Date(item.previsaoChegada);
+    if (Number.isNaN(previsao.getTime())) return null;
+    const hoje = new Date();
+    const startHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+    const startPrev = new Date(previsao.getFullYear(), previsao.getMonth(), previsao.getDate());
+    const diffDays = Math.floor((startHoje.getTime() - startPrev.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return null;
+    return {
+      dias: diffDays,
+      label: `Atrasada ${diffDays} dia${diffDays === 1 ? '' : 's'}`,
+    };
+  }, [item.entregue, item.previsaoChegada]);
+
+  const handleCopyRastreio = async () => {
+    if (!item.codigoRastreio) return;
+    try {
+      await navigator.clipboard?.writeText(item.codigoRastreio);
+    } catch {
+      // Silencioso: copia nao disponivel
+    }
+  };
 
   return (
     <Card
@@ -67,9 +103,16 @@ export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: Remes
               {title}
             </Text>
             {prioridadeLabel && (
-              <Badge appearance="filled" color="warning">
+              <Badge appearance="filled" color={prioridadeColor}>
                 {prioridadeLabel}
               </Badge>
+            )}
+            {atrasoInfo && (
+              <Tooltip content={atrasoInfo.label} relationship="description">
+                <Badge appearance="filled" color="danger" icon={<Warning24Regular />}>
+                  {atrasoInfo.dias}d
+                </Badge>
+              </Tooltip>
             )}
           </div>
           <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
@@ -82,16 +125,32 @@ export function RemessaCard({ item, title, isSelected, onOpen, onSelect }: Remes
             Previsão chegada: {item.previsaoChegada ? new Date(item.previsaoChegada).toLocaleDateString() : '-'}
           </Text>
         </div>
-        <Button
-          size="small"
-          appearance="subtle"
-          icon={<Open24Regular />}
-          aria-label="Abrir remessa"
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpen(item.id);
-          }}
-        />
+        <div className="flex flex-col items-end gap-1">
+          {item.codigoRastreio && (
+            <Tooltip content={`Copiar rastreio: ${item.codigoRastreio}`} relationship="description">
+              <Button
+                size="small"
+                appearance="subtle"
+                icon={<Copy24Regular />}
+                aria-label="Copiar código de rastreio"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void handleCopyRastreio();
+                }}
+              />
+            </Tooltip>
+          )}
+          <Button
+            size="small"
+            appearance="subtle"
+            icon={<Open24Regular />}
+            aria-label="Abrir remessa"
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpen(item.id);
+            }}
+          />
+        </div>
       </div>
     </Card>
   );

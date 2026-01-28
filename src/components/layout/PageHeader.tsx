@@ -5,6 +5,7 @@ interface KPI {
   label: string;
   value: string | number;
   icon?: ReactNode;
+  color?: string;
 }
 
 interface PageHeaderProps {
@@ -61,13 +62,13 @@ export function PageHeader({
 
         {/* Right side - KPIs */}
         {kpis && kpis.length > 0 && (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-0">
             {kpis.map((kpi, index) => (
-              <div key={index}>
+              <div key={index} className="flex items-center">
                 {index > 0 && (
                   <Divider
                     vertical
-                    style={{ height: '40px', marginRight: '16px', display: 'inline-block' }}
+                    style={{ height: '32px', margin: '0 16px' }}
                   />
                 )}
                 <div className="text-center">
@@ -83,9 +84,13 @@ export function PageHeader({
                   >
                     {kpi.label}
                   </Text>
-                  <div className="flex items-center gap-1 justify-center">
-                    {kpi.icon}
-                    <Text size={400} weight="semibold">
+                  <div className="flex items-center gap-1 justify-center" style={{ minHeight: '32px' }}>
+                    {kpi.icon && (
+                      <span className="flex items-center" style={{ color: kpi.color || tokens.colorNeutralForeground2 }}>
+                        {kpi.icon}
+                      </span>
+                    )}
+                    <Text size={400} weight="semibold" style={{ color: kpi.color || tokens.colorNeutralForeground1 }}>
                       {kpi.value}
                     </Text>
                   </div>

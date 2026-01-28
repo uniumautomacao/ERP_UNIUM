@@ -1,8 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Text, tokens } from '@fluentui/react-components';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
+  Dropdown,
+  Field,
+  Option,
+  Text,
+  Toaster,
+  Toast,
+  ToastBody,
+  ToastTitle,
+  tokens,
+  useId,
+  useToastController,
+} from '@fluentui/react-components';
 import { DndContext, DragEndEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ArrowSync24Regular } from '@fluentui/react-icons';
+import { ArrowSync24Regular, Box24Regular, CalendarClock24Regular, Warning24Regular } from '@fluentui/react-icons';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { FilterBar } from '../../components/shared/FilterBar';
@@ -104,7 +123,6 @@ export function GestaoRemessasPage() {
   const [listItems, setListItems] = useState<RemessaCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [listLoading, setListLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [kpis, setKpis] = useState({ atrasadas: 0, chegando: 0, emTransito: 0 });
   const [selectedRemessaId, setSelectedRemessaId] = useState<string | null>(null);
   const [selectedRemessa, setSelectedRemessa] = useState<RemessaDetails | null>(null);
@@ -127,6 +145,28 @@ export function GestaoRemessasPage() {
   const [batchTransportadoraId, setBatchTransportadoraId] = useState('');
   const [saving, setSaving] = useState(false);
   const loadRequestId = useRef(0);
+  const toasterId = useId('remessas-toast');
+  const { dispatchToast } = useToastController(toasterId);
+
+  const showError = useCallback((title: string, description?: string) => {
+    dispatchToast(
+      <Toast>
+        <ToastTitle>{title}</ToastTitle>
+        {description && <ToastBody>{description}</ToastBody>}
+      </Toast>,
+      { intent: 'error' }
+    );
+  }, [dispatchToast]);
+
+  const showSuccess = useCallback((title: string, description?: string) => {
+    dispatchToast(
+      <Toast>
+        <ToastTitle>{title}</ToastTitle>
+        {description && <ToastBody>{description}</ToastBody>}
+      </Toast>,
+      { intent: 'success' }
+    );
+  }, [dispatchToast]);
 
   const effectiveStages = useMemo(() => {
     if (stageFilter !== 'all') {
@@ -135,6 +175,16 @@ export function GestaoRemessasPage() {
     }
     return REMESSA_STAGES;
   }, [stageFilter]);
+
+  const isRemessaAtrasada = useCallback((item: RemessaCardData) => {
+    if (!item.previsaoChegada || item.entregue) return false;
+    const previsao = new Date(item.previsaoChegada);
+    if (Number.isNaN(previsao.getTime())) return false;
+    const hoje = new Date();
+    const startHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+    const startPrev = new Date(previsao.getFullYear(), previsao.getMonth(), previsao.getDate());
+    return startPrev < startHoje;
+  }, []);
 
   const mapRecordToCard = useCallback((record: any): RemessaCardData => ({
     id: record.new_remessaid,
@@ -222,7 +272,6 @@ export function GestaoRemessasPage() {
   const loadColumnData = useCallback(async () => {
     const requestId = ++loadRequestId.current;
     setLoading(true);
-    setError(null);
     try {
       const baseFilter = await buildBaseFilter();
       const results = await Promise.all(
@@ -248,18 +297,17 @@ export function GestaoRemessasPage() {
       setColumns(nextColumns);
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao carregar remessas', err);
-      setError('Erro ao carregar remessas.');
+      showError('Erro ao carregar remessas.');
     } finally {
       if (requestId === loadRequestId.current) {
         setLoading(false);
       }
     }
-  }, [buildBaseFilter, effectiveStages, mapRecordToCard]);
+  }, [buildBaseFilter, effectiveStages, mapRecordToCard, showError]);
 
   const loadListData = useCallback(async () => {
     if (selectedTab !== 'lista') return;
     setListLoading(true);
-    setError(null);
     try {
       const baseFilter = await buildBaseFilter();
       const filter = stageFilter !== 'all'
@@ -274,11 +322,11 @@ export function GestaoRemessasPage() {
       setListItems((result.data || []).map(mapRecordToCard));
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao carregar lista', err);
-      setError('Erro ao carregar lista de remessas.');
+      showError('Erro ao carregar lista de remessas.');
     } finally {
       setListLoading(false);
     }
-  }, [buildBaseFilter, mapRecordToCard, selectedTab, stageFilter]);
+  }, [buildBaseFilter, mapRecordToCard, selectedTab, showError, stageFilter]);
 
   const loadTransportadoras = useCallback(async () => {
     const result = await NewTransportadoraService.getAll({
@@ -482,11 +530,11 @@ export function GestaoRemessasPage() {
 
     const item = sourceItems[activeIndex];
     if (destStage === REMESSA_STAGE_ENVIO && !item.dataEnvio) {
-      setError('Para mover para "Envio" preencha a data de envio.');
+      showError('Para mover para "Envio" preencha a data de envio.');
       return;
     }
     if (destStage === REMESSA_STAGE_ENTREGUE && !item.dataRecebimento) {
-      setError('Para mover para "Entregue" preencha a data de recebimento.');
+      showError('Para mover para "Entregue" preencha a data de recebimento.');
       return;
     }
 
@@ -518,7 +566,7 @@ export function GestaoRemessasPage() {
       await refreshAll();
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao mover remessa', err);
-      setError('Erro ao atualizar estágio da remessa.');
+      showError('Erro ao atualizar estágio da remessa.');
       await refreshAll();
     }
   };
@@ -539,11 +587,11 @@ export function GestaoRemessasPage() {
     const nextDataEnvio = changes.new_datadeenvio ?? selectedRemessa.dataEnvio;
     const nextDataRecebimento = changes.new_dataderecebimento ?? selectedRemessa.dataRecebimento;
     if (nextStage === REMESSA_STAGE_ENVIO && !nextDataEnvio) {
-      setError('Para mover para "Envio" preencha a data de envio.');
+      showError('Para mover para "Envio" preencha a data de envio.');
       return;
     }
     if (nextStage === REMESSA_STAGE_ENTREGUE && !nextDataRecebimento) {
-      setError('Para mover para "Entregue" preencha a data de recebimento.');
+      showError('Para mover para "Entregue" preencha a data de recebimento.');
       return;
     }
     setSaving(true);
@@ -656,13 +704,14 @@ export function GestaoRemessasPage() {
       await refreshAll();
       await loadRemessaDetails(selectedRemessa.id);
       await loadHistorico(selectedRemessa.id);
+      showSuccess('Remessa atualizada', 'As alterações foram salvas com sucesso.');
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao salvar detalhes', err);
-      setError('Erro ao salvar alterações da remessa.');
+      showError('Erro ao salvar alterações da remessa.');
     } finally {
       setSaving(false);
     }
-  }, [loadHistorico, loadRemessaDetails, refreshAll, registerHistorico, selectedRemessa, transportadoras]);
+  }, [loadHistorico, loadRemessaDetails, refreshAll, registerHistorico, selectedRemessa, showError, showSuccess, transportadoras]);
 
   const handleDividir = useCallback(async (payload: { codigoRastreio?: string; previsaoEnvio?: string; previsaoChegada?: string }) => {
     if (!selectedRemessa || selectedProdutos.length === 0) return;
@@ -699,13 +748,14 @@ export function GestaoRemessasPage() {
       setSelectedProdutos([]);
       await refreshAll();
       await loadRemessaOptions();
+      showSuccess('Remessa dividida', 'Nova remessa criada com sucesso.');
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao dividir remessa', err);
-      setError('Erro ao dividir remessa.');
+      showError('Erro ao dividir remessa.');
     } finally {
       setSaving(false);
     }
-  }, [loadRemessaOptions, refreshAll, registerHistorico, selectedProdutos, selectedRemessa]);
+  }, [loadRemessaOptions, refreshAll, registerHistorico, selectedProdutos, selectedRemessa, showError, showSuccess]);
 
   const handleJuntar = useCallback(async (payload: { principalId: string; mergeIds: string[] }) => {
     if (!payload.principalId || payload.mergeIds.length === 0) return;
@@ -717,7 +767,7 @@ export function GestaoRemessasPage() {
         return item?.fornecedor && principal?.fornecedor && item.fornecedor !== principal.fornecedor;
       });
       if (invalidFornecedor) {
-        setError('As remessas selecionadas precisam ter o mesmo fornecedor.');
+        showError('As remessas selecionadas precisam ter o mesmo fornecedor.');
         setSaving(false);
         return;
       }
@@ -747,13 +797,14 @@ export function GestaoRemessasPage() {
       setDialogs((prev) => ({ ...prev, juntar: false }));
       await refreshAll();
       await loadRemessaOptions();
+      showSuccess('Remessas juntadas', 'As remessas foram consolidadas com sucesso.');
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao juntar remessas', err);
-      setError('Erro ao juntar remessas.');
+      showError('Erro ao juntar remessas.');
     } finally {
       setSaving(false);
     }
-  }, [loadRemessaOptions, refreshAll, registerHistorico, remessaOptions]);
+  }, [loadRemessaOptions, refreshAll, registerHistorico, remessaOptions, showError, showSuccess]);
 
   const handleMoverProdutos = useCallback(async (destinoId: string) => {
     if (!destinoId || selectedProdutos.length === 0) return;
@@ -779,13 +830,14 @@ export function GestaoRemessasPage() {
       if (selectedRemessa?.id) {
         await loadProdutos(selectedRemessa.id);
       }
+      showSuccess('Itens movidos', 'Os produtos foram movidos para a remessa selecionada.');
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao mover itens', err);
-      setError('Erro ao mover itens.');
+      showError('Erro ao mover itens.');
     } finally {
       setSaving(false);
     }
-  }, [loadProdutos, refreshAll, registerHistorico, selectedProdutos, selectedRemessa]);
+  }, [loadProdutos, refreshAll, registerHistorico, selectedProdutos, selectedRemessa, showError, showSuccess]);
 
   const handleBatchStage = useCallback(async () => {
     if (batchStageValue === '' || listSelection.length === 0) return;
@@ -801,13 +853,14 @@ export function GestaoRemessasPage() {
       setBatchStageValue('');
       setListSelection([]);
       await refreshAll();
+      showSuccess('Estágio atualizado', 'As remessas selecionadas foram atualizadas.');
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao atualizar estágio', err);
-      setError('Erro ao atualizar estágio.');
+      showError('Erro ao atualizar estágio.');
     } finally {
       setSaving(false);
     }
-  }, [batchStageValue, listSelection, refreshAll, registerHistorico]);
+  }, [batchStageValue, listSelection, refreshAll, registerHistorico, showError, showSuccess]);
 
   const handleBatchTransportadora = useCallback(async () => {
     if (!batchTransportadoraId || listSelection.length === 0) return;
@@ -831,13 +884,14 @@ export function GestaoRemessasPage() {
       setBatchTransportadoraId('');
       setListSelection([]);
       await refreshAll();
+      showSuccess('Transportadora atualizada', 'As remessas selecionadas foram atualizadas.');
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao atualizar transportadora', err);
-      setError('Erro ao atualizar transportadora.');
+      showError('Erro ao atualizar transportadora.');
     } finally {
       setSaving(false);
     }
-  }, [batchTransportadoraId, listSelection, refreshAll, registerHistorico, transportadoras]);
+  }, [batchTransportadoraId, listSelection, refreshAll, registerHistorico, showError, showSuccess, transportadoras]);
 
   const listColumns = [
     createTableColumn<RemessaCardData>({
@@ -901,13 +955,29 @@ export function GestaoRemessasPage() {
 
   return (
     <div className="flex flex-col h-full">
+      <Toaster toasterId={toasterId} />
       <PageHeader
         title="Gestão de Remessas"
         subtitle="Monitoramento, logística e histórico das remessas"
         kpis={[
-          { label: 'Atrasadas', value: kpis.atrasadas },
-          { label: 'Chegam hoje/amanhã', value: kpis.chegando },
-          { label: 'Em trânsito', value: kpis.emTransito },
+          {
+            label: 'Atrasadas',
+            value: kpis.atrasadas,
+            icon: <Warning24Regular />,
+            color: kpis.atrasadas > 0 ? tokens.colorPaletteRedForeground2 : tokens.colorNeutralForeground2,
+          },
+          {
+            label: 'Chegam hoje/amanhã',
+            value: kpis.chegando,
+            icon: <CalendarClock24Regular />,
+            color: tokens.colorPaletteGreenForeground2,
+          },
+          {
+            label: 'Em trânsito',
+            value: kpis.emTransito,
+            icon: <Box24Regular />,
+            color: tokens.colorPaletteBlueForeground2,
+          },
         ]}
         tabs={[
           { value: 'kanban', label: 'Kanban' },
@@ -953,14 +1023,6 @@ export function GestaoRemessasPage() {
           </Button>
         </div>
 
-        {error && (
-          <div style={{ marginBottom: '12px' }}>
-            <Text size={200} style={{ color: tokens.colorPaletteRedForeground1 }}>
-              {error}
-            </Text>
-          </div>
-        )}
-
         {selectedTab === 'kanban' && (
           <div className="grid gap-4" style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(320px, 1fr)' }}>
             <div>
@@ -975,6 +1037,7 @@ export function GestaoRemessasPage() {
                         stageValue={stage.value}
                         title={stage.label}
                         count={(columns[stage.value] || []).length}
+                        lateCount={(columns[stage.value] || []).filter(isRemessaAtrasada).length}
                       >
                         <SortableContext
                           items={(columns[stage.value] || []).map((item) => item.id)}
@@ -1108,56 +1171,41 @@ interface DialogBatchStageProps {
 }
 
 function DialogBatchStage({ open, loading, value, onChange, onOpenChange, onConfirm }: DialogBatchStageProps) {
+  const selectedLabel = value
+    ? REMESSA_STAGES.find((stage) => String(stage.value) === value)?.label ?? ''
+    : '';
+
   return (
-    <div style={{ display: open ? 'block' : 'none' }}>
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: tokens.colorNeutralBackground1,
-            borderRadius: 8,
-            padding: 16,
-            minWidth: 320,
-            boxShadow: `0 8px 24px ${tokens.colorNeutralShadowAmbient}`,
-          }}
-        >
-          <Text size={300} weight="semibold" block style={{ marginBottom: 12 }}>
-            Atualizar estágio (em lote)
-          </Text>
-          <div className="flex flex-col gap-3">
-            <select
-              value={value}
-              onChange={(event) => onChange(event.target.value)}
-              style={{ padding: '8px', borderRadius: 4, border: `1px solid ${tokens.colorNeutralStroke2}` }}
-            >
-              <option value="">Selecione um estágio</option>
-              {REMESSA_STAGES.map((stage) => (
-                <option key={stage.value} value={stage.value}>
-                  {stage.label}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2 justify-end">
-              <Button appearance="secondary" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button appearance="primary" onClick={onConfirm} disabled={!value || loading}>
-                Aplicar
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Dialog open={open} onOpenChange={(_, data) => onOpenChange(data.open)}>
+      <DialogSurface>
+        <DialogBody>
+          <DialogTitle>Atualizar estágio (em lote)</DialogTitle>
+          <DialogContent>
+            <Field label="Estágio">
+              <Dropdown
+                value={selectedLabel}
+                placeholder="Selecione um estágio"
+                onOptionSelect={(_, data) => onChange(data.optionValue as string)}
+              >
+                {REMESSA_STAGES.map((stage) => (
+                  <Option key={stage.value} value={String(stage.value)}>
+                    {stage.label}
+                  </Option>
+                ))}
+              </Dropdown>
+            </Field>
+          </DialogContent>
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button appearance="primary" onClick={onConfirm} disabled={!value || loading}>
+              Aplicar
+            </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
   );
 }
 
@@ -1180,55 +1228,40 @@ function DialogBatchTransportadora({
   onOpenChange,
   onConfirm,
 }: DialogBatchTransportadoraProps) {
+  const selectedLabel = value
+    ? transportadoras.find((item) => item.id === value)?.label ?? ''
+    : '';
+
   return (
-    <div style={{ display: open ? 'block' : 'none' }}>
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: tokens.colorNeutralBackground1,
-            borderRadius: 8,
-            padding: 16,
-            minWidth: 320,
-            boxShadow: `0 8px 24px ${tokens.colorNeutralShadowAmbient}`,
-          }}
-        >
-          <Text size={300} weight="semibold" block style={{ marginBottom: 12 }}>
-            Atualizar transportadora (em lote)
-          </Text>
-          <div className="flex flex-col gap-3">
-            <select
-              value={value}
-              onChange={(event) => onChange(event.target.value)}
-              style={{ padding: '8px', borderRadius: 4, border: `1px solid ${tokens.colorNeutralStroke2}` }}
-            >
-              <option value="">Selecione uma transportadora</option>
-              {transportadoras.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2 justify-end">
-              <Button appearance="secondary" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button appearance="primary" onClick={onConfirm} disabled={!value || loading}>
-                Aplicar
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Dialog open={open} onOpenChange={(_, data) => onOpenChange(data.open)}>
+      <DialogSurface>
+        <DialogBody>
+          <DialogTitle>Atualizar transportadora (em lote)</DialogTitle>
+          <DialogContent>
+            <Field label="Transportadora">
+              <Dropdown
+                value={selectedLabel}
+                placeholder="Selecione uma transportadora"
+                onOptionSelect={(_, data) => onChange(data.optionValue as string)}
+              >
+                {transportadoras.map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.label}
+                  </Option>
+                ))}
+              </Dropdown>
+            </Field>
+          </DialogContent>
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button appearance="primary" onClick={onConfirm} disabled={!value || loading}>
+              Aplicar
+            </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
   );
 }

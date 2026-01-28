@@ -1,20 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Button,
-  Divider,
   Dropdown,
   Field,
   Input,
   Option,
+  Tab,
+  TabList,
   Text,
   Textarea,
   tokens,
 } from '@fluentui/react-components';
+import { ArrowSync24Regular, Box24Regular, Copy24Regular } from '@fluentui/react-icons';
 import { RemessaCardData, RemessaHistoricoItem, RemessaProdutoItem, TransportadoraOption } from '../../../features/remessas/types';
 import { REMESSA_PRIORITIES, REMESSA_STAGES } from '../../../features/remessas/constants';
 import { ProdutosDaRemessaList } from './ProdutosDaRemessaList';
 import { HistoricoRemessaTimeline } from './HistoricoRemessaTimeline';
 import { EmptyState } from '../../shared/EmptyState';
+import { RemessaProgressTracker } from './RemessaProgressTracker';
 
 interface RemessaDetails extends RemessaCardData {
   transportadoraId?: string | null;
@@ -77,6 +80,7 @@ export function RemessaDetailsPanel({
   const [dataEnvio, setDataEnvio] = useState('');
   const [dataRecebimento, setDataRecebimento] = useState('');
   const [notas, setNotas] = useState('');
+  const [activeTab, setActiveTab] = useState('detalhes');
 
   useEffect(() => {
     if (!remessa) return;
@@ -133,128 +137,150 @@ export function RemessaDetailsPanel({
         <Text size={200} style={{ color: tokens.colorNeutralForeground2 }} block>
           Transportadora: {remessa.transportadora || '-'}
         </Text>
-      </div>
-
-      <div
-        style={{
-          padding: '16px',
-          borderRadius: '8px',
-          border: `1px solid ${tokens.colorNeutralStroke2}`,
-          backgroundColor: tokens.colorNeutralBackground1,
-        }}
-      >
-        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-          <Field label="Estágio">
-            <Dropdown
-              value={stageLabel}
-              placeholder="Selecione"
-              onOptionSelect={(_, data) => setStageValue(data.optionValue as string)}
-            >
-              {REMESSA_STAGES.map((stage) => (
-                <Option key={stage.value} value={String(stage.value)}>
-                  {stage.label}
-                </Option>
-              ))}
-            </Dropdown>
-          </Field>
-          <Field label="Prioridade">
-            <Dropdown
-              value={prioridadeLabel}
-              placeholder="Selecione"
-              onOptionSelect={(_, data) => setPrioridade(data.optionValue as string)}
-            >
-              {REMESSA_PRIORITIES.map((item) => (
-                <Option key={item.value} value={String(item.value)}>
-                  {item.label}
-                </Option>
-              ))}
-            </Dropdown>
-          </Field>
-          <Field label="Transportadora">
-            <Dropdown
-              value={transportadoraLabel}
-              placeholder="Selecione"
-              onOptionSelect={(_, data) => setTransportadoraId(data.optionValue as string)}
-            >
-              {transportadoras.map((item) => (
-                <Option key={item.id} value={item.id}>
-                  {item.label}
-                </Option>
-              ))}
-            </Dropdown>
-          </Field>
-          <Field label="Código de rastreio">
-            <Input value={codigoRastreio} onChange={(_, data) => setCodigoRastreio(data.value)} />
-          </Field>
-          <Field label="Previsão de envio">
-            <Input type="date" value={previsaoEnvio} onChange={(_, data) => setPrevisaoEnvio(data.value)} />
-          </Field>
-          <Field label="Previsão de chegada">
-            <Input type="date" value={previsaoChegada} onChange={(_, data) => setPrevisaoChegada(data.value)} />
-          </Field>
-          <Field label="Data de envio">
-            <Input type="date" value={dataEnvio} onChange={(_, data) => setDataEnvio(data.value)} />
-          </Field>
-          <Field label="Data de recebimento">
-            <Input type="date" value={dataRecebimento} onChange={(_, data) => setDataRecebimento(data.value)} />
-          </Field>
-        </div>
         <div className="mt-3">
-          <Field label="Notas">
-            <Textarea value={notas} onChange={(_, data) => setNotas(data.value)} />
-          </Field>
-        </div>
-        <div className="mt-4 flex items-center gap-2">
-          <Button
-            appearance="primary"
-            onClick={() =>
-              onSalvar({
-                new_estagiodamovimentacao: stageValue ? Number(stageValue) : null,
-                new_transportadoraId: transportadoraId || null,
-                new_prioridade: prioridade ? Number(prioridade) : null,
-                new_codigoderastreio: codigoRastreio || null,
-                new_previsaodeenvio: previsaoEnvio || null,
-                new_previsaodechegada: previsaoChegada || null,
-                new_datadeenvio: dataEnvio || null,
-                new_dataderecebimento: dataRecebimento || null,
-                new_notas: notas || null,
-              })
-            }
-            disabled={saving}
-          >
-            Salvar alterações
-          </Button>
-          <Button appearance="secondary" onClick={onOpenDividir}>
-            Dividir remessa
-          </Button>
-          <Button appearance="secondary" onClick={onOpenJuntar}>
-            Juntar remessas
-          </Button>
-          <Button appearance="secondary" onClick={onOpenMover}>
-            Mover itens
-          </Button>
+          <RemessaProgressTracker stageValue={remessa.stageValue} />
         </div>
       </div>
 
-      <Divider />
+      <TabList selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(data.value as string)}>
+        <Tab value="detalhes">Detalhes</Tab>
+        <Tab value="produtos">Produtos ({produtos.length})</Tab>
+        <Tab value="historico">Histórico</Tab>
+      </TabList>
 
-      <div>
-        <Text size={300} weight="semibold" block style={{ marginBottom: '8px' }}>
-          Produtos da remessa
-        </Text>
-        <ProdutosDaRemessaList
-          items={produtos}
-          loading={produtosLoading}
-          onSelectionChange={onSelecionarProdutos}
-        />
-      </div>
+      {activeTab === 'detalhes' && (
+        <div
+          style={{
+            padding: '16px',
+            borderRadius: '8px',
+            border: `1px solid ${tokens.colorNeutralStroke2}`,
+            backgroundColor: tokens.colorNeutralBackground1,
+          }}
+        >
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            <Field label="Estágio">
+              <Dropdown
+                value={stageLabel}
+                placeholder="Selecione"
+                onOptionSelect={(_, data) => setStageValue(data.optionValue as string)}
+              >
+                {REMESSA_STAGES.map((stage) => (
+                  <Option key={stage.value} value={String(stage.value)}>
+                    {stage.label}
+                  </Option>
+                ))}
+              </Dropdown>
+            </Field>
+            <Field label="Prioridade">
+              <Dropdown
+                value={prioridadeLabel}
+                placeholder="Selecione"
+                onOptionSelect={(_, data) => setPrioridade(data.optionValue as string)}
+              >
+                {REMESSA_PRIORITIES.map((item) => (
+                  <Option key={item.value} value={String(item.value)}>
+                    {item.label}
+                  </Option>
+                ))}
+              </Dropdown>
+            </Field>
+            <Field label="Transportadora">
+              <Dropdown
+                value={transportadoraLabel}
+                placeholder="Selecione"
+                onOptionSelect={(_, data) => setTransportadoraId(data.optionValue as string)}
+              >
+                {transportadoras.map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.label}
+                  </Option>
+                ))}
+              </Dropdown>
+            </Field>
+            <Field label="Código de rastreio">
+              <Input value={codigoRastreio} onChange={(_, data) => setCodigoRastreio(data.value)} />
+            </Field>
+            <Field label="Previsão de envio">
+              <Input type="date" value={previsaoEnvio} onChange={(_, data) => setPrevisaoEnvio(data.value)} />
+            </Field>
+            <Field label="Previsão de chegada">
+              <Input type="date" value={previsaoChegada} onChange={(_, data) => setPrevisaoChegada(data.value)} />
+            </Field>
+            <Field label="Data de envio">
+              <Input type="date" value={dataEnvio} onChange={(_, data) => setDataEnvio(data.value)} />
+            </Field>
+            <Field label="Data de recebimento">
+              <Input type="date" value={dataRecebimento} onChange={(_, data) => setDataRecebimento(data.value)} />
+            </Field>
+          </div>
+          <div className="mt-3">
+            <Field label="Notas">
+              <Textarea value={notas} onChange={(_, data) => setNotas(data.value)} />
+            </Field>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button
+              appearance="primary"
+              onClick={() =>
+                onSalvar({
+                  new_estagiodamovimentacao: stageValue ? Number(stageValue) : null,
+                  new_transportadoraId: transportadoraId || null,
+                  new_prioridade: prioridade ? Number(prioridade) : null,
+                  new_codigoderastreio: codigoRastreio || null,
+                  new_previsaodeenvio: previsaoEnvio || null,
+                  new_previsaodechegada: previsaoChegada || null,
+                  new_datadeenvio: dataEnvio || null,
+                  new_dataderecebimento: dataRecebimento || null,
+                  new_notas: notas || null,
+                })
+              }
+              disabled={saving}
+            >
+              Salvar alterações
+            </Button>
+            <div
+              className="flex flex-wrap items-center gap-2"
+              style={{
+                padding: '6px',
+                borderRadius: 6,
+                backgroundColor: tokens.colorNeutralBackground3,
+              }}
+            >
+              <Button appearance="secondary" icon={<Copy24Regular />} onClick={onOpenDividir}>
+                Dividir remessa
+              </Button>
+              <Button appearance="secondary" icon={<ArrowSync24Regular />} onClick={onOpenJuntar}>
+                Juntar remessas
+              </Button>
+              <Button appearance="secondary" icon={<Box24Regular />} onClick={onOpenMover}>
+                Mover itens
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div>
-        <Text size={300} weight="semibold" block style={{ marginBottom: '8px' }}>
-          Histórico
-        </Text>
-        <HistoricoRemessaTimeline items={historico} loading={historicoLoading} />
-      </div>
+      {activeTab === 'produtos' && (
+        <div>
+          <Text size={300} weight="semibold" block style={{ marginBottom: '8px' }}>
+            Produtos da remessa
+          </Text>
+          <ProdutosDaRemessaList
+            items={produtos}
+            loading={produtosLoading}
+            onSelectionChange={onSelecionarProdutos}
+          />
+        </div>
+      )}
+
+      {activeTab === 'historico' && (
+        <div>
+          <Text size={300} weight="semibold" block style={{ marginBottom: '8px' }}>
+            Histórico
+          </Text>
+          <HistoricoRemessaTimeline items={historico} loading={historicoLoading} />
+        </div>
+      )}
     </div>
   );
 }
