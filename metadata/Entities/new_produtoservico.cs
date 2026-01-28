@@ -332,12 +332,30 @@ public partial class new_ProdutoServico : Microsoft.Xrm.Sdk.Entity, System.Compo
 		}
 	}
 	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_datalimiteparapedido")]
+	public System.Nullable<System.DateTime> new_DataLimiteparaPedido
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<System.DateTime>>("new_datalimiteparapedido");
+		}
+	}
+	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_descricao")]
 	public string new_Descricao
 	{
 		get
 		{
 			return this.GetAttributeValue<string>("new_descricao");
+		}
+	}
+	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_diasparapedido")]
+	public System.Nullable<decimal> new_DiasparaPedido
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<decimal>>("new_diasparapedido");
 		}
 	}
 	
@@ -458,6 +476,15 @@ public partial class new_ProdutoServico : Microsoft.Xrm.Sdk.Entity, System.Compo
 			this.OnPropertyChanging("new_Fabricante");
 			this.SetAttributeValue("new_fabricante", value);
 			this.OnPropertyChanged("new_Fabricante");
+		}
+	}
+	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_faixadeprazo")]
+	public virtual new_faixadeprazo_options? new_FaixadePrazo
+	{
+		get
+		{
+			return ((new_faixadeprazo_options?)(EntityOptionSetEnum.GetEnum(this, "new_faixadeprazo")));
 		}
 	}
 	

@@ -314,6 +314,15 @@ public partial class cr22f_FornecedoresFromSharepointList : Microsoft.Xrm.Sdk.En
 		}
 	}
 	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_leadtimetotal")]
+	public System.Nullable<decimal> new_LeadTimeTotal
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<decimal>>("new_leadtimetotal");
+		}
+	}
+	
 	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_modified")]
 	public System.Nullable<System.DateTime> new_Modified
 	{
@@ -326,6 +335,21 @@ public partial class cr22f_FornecedoresFromSharepointList : Microsoft.Xrm.Sdk.En
 			this.OnPropertyChanging("new_Modified");
 			this.SetAttributeValue("new_modified", value);
 			this.OnPropertyChanged("new_Modified");
+		}
+	}
+	
+	[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("new_prazofrete")]
+	public System.Nullable<int> new_PrazoFrete
+	{
+		get
+		{
+			return this.GetAttributeValue<System.Nullable<int>>("new_prazofrete");
+		}
+		set
+		{
+			this.OnPropertyChanging("new_PrazoFrete");
+			this.SetAttributeValue("new_prazofrete", value);
+			this.OnPropertyChanged("new_PrazoFrete");
 		}
 	}
 	

@@ -67,9 +67,10 @@ type FornecedorItem = {
 };
 
 const FAIXAS_PRAZO = [
-  { value: 100000001, label: 'Pedir agora', color: 'danger' as const },
-  { value: 100000007, label: '7 dias', color: 'warning' as const },
-  { value: 100000030, label: '30 dias', color: 'informative' as const },
+  { value: 100000000, label: 'Atrasado', color: 'danger' as const },
+  { value: 100000001, label: 'Pedir agora', color: 'warning' as const },
+  { value: 100000007, label: '7 dias', color: 'informative' as const },
+  { value: 100000030, label: '30 dias', color: 'subtle' as const },
   { value: 100000099, label: 'Futuro', color: 'subtle' as const },
 ];
 
