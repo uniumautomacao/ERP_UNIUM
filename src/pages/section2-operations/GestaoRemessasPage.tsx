@@ -831,6 +831,9 @@ export function GestaoRemessasPage() {
       setDialogs((prev) => ({ ...prev, dividir: false }));
       setSelectedProdutos([]);
       await refreshAll();
+      await loadRemessaDetails(selectedRemessa.id);
+      await loadProdutos(selectedRemessa.id);
+      await loadHistorico(selectedRemessa.id);
       await loadRemessaOptions();
       showSuccess('Remessa dividida', 'Nova remessa criada com sucesso.');
     } catch (err) {
@@ -839,7 +842,18 @@ export function GestaoRemessasPage() {
     } finally {
       setSaving(false);
     }
-  }, [loadRemessaOptions, refreshAll, registerHistorico, selectedProdutos, selectedRemessa, showError, showSuccess]);
+  }, [
+    loadHistorico,
+    loadProdutos,
+    loadRemessaDetails,
+    loadRemessaOptions,
+    refreshAll,
+    registerHistorico,
+    selectedProdutos,
+    selectedRemessa,
+    showError,
+    showSuccess,
+  ]);
 
   const handleJuntar = useCallback(async (payload: { principalId: string; mergeIds: string[] }) => {
     if (!payload.principalId || payload.mergeIds.length === 0) return;
@@ -1142,6 +1156,7 @@ export function GestaoRemessasPage() {
               cotacoesLoading={cotacoesLoading}
               historico={historico}
               historicoLoading={historicoLoading}
+              selectedProdutos={selectedProdutos}
               onSalvar={handleSalvarDetalhes}
               onSelecionarProdutos={setSelectedProdutos}
               onOpenDividir={async () => {
@@ -1229,9 +1244,13 @@ export function GestaoRemessasPage() {
 
       <DividirRemessaDialog
         open={dialogs.dividir}
+        produtos={produtos}
         selectedCount={selectedProdutos.length}
+        selectedProdutos={selectedProdutos}
         loading={saving}
+        produtosLoading={produtosLoading}
         onOpenChange={(open) => setDialogs((prev) => ({ ...prev, dividir: open }))}
+        onSelectionChange={setSelectedProdutos}
         onConfirm={handleDividir}
       />
       <JuntarRemessasDialog

@@ -35,6 +35,7 @@ interface RemessaDetailsPanelProps {
   cotacoesLoading?: boolean;
   historico: RemessaHistoricoItem[];
   historicoLoading?: boolean;
+  selectedProdutos?: RemessaProdutoItem[];
   onSalvar: (changes: {
     new_estagiodamovimentacao?: number | null;
     new_transportadoraId?: string | null;
@@ -69,6 +70,7 @@ export function RemessaDetailsPanel({
   cotacoesLoading,
   historico,
   historicoLoading,
+  selectedProdutos,
   onSalvar,
   onSelecionarProdutos,
   onOpenDividir,
@@ -273,6 +275,7 @@ export function RemessaDetailsPanel({
           <ProdutosDaRemessaList
             items={produtos}
             loading={produtosLoading}
+            selectedItems={selectedProdutos}
             onSelectionChange={onSelecionarProdutos}
           />
         </div>

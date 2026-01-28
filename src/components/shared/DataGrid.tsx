@@ -15,6 +15,7 @@ interface DataGridProps<T> {
   items: T[];
   columns: TableColumnDefinition<T>[];
   selectionMode?: 'single' | 'multiselect';
+  selectedItems?: T[];
   onSelectionChange?: (selectedItems: T[]) => void;
   getRowId?: (item: T) => string;
   emptyState?: ReactNode;
@@ -24,6 +25,7 @@ export function DataGrid<T>({
   items,
   columns,
   selectionMode,
+  selectedItems,
   onSelectionChange,
   getRowId,
   emptyState,
@@ -45,6 +47,17 @@ export function DataGrid<T>({
     const selectedItems = items.filter((item) => selectedRowIds.has(resolvedGetRowId(item)));
     onSelectionChange?.(selectedItems);
   }, [items, onSelectionChange, resolvedGetRowId, selectedRowIds, selectionEnabled]);
+
+  useEffect(() => {
+    if (!selectionEnabled || !selectedItems) return;
+    const validIds = new Set(items.map((item) => resolvedGetRowId(item)));
+    const nextSelected = new Set<string>();
+    selectedItems.forEach((item) => {
+      const id = resolvedGetRowId(item);
+      if (validIds.has(id)) nextSelected.add(id);
+    });
+    setSelectedRowIds(nextSelected);
+  }, [items, resolvedGetRowId, selectedItems, selectionEnabled]);
 
   useEffect(() => {
     if (!selectionEnabled) return;

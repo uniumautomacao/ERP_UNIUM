@@ -6,10 +6,11 @@ import { EmptyState } from '../../shared/EmptyState';
 interface ProdutosDaRemessaListProps {
   items: RemessaProdutoItem[];
   loading?: boolean;
+  selectedItems?: RemessaProdutoItem[];
   onSelectionChange?: (items: RemessaProdutoItem[]) => void;
 }
 
-export function ProdutosDaRemessaList({ items, loading, onSelectionChange }: ProdutosDaRemessaListProps) {
+export function ProdutosDaRemessaList({ items, loading, selectedItems, onSelectionChange }: ProdutosDaRemessaListProps) {
   const columns = [
     createTableColumn<RemessaProdutoItem>({
       columnId: 'referencia',
@@ -51,6 +52,7 @@ export function ProdutosDaRemessaList({ items, loading, onSelectionChange }: Pro
       items={items}
       columns={columns}
       selectionMode="multiselect"
+      selectedItems={selectedItems}
       onSelectionChange={onSelectionChange}
       getRowId={(item) => item.id}
       emptyState={<EmptyState title="Nenhum produto vinculado" description="A remessa ainda não possui itens." />}
