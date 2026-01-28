@@ -936,13 +936,13 @@ export function GestaoRemessasPage() {
     showSuccess,
   ]);
 
-  const handleMoverProdutos = useCallback(async (destinoId: string) => {
-    if (!destinoId || selectedProdutos.length === 0) return;
+  const handleMoverProdutos = useCallback(async (payload: { destinoId: string; items: RemessaProdutoItem[] }) => {
+    if (!payload.destinoId || payload.items.length === 0) return;
     setSaving(true);
     try {
-      await Promise.all(selectedProdutos.map((item) => (
+      await Promise.all(payload.items.map((item) => (
         NewProdutoServicoService.update(item.id, {
-          'new_Remessa@odata.bind': `/new_remessas(${destinoId})`,
+          'new_Remessa@odata.bind': `/new_remessas(${payload.destinoId})`,
         } as any)
       )));
       if (selectedRemessa?.id) {
@@ -950,7 +950,7 @@ export function GestaoRemessasPage() {
           selectedRemessa.id,
           'Mover itens',
           selectedRemessa.codigo ?? selectedRemessa.id,
-          destinoId,
+          payload.destinoId,
           REMESSA_HISTORICO_MOVER_ITENS
         );
       }
@@ -958,7 +958,9 @@ export function GestaoRemessasPage() {
       setSelectedProdutos([]);
       await refreshAll();
       if (selectedRemessa?.id) {
+        await loadRemessaDetails(selectedRemessa.id);
         await loadProdutos(selectedRemessa.id);
+        await loadHistorico(selectedRemessa.id);
       }
       showSuccess('Itens movidos', 'Os produtos foram movidos para a remessa selecionada.');
     } catch (err) {
@@ -967,7 +969,16 @@ export function GestaoRemessasPage() {
     } finally {
       setSaving(false);
     }
-  }, [loadProdutos, refreshAll, registerHistorico, selectedProdutos, selectedRemessa, showError, showSuccess]);
+  }, [
+    loadHistorico,
+    loadProdutos,
+    loadRemessaDetails,
+    refreshAll,
+    registerHistorico,
+    selectedRemessa,
+    showError,
+    showSuccess,
+  ]);
 
   const handleBatchStage = useCallback(async () => {
     if (batchStageValue === '' || listSelection.length === 0) return;
@@ -1296,8 +1307,11 @@ export function GestaoRemessasPage() {
       <MoverProdutosDialog
         open={dialogs.mover}
         loading={saving}
-        selectedCount={selectedProdutos.length}
+        produtos={produtos}
+        produtosLoading={produtosLoading}
         options={remessaOptions}
+        origemId={selectedRemessa?.id ?? null}
+        origemFornecedor={selectedRemessa?.fornecedor ?? null}
         onOpenChange={(open) => setDialogs((prev) => ({ ...prev, mover: open }))}
         onConfirm={handleMoverProdutos}
       />
