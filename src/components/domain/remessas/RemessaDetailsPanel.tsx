@@ -137,7 +137,7 @@ export function RemessaDetailsPanel({
             Transportadora: {remessa.transportadora || '-'}
           </Text>
         </div>
-        <div className="mt-4">
+        <div className="mt-4" style={{ paddingBottom: 4 }}>
           <RemessaProgressTracker stageValue={remessa.stageValue} />
         </div>
       </div>
