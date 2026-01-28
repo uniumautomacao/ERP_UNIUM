@@ -528,7 +528,7 @@ export function GestaoRemessasPage() {
         select: ['new_historicoremessaid', 'new_dataalteracao', 'new_campoalterado', 'new_valoranterior', 'new_valornovo', 'new_tipoacao'],
         orderBy: ['new_dataalteracao desc'],
       });
-      const items = (result.data || []).map((item) => ({
+      let items = (result.data || []).map((item) => ({
         id: item.new_historicoremessaid,
         data: item.new_dataalteracao ?? null,
         campo: item.new_campoalterado ?? null,
@@ -536,6 +536,35 @@ export function GestaoRemessasPage() {
         novo: item.new_valornovo ?? null,
         tipo: item.new_tipoacao ?? null,
       }));
+      const idsToResolve = Array.from(new Set(
+        items
+          .filter((item) => item.tipo === REMESSA_HISTORICO_DIVISAO)
+          .map((item) => item.novo)
+          .filter((value): value is string => Boolean(value))
+      )).filter((value) => /^[0-9a-fA-F-]{36}$/.test(value));
+
+      if (idsToResolve.length > 0) {
+        const chunks = chunkIds(idsToResolve, REFERENCE_CHUNK_SIZE);
+        const results = await Promise.all(
+          chunks.map((chunk) => (
+            NewRemessaService.getAll({
+              filter: `statecode eq 0 and (${chunk.map((id) => `new_remessaid eq '${id}'`).join(' or ')})`,
+              select: ['new_remessaid', 'new_id'],
+            })
+          ))
+        );
+        const idMap = new Map<string, string>();
+        results.flatMap((res) => res.data ?? []).forEach((remessa) => {
+          if (remessa.new_remessaid && remessa.new_id) {
+            idMap.set(remessa.new_remessaid, remessa.new_id);
+          }
+        });
+        items = items.map((item) => {
+          if (item.tipo !== REMESSA_HISTORICO_DIVISAO || !item.novo) return item;
+          const mapped = idMap.get(item.novo);
+          return mapped ? { ...item, novo: mapped } : item;
+        });
+      }
       setHistorico(items);
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao carregar historico', err);
