@@ -12,10 +12,10 @@ export function RemessaProgressTracker({ stageValue }: RemessaProgressTrackerPro
 
   return (
     <div className="flex flex-col gap-2">
-      <Text size={200} weight="medium" style={{ color: tokens.colorNeutralForeground2 }}>
+      <Text size={100} weight="medium" style={{ color: tokens.colorNeutralForeground2 }}>
         Estágio atual: {currentLabel}
       </Text>
-      <div className="flex items-start gap-0 overflow-x-auto" role="list">
+      <div className="flex items-start gap-0 overflow-x-auto" role="list" style={{ padding: '4px 0' }}>
         {REMESSA_STAGES.map((stage, index) => {
           const isComplete = currentIndex > index;
           const isCurrent = currentIndex === index;
@@ -29,7 +29,7 @@ export function RemessaProgressTracker({ stageValue }: RemessaProgressTrackerPro
             : isComplete
               ? tokens.colorBrandBackground
               : tokens.colorNeutralStroke2;
-          const nodeSize = isCurrent ? 32 : 28;
+          const nodeSize = 22;
           const nodeStyle = {
             width: nodeSize,
             height: nodeSize,
@@ -39,10 +39,9 @@ export function RemessaProgressTracker({ stageValue }: RemessaProgressTrackerPro
             justifyContent: 'center',
             backgroundColor: isComplete ? tokens.colorBrandBackground : tokens.colorNeutralBackground1,
             color: isComplete ? tokens.colorNeutralForegroundOnBrand : tokens.colorNeutralForeground2,
-            border: isCurrent
-              ? `2px solid ${tokens.colorBrandBackground}`
-              : `1px solid ${tokens.colorNeutralStroke2}`,
-            fontSize: 12,
+            border: `1px solid ${tokens.colorNeutralStroke2}`,
+            boxShadow: isCurrent ? `0 0 0 2px ${tokens.colorBrandBackground}` : undefined,
+            fontSize: 10,
             fontWeight: 600 as const,
             position: 'relative' as const,
           };
@@ -52,20 +51,20 @@ export function RemessaProgressTracker({ stageValue }: RemessaProgressTrackerPro
               key={stage.value}
               role="listitem"
               className="flex flex-col items-center"
-              style={{ minWidth: 130, flex: 1, padding: '0 4px' }}
+              style={{ minWidth: 96, flex: 1, padding: '0 2px' }}
             >
               <div className="flex items-center w-full">
                 <div style={{ flex: 1, height: 2, background: leftColor }} />
                 <div aria-current={isCurrent ? 'step' : undefined} style={nodeStyle}>
                   {isComplete ? (
-                    <Checkmark24Regular />
+                    <Checkmark24Regular fontSize={14} />
                   ) : (
                     <>
                       {isCurrent && (
                         <span
                           style={{
-                            width: 8,
-                            height: 8,
+                            width: 6,
+                            height: 6,
                             borderRadius: '50%',
                             backgroundColor: tokens.colorBrandBackground,
                             position: 'absolute',
@@ -80,11 +79,11 @@ export function RemessaProgressTracker({ stageValue }: RemessaProgressTrackerPro
               </div>
               <Tooltip content={stage.label} relationship="description">
                 <Text
-                  size={200}
+                  size={100}
                   block
                   style={{
-                    marginTop: 8,
-                    maxWidth: 140,
+                    marginTop: 6,
+                    maxWidth: 100,
                     textAlign: 'center',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
