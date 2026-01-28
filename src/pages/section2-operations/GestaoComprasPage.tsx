@@ -519,7 +519,8 @@ export function GestaoComprasPage() {
   ), [fornecedoresBasicos]);
 
   useEffect(() => {
-    if (selectedTab !== 'fornecedor') return;
+    const shouldLoad = selectedTab === 'fornecedor' || selectedTab === 'lista';
+    if (!shouldLoad) return;
     if (fornecedoresDetalhados.length > 0 || fornecedoresDetalhesLoading) return;
     void loadFornecedores(fornecedorIds);
   }, [fornecedoresDetalhados.length, fornecedoresDetalhesLoading, fornecedorIds, loadFornecedores, selectedTab]);
@@ -628,15 +629,15 @@ export function GestaoComprasPage() {
     return base;
   }, [fornecedoresBasicos, fornecedoresLookup, selectedFornecedorId]);
 
-  const filteredFornecedores = useMemo(() => {
-    const termo = fornecedorSearch.trim().toLowerCase();
-    if (!termo) return fornecedoresComItens;
-    return fornecedoresComItens.filter((item) => resolveFornecedorNome(item).toLowerCase().includes(termo));
-  }, [fornecedoresComItens, fornecedorSearch]);
-
   const fornecedoresExibicao = useMemo(() => (
     fornecedoresComItens.map((item) => fornecedorMap.get(item.id) ?? item)
   ), [fornecedorMap, fornecedoresComItens]);
+
+  const filteredFornecedores = useMemo(() => {
+    const termo = fornecedorSearch.trim().toLowerCase();
+    if (!termo) return fornecedoresExibicao;
+    return fornecedoresExibicao.filter((item) => resolveFornecedorNome(item).toLowerCase().includes(termo));
+  }, [fornecedorSearch, fornecedoresExibicao]);
 
   const listColumns = useMemo(() => [
     createTableColumn<ProdutoCompraItem>({
