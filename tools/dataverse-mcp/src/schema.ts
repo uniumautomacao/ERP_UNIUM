@@ -188,12 +188,12 @@ export const globalOptionSetExists = async (name: string) => {
   }
 };
 
-export const createGlobalOptionSet = async (payload: ReturnType<typeof buildGlobalOptionSetPayload>) => {
+export const createGlobalOptionSet = async (payload: ReturnType<typeof buildGlobalOptionSetPayload>, solutionUniqueName: string) => {
   await dataverseRequest({
     method: 'POST',
     path: 'GlobalOptionSetDefinitions',
     body: payload,
-    useSolution: true,
+    solutionUniqueName,
   });
 };
 
@@ -204,6 +204,7 @@ const createLookupRelationship = async (input: {
   referencedEntity: string;
   referencedAttribute: string;
   displayName: string;
+  solutionUniqueName: string;
 }) => {
   await dataverseRequest({
     method: 'POST',
@@ -221,25 +222,40 @@ const createLookupRelationship = async (input: {
         RequiredLevel: requiredLevel('None'),
       },
     },
-    useSolution: true,
+    solutionUniqueName: input.solutionUniqueName,
   });
 };
 
-export const createTable = async (payload: ReturnType<typeof buildEntityPayload>) => {
+type EntityPayloadInput = {
+  schemaName: string;
+  logicalName: string;
+  displayName: string;
+  displayCollectionName: string;
+  entitySetName: string;
+  primaryNameSchema: string;
+  primaryNameLogical: string;
+  primaryNameDisplay: string;
+};
+
+const isEntityPayload = (value: unknown): value is ReturnType<typeof buildEntityPayload> =>
+  Boolean(value && typeof value === 'object' && 'SchemaName' in value);
+
+export const createTable = async (input: EntityPayloadInput | ReturnType<typeof buildEntityPayload>, solutionUniqueName: string) => {
+  const payload = isEntityPayload(input) ? input : buildEntityPayload(input);
   await dataverseRequest({
     method: 'POST',
     path: 'EntityDefinitions',
     body: payload,
-    useSolution: true,
+    solutionUniqueName,
   });
 };
 
-export const createColumn = async (tableLogicalName: string, payload: Record<string, unknown>) => {
+export const createColumn = async (tableLogicalName: string, payload: Record<string, unknown>, solutionUniqueName: string) => {
   await dataverseRequest({
     method: 'POST',
     path: `EntityDefinitions(LogicalName='${tableLogicalName}')/Attributes`,
     body: payload,
-    useSolution: true,
+    solutionUniqueName,
   });
 };
 
@@ -258,7 +274,40 @@ export const listEntities = async () => {
   });
 };
 
-export const createContagemSnapshotTables = async () => {
+export const listSolutions = async () => {
+  return dataverseRequest<{ value: Array<{ solutionid?: string; friendlyname?: string; uniquename?: string; ismanaged?: boolean }> }>({
+    method: 'GET',
+    path: 'solutions?$select=solutionid,friendlyname,uniquename,ismanaged&$filter=ismanaged eq false',
+  });
+};
+
+const getEntityMetadataId = async (logicalName: string) => {
+  const entity = await dataverseRequest<{ MetadataId?: string }>({
+    method: 'GET',
+    path: `EntityDefinitions(LogicalName='${logicalName}')?$select=MetadataId`,
+  });
+  return entity?.MetadataId;
+};
+
+export const addEntityToSolution = async (logicalName: string, solutionUniqueName: string) => {
+  const metadataId = await getEntityMetadataId(logicalName);
+  if (!metadataId) {
+    throw new Error(`Entidade '${logicalName}' nao encontrada no Dataverse.`);
+  }
+
+  await dataverseRequest({
+    method: 'POST',
+    path: 'AddSolutionComponent',
+    body: {
+      ComponentType: 1,
+      ComponentId: metadataId,
+      SolutionUniqueName: solutionUniqueName,
+      AddRequiredComponents: false,
+    },
+  });
+};
+
+export const createContagemSnapshotTables = async (solutionUniqueName: string) => {
   const contagemDiaLogical = 'new_contagemdodia';
   const contagemDiaItemLogical = 'new_contagemdodiaitem';
 
@@ -273,7 +322,7 @@ export const createContagemSnapshotTables = async () => {
       primaryNameLogical: 'new_name',
       primaryNameDisplay: 'Name',
     });
-    await createTable(entity);
+    await createTable(entity, solutionUniqueName);
   }
 
   if (!(await entityExists(contagemDiaItemLogical))) {
@@ -287,7 +336,7 @@ export const createContagemSnapshotTables = async () => {
       primaryNameLogical: 'new_name',
       primaryNameDisplay: 'Name',
     });
-    await createTable(entity);
+    await createTable(entity, solutionUniqueName);
   }
 
   const contagemDiaColumns = [
@@ -300,7 +349,7 @@ export const createContagemSnapshotTables = async () => {
 
   for (const column of contagemDiaColumns) {
     if (!(await attributeExists(contagemDiaLogical, column.logical))) {
-      await createColumn(contagemDiaLogical, column.payload);
+      await createColumn(contagemDiaLogical, column.payload, solutionUniqueName);
     }
   }
 
@@ -320,7 +369,7 @@ export const createContagemSnapshotTables = async () => {
 
   for (const column of contagemDiaItemColumns) {
     if (!(await attributeExists(contagemDiaItemLogical, column.logical))) {
-      await createColumn(contagemDiaItemLogical, column.payload);
+      await createColumn(contagemDiaItemLogical, column.payload, solutionUniqueName);
     }
   }
 
@@ -353,14 +402,14 @@ export const createContagemSnapshotTables = async () => {
 
   for (const relationship of relationships) {
     if (!(await relationshipExists(relationship.schemaName))) {
-      await createLookupRelationship(relationship);
+      await createLookupRelationship({ ...relationship, solutionUniqueName });
     }
   }
 
   await publishAll();
 };
 
-export const createRemessaSchema = async () => {
+export const createRemessaSchema = async (solutionUniqueName: string) => {
   const remessaLogical = 'new_remessa';
   const produtoServicoLogical = 'new_produtoservico';
   const historicoRemessaLogical = 'new_historicoremessa';
@@ -380,7 +429,7 @@ export const createRemessaSchema = async () => {
 
   for (const column of remessaColumns) {
     if (!(await attributeExists(remessaLogical, column.logical))) {
-      await createColumn(remessaLogical, column.payload);
+      await createColumn(remessaLogical, column.payload, solutionUniqueName);
     }
   }
 
@@ -393,6 +442,7 @@ export const createRemessaSchema = async () => {
       referencedEntity: remessaLogical,
       referencedAttribute: 'new_remessaid',
       displayName: 'Remessa Origem',
+      solutionUniqueName,
     });
   }
 
@@ -405,6 +455,7 @@ export const createRemessaSchema = async () => {
       referencedEntity: remessaLogical,
       referencedAttribute: 'new_remessaid',
       displayName: 'Remessa',
+      solutionUniqueName,
     });
   }
 
@@ -420,7 +471,7 @@ export const createRemessaSchema = async () => {
       primaryNameLogical: 'new_name',
       primaryNameDisplay: 'Nome',
     });
-    await createTable(entity);
+    await createTable(entity, solutionUniqueName);
   }
 
   const historicoColumns = [
@@ -443,7 +494,7 @@ export const createRemessaSchema = async () => {
 
   for (const column of historicoColumns) {
     if (!(await attributeExists(historicoRemessaLogical, column.logical))) {
-      await createColumn(historicoRemessaLogical, column.payload);
+      await createColumn(historicoRemessaLogical, column.payload, solutionUniqueName);
     }
   }
 
@@ -469,7 +520,7 @@ export const createRemessaSchema = async () => {
 
   for (const rel of historicoRelationships) {
     if (!(await relationshipExists(rel.schemaName))) {
-      await createLookupRelationship(rel);
+      await createLookupRelationship({ ...rel, solutionUniqueName });
     }
   }
 

@@ -4,7 +4,6 @@ const envSchema = z.object({
   DATAVERSE_URL: z.string().url(),
   TENANT_ID: z.string().min(1),
   CLIENT_ID: z.string().min(1),
-  SOLUTION_UNIQUE_NAME: z.string().min(1).optional(),
   TOKEN_CACHE_PATH: z.string().min(1).optional(),
 });
 

@@ -7,8 +7,10 @@ import {
   createContagemSnapshotTables,
   createGlobalOptionSet,
   createTable,
+  addEntityToSolution,
   globalOptionSetExists,
   listEntities,
+  listSolutions,
   publishAll,
 } from './schema';
 
@@ -31,6 +33,7 @@ server.tool(
   'dataverse_schema_create_table',
   'Cria tabela no Dataverse (EntityDefinition).',
   {
+    solutionUniqueName: z.string().min(1),
     schemaName: z.string(),
     logicalName: z.string(),
     displayName: z.string(),
@@ -50,7 +53,7 @@ server.tool(
       primaryNameSchema: input.primaryNameSchema,
       primaryNameLogical: input.primaryNameLogical,
       primaryNameDisplay: input.primaryNameDisplay,
-    });
+    }, input.solutionUniqueName);
     return { content: [{ type: 'text', text: 'Tabela criada.' }] };
   }
 );
@@ -59,11 +62,12 @@ server.tool(
   'dataverse_schema_create_column',
   'Cria coluna no Dataverse (AttributeDefinition).',
   {
+    solutionUniqueName: z.string().min(1),
     tableLogicalName: z.string(),
     payload: z.record(z.any()),
   },
   async (input) => {
-    await createColumn(input.tableLogicalName, input.payload);
+    await createColumn(input.tableLogicalName, input.payload, input.solutionUniqueName);
     return { content: [{ type: 'text', text: 'Coluna criada.' }] };
   }
 );
@@ -72,6 +76,7 @@ server.tool(
   'dataverse_schema_create_global_optionset',
   'Cria um Choice global (Global OptionSet).',
   {
+    solutionUniqueName: z.string().min(1),
     name: z.string(),
     displayName: z.string(),
     description: z.string().optional(),
@@ -92,8 +97,31 @@ server.tool(
       options: input.options,
     });
 
-    await createGlobalOptionSet(payload);
+    await createGlobalOptionSet(payload, input.solutionUniqueName);
     return { content: [{ type: 'text', text: 'Global choice criado.' }] };
+  }
+);
+
+server.tool(
+  'dataverse_schema_list_solutions',
+  'Lista soluções não-gerenciadas (friendlyname/uniquename).',
+  {},
+  async () => {
+    const data = await listSolutions();
+    return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+  }
+);
+
+server.tool(
+  'dataverse_schema_add_entity_to_solution',
+  'Adiciona uma entidade existente a uma solucao.',
+  {
+    solutionUniqueName: z.string().min(1),
+    logicalName: z.string().min(1),
+  },
+  async (input) => {
+    await addEntityToSolution(input.logicalName, input.solutionUniqueName);
+    return { content: [{ type: 'text', text: 'Entidade adicionada a solucao.' }] };
   }
 );
 
@@ -110,9 +138,11 @@ server.tool(
 server.tool(
   'unium_create_contagem_snapshot_tables',
   'Cria tabelas e colunas da contagem diaria e publica.',
-  {},
-  async () => {
-    await createContagemSnapshotTables();
+  {
+    solutionUniqueName: z.string().min(1),
+  },
+  async (input) => {
+    await createContagemSnapshotTables(input.solutionUniqueName);
     return { content: [{ type: 'text', text: 'Tabelas e colunas criadas e publicadas.' }] };
   }
 );
@@ -120,9 +150,11 @@ server.tool(
 server.tool(
   'unium_create_remessa_schema',
   'Cria/atualiza schema de remessas no Dataverse.',
-  {},
-  async () => {
-    await (await import('./schema')).createRemessaSchema();
+  {
+    solutionUniqueName: z.string().min(1),
+  },
+  async (input) => {
+    await (await import('./schema')).createRemessaSchema(input.solutionUniqueName);
     return { content: [{ type: 'text', text: 'Schema de remessas atualizado e publicado.' }] };
   }
 );

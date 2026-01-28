@@ -1,7 +1,7 @@
 import { config, dataverseApiBase } from './config';
 import { getAccessToken } from './auth';
 
-const buildHeaders = (token: string, useSolution: boolean) => {
+const buildHeaders = (token: string, solutionUniqueName?: string) => {
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     Accept: 'application/json',
@@ -9,9 +9,9 @@ const buildHeaders = (token: string, useSolution: boolean) => {
     'OData-MaxVersion': '4.0',
     'OData-Version': '4.0',
   };
-  if (useSolution && config.SOLUTION_UNIQUE_NAME) {
-    headers.MSCRM_SolutionUniqueName = config.SOLUTION_UNIQUE_NAME;
-    headers['MSCRM.SolutionUniqueName'] = config.SOLUTION_UNIQUE_NAME;
+  if (solutionUniqueName) {
+    headers.MSCRM_SolutionUniqueName = solutionUniqueName;
+    headers['MSCRM.SolutionUniqueName'] = solutionUniqueName;
   }
   return headers;
 };
@@ -22,14 +22,14 @@ export type DataverseRequestOptions = {
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   path: string;
   body?: unknown;
-  useSolution?: boolean;
+  solutionUniqueName?: string;
 };
 
-export const dataverseRequest = async <T>({ method, path, body, useSolution }: DataverseRequestOptions) => {
+export const dataverseRequest = async <T>({ method, path, body, solutionUniqueName }: DataverseRequestOptions) => {
   const token = await getAccessToken([`${config.DATAVERSE_URL}/user_impersonation`]);
   const response = await fetch(buildUrl(path), {
     method,
-    headers: buildHeaders(token, Boolean(useSolution)),
+    headers: buildHeaders(token, solutionUniqueName),
     body: body ? JSON.stringify(body) : undefined,
   });
 

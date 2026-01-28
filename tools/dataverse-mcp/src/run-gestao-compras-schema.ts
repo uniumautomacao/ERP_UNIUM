@@ -1,6 +1,11 @@
 import { buildGlobalOptionSetPayload, createColumn, createGlobalOptionSet, globalOptionSetExists, integerAttribute, publishAll } from './schema';
 
 const globalChoiceName = 'new_faixadeprazo_options';
+const solutionUniqueName = process.env.SOLUTION_UNIQUE_NAME;
+
+if (!solutionUniqueName) {
+  throw new Error('SOLUTION_UNIQUE_NAME é obrigatório para criar schema.');
+}
 
 const createGlobalFaixaPrazo = async () => {
   if (await globalOptionSetExists(globalChoiceName)) {
@@ -21,7 +26,7 @@ const createGlobalFaixaPrazo = async () => {
     ],
   });
 
-  await createGlobalOptionSet(payload);
+  await createGlobalOptionSet(payload, solutionUniqueName);
   console.log(`Global choice "${globalChoiceName}" criado.`);
 };
 
@@ -33,7 +38,7 @@ const createPrazoFreteColumn = async () => {
   };
 
   try {
-    await createColumn('cr22f_fornecedoresfromsharepointlist', payload);
+    await createColumn('cr22f_fornecedoresfromsharepointlist', payload, solutionUniqueName);
     console.log('Coluna new_prazofrete criada.');
   } catch (error) {
     console.error('Falha ao criar new_prazofrete (talvez já exista).', error);

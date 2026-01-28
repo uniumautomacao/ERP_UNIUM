@@ -15,17 +15,20 @@ Usar o MCP de schema do Dataverse para criar/ajustar tabelas e manter o projeto 
 
 ## Fluxo recomendado (schema)
 1. Validar acesso com listagem de entidades (tool `dataverse_schema_list_entity_definitions`).
-2. Criar tabela/coluna/relacionamento com as tools de schema.
-3. Publicar customizações (`dataverse_schema_publish_all`).
-4. Reimportar metadados no projeto via `pac modelbuilder`.
-5. Atualizar `power.config.json`, `.power/schemas/appschemas/dataSourcesInfo.ts` e `DATAVERSE_METADATA.md`.
+2. Listar soluções disponíveis (`dataverse_schema_list_solutions`) e escolher a `solutionUniqueName`.
+3. Criar tabela/coluna/relacionamento com as tools de schema, informando `solutionUniqueName`.
+4. Publicar customizações (`dataverse_schema_publish_all`).
+5. Reimportar metadados no projeto via `pac modelbuilder`.
+6. Atualizar `power.config.json`, `.power/schemas/appschemas/dataSourcesInfo.ts` e `DATAVERSE_METADATA.md`.
 
 ## Tools MCP disponíveis
 - `dataverse_schema_list_entity_definitions`
-- `dataverse_schema_create_table`
-- `dataverse_schema_create_column`
+- `dataverse_schema_list_solutions`
+- `dataverse_schema_create_table` (exige `solutionUniqueName`)
+- `dataverse_schema_create_column` (exige `solutionUniqueName`)
+- `dataverse_schema_create_global_optionset` (exige `solutionUniqueName`)
 - `dataverse_schema_publish_all`
-- `unium_create_contagem_snapshot_tables` (cria `new_contagemdodia` e `new_contagemdodiaitem`)
+- `unium_create_contagem_snapshot_tables` (exige `solutionUniqueName`)
 
 ## Reimportar metadados (PAC)
 Use o filtro com **ponto e vírgula**:

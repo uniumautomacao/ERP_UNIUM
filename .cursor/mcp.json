@@ -20,7 +20,6 @@
         "DATAVERSE_URL": "https://dev-unium.crm2.dynamics.com",
         "TENANT_ID": "e3d20045-1678-4bd0-96bb-4195baba23a6",
         "CLIENT_ID": "f0af8371-e5df-4bb5-82b1-d02774fc4090",
-        "SOLUTION_UNIQUE_NAME": "UNIUMCore",
         "TOKEN_CACHE_PATH": "${userHome}/.cursor/mcp-cache/dataverse_token_cache.json"
       }
     }
