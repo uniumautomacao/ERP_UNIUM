@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Profiler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Badge,
   Button,
@@ -36,6 +36,7 @@ import {
 import { NewCotacaoService } from '../../services/NewCotacaoService';
 
 const REFERENCE_CHUNK_SIZE = 25;
+const PAGE_SIZE = 100;
 const CRM_APP_ID = '3ec4d8a9-2a8e-ee11-8179-002248de6f66';
 
 type ProdutoCompraItem = {
@@ -56,6 +57,8 @@ type ProdutoCompraItem = {
   modeloId?: string | null;
   precoUnitario?: number;
   valorTotal?: number;
+  entregaFmt?: string;
+  dataLimiteFmt?: string;
 };
 
 type FornecedorItem = {
@@ -77,15 +80,21 @@ const FAIXAS_PRAZO = [
 const getFaixaLabel = (value?: number | null) =>
   FAIXAS_PRAZO.find((faixa) => faixa.value === value)?.label ?? 'Sem prazo';
 
+const getFaixaColor = (value?: number | null) =>
+  FAIXAS_PRAZO.find((faixa) => faixa.value === value)?.color ?? 'subtle';
+
+const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const dateFormatter = new Intl.DateTimeFormat('pt-BR');
+
 const formatDate = (value?: string | null) => {
   if (!value) return '-';
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '-' : date.toLocaleDateString('pt-BR');
+  return Number.isNaN(date.getTime()) ? '-' : dateFormatter.format(date);
 };
 
 const formatCurrency = (value?: number | null) => {
   if (value === null || value === undefined) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  return currencyFormatter.format(value);
 };
 
 const buildProdutosFilter = (params: {
@@ -140,6 +149,7 @@ export function GestaoComprasPage() {
   const [clienteFilter, setClienteFilter] = useState('all');
   const [fabricanteFilter, setFabricanteFilter] = useState('all');
   const [fornecedorSearch, setFornecedorSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [fornecedoresLoading, setFornecedoresLoading] = useState(true);
   const [produtos, setProdutos] = useState<ProdutoCompraItem[]>([]);
@@ -150,6 +160,7 @@ export function GestaoComprasPage() {
   const [copyText, setCopyText] = useState('');
   const [processing, setProcessing] = useState(false);
   const loadRequestId = useRef(0);
+  const precosCacheRef = useRef(new Map<string, number>());
   const toasterId = useId('compras-toast');
   const { dispatchToast } = useToastController(toasterId);
 
@@ -172,6 +183,19 @@ export function GestaoComprasPage() {
       { intent: 'success' }
     );
   }, [dispatchToast]);
+
+  const profilerEnabled = import.meta.env.DEV;
+  const handleProfileRender = useCallback((
+    id: string,
+    phase: 'mount' | 'update',
+    actualDuration: number,
+    baseDuration: number
+  ) => {
+    if (!profilerEnabled) return;
+    console.debug(
+      `[Profiler:${id}] ${phase} - atual: ${actualDuration.toFixed(1)}ms, base: ${baseDuration.toFixed(1)}ms`
+    );
+  }, [profilerEnabled]);
 
   const loadFornecedores = useCallback(async () => {
     setFornecedoresLoading(true);
@@ -207,23 +231,44 @@ export function GestaoComprasPage() {
 
   const loadPrecos = useCallback(async (modeloIds: string[]) => {
     if (modeloIds.length === 0) return new Map<string, number>();
-    const chunks = chunkIds(modeloIds, REFERENCE_CHUNK_SIZE);
-    const results = await Promise.all(
-      chunks.map((chunk) => (
-        NewPrecodeProdutoService.getAll({
-          select: ['new_precodecompra', '_new_modelodeproduto_value'],
-          filter: `statecode eq 0 and (${chunk.map((id) => `_new_modelodeproduto_value eq '${id}'`).join(' or ')})`,
-        })
-      ))
-    );
+
+    const cache = precosCacheRef.current;
+    const missingIds = modeloIds.filter((id) => !cache.has(id));
+
+    if (missingIds.length > 0) {
+      const chunks = chunkIds(missingIds, REFERENCE_CHUNK_SIZE);
+      const results = await Promise.all(
+        chunks.map((chunk) => (
+          NewPrecodeProdutoService.getAll({
+            select: ['new_precodecompra', '_new_modelodeproduto_value'],
+            filter: `statecode eq 0 and (${chunk.map((id) => `_new_modelodeproduto_value eq '${id}'`).join(' or ')})`,
+          })
+        ))
+      );
+
+      const stillMissing = new Set(missingIds);
+      results.flatMap((res) => res.data ?? []).forEach((item: any) => {
+        const modeloId = item._new_modelodeproduto_value;
+        const preco = item.new_precodecompra;
+        if (modeloId && typeof preco === 'number') {
+          cache.set(modeloId, preco);
+          stillMissing.delete(modeloId);
+        }
+      });
+
+      stillMissing.forEach((modeloId) => {
+        cache.set(modeloId, 0);
+      });
+    }
+
     const priceMap = new Map<string, number>();
-    results.flatMap((res) => res.data ?? []).forEach((item: any) => {
-      const modeloId = item._new_modelodeproduto_value;
-      const preco = item.new_precodecompra;
-      if (modeloId && typeof preco === 'number' && !priceMap.has(modeloId)) {
-        priceMap.set(modeloId, preco);
+    modeloIds.forEach((id) => {
+      const preco = cache.get(id);
+      if (typeof preco === 'number') {
+        priceMap.set(id, preco);
       }
     });
+
     return priceMap;
   }, []);
 
@@ -271,7 +316,9 @@ export function GestaoComprasPage() {
         quantidade: item.new_quantidade ?? null,
         cliente: item.new_nomedoclientefx ?? null,
         entrega: item.new_previsaodeentrega ?? null,
+        entregaFmt: formatDate(item.new_previsaodeentrega ?? null),
         dataLimite: item.new_datalimiteparapedido ?? null,
+        dataLimiteFmt: formatDate(item.new_datalimiteparapedido ?? null),
         diasParaPedido: item.new_diasparapedido ?? null,
         faixaPrazo: item.new_faixadeprazo ?? null,
         fornecedorId: item.new_fornecedorprincipalid ?? null,
@@ -305,9 +352,14 @@ export function GestaoComprasPage() {
     }
   }, [clienteFilter, fornecedorFilter, fabricanteFilter, loadPrecos, prazoFilter, searchValue, showError]);
 
+  const clearPrecoCache = useCallback(() => {
+    precosCacheRef.current = new Map();
+  }, []);
+
   const refreshAll = useCallback(async () => {
+    clearPrecoCache();
     await Promise.all([loadFornecedores(), loadProdutos()]);
-  }, [loadFornecedores, loadProdutos]);
+  }, [clearPrecoCache, loadFornecedores, loadProdutos]);
 
   useEffect(() => {
     void loadFornecedores();
@@ -317,26 +369,68 @@ export function GestaoComprasPage() {
     void loadProdutos();
   }, [loadProdutos]);
 
+  const derivedData = useMemo(() => {
+    const produtosByFaixa = new Map<number, ProdutoCompraItem[]>();
+    const produtosByFornecedor = new Map<string, ProdutoCompraItem[]>();
+    const fornecedorResumo = new Map<string, { count: number; total: number; faixas: Map<number, number> }>();
+    const resumoPorFaixaMap = new Map<number, { count: number; total: number; fornecedores: Set<string> }>();
+    const produtosACotar: ProdutoCompraItem[] = [];
+    const produtosCotados: ProdutoCompraItem[] = [];
+
+    produtos.forEach((item) => {
+      if (item.cotacaoId) {
+        produtosCotados.push(item);
+      } else {
+        produtosACotar.push(item);
+      }
+
+      if (item.faixaPrazo) {
+        if (!produtosByFaixa.has(item.faixaPrazo)) produtosByFaixa.set(item.faixaPrazo, []);
+        produtosByFaixa.get(item.faixaPrazo)!.push(item);
+
+        if (!resumoPorFaixaMap.has(item.faixaPrazo)) {
+          resumoPorFaixaMap.set(item.faixaPrazo, { count: 0, total: 0, fornecedores: new Set() });
+        }
+        const resumo = resumoPorFaixaMap.get(item.faixaPrazo)!;
+        resumo.count += 1;
+        resumo.total += item.valorTotal ?? 0;
+        if (item.fornecedorId) resumo.fornecedores.add(item.fornecedorId);
+      }
+
+      if (item.fornecedorId) {
+        if (!produtosByFornecedor.has(item.fornecedorId)) produtosByFornecedor.set(item.fornecedorId, []);
+        produtosByFornecedor.get(item.fornecedorId)!.push(item);
+
+        if (!fornecedorResumo.has(item.fornecedorId)) {
+          fornecedorResumo.set(item.fornecedorId, { count: 0, total: 0, faixas: new Map() });
+        }
+        const data = fornecedorResumo.get(item.fornecedorId)!;
+        data.count += 1;
+        data.total += item.valorTotal ?? 0;
+        if (item.faixaPrazo) {
+          data.faixas.set(item.faixaPrazo, (data.faixas.get(item.faixaPrazo) ?? 0) + 1);
+        }
+      }
+    });
+
+    const resumoPorFaixa = FAIXAS_PRAZO.map((faixa) => {
+      const resumo = resumoPorFaixaMap.get(faixa.value);
+      return {
+        ...faixa,
+        count: resumo?.count ?? 0,
+        total: resumo?.total ?? 0,
+        fornecedores: resumo?.fornecedores.size ?? 0,
+      };
+    });
+
+    return { produtosByFaixa, produtosByFornecedor, fornecedorResumo, resumoPorFaixa, produtosACotar, produtosCotados };
+  }, [produtos]);
+
   const fornecedorMap = useMemo(() => {
     return new Map(fornecedores.map((item) => [item.id, item]));
   }, [fornecedores]);
 
-  const fornecedorResumo = useMemo(() => {
-    const summary = new Map<string, { count: number; total: number; faixas: Map<number, number> }>();
-    produtos.forEach((item) => {
-      if (!item.fornecedorId) return;
-      if (!summary.has(item.fornecedorId)) {
-        summary.set(item.fornecedorId, { count: 0, total: 0, faixas: new Map() });
-      }
-      const data = summary.get(item.fornecedorId)!;
-      data.count += 1;
-      data.total += item.valorTotal ?? 0;
-      if (item.faixaPrazo) {
-        data.faixas.set(item.faixaPrazo, (data.faixas.get(item.faixaPrazo) ?? 0) + 1);
-      }
-    });
-    return summary;
-  }, [produtos]);
+  const { fornecedorResumo, resumoPorFaixa, produtosByFornecedor, produtosACotar, produtosCotados } = derivedData;
 
   const fornecedorOptions = useMemo(() => {
     const options = fornecedores.map((item) => ({
@@ -405,34 +499,42 @@ export function GestaoComprasPage() {
     selectedProdutos.reduce((acc, item) => acc + (item.valorTotal ?? 0), 0)
   ), [selectedProdutos]);
 
-  const resumoPorFaixa = useMemo(() => {
-    return FAIXAS_PRAZO.map((faixa) => {
-      const items = produtos.filter((item) => item.faixaPrazo === faixa.value);
-      const fornecedoresSet = new Set(items.map((item) => item.fornecedorId).filter(Boolean));
-      return {
-        ...faixa,
-        count: items.length,
-        total: items.reduce((acc, item) => acc + (item.valorTotal ?? 0), 0),
-        fornecedores: fornecedoresSet.size,
-      };
-    });
-  }, [produtos]);
+  const selectedProdutoIds = useMemo(() => (
+    new Set(selectedProdutos.map((item) => item.id))
+  ), [selectedProdutos]);
+
+  const totalPages = Math.max(1, Math.ceil(produtos.length / PAGE_SIZE));
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return produtos.slice(start, start + PAGE_SIZE);
+  }, [currentPage, produtos]);
+  const startIndex = produtos.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endIndex = Math.min(produtos.length, currentPage * PAGE_SIZE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchValue, prazoFilter, fornecedorFilter, clienteFilter, fabricanteFilter]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const fornecedoresComItens = useMemo(() => {
+    const base = fornecedores.filter((item) => (fornecedorResumo.get(item.id)?.count ?? 0) > 0);
+    if (selectedFornecedorId && !base.some((item) => item.id === selectedFornecedorId)) {
+      const selected = fornecedores.find((item) => item.id === selectedFornecedorId);
+      if (selected) return [selected, ...base];
+    }
+    return base;
+  }, [fornecedores, fornecedorResumo, selectedFornecedorId]);
 
   const filteredFornecedores = useMemo(() => {
     const termo = fornecedorSearch.trim().toLowerCase();
-    if (!termo) return fornecedores;
-    return fornecedores.filter((item) => resolveFornecedorNome(item).toLowerCase().includes(termo));
-  }, [fornecedores, fornecedorSearch]);
-
-  const produtosPorFaixa = useMemo(() => {
-    const groups = new Map<number, ProdutoCompraItem[]>();
-    produtos.forEach((item) => {
-      if (!item.faixaPrazo) return;
-      if (!groups.has(item.faixaPrazo)) groups.set(item.faixaPrazo, []);
-      groups.get(item.faixaPrazo)!.push(item);
-    });
-    return groups;
-  }, [produtos]);
+    if (!termo) return fornecedoresComItens;
+    return fornecedoresComItens.filter((item) => resolveFornecedorNome(item).toLowerCase().includes(termo));
+  }, [fornecedoresComItens, fornecedorSearch]);
 
   const listColumns = useMemo(() => [
     createTableColumn<ProdutoCompraItem>({
@@ -464,13 +566,23 @@ export function GestaoComprasPage() {
       columnId: 'entrega',
       compare: (a, b) => (a.entrega || '').localeCompare(b.entrega || ''),
       renderHeaderCell: () => 'Entrega Cliente',
-      renderCell: (item) => `${formatDate(item.entrega)} ${item.cliente ? `• ${item.cliente}` : ''}`,
+      renderCell: (item) => `${item.entregaFmt ?? formatDate(item.entrega)} ${item.cliente ? `• ${item.cliente}` : ''}`,
     }),
     createTableColumn<ProdutoCompraItem>({
       columnId: 'pedirAte',
       compare: (a, b) => (a.dataLimite || '').localeCompare(b.dataLimite || ''),
       renderHeaderCell: () => 'Pedir até',
-      renderCell: (item) => formatDate(item.dataLimite),
+      renderCell: (item) => item.dataLimiteFmt ?? formatDate(item.dataLimite),
+    }),
+    createTableColumn<ProdutoCompraItem>({
+      columnId: 'prazo',
+      compare: (a, b) => (a.faixaPrazo || 0) - (b.faixaPrazo || 0),
+      renderHeaderCell: () => 'Prazo',
+      renderCell: (item) => (
+        <Badge color={getFaixaColor(item.faixaPrazo)}>
+          {getFaixaLabel(item.faixaPrazo)}
+        </Badge>
+      ),
     }),
     createTableColumn<ProdutoCompraItem>({
       columnId: 'status',
@@ -482,6 +594,12 @@ export function GestaoComprasPage() {
       ),
     }),
   ], []);
+
+  const kanbanColumns = useMemo(() => ([
+    { key: 'acotar', label: 'A Cotar', items: produtosACotar },
+    { key: 'cotado', label: 'Cotado', items: produtosCotados },
+    { key: 'pedido', label: 'Pedido', items: [] as ProdutoCompraItem[] },
+  ]), [produtosACotar, produtosCotados]);
 
   const handleGroupSelection = useCallback((groupItems: ProdutoCompraItem[], selectedInGroup: ProdutoCompraItem[]) => {
     const groupIds = new Set(groupItems.map((item) => item.id));
@@ -540,7 +658,7 @@ export function GestaoComprasPage() {
       item.descricao ?? '',
       item.quantidade ?? 0,
       item.cliente ?? '',
-      formatDate(item.entrega),
+      item.entregaFmt ?? formatDate(item.entrega),
       item.precoUnitario ?? 0,
       item.valorTotal ?? 0,
     ].join(';'));
@@ -617,7 +735,7 @@ export function GestaoComprasPage() {
     }
   }, [copyText, showError, showSuccess]);
 
-  return (
+  const pageContent = (
     <div className="flex flex-col h-full">
       <Toaster toasterId={toasterId} />
       <PageHeader
@@ -723,30 +841,41 @@ export function GestaoComprasPage() {
                 <LoadingState />
               ) : (
                 <div className="flex flex-col gap-4">
-                  {FAIXAS_PRAZO.map((faixa) => {
-                    const items = produtosPorFaixa.get(faixa.value) || [];
-                    if (items.length === 0) return null;
-                    return (
-                      <div key={faixa.value}>
-                        <div className="flex items-center justify-between mb-2">
-                          <Text weight="semibold">{faixa.label}</Text>
-                          <Badge color={faixa.color}>{items.length}</Badge>
-                        </div>
-                        <DataGrid
-                          items={items}
-                          columns={listColumns}
-                          selectionMode="multiselect"
-                          selectedItems={selectedProdutos}
-                          onSelectionChange={(selectedInGroup) => handleGroupSelection(items, selectedInGroup)}
-                          getRowId={(item) => item.id}
-                          emptyState={<EmptyState title="Sem itens" description="Nenhum item nesta faixa de prazo." />}
-                        />
+                  {produtos.length > 0 && (
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                        Mostrando {startIndex}-{endIndex} de {produtos.length} itens
+                      </Text>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          appearance="secondary"
+                          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                          disabled={currentPage === 1}
+                        >
+                          Anterior
+                        </Button>
+                        <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                          Página {currentPage} de {totalPages}
+                        </Text>
+                        <Button
+                          appearance="secondary"
+                          onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                          disabled={currentPage === totalPages}
+                        >
+                          Próxima
+                        </Button>
                       </div>
-                    );
-                  })}
-                  {produtos.length === 0 && (
-                    <EmptyState title="Sem itens para comprar" description="Nenhum item encontrado com os filtros atuais." />
+                    </div>
                   )}
+                  <DataGrid
+                    items={paginatedItems}
+                    columns={listColumns}
+                    selectionMode="multiselect"
+                    selectedItems={selectedProdutos}
+                    onSelectionChange={(selectedInPage) => handleGroupSelection(paginatedItems, selectedInPage)}
+                    getRowId={(item) => item.id}
+                    emptyState={<EmptyState title="Sem itens para comprar" description="Nenhum item encontrado com os filtros atuais." />}
+                  />
                 </div>
               )}
             </div>
@@ -764,12 +893,8 @@ export function GestaoComprasPage() {
 
         {selectedTab === 'kanban' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {[
-              { key: 'acotar', label: 'A Cotar', filter: (item: ProdutoCompraItem) => !item.cotacaoId },
-              { key: 'cotado', label: 'Cotado', filter: (item: ProdutoCompraItem) => Boolean(item.cotacaoId) },
-              { key: 'pedido', label: 'Pedido', filter: (_: ProdutoCompraItem) => false },
-            ].map((col) => {
-              const items = produtos.filter(col.filter);
+            {kanbanColumns.map((col) => {
+              const items = col.items;
               return (
                 <Card key={col.key} style={{ padding: '12px' }}>
                   <div className="flex items-center justify-between mb-2">
@@ -786,11 +911,11 @@ export function GestaoComprasPage() {
                               {item.fornecedorNome || '-'} • {item.quantidade ?? 0} un
                             </Text>
                             <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                              {item.cliente || '-'} • {formatDate(item.dataLimite)}
+                              {item.cliente || '-'} • {item.dataLimiteFmt ?? formatDate(item.dataLimite)}
                             </Text>
                           </div>
                           <Checkbox
-                            checked={selectedProdutos.some((selected) => selected.id === item.id)}
+                            checked={selectedProdutoIds.has(item.id)}
                             onChange={() => {
                               setSelectedProdutos((prev) => {
                                 if (prev.some((selected) => selected.id === item.id)) {
@@ -823,9 +948,9 @@ export function GestaoComprasPage() {
             {fornecedoresLoading ? (
               <LoadingState />
             ) : (
-              fornecedores.map((fornecedor) => {
+              fornecedoresComItens.map((fornecedor) => {
                 const resumo = fornecedorResumo.get(fornecedor.id);
-                const itens = produtos.filter((item) => item.fornecedorId === fornecedor.id);
+                const itens = produtosByFornecedor.get(fornecedor.id) || [];
                 if (itens.length === 0) return null;
                 return (
                   <Card key={fornecedor.id} style={{ padding: '16px' }}>
@@ -858,14 +983,14 @@ export function GestaoComprasPage() {
                             <div>
                               <Text weight="semibold" block>{item.referencia || item.descricao || 'Item'}</Text>
                               <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                                {item.cliente || '-'} • {formatDate(item.entrega)}
+                                {item.cliente || '-'} • {item.entregaFmt ?? formatDate(item.entrega)}
                               </Text>
                               <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
                                 {item.quantidade ?? 0} un • {formatCurrency(item.precoUnitario ?? 0)}
                               </Text>
                             </div>
                             <Checkbox
-                              checked={selectedProdutos.some((selected) => selected.id === item.id)}
+                              checked={selectedProdutoIds.has(item.id)}
                               onChange={() => {
                                 setSelectedProdutos((prev) => {
                                   if (prev.some((selected) => selected.id === item.id)) {
@@ -926,4 +1051,10 @@ export function GestaoComprasPage() {
       </Dialog>
     </div>
   );
+
+  return profilerEnabled ? (
+    <Profiler id="GestaoComprasPage" onRender={handleProfileRender}>
+      {pageContent}
+    </Profiler>
+  ) : pageContent;
 }
