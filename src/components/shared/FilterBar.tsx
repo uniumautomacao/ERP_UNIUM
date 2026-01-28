@@ -14,6 +14,7 @@ interface ActiveFilter {
 interface FilterBarProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  onSearchSubmit?: (value: string) => void;
   isInline?: boolean;
   filters?: {
     id: string;
@@ -30,6 +31,7 @@ interface FilterBarProps {
 export function FilterBar({
   searchValue,
   onSearchChange,
+  onSearchSubmit,
   isInline = false,
   filters = [],
   activeFilters = [],
@@ -50,6 +52,11 @@ export function FilterBar({
             placeholder="Search..."
             value={searchValue}
             onChange={(_, data) => onSearchChange(data.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                onSearchSubmit?.(searchValue ?? '');
+              }
+            }}
             style={{ flexGrow: 1, maxWidth: '400px' }}
           />
         )}

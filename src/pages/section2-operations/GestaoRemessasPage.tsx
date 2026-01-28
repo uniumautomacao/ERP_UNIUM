@@ -123,6 +123,7 @@ export function GestaoRemessasPage() {
   const { systemUserId } = useCurrentSystemUser();
   const [selectedTab, setSelectedTab] = useState('kanban');
   const [searchValue, setSearchValue] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [stageFilter, setStageFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [columns, setColumns] = useState<Record<number, RemessaCardData[]>>({});
@@ -176,6 +177,10 @@ export function GestaoRemessasPage() {
       { intent: 'success' }
     );
   }, [dispatchToast]);
+
+  useEffect(() => {
+    setSearchInput(searchValue);
+  }, [searchValue]);
 
   const effectiveStages = useMemo(() => {
     if (stageFilter !== 'all') {
@@ -1160,8 +1165,9 @@ export function GestaoRemessasPage() {
       <PageContainer>
         <div className="flex items-center justify-between gap-4 mb-3">
           <FilterBar
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
+            searchValue={searchInput}
+            onSearchChange={setSearchInput}
+            onSearchSubmit={setSearchValue}
             filters={[
               {
                 id: 'stage',
