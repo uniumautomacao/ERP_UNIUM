@@ -36,7 +36,6 @@ import {
 import { NewCotacaoService } from '../../services/NewCotacaoService';
 
 const REFERENCE_CHUNK_SIZE = 25;
-const PAGE_SIZE = 100;
 const CRM_APP_ID = '3ec4d8a9-2a8e-ee11-8179-002248de6f66';
 
 type ProdutoCompraItem = {
@@ -108,11 +107,20 @@ const buildProdutosFilter = (params: {
     'statecode eq 0',
     '_new_ordemdeservico_value ne null',
     'new_fornecedorprincipalid ne null',
-    '(new_contemcotacao eq false or _new_cotacao_value eq null)',
-    '(new_situacaoreserva eq 100000006 or new_situacaoreserva eq 100000007 or new_situacaoreserva eq 100000009)',
     'new_opcaodefornecimento eq 100000000',
-    '(new_eemprestimo ne true or new_eemprestimo eq null)',
-    "(new_datalimiteparapedido ne null or new_nomedoclientefx eq 'Estoque Mínimo')",
+    '_new_cotacao_value eq null',
+    'new_eemprestimo ne true',
+    'new_situacaoreserva ne 100000000',
+    'new_situacaoreserva ne 100000001',
+    'new_situacaoreserva ne 100000002',
+    'new_situacaoreserva ne 100000003',
+    'new_situacaoreserva ne 100000004',
+    'new_situacaoreserva ne 100000005',
+    'new_situacaoreserva ne 100000008',
+    'new_situacaoreserva ne 100000009',
+    'new_situacaoreserva ne 1000000010',
+    'new_situacaoreserva ne 1000000011',//'(new_situacaoreserva eq 100000006 or new_situacaoreserva eq 100000007 or new_situacaoreserva eq 100000009)',
+    '(new_datalimiteparapedido ne null or _new_cliente_value eq 79d96ce3-23e3-ef11-9342-6045bd3b8bec)'//"(new_datalimiteparapedido ne null or new_nomedoclientefx eq 'Estoque Mínimo')",
   ];
 
   const searchFilter = buildProdutoServicoSearchFilter(params.search);
@@ -149,11 +157,11 @@ export function GestaoComprasPage() {
   const [clienteFilter, setClienteFilter] = useState('all');
   const [fabricanteFilter, setFabricanteFilter] = useState('all');
   const [fornecedorSearch, setFornecedorSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [fornecedoresLoading, setFornecedoresLoading] = useState(true);
+  const [loadingProdutos, setLoadingProdutos] = useState(true);
+  const [loadingPrecos, setLoadingPrecos] = useState(false);
+  const [fornecedoresDetalhesLoading, setFornecedoresDetalhesLoading] = useState(false);
   const [produtos, setProdutos] = useState<ProdutoCompraItem[]>([]);
-  const [fornecedores, setFornecedores] = useState<FornecedorItem[]>([]);
+  const [fornecedoresDetalhados, setFornecedoresDetalhados] = useState<FornecedorItem[]>([]);
   const [selectedProdutos, setSelectedProdutos] = useState<ProdutoCompraItem[]>([]);
   const [selectedFornecedorId, setSelectedFornecedorId] = useState<string | null>(null);
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
@@ -185,6 +193,8 @@ export function GestaoComprasPage() {
   }, [dispatchToast]);
 
   const profilerEnabled = import.meta.env.DEV;
+  const timingEnabled = import.meta.env.DEV;
+  const isListTab = selectedTab === 'lista';
   const handleProfileRender = useCallback((
     id: string,
     phase: 'mount' | 'update',
@@ -197,23 +207,57 @@ export function GestaoComprasPage() {
     );
   }, [profilerEnabled]);
 
-  const loadFornecedores = useCallback(async () => {
-    setFornecedoresLoading(true);
+  const timeStart = useCallback((label: string) => {
+    if (timingEnabled) console.time(label);
+  }, [timingEnabled]);
+
+  const timeEnd = useCallback((label: string, meta?: Record<string, unknown>) => {
+    if (!timingEnabled) return;
+    console.timeEnd(label);
+    if (meta) {
+      console.debug(`[GestaoCompras] ${label}`, meta);
+    }
+  }, [timingEnabled]);
+
+  const loadFornecedores = useCallback(async (ids?: string[]) => {
+    setFornecedoresDetalhesLoading(true);
     try {
-      const result = await Cr22fFornecedoresFromSharepointListService.getAll({
-        select: [
-          'cr22f_fornecedoresfromsharepointlistid',
-          'cr22f_nomefantasia',
-          'cr22f_title',
-          'cr22f_razosocial',
-          'new_prazofrete',
-          'new_leadtimetotal',
-        ],
-        filter: 'statecode eq 0',
-        orderBy: ['cr22f_nomefantasia asc'],
-        top: 500,
+      timeStart('compras.fornecedores');
+      const select = [
+        'cr22f_fornecedoresfromsharepointlistid',
+        'cr22f_nomefantasia',
+        'cr22f_title',
+        'cr22f_razosocial',
+        'new_prazofrete',
+        'new_leadtimetotal',
+      ];
+      const filtroIds = (ids ?? []).filter(Boolean);
+      const results = filtroIds.length > 0
+        ? await Promise.all(
+          chunkIds(filtroIds, REFERENCE_CHUNK_SIZE).map((chunk) => (
+            Cr22fFornecedoresFromSharepointListService.getAll({
+              select,
+              filter: `statecode eq 0 and (${chunk.map((id) => `cr22f_fornecedoresfromsharepointlistid eq '${escapeODataString(id)}'`).join(' or ')})`,
+              orderBy: ['cr22f_nomefantasia asc'],
+            })
+          ))
+        )
+        : [
+          await Cr22fFornecedoresFromSharepointListService.getAll({
+            select,
+            filter: 'statecode eq 0',
+            orderBy: ['cr22f_nomefantasia asc'],
+            top: 500,
+          }),
+        ];
+
+      const data = results.flatMap((res) => res.data ?? []);
+      timeEnd('compras.fornecedores', {
+        total: data.length,
+        ids: filtroIds.length,
+        chunks: filtroIds.length > 0 ? Math.ceil(filtroIds.length / REFERENCE_CHUNK_SIZE) : 1,
       });
-      setFornecedores((result.data || []).map((item: any) => ({
+      setFornecedoresDetalhados(data.map((item: any) => ({
         id: item.cr22f_fornecedoresfromsharepointlistid,
         nome: item.cr22f_nomefantasia || item.cr22f_title || null,
         razaoSocial: item.cr22f_razosocial || null,
@@ -223,11 +267,11 @@ export function GestaoComprasPage() {
     } catch (error) {
       console.error('[GestaoCompras] erro ao carregar fornecedores', error);
       showError('Erro ao carregar fornecedores');
-      setFornecedores([]);
+      setFornecedoresDetalhados([]);
     } finally {
-      setFornecedoresLoading(false);
+      setFornecedoresDetalhesLoading(false);
     }
-  }, [showError]);
+  }, [showError, timeEnd, timeStart]);
 
   const loadPrecos = useCallback(async (modeloIds: string[]) => {
     if (modeloIds.length === 0) return new Map<string, number>();
@@ -237,6 +281,7 @@ export function GestaoComprasPage() {
 
     if (missingIds.length > 0) {
       const chunks = chunkIds(missingIds, REFERENCE_CHUNK_SIZE);
+      timeStart('compras.precos');
       const results = await Promise.all(
         chunks.map((chunk) => (
           NewPrecodeProdutoService.getAll({
@@ -245,6 +290,7 @@ export function GestaoComprasPage() {
           })
         ))
       );
+      timeEnd('compras.precos', { totalModelos: modeloIds.length, faltantes: missingIds.length, chunks: chunks.length });
 
       const stillMissing = new Set(missingIds);
       results.flatMap((res) => res.data ?? []).forEach((item: any) => {
@@ -270,12 +316,15 @@ export function GestaoComprasPage() {
     });
 
     return priceMap;
-  }, []);
+  }, [timeEnd, timeStart]);
 
   const loadProdutos = useCallback(async () => {
     const requestId = ++loadRequestId.current;
-    setLoading(true);
+    setLoadingProdutos(true);
+    setLoadingPrecos(false);
+    const renderStart = performance.now();
     try {
+      
       const filter = buildProdutosFilter({
         search: searchValue,
         prazo: prazoFilter,
@@ -284,6 +333,12 @@ export function GestaoComprasPage() {
         fabricante: fabricanteFilter === 'all' ? undefined : fabricanteFilter,
       });
 
+      const top = 5000;
+      const orderBy = isListTab
+        ? ['new_datalimiteparapedido asc']
+        : ['new_faixadeprazo asc', 'new_datalimiteparapedido asc', 'new_nomedoclientefx asc'];
+      
+        timeStart('compras.produtos');
       const result = await NewProdutoServicoService.getAll({
         select: [
           'new_produtoservicoid',
@@ -303,13 +358,18 @@ export function GestaoComprasPage() {
           '_new_modelodeprodutooriginal_value',
         ],
         filter,
-        orderBy: ['new_faixadeprazo asc', 'new_datalimiteparapedido asc', 'new_nomedoclientefx asc'],
-        top: 500,
+        orderBy,
+        top,
       });
+      timeEnd('compras.produtos', { total: result.data?.length ?? 0, top, tab: selectedTab, orderBy });
 
       if (requestId !== loadRequestId.current) return;
 
-      const items = (result.data || []).map((item: any) => ({
+      const cachedPrecos = precosCacheRef.current;
+      const items = (result.data || []).map((item: any) => {
+        const modeloId = item._new_modelodeprodutooriginal_value ?? null;
+        const precoUnitario = modeloId ? cachedPrecos.get(modeloId) ?? 0 : 0;
+        return {
         id: item.new_produtoservicoid,
         referencia: item.new_referenciadoproduto ?? null,
         descricao: item.new_descricao ?? null,
@@ -326,44 +386,58 @@ export function GestaoComprasPage() {
         fabricante: item.new_nomedofabricante ?? null,
         cotacaoId: item._new_cotacao_value ?? null,
         contemCotacao: item.new_contemcotacao ?? null,
-        modeloId: item._new_modelodeprodutooriginal_value ?? null,
-      })) as ProdutoCompraItem[];
+        modeloId,
+        precoUnitario,
+        valorTotal: (item.new_quantidade ?? 0) * precoUnitario,
+      };
+      }) as ProdutoCompraItem[];
 
       const modeloIds = Array.from(new Set(items.map((item) => item.modeloId).filter(Boolean))) as string[];
-      const precos = await loadPrecos(modeloIds);
-      const withPrices = items.map((item) => {
-        const precoUnitario = item.modeloId ? precos.get(item.modeloId) ?? 0 : 0;
-        return {
-          ...item,
-          precoUnitario,
-          valorTotal: (item.quantidade ?? 0) * precoUnitario,
-        };
-      });
+      setProdutos(items);
+      setLoadingProdutos(false);
+      if (timingEnabled) {
+        console.debug('[GestaoCompras] render-util', {
+          ms: Math.round(performance.now() - renderStart),
+          total: items.length,
+        });
+      }
 
-      setProdutos(withPrices);
+      if (modeloIds.length === 0) return;
+      setLoadingPrecos(true);
+      void (async () => {
+        const precos = await loadPrecos(modeloIds);
+        if (requestId !== loadRequestId.current) return;
+        setProdutos((prev) => prev.map((item) => {
+          if (!item.modeloId) return item;
+          const precoUnitario = precos.get(item.modeloId);
+          if (precoUnitario === undefined) return item;
+          if (precoUnitario === item.precoUnitario) return item;
+          return {
+            ...item,
+            precoUnitario,
+            valorTotal: (item.quantidade ?? 0) * precoUnitario,
+          };
+        }));
+      })().finally(() => {
+        if (requestId === loadRequestId.current) {
+          setLoadingPrecos(false);
+        }
+      });
     } catch (error) {
       console.error('[GestaoCompras] erro ao carregar produtos', error);
       showError('Erro ao carregar produtos');
       setProdutos([]);
     } finally {
       if (requestId === loadRequestId.current) {
-        setLoading(false);
+        setLoadingProdutos(false);
+        setLoadingPrecos(false);
       }
     }
-  }, [clienteFilter, fornecedorFilter, fabricanteFilter, loadPrecos, prazoFilter, searchValue, showError]);
+  }, [clienteFilter, fornecedorFilter, fabricanteFilter, isListTab, loadPrecos, prazoFilter, searchValue, selectedTab, showError, timeEnd, timeStart, timingEnabled]);
 
   const clearPrecoCache = useCallback(() => {
     precosCacheRef.current = new Map();
   }, []);
-
-  const refreshAll = useCallback(async () => {
-    clearPrecoCache();
-    await Promise.all([loadFornecedores(), loadProdutos()]);
-  }, [clearPrecoCache, loadFornecedores, loadProdutos]);
-
-  useEffect(() => {
-    void loadFornecedores();
-  }, [loadFornecedores]);
 
   useEffect(() => {
     void loadProdutos();
@@ -426,19 +500,59 @@ export function GestaoComprasPage() {
     return { produtosByFaixa, produtosByFornecedor, fornecedorResumo, resumoPorFaixa, produtosACotar, produtosCotados };
   }, [produtos]);
 
+  const fornecedoresBasicos = useMemo(() => {
+    const map = new Map<string, FornecedorItem>();
+    produtos.forEach((item) => {
+      if (!item.fornecedorId) return;
+      if (!map.has(item.fornecedorId)) {
+        map.set(item.fornecedorId, {
+          id: item.fornecedorId,
+          nome: item.fornecedorNome ?? null,
+        });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => resolveFornecedorNome(a).localeCompare(resolveFornecedorNome(b)));
+  }, [produtos]);
+
+  const fornecedorIds = useMemo(() => (
+    fornecedoresBasicos.map((item) => item.id)
+  ), [fornecedoresBasicos]);
+
+  useEffect(() => {
+    if (selectedTab !== 'fornecedor') return;
+    if (fornecedoresDetalhados.length > 0 || fornecedoresDetalhesLoading) return;
+    void loadFornecedores(fornecedorIds);
+  }, [fornecedoresDetalhados.length, fornecedoresDetalhesLoading, fornecedorIds, loadFornecedores, selectedTab]);
+
+  const refreshAll = useCallback(async () => {
+    clearPrecoCache();
+    if (selectedTab === 'fornecedor') {
+      await Promise.all([loadFornecedores(fornecedorIds), loadProdutos()]);
+      return;
+    }
+    await loadProdutos();
+  }, [clearPrecoCache, fornecedorIds, loadFornecedores, loadProdutos, selectedTab]);
+
+  const fornecedoresLookup = useMemo(() => {
+    const merged = new Map<string, FornecedorItem>();
+    fornecedoresBasicos.forEach((item) => merged.set(item.id, item));
+    fornecedoresDetalhados.forEach((item) => merged.set(item.id, item));
+    return Array.from(merged.values());
+  }, [fornecedoresBasicos, fornecedoresDetalhados]);
+
   const fornecedorMap = useMemo(() => {
-    return new Map(fornecedores.map((item) => [item.id, item]));
-  }, [fornecedores]);
+    return new Map(fornecedoresLookup.map((item) => [item.id, item]));
+  }, [fornecedoresLookup]);
 
   const { fornecedorResumo, resumoPorFaixa, produtosByFornecedor, produtosACotar, produtosCotados } = derivedData;
 
   const fornecedorOptions = useMemo(() => {
-    const options = fornecedores.map((item) => ({
+    const options = fornecedoresBasicos.map((item) => ({
       key: item.id,
       text: resolveFornecedorNome(item),
     }));
     return [{ key: 'all', text: 'Todos' }, ...options];
-  }, [fornecedores]);
+  }, [fornecedoresBasicos]);
 
   const clienteOptions = useMemo(() => {
     const clientes = new Set<string>();
@@ -503,38 +617,26 @@ export function GestaoComprasPage() {
     new Set(selectedProdutos.map((item) => item.id))
   ), [selectedProdutos]);
 
-  const totalPages = Math.max(1, Math.ceil(produtos.length / PAGE_SIZE));
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return produtos.slice(start, start + PAGE_SIZE);
-  }, [currentPage, produtos]);
-  const startIndex = produtos.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endIndex = Math.min(produtos.length, currentPage * PAGE_SIZE);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchValue, prazoFilter, fornecedorFilter, clienteFilter, fabricanteFilter]);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
+  const listItems = produtos;
 
   const fornecedoresComItens = useMemo(() => {
-    const base = fornecedores.filter((item) => (fornecedorResumo.get(item.id)?.count ?? 0) > 0);
+    const base = fornecedoresBasicos;
     if (selectedFornecedorId && !base.some((item) => item.id === selectedFornecedorId)) {
-      const selected = fornecedores.find((item) => item.id === selectedFornecedorId);
+      const selected = fornecedoresLookup.find((item) => item.id === selectedFornecedorId);
       if (selected) return [selected, ...base];
     }
     return base;
-  }, [fornecedores, fornecedorResumo, selectedFornecedorId]);
+  }, [fornecedoresBasicos, fornecedoresLookup, selectedFornecedorId]);
 
   const filteredFornecedores = useMemo(() => {
     const termo = fornecedorSearch.trim().toLowerCase();
     if (!termo) return fornecedoresComItens;
     return fornecedoresComItens.filter((item) => resolveFornecedorNome(item).toLowerCase().includes(termo));
   }, [fornecedoresComItens, fornecedorSearch]);
+
+  const fornecedoresExibicao = useMemo(() => (
+    fornecedoresComItens.map((item) => fornecedorMap.get(item.id) ?? item)
+  ), [fornecedorMap, fornecedoresComItens]);
 
   const listColumns = useMemo(() => [
     createTableColumn<ProdutoCompraItem>({
@@ -804,8 +906,8 @@ export function GestaoComprasPage() {
                   placeholder="Filtrar fornecedor..."
                   style={{ marginTop: 8, marginBottom: 12 }}
                 />
-                {fornecedoresLoading ? (
-                  <LoadingState />
+                {loadingProdutos ? (
+                  <LoadingState label="Carregando produtos..." />
                 ) : (
                   <div className="flex flex-col gap-2">
                     {filteredFornecedores.map((fornecedor) => {
@@ -837,42 +939,21 @@ export function GestaoComprasPage() {
             </div>
 
             <div className="lg:col-span-8">
-              {loading ? (
-                <LoadingState />
+              {loadingProdutos ? (
+                <LoadingState label="Carregando produtos..." />
               ) : (
                 <div className="flex flex-col gap-4">
-                  {produtos.length > 0 && (
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                        Mostrando {startIndex}-{endIndex} de {produtos.length} itens
-                      </Text>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          appearance="secondary"
-                          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                          disabled={currentPage === 1}
-                        >
-                          Anterior
-                        </Button>
-                        <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                          Página {currentPage} de {totalPages}
-                        </Text>
-                        <Button
-                          appearance="secondary"
-                          onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                          disabled={currentPage === totalPages}
-                        >
-                          Próxima
-                        </Button>
-                      </div>
-                    </div>
+                  {loadingPrecos && (
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                      Calculando preços...
+                    </Text>
                   )}
                   <DataGrid
-                    items={paginatedItems}
+                    items={listItems}
                     columns={listColumns}
                     selectionMode="multiselect"
                     selectedItems={selectedProdutos}
-                    onSelectionChange={(selectedInPage) => handleGroupSelection(paginatedItems, selectedInPage)}
+                    onSelectionChange={(selectedInList) => handleGroupSelection(listItems, selectedInList)}
                     getRowId={(item) => item.id}
                     emptyState={<EmptyState title="Sem itens para comprar" description="Nenhum item encontrado com os filtros atuais." />}
                   />
@@ -945,10 +1026,10 @@ export function GestaoComprasPage() {
 
         {selectedTab === 'fornecedor' && (
           <div className="flex flex-col gap-4">
-            {fornecedoresLoading ? (
-              <LoadingState />
+            {fornecedoresDetalhesLoading ? (
+              <LoadingState label="Carregando fornecedores..." />
             ) : (
-              fornecedoresComItens.map((fornecedor) => {
+              fornecedoresExibicao.map((fornecedor) => {
                 const resumo = fornecedorResumo.get(fornecedor.id);
                 const itens = produtosByFornecedor.get(fornecedor.id) || [];
                 if (itens.length === 0) return null;
