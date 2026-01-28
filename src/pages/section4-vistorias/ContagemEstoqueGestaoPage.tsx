@@ -682,28 +682,44 @@ export function ContagemEstoqueGestaoPage() {
         } as AderenciaResumoRecord;
       });
 
+      // Gerar range completo de datas entre start e end, pulando domingos
+      const chartData: ChartDataPoint[] = [];
+      const curr = new Date(`${aderenciaStart}T00:00:00`);
+      const endLimit = new Date(`${aderenciaEnd}T00:00:00`);
+
+      while (curr <= endLimit) {
+        // 0 = Domingo
+        if (curr.getDay() !== 0) {
+          const dateKey = curr.toISOString().split('T')[0];
+          const item = consolidated.find((c) => toDateOnlyKey(c.snapshotDate) === dateKey);
+
+          if (item) {
+            chartData.push({
+              date: formatChartLabel(curr),
+              value: item.percentual,
+              id: item.snapshotId,
+              esperados: item.esperados,
+              contados: item.contados,
+              percentual: item.percentual,
+            } as ChartDataPoint);
+          } else {
+            // Se não houve snapshot no dia útil, valor é 0%
+            chartData.push({
+              date: formatChartLabel(curr),
+              value: 0,
+              id: `empty-${dateKey}`,
+              esperados: 0,
+              contados: 0,
+              percentual: 0,
+            } as ChartDataPoint);
+          }
+        }
+        curr.setDate(curr.getDate() + 1);
+      }
+
       setAderenciaData(consolidated);
       setAderenciaSelected(null);
       setAderenciaItens([]);
-
-      const chartData = [...consolidated]
-        .sort((a, b) => (a.snapshotDate || '').localeCompare(b.snapshotDate || ''))
-        .map((item) => {
-          const dateKey = toDateOnlyKey(item.snapshotDate);
-          const date = dateKey ? new Date(`${dateKey}T00:00:00`) : new Date();
-          const esperados = item.esperados ?? 0;
-          const contados = item.contados ?? 0;
-          const percentual = esperados > 0 ? Math.round((contados / esperados) * 100) : 0;
-          return {
-            date: formatChartLabel(date),
-            value: percentual,
-            id: item.snapshotId,
-            esperados,
-            contados,
-            percentual,
-          } as ChartDataPoint;
-        });
-
       setAderenciaChartData(chartData);
     } catch (err: any) {
       console.error('[GestaoContagem] erro aderencia', err);
