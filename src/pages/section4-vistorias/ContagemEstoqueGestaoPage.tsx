@@ -634,22 +634,6 @@ export function ContagemEstoqueGestaoPage() {
         return;
       }
 
-      const contagensResult = await NewContagemEstoqueService.getAll({
-        filter: `statecode eq 0 and ((new_datacontagem ge ${startRange.start} and new_datacontagem le ${endRange.end}) or (new_datacontagem eq null and createdon ge ${startRange.start} and createdon le ${endRange.end}))`,
-        select: ['new_datacontagem', 'createdon', '_new_itemestoque_value'],
-        top: 2000,
-      });
-
-      const contadosPorDia = new Map<string, Set<string>>();
-      (contagensResult.data ?? []).forEach((contagem: any) => {
-        const dateKey = toDateOnlyKey(contagem?.new_datacontagem ?? contagem?.createdon);
-        if (!dateKey || !contagem?._new_itemestoque_value) return;
-        if (!contadosPorDia.has(dateKey)) {
-          contadosPorDia.set(dateKey, new Set<string>());
-        }
-        contadosPorDia.get(dateKey)!.add(contagem._new_itemestoque_value);
-      });
-
       const snapshotPorDia = new Map<string, ContagemDiaRecord>();
       snapshots.forEach((item) => {
         const dateKey = toDateOnlyKey(item.new_data);
@@ -668,6 +652,62 @@ export function ContagemEstoqueGestaoPage() {
         if (item.createdon && !current.createdon) {
           snapshotPorDia.set(dateKey, item);
         }
+      });
+
+      const snapshotIds = Array.from(snapshotPorDia.values())
+        .map((item) => item.new_contagemdodiaid)
+        .filter((id): id is string => Boolean(id));
+
+      const [contagensResult, snapshotItensResults] = await Promise.all([
+        NewContagemEstoqueService.getAll({
+          filter: `statecode eq 0 and ((new_datacontagem ge ${startRange.start} and new_datacontagem le ${endRange.end}) or (new_datacontagem eq null and createdon ge ${startRange.start} and createdon le ${endRange.end}))`,
+          select: ['new_datacontagem', 'createdon', '_new_itemestoque_value'],
+          top: 2000,
+        }),
+        snapshotIds.length > 0
+          ? Promise.all(
+              Array.from({ length: Math.ceil(snapshotIds.length / 50) }, (_, index) => {
+                const chunk = snapshotIds.slice(index * 50, index * 50 + 50);
+                const filter = chunk.map((id) => `_new_snapshot_value eq '${id}'`).join(' or ');
+                return NewContagemDoDiaItemService.getAll({
+                  filter,
+                  select: ['_new_snapshot_value', '_new_itemestoque_value'],
+                  top: 5000,
+                });
+              })
+            )
+          : Promise.resolve([]),
+      ]);
+
+      const snapshotItensMap = new Map<string, Set<string>>();
+      snapshotItensResults
+        .flatMap((result) => result.data ?? [])
+        .forEach((item: any) => {
+          const snapshotId = item?._new_snapshot_value;
+          const estoqueId = item?._new_itemestoque_value;
+          if (!snapshotId || !estoqueId) return;
+          if (!snapshotItensMap.has(snapshotId)) {
+            snapshotItensMap.set(snapshotId, new Set<string>());
+          }
+          snapshotItensMap.get(snapshotId)!.add(estoqueId);
+        });
+
+      const esperadosPorDia = new Map<string, Set<string>>();
+      snapshotPorDia.forEach((snapshot, dateKey) => {
+        const expectedSet = snapshotItensMap.get(snapshot.new_contagemdodiaid) ?? new Set<string>();
+        esperadosPorDia.set(dateKey, expectedSet);
+      });
+
+      const contadosPorDia = new Map<string, Set<string>>();
+      (contagensResult.data ?? []).forEach((contagem: any) => {
+        const dateKey = toDateOnlyKey(contagem?.new_datacontagem ?? contagem?.createdon);
+        if (!dateKey || !contagem?._new_itemestoque_value) return;
+        const expectedSet = esperadosPorDia.get(dateKey);
+        if (!expectedSet || !expectedSet.has(contagem._new_itemestoque_value)) return;
+        if (!contadosPorDia.has(dateKey)) {
+          contadosPorDia.set(dateKey, new Set<string>());
+        }
+        contadosPorDia.get(dateKey)!.add(contagem._new_itemestoque_value);
       });
 
       const consolidated = Array.from(snapshotPorDia.entries()).map(([dateKey, item]) => {
