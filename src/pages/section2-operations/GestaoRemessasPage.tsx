@@ -584,10 +584,10 @@ export function GestaoRemessasPage() {
     try {
       await NewHistoricoRemessaService.create({
         new_campoalterado: campo,
-        new_valoranterior: anterior ?? null,
-        new_valornovo: novo ?? null,
+        new_valoranterior: anterior ?? undefined,
+        new_valornovo: novo ?? undefined,
         new_dataalteracao: new Date().toISOString(),
-        new_tipoacao: tipo ?? null,
+        new_tipoacao: tipo ?? undefined,
         'new_Remessa@odata.bind': `/new_remessas(${remessaId})`,
         ...(systemUserId ? { 'new_AlteradoPor@odata.bind': `/systemusers(${systemUserId})` } : {}),
       });
