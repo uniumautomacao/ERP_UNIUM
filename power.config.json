@@ -163,6 +163,11 @@
           "logicalName": "new_tipodeservico",
           "isHidden": false
         },
+        "new_cotacaos": {
+          "entitySetName": "new_cotacaos",
+          "logicalName": "new_cotacao",
+          "isHidden": false
+        },
         "new_cotacaotemporariadeprodutos": {
           "entitySetName": "new_cotacaotemporariadeprodutos",
           "logicalName": "new_cotacaotemporariadeproduto",

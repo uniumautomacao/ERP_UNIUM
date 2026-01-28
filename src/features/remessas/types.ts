@@ -22,6 +22,18 @@ export interface RemessaProdutoItem {
   cliente?: string | null;
   projeto?: string | null;
   quantidade?: number | null;
+  cotacaoId?: string | null;
+}
+
+export interface RemessaCotacaoItem {
+  id: string;
+  nome?: string | null;
+  fornecedor?: string | null;
+  valorTotal?: number | null;
+  opcaoEntrega?: number | null;
+  enderecoEntrega?: string | null;
+  observacoes?: string | null;
+  dataAprovacao?: string | null;
 }
 
 export interface RemessaHistoricoItem {

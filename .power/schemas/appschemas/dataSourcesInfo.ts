@@ -215,6 +215,13 @@ export const dataSourcesInfo = {
     "dataSourceType": "Dataverse",
     "apis": {}
   },
+  "new_cotacaos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_cotacaoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
   "new_cotacaotemporariadeprodutos": {
     "tableId": "",
     "version": "",

@@ -50,12 +50,13 @@ import {
   REMESSA_STAGES,
   REMESSA_PRIORITIES,
 } from '../../features/remessas/constants';
-import { RemessaCardData, RemessaHistoricoItem, RemessaLookupOption, RemessaProdutoItem, TransportadoraOption } from '../../features/remessas/types';
+import { RemessaCardData, RemessaCotacaoItem, RemessaHistoricoItem, RemessaLookupOption, RemessaProdutoItem, TransportadoraOption } from '../../features/remessas/types';
 import { buildProdutoServicoSearchFilter, buildRemessaSearchFilter, chunkIds } from '../../features/remessas/utils';
 import { NewRemessaService } from '../../generated/services/NewRemessaService';
 import { NewProdutoServicoService } from '../../generated/services/NewProdutoServicoService';
 import { NewHistoricoRemessaService } from '../../generated/services/NewHistoricoRemessaService';
 import { NewTransportadoraService } from '../../generated/services/NewTransportadoraService';
+import { NewCotacaoService } from '../../services/NewCotacaoService';
 import { useCurrentSystemUser } from '../../hooks/useCurrentSystemUser';
 
 interface RemessaDetails extends RemessaCardData {
@@ -94,6 +95,7 @@ const selectProdutoFields = [
   'new_apelidodoprojetofx',
   'new_quantidade',
   '_new_remessa_value',
+  '_new_cotacao_value',
 ];
 
 const formatDate = (value?: string | null) => {
@@ -132,6 +134,8 @@ export function GestaoRemessasPage() {
   const [selectedRemessa, setSelectedRemessa] = useState<RemessaDetails | null>(null);
   const [produtos, setProdutos] = useState<RemessaProdutoItem[]>([]);
   const [produtosLoading, setProdutosLoading] = useState(false);
+  const [cotacoes, setCotacoes] = useState<RemessaCotacaoItem[]>([]);
+  const [cotacoesLoading, setCotacoesLoading] = useState(false);
   const [historico, setHistorico] = useState<RemessaHistoricoItem[]>([]);
   const [historicoLoading, setHistoricoLoading] = useState(false);
   const [selectedProdutos, setSelectedProdutos] = useState<RemessaProdutoItem[]>([]);
@@ -149,6 +153,7 @@ export function GestaoRemessasPage() {
   const [batchTransportadoraId, setBatchTransportadoraId] = useState('');
   const [saving, setSaving] = useState(false);
   const loadRequestId = useRef(0);
+  const cotacoesRequestId = useRef(0);
   const toasterId = useId('remessas-toast');
   const { dispatchToast } = useToastController(toasterId);
 
@@ -402,6 +407,75 @@ export function GestaoRemessasPage() {
     });
   }, [mapRecordToCard]);
 
+  const loadCotacoes = useCallback(async (items: RemessaProdutoItem[]) => {
+    const requestId = ++cotacoesRequestId.current;
+    setCotacoesLoading(true);
+    try {
+      const cotacaoIds = Array.from(new Set(
+        items
+          .map((item) => item.cotacaoId)
+          .filter((id): id is string => Boolean(id))
+      ));
+
+      if (cotacaoIds.length === 0) {
+        if (requestId === cotacoesRequestId.current) {
+          setCotacoes([]);
+        }
+        return;
+      }
+
+      const chunks = chunkIds(cotacaoIds, REFERENCE_CHUNK_SIZE);
+      const results = await Promise.all(
+        chunks.map((chunk) => (
+          NewCotacaoService.getAll({
+            filter: `statecode eq 0 and (${chunk.map((id) => `new_cotacaoid eq '${id}'`).join(' or ')})`,
+            select: [
+              'new_cotacaoid',
+              'new_name',
+              'new_nomedofornecedor',
+              'new_valortotal',
+              'new_opcaodeentrega',
+              'new_enderecodeentrega',
+              'new_observacoes',
+              'new_datadeaprovacao',
+            ],
+          })
+        ))
+      );
+
+      if (requestId !== cotacoesRequestId.current) return;
+
+      const mapped = results
+        .flatMap((result) => result.data ?? [])
+        .map((item) => ({
+          id: (item as any).new_cotacaoid,
+          nome: (item as any).new_name ?? null,
+          fornecedor: (item as any).new_nomedofornecedor ?? null,
+          valorTotal: (item as any).new_valortotal ?? null,
+          opcaoEntrega: (item as any).new_opcaodeentrega ?? null,
+          enderecoEntrega: (item as any).new_enderecodeentrega ?? null,
+          observacoes: (item as any).new_observacoes ?? null,
+          dataAprovacao: (item as any).new_datadeaprovacao ?? null,
+        }));
+
+      const uniqueMap = new Map<string, RemessaCotacaoItem>();
+      mapped.forEach((item) => {
+        if (item.id) uniqueMap.set(item.id, item);
+      });
+
+      setCotacoes(Array.from(uniqueMap.values()));
+    } catch (err) {
+      console.error('[GestaoRemessasPage] erro ao carregar cotacoes', err);
+      if (requestId === cotacoesRequestId.current) {
+        setCotacoes([]);
+      }
+    } finally {
+      if (requestId === cotacoesRequestId.current) {
+        setCotacoesLoading(false);
+      }
+    }
+  }, []);
+
   const loadProdutos = useCallback(async (remessaId: string) => {
     setProdutosLoading(true);
     try {
@@ -417,15 +491,18 @@ export function GestaoRemessasPage() {
         cliente: (item as any).new_nomedoclientefx ?? null,
         projeto: (item as any).new_apelidodoprojetofx ?? null,
         quantidade: (item as any).new_quantidade ?? null,
+        cotacaoId: (item as any)._new_cotacao_value ?? null,
       }));
       setProdutos(items);
+      void loadCotacoes(items);
     } catch (err) {
       console.error('[GestaoRemessasPage] erro ao carregar produtos', err);
       setProdutos([]);
+      setCotacoes([]);
     } finally {
       setProdutosLoading(false);
     }
-  }, []);
+  }, [loadCotacoes]);
 
   const loadHistorico = useCallback(async (remessaId: string) => {
     setHistoricoLoading(true);
@@ -484,6 +561,9 @@ export function GestaoRemessasPage() {
     if (!selectedRemessaId) {
       setSelectedRemessa(null);
       setProdutos([]);
+      setCotacoes([]);
+      setCotacoesLoading(false);
+      cotacoesRequestId.current += 1;
       setHistorico([]);
       return;
     }
@@ -1058,6 +1138,8 @@ export function GestaoRemessasPage() {
               transportadoras={transportadoras}
               produtos={produtos}
               produtosLoading={produtosLoading}
+              cotacoes={cotacoes}
+              cotacoesLoading={cotacoesLoading}
               historico={historico}
               historicoLoading={historicoLoading}
               onSalvar={handleSalvarDetalhes}

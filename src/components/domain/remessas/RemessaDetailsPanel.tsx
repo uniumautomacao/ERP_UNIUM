@@ -12,11 +12,11 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { ArrowSync24Regular, Box24Regular, Copy24Regular } from '@fluentui/react-icons';
-import { RemessaCardData, RemessaHistoricoItem, RemessaProdutoItem, TransportadoraOption } from '../../../features/remessas/types';
+import { RemessaCardData, RemessaCotacaoItem, RemessaHistoricoItem, RemessaProdutoItem, TransportadoraOption } from '../../../features/remessas/types';
 import { REMESSA_PRIORITIES, REMESSA_STAGES } from '../../../features/remessas/constants';
 import { ProdutosDaRemessaList } from './ProdutosDaRemessaList';
+import { CotacoesDaRemessaList } from './CotacoesDaRemessaList';
 import { HistoricoRemessaTimeline } from './HistoricoRemessaTimeline';
-import { EmptyState } from '../../shared/EmptyState';
 import { RemessaProgressTracker } from './RemessaProgressTracker';
 
 interface RemessaDetails extends RemessaCardData {
@@ -31,6 +31,8 @@ interface RemessaDetailsPanelProps {
   transportadoras: TransportadoraOption[];
   produtos: RemessaProdutoItem[];
   produtosLoading?: boolean;
+  cotacoes: RemessaCotacaoItem[];
+  cotacoesLoading?: boolean;
   historico: RemessaHistoricoItem[];
   historicoLoading?: boolean;
   onSalvar: (changes: {
@@ -63,6 +65,8 @@ export function RemessaDetailsPanel({
   transportadoras,
   produtos,
   produtosLoading,
+  cotacoes,
+  cotacoesLoading,
   historico,
   historicoLoading,
   onSalvar,
@@ -145,6 +149,7 @@ export function RemessaDetailsPanel({
       >
         <Tab value="detalhes">Detalhes</Tab>
         <Tab value="produtos">Produtos ({produtos.length})</Tab>
+        <Tab value="cotacoes">Cotações ({cotacoes.length})</Tab>
         <Tab value="historico">Histórico</Tab>
       </TabList>
 
@@ -270,6 +275,15 @@ export function RemessaDetailsPanel({
             loading={produtosLoading}
             onSelectionChange={onSelecionarProdutos}
           />
+        </div>
+      )}
+
+      {activeTab === 'cotacoes' && (
+        <div style={{ padding: '8px 4px' }}>
+          <Text size={400} weight="semibold" block style={{ marginBottom: '16px' }}>
+            Cotações vinculadas
+          </Text>
+          <CotacoesDaRemessaList items={cotacoes} loading={cotacoesLoading} />
         </div>
       )}
 
