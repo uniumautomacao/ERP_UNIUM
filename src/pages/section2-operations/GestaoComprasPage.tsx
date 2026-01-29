@@ -323,7 +323,7 @@ export function GestaoComprasPage() {
   const isListTab = selectedTab === 'lista';
   const handleProfileRender = useCallback((
     id: string,
-    phase: 'mount' | 'update',
+    phase: 'mount' | 'update' | 'nested-update',
     actualDuration: number,
     baseDuration: number
   ) => {
@@ -1762,7 +1762,7 @@ export function GestaoComprasPage() {
                           }}
                           style={{
                             cursor: 'pointer',
-                            border: ativo ? `1px solid ${tokens.colorPaletteBlueBorder2}` : `1px solid ${tokens.colorNeutralStroke2}`,
+                            border: ativo ? `1px solid ${tokens.colorPaletteBlueForeground2}` : `1px solid ${tokens.colorNeutralStroke2}`,
                             backgroundColor: ativo ? tokens.colorNeutralBackground1Selected : tokens.colorNeutralBackground1,
                           }}
                         >

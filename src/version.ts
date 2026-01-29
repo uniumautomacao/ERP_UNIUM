@@ -1,8 +1,8 @@
-export const APP_VERSION = '0.1.130';
+export const APP_VERSION = '0.1.131';
 export const APP_BUILD_DATE = '2026-01-27';
 export const VERSION_HISTORY = [
   {
-    version: '0.1.130',
+    version: '0.1.131',
     date: '2026-01-27',
     changes: 'Publicação do app no PowerApps conforme solicitado pelo usuário.',
   },
