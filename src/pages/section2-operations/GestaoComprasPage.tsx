@@ -30,6 +30,7 @@ import { LoadingState } from '../../components/shared/LoadingState';
 import { buildProdutoServicoSearchFilter, chunkIds, escapeODataString } from '../../features/remessas/utils';
 import {
   Cr22fFornecedoresFromSharepointListService,
+  NewCacheComprasProdutosPendentesService,
   NewPrecodeProdutoService,
   NewProdutoServicoService,
 } from '../../generated';
@@ -96,7 +97,7 @@ const formatCurrency = (value?: number | null) => {
   return currencyFormatter.format(value);
 };
 
-const buildProdutosFilter = (params: {
+const buildCacheProdutosFilter = (params: {
   search: string;
   prazo?: string;
   fornecedorId?: string;
@@ -105,22 +106,7 @@ const buildProdutosFilter = (params: {
 }) => {
   const filters = [
     'statecode eq 0',
-    '_new_ordemdeservico_value ne null',
-    'new_fornecedorprincipalid ne null',
-    'new_opcaodefornecimento eq 100000000',
-    '_new_cotacao_value eq null',
-    'new_eemprestimo ne true',
-    'new_situacaoreserva ne 100000000',
-    'new_situacaoreserva ne 100000001',
-    'new_situacaoreserva ne 100000002',
-    'new_situacaoreserva ne 100000003',
-    'new_situacaoreserva ne 100000004',
-    'new_situacaoreserva ne 100000005',
-    'new_situacaoreserva ne 100000008',
-    'new_situacaoreserva ne 100000009',
-    'new_situacaoreserva ne 1000000010',
-    'new_situacaoreserva ne 1000000011',//'(new_situacaoreserva eq 100000006 or new_situacaoreserva eq 100000007 or new_situacaoreserva eq 100000009)',
-    '(new_datalimiteparapedido ne null or _new_cliente_value eq 79d96ce3-23e3-ef11-9342-6045bd3b8bec)'//"(new_datalimiteparapedido ne null or new_nomedoclientefx eq 'Estoque Mínimo')",
+    'new_originalpendenteparacompras eq true',
   ];
 
   const searchFilter = buildProdutoServicoSearchFilter(params.search);
@@ -144,6 +130,8 @@ const buildProdutosFilter = (params: {
 
   return filters.join(' and ');
 };
+
+const hasCotacao = (item: ProdutoCompraItem) => item.contemCotacao === true;
 
 const resolveFornecedorNome = (fornecedor?: FornecedorItem | null) =>
   fornecedor?.nome || fornecedor?.razaoSocial || 'Fornecedor';
@@ -325,7 +313,7 @@ export function GestaoComprasPage() {
     const renderStart = performance.now();
     try {
       
-      const filter = buildProdutosFilter({
+      const filter = buildCacheProdutosFilter({
         search: searchValue,
         prazo: prazoFilter,
         fornecedorId: fornecedorFilter === 'all' ? undefined : fornecedorFilter,
@@ -339,9 +327,9 @@ export function GestaoComprasPage() {
         : ['new_faixadeprazo asc', 'new_datalimiteparapedido asc', 'new_nomedoclientefx asc'];
       
         timeStart('compras.produtos');
-      const result = await NewProdutoServicoService.getAll({
+      const result = await NewCacheComprasProdutosPendentesService.getAll({
         select: [
-          'new_produtoservicoid',
+          'new_cachecomprasprodutospendentesid',
           'new_referenciadoproduto',
           'new_descricao',
           'new_quantidade',
@@ -353,9 +341,9 @@ export function GestaoComprasPage() {
           'new_nomedofornecedorprincipal',
           'new_fornecedorprincipalid',
           'new_nomedofabricante',
-          '_new_cotacao_value',
           'new_contemcotacao',
           '_new_modelodeprodutooriginal_value',
+          '_new_produtoservico_value',
         ],
         filter,
         orderBy,
@@ -367,30 +355,31 @@ export function GestaoComprasPage() {
 
       const cachedPrecos = precosCacheRef.current;
       const items = (result.data || []).map((item: any) => {
+        const originalId = item._new_produtoservico_value ?? null;
+        if (!originalId) return null;
         const modeloId = item._new_modelodeprodutooriginal_value ?? null;
         const precoUnitario = modeloId ? cachedPrecos.get(modeloId) ?? 0 : 0;
         return {
-        id: item.new_produtoservicoid,
-        referencia: item.new_referenciadoproduto ?? null,
-        descricao: item.new_descricao ?? null,
-        quantidade: item.new_quantidade ?? null,
-        cliente: item.new_nomedoclientefx ?? null,
-        entrega: item.new_previsaodeentrega ?? null,
-        entregaFmt: formatDate(item.new_previsaodeentrega ?? null),
-        dataLimite: item.new_datalimiteparapedido ?? null,
-        dataLimiteFmt: formatDate(item.new_datalimiteparapedido ?? null),
-        diasParaPedido: item.new_diasparapedido ?? null,
-        faixaPrazo: item.new_faixadeprazo ?? null,
-        fornecedorId: item.new_fornecedorprincipalid ?? null,
-        fornecedorNome: item.new_nomedofornecedorprincipal ?? null,
-        fabricante: item.new_nomedofabricante ?? null,
-        cotacaoId: item._new_cotacao_value ?? null,
-        contemCotacao: item.new_contemcotacao ?? null,
-        modeloId,
-        precoUnitario,
-        valorTotal: (item.new_quantidade ?? 0) * precoUnitario,
-      };
-      }) as ProdutoCompraItem[];
+          id: originalId,
+          referencia: item.new_referenciadoproduto ?? null,
+          descricao: item.new_descricao ?? null,
+          quantidade: item.new_quantidade ?? null,
+          cliente: item.new_nomedoclientefx ?? null,
+          entrega: item.new_previsaodeentrega ?? null,
+          entregaFmt: formatDate(item.new_previsaodeentrega ?? null),
+          dataLimite: item.new_datalimiteparapedido ?? null,
+          dataLimiteFmt: formatDate(item.new_datalimiteparapedido ?? null),
+          diasParaPedido: item.new_diasparapedido ?? null,
+          faixaPrazo: item.new_faixadeprazo ?? null,
+          fornecedorId: item.new_fornecedorprincipalid ?? null,
+          fornecedorNome: item.new_nomedofornecedorprincipal ?? null,
+          fabricante: item.new_nomedofabricante ?? null,
+          contemCotacao: item.new_contemcotacao ?? null,
+          modeloId,
+          precoUnitario,
+          valorTotal: (item.new_quantidade ?? 0) * precoUnitario,
+        };
+      }).filter(Boolean) as ProdutoCompraItem[];
 
       const modeloIds = Array.from(new Set(items.map((item) => item.modeloId).filter(Boolean))) as string[];
       setProdutos(items);
@@ -452,7 +441,7 @@ export function GestaoComprasPage() {
     const produtosCotados: ProdutoCompraItem[] = [];
 
     produtos.forEach((item) => {
-      if (item.cotacaoId) {
+      if (hasCotacao(item)) {
         produtosCotados.push(item);
       } else {
         produtosACotar.push(item);
@@ -596,6 +585,31 @@ export function GestaoComprasPage() {
     return filters;
   }, [clienteFilter, fabricanteFilter, fornecedorFilter, fornecedorMap, prazoFilter]);
 
+  const hasActiveFilters = useMemo(() => (
+    searchValue.trim() !== ''
+    || prazoFilter !== 'all'
+    || fornecedorFilter !== 'all'
+    || clienteFilter !== 'all'
+    || fabricanteFilter !== 'all'
+  ), [clienteFilter, fabricanteFilter, fornecedorFilter, prazoFilter, searchValue]);
+
+  const emptyState = useMemo(() => {
+    if (!hasActiveFilters && produtos.length === 0) {
+      return (
+        <EmptyState
+          title="Snapshot do dia ainda não foi gerado"
+          description="Verifique se o dataflow já rodou para gerar o cache diário."
+        />
+      );
+    }
+    return (
+      <EmptyState
+        title="Sem itens para comprar"
+        description="Nenhum item encontrado com os filtros atuais."
+      />
+    );
+  }, [hasActiveFilters, produtos.length]);
+
   const handleClearFilter = (id: string) => {
     if (id === 'prazo') setPrazoFilter('all');
     if (id === 'fornecedor') setFornecedorFilter('all');
@@ -691,8 +705,8 @@ export function GestaoComprasPage() {
       columnId: 'status',
       renderHeaderCell: () => 'Status',
       renderCell: (item) => (
-        <Badge color={item.cotacaoId ? 'warning' : 'danger'}>
-          {item.cotacaoId ? 'Cotado' : 'A cotar'}
+        <Badge color={hasCotacao(item) ? 'warning' : 'danger'}>
+          {hasCotacao(item) ? 'Cotado' : 'A cotar'}
         </Badge>
       ),
     }),
@@ -785,7 +799,7 @@ export function GestaoComprasPage() {
       showError('Selecione itens do fornecedor');
       return;
     }
-    const itensSemCotacao = itens.filter((item) => !item.cotacaoId);
+    const itensSemCotacao = itens.filter((item) => !hasCotacao(item));
     if (itensSemCotacao.length === 0) {
       showError('Todos os itens já possuem cotação');
       return;
@@ -956,7 +970,7 @@ export function GestaoComprasPage() {
                     selectedItems={selectedProdutos}
                     onSelectionChange={(selectedInList) => handleGroupSelection(listItems, selectedInList)}
                     getRowId={(item) => item.id}
-                    emptyState={<EmptyState title="Sem itens para comprar" description="Nenhum item encontrado com os filtros atuais." />}
+                    emptyState={emptyState}
                   />
                 </div>
               )}
