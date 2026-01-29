@@ -1,4 +1,4 @@
-import { Profiler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Dispatch, Profiler, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Badge,
   Button,
@@ -131,6 +131,37 @@ const buildCacheProdutosFilter = (params: {
   return filters.join(' and ');
 };
 
+const buildProdutoServicoFilters = (params: {
+  search: string;
+  prazo?: string;
+  fornecedorId?: string;
+  cliente?: string;
+  fabricante?: string;
+}) => {
+  const filters = ['statecode eq 0'];
+
+  const searchFilter = buildProdutoServicoSearchFilter(params.search);
+  if (searchFilter) filters.push(searchFilter);
+
+  if (params.prazo && params.prazo !== 'all') {
+    filters.push(`new_faixadeprazo eq ${params.prazo}`);
+  }
+
+  if (params.fornecedorId) {
+    filters.push(`new_fornecedorprincipalid eq '${escapeODataString(params.fornecedorId)}'`);
+  }
+
+  if (params.cliente && params.cliente !== 'all') {
+    filters.push(`new_nomedoclientefx eq '${escapeODataString(params.cliente)}'`);
+  }
+
+  if (params.fabricante && params.fabricante !== 'all') {
+    filters.push(`new_nomedofabricante eq '${escapeODataString(params.fabricante)}'`);
+  }
+
+  return filters;
+};
+
 const hasCotacao = (item: ProdutoCompraItem) => item.contemCotacao === true;
 
 const resolveFornecedorNome = (fornecedor?: FornecedorItem | null) =>
@@ -147,8 +178,12 @@ export function GestaoComprasPage() {
   const [fornecedorSearch, setFornecedorSearch] = useState('');
   const [loadingProdutos, setLoadingProdutos] = useState(true);
   const [loadingPrecos, setLoadingPrecos] = useState(false);
+  const [loadingCotados, setLoadingCotados] = useState(false);
+  const [loadingPedidos, setLoadingPedidos] = useState(false);
   const [fornecedoresDetalhesLoading, setFornecedoresDetalhesLoading] = useState(false);
-  const [produtos, setProdutos] = useState<ProdutoCompraItem[]>([]);
+  const [produtosCache, setProdutosCache] = useState<ProdutoCompraItem[]>([]);
+  const [produtosCotados, setProdutosCotados] = useState<ProdutoCompraItem[]>([]);
+  const [produtosPedidos, setProdutosPedidos] = useState<ProdutoCompraItem[]>([]);
   const [fornecedoresDetalhados, setFornecedoresDetalhados] = useState<FornecedorItem[]>([]);
   const [selectedProdutos, setSelectedProdutos] = useState<ProdutoCompraItem[]>([]);
   const [selectedFornecedorId, setSelectedFornecedorId] = useState<string | null>(null);
@@ -156,7 +191,15 @@ export function GestaoComprasPage() {
   const [copyText, setCopyText] = useState('');
   const [processing, setProcessing] = useState(false);
   const loadRequestId = useRef(0);
+  const cotadosRequestId = useRef(0);
+  const pedidosRequestId = useRef(0);
   const precosCacheRef = useRef(new Map<string, number>());
+  const [pedidoSearchInput, setPedidoSearchInput] = useState('');
+  const [pedidoSearchValue, setPedidoSearchValue] = useState('');
+  const [pedidoSkipToken, setPedidoSkipToken] = useState<string | null>(null);
+  const pedidoSkipTokenRef = useRef<string | null>(null);
+  const [pedidoHasMore, setPedidoHasMore] = useState(false);
+  const [pedidoLoadingMore, setPedidoLoadingMore] = useState(false);
   const toasterId = useId('compras-toast');
   const { dispatchToast } = useToastController(toasterId);
 
@@ -306,7 +349,7 @@ export function GestaoComprasPage() {
     return priceMap;
   }, [timeEnd, timeStart]);
 
-  const loadProdutos = useCallback(async () => {
+  const loadProdutosCache = useCallback(async () => {
     const requestId = ++loadRequestId.current;
     setLoadingProdutos(true);
     setLoadingPrecos(false);
@@ -382,7 +425,7 @@ export function GestaoComprasPage() {
       }).filter(Boolean) as ProdutoCompraItem[];
 
       const modeloIds = Array.from(new Set(items.map((item) => item.modeloId).filter(Boolean))) as string[];
-      setProdutos(items);
+      setProdutosCache(items);
       setLoadingProdutos(false);
       if (timingEnabled) {
         console.debug('[GestaoCompras] render-util', {
@@ -396,7 +439,7 @@ export function GestaoComprasPage() {
       void (async () => {
         const precos = await loadPrecos(modeloIds);
         if (requestId !== loadRequestId.current) return;
-        setProdutos((prev) => prev.map((item) => {
+        setProdutosCache((prev) => prev.map((item) => {
           if (!item.modeloId) return item;
           const precoUnitario = precos.get(item.modeloId);
           if (precoUnitario === undefined) return item;
@@ -415,22 +458,232 @@ export function GestaoComprasPage() {
     } catch (error) {
       console.error('[GestaoCompras] erro ao carregar produtos', error);
       showError('Erro ao carregar produtos');
-      setProdutos([]);
+      setProdutosCache([]);
     } finally {
       if (requestId === loadRequestId.current) {
         setLoadingProdutos(false);
         setLoadingPrecos(false);
       }
     }
-  }, [clienteFilter, fornecedorFilter, fabricanteFilter, isListTab, loadPrecos, prazoFilter, searchValue, selectedTab, showError, timeEnd, timeStart, timingEnabled]);
+  }, [clienteFilter, fornecedorFilter, fabricanteFilter, isListTab, loadPrecos, prazoFilter, searchValue, showError, timeEnd, timeStart, timingEnabled]);
+
+  const mapProdutoServicoItem = useCallback((item: any) => {
+    const modeloId = item._new_modelodeprodutooriginal_value ?? null;
+    const precoUnitario = modeloId ? precosCacheRef.current.get(modeloId) ?? 0 : 0;
+    return {
+      id: item.new_produtoservicoid ?? '',
+      referencia: item.new_referenciadoproduto ?? null,
+      descricao: item.new_descricao ?? null,
+      quantidade: item.new_quantidade ?? null,
+      cliente: item.new_nomedoclientefx ?? null,
+      entrega: item.new_previsaodeentrega ?? null,
+      entregaFmt: formatDate(item.new_previsaodeentrega ?? null),
+      dataLimite: item.new_datalimiteparapedido ?? null,
+      dataLimiteFmt: formatDate(item.new_datalimiteparapedido ?? null),
+      diasParaPedido: item.new_diasparapedido ?? null,
+      faixaPrazo: item.new_faixadeprazo ?? null,
+      fornecedorId: item.new_fornecedorprincipalid ?? null,
+      fornecedorNome: item.new_nomedofornecedorprincipal ?? null,
+      fabricante: item.new_nomedofabricante ?? null,
+      cotacaoId: item._new_cotacao_value ?? null,
+      contemCotacao: true,
+      modeloId,
+      precoUnitario,
+      valorTotal: (item.new_quantidade ?? 0) * precoUnitario,
+    } as ProdutoCompraItem;
+  }, []);
+
+  const enrichProdutosComPrecos = useCallback(async (
+    items: ProdutoCompraItem[],
+    requestId: number,
+    requestRef: { current: number },
+    setState: Dispatch<SetStateAction<ProdutoCompraItem[]>>
+  ) => {
+    const modeloIds = Array.from(new Set(items.map((item) => item.modeloId).filter(Boolean))) as string[];
+    if (modeloIds.length === 0) return;
+    const precos = await loadPrecos(modeloIds);
+    if (requestId !== requestRef.current) return;
+    setState((prev) => prev.map((item) => {
+      if (!item.modeloId) return item;
+      const precoUnitario = precos.get(item.modeloId);
+      if (precoUnitario === undefined || precoUnitario === item.precoUnitario) return item;
+      return {
+        ...item,
+        precoUnitario,
+        valorTotal: (item.quantidade ?? 0) * precoUnitario,
+      };
+    }));
+  }, [loadPrecos]);
+
+  const loadCotadosFromProdutoServico = useCallback(async () => {
+    const requestId = ++cotadosRequestId.current;
+    setLoadingCotados(true);
+    try {
+      const filters = buildProdutoServicoFilters({
+        search: searchValue,
+        prazo: prazoFilter,
+        fornecedorId: fornecedorFilter === 'all' ? undefined : fornecedorFilter,
+        cliente: clienteFilter === 'all' ? undefined : clienteFilter,
+        fabricante: fabricanteFilter === 'all' ? undefined : fabricanteFilter,
+      });
+      filters.push('_new_cotacao_value ne null');
+      filters.push('new_Cotacao/new_aprovarcotacao ne true');
+
+      const result = await NewProdutoServicoService.getAll({
+        select: [
+          'new_produtoservicoid',
+          'new_referenciadoproduto',
+          'new_descricao',
+          'new_quantidade',
+          'new_nomedoclientefx',
+          'new_previsaodeentrega',
+          'new_datalimiteparapedido',
+          'new_diasparapedido',
+          'new_faixadeprazo',
+          'new_nomedofornecedorprincipal',
+          'new_fornecedorprincipalid',
+          'new_nomedofabricante',
+          '_new_modelodeprodutooriginal_value',
+          '_new_cotacao_value',
+        ],
+        filter: filters.join(' and '),
+        orderBy: ['new_datalimiteparapedido asc'],
+        top: 5000,
+      });
+      if (requestId !== cotadosRequestId.current) return;
+
+      const items = (result.data || [])
+        .map((item: any) => mapProdutoServicoItem(item))
+        .filter((item: ProdutoCompraItem) => Boolean(item.id));
+      setProdutosCotados(items);
+      await enrichProdutosComPrecos(items, requestId, cotadosRequestId, setProdutosCotados);
+    } catch (error) {
+      console.error('[GestaoCompras] erro ao carregar produtos cotados', error);
+      setProdutosCotados([]);
+    } finally {
+      if (requestId === cotadosRequestId.current) {
+        setLoadingCotados(false);
+      }
+    }
+  }, [
+    clienteFilter,
+    fornecedorFilter,
+    fabricanteFilter,
+    mapProdutoServicoItem,
+    prazoFilter,
+    searchValue,
+    enrichProdutosComPrecos,
+  ]);
+
+  const loadPedidosFromProdutoServico = useCallback(async (options?: { append?: boolean }) => {
+    const append = options?.append ?? false;
+    const requestId = append ? pedidosRequestId.current : ++pedidosRequestId.current;
+    const skipToken = append ? pedidoSkipTokenRef.current : null;
+    if (!append) {
+      setLoadingPedidos(true);
+      setPedidoHasMore(false);
+      setPedidoSkipToken(null);
+      pedidoSkipTokenRef.current = null;
+    } else {
+      setPedidoLoadingMore(true);
+    }
+    try {
+      const hasPedidoSearch = pedidoSearchValue.trim().length > 0;
+      const searchTerm = hasPedidoSearch ? pedidoSearchValue : searchValue;
+      const filters = buildProdutoServicoFilters({
+        search: searchTerm,
+        prazo: prazoFilter,
+        fornecedorId: fornecedorFilter === 'all' ? undefined : fornecedorFilter,
+        cliente: clienteFilter === 'all' ? undefined : clienteFilter,
+        fabricante: fabricanteFilter === 'all' ? undefined : fabricanteFilter,
+      });
+      filters.push('_new_cotacao_value ne null');
+      filters.push('new_Cotacao/new_aprovarcotacao eq true');
+      if (!hasPedidoSearch) {
+        const isoCutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        filters.push(`new_Cotacao/new_datadeaprovacao ge ${isoCutoff}`);
+      }
+
+      const result = await NewProdutoServicoService.getAll({
+        select: [
+          'new_produtoservicoid',
+          'new_referenciadoproduto',
+          'new_descricao',
+          'new_quantidade',
+          'new_nomedoclientefx',
+          'new_previsaodeentrega',
+          'new_datalimiteparapedido',
+          'new_diasparapedido',
+          'new_faixadeprazo',
+          'new_nomedofornecedorprincipal',
+          'new_fornecedorprincipalid',
+          'new_nomedofabricante',
+          '_new_modelodeprodutooriginal_value',
+          '_new_cotacao_value',
+          'createdon',
+        ],
+        filter: filters.join(' and '),
+        orderBy: ['createdon desc'],
+        top: hasPedidoSearch ? 100 : 500,
+        ...(append && skipToken ? { skipToken } : {}),
+      });
+      if (requestId !== pedidosRequestId.current) return;
+
+      const fetched = (result.data || [])
+        .map((item: any) => mapProdutoServicoItem(item))
+        .filter((item: ProdutoCompraItem) => Boolean(item.id));
+
+      let nextItems: ProdutoCompraItem[] = [];
+      setProdutosPedidos((prev) => {
+        nextItems = append ? [...prev, ...fetched] : fetched;
+        return nextItems;
+      });
+
+      const nextToken = result.skipToken ?? null;
+      pedidoSkipTokenRef.current = nextToken;
+      setPedidoSkipToken(nextToken);
+      setPedidoHasMore(Boolean(nextToken) && hasPedidoSearch);
+
+      await enrichProdutosComPrecos(nextItems, requestId, pedidosRequestId, setProdutosPedidos);
+    } catch (error) {
+      console.error('[GestaoCompras] erro ao carregar produtos pedidos', error);
+      setProdutosPedidos([]);
+    } finally {
+      if (requestId === pedidosRequestId.current) {
+        setLoadingPedidos(false);
+        setPedidoLoadingMore(false);
+      }
+    }
+  }, [
+    clienteFilter,
+    fornecedorFilter,
+    fabricanteFilter,
+    mapProdutoServicoItem,
+    pedidoSearchValue,
+    prazoFilter,
+    searchValue,
+    enrichProdutosComPrecos,
+  ]);
 
   const clearPrecoCache = useCallback(() => {
     precosCacheRef.current = new Map();
   }, []);
 
   useEffect(() => {
-    void loadProdutos();
-  }, [loadProdutos]);
+    void (async () => {
+      await loadProdutosCache();
+      if (selectedTab !== 'kanban') return;
+      await Promise.all([
+        loadCotadosFromProdutoServico(),
+        loadPedidosFromProdutoServico(),
+      ]);
+    })();
+  }, [
+    loadCotadosFromProdutoServico,
+    loadPedidosFromProdutoServico,
+    loadProdutosCache,
+    selectedTab,
+  ]);
 
   const derivedData = useMemo(() => {
     const produtosByFaixa = new Map<number, ProdutoCompraItem[]>();
@@ -438,11 +691,12 @@ export function GestaoComprasPage() {
     const fornecedorResumo = new Map<string, { count: number; total: number; faixas: Map<number, number> }>();
     const resumoPorFaixaMap = new Map<number, { count: number; total: number; fornecedores: Set<string> }>();
     const produtosACotar: ProdutoCompraItem[] = [];
-    const produtosCotados: ProdutoCompraItem[] = [];
+    const produtosCotadosCache: ProdutoCompraItem[] = [];
+    const baseProdutos = produtosCache;
 
-    produtos.forEach((item) => {
+    baseProdutos.forEach((item) => {
       if (hasCotacao(item)) {
-        produtosCotados.push(item);
+        produtosCotadosCache.push(item);
       } else {
         produtosACotar.push(item);
       }
@@ -476,6 +730,13 @@ export function GestaoComprasPage() {
       }
     });
 
+    if (timingEnabled) {
+      console.log('[GestaoCompras] produtos cotados', {
+        total: produtosCotadosCache.length,
+        totalAmostrar: baseProdutos.length,
+      });
+    }
+
     const resumoPorFaixa = FAIXAS_PRAZO.map((faixa) => {
       const resumo = resumoPorFaixaMap.get(faixa.value);
       return {
@@ -486,12 +747,18 @@ export function GestaoComprasPage() {
       };
     });
 
-    return { produtosByFaixa, produtosByFornecedor, fornecedorResumo, resumoPorFaixa, produtosACotar, produtosCotados };
-  }, [produtos]);
+    return {
+      produtosByFaixa,
+      produtosByFornecedor,
+      fornecedorResumo,
+      resumoPorFaixa,
+      produtosACotar,
+    };
+  }, [produtosCache, timingEnabled]);
 
   const fornecedoresBasicos = useMemo(() => {
     const map = new Map<string, FornecedorItem>();
-    produtos.forEach((item) => {
+    produtosCache.forEach((item) => {
       if (!item.fornecedorId) return;
       if (!map.has(item.fornecedorId)) {
         map.set(item.fornecedorId, {
@@ -501,7 +768,7 @@ export function GestaoComprasPage() {
       }
     });
     return Array.from(map.values()).sort((a, b) => resolveFornecedorNome(a).localeCompare(resolveFornecedorNome(b)));
-  }, [produtos]);
+  }, [produtosCache]);
 
   const fornecedorIds = useMemo(() => (
     fornecedoresBasicos.map((item) => item.id)
@@ -517,11 +784,22 @@ export function GestaoComprasPage() {
   const refreshAll = useCallback(async () => {
     clearPrecoCache();
     if (selectedTab === 'fornecedor') {
-      await Promise.all([loadFornecedores(fornecedorIds), loadProdutos()]);
+      await Promise.all([loadFornecedores(fornecedorIds), loadProdutosCache()]);
       return;
     }
-    await loadProdutos();
-  }, [clearPrecoCache, fornecedorIds, loadFornecedores, loadProdutos, selectedTab]);
+    await loadProdutosCache();
+    if (selectedTab === 'kanban') {
+      await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
+    }
+  }, [
+    clearPrecoCache,
+    fornecedorIds,
+    loadCotadosFromProdutoServico,
+    loadFornecedores,
+    loadPedidosFromProdutoServico,
+    loadProdutosCache,
+    selectedTab,
+  ]);
 
   const fornecedoresLookup = useMemo(() => {
     const merged = new Map<string, FornecedorItem>();
@@ -534,7 +812,7 @@ export function GestaoComprasPage() {
     return new Map(fornecedoresLookup.map((item) => [item.id, item]));
   }, [fornecedoresLookup]);
 
-  const { fornecedorResumo, resumoPorFaixa, produtosByFornecedor, produtosACotar, produtosCotados } = derivedData;
+  const { fornecedorResumo, resumoPorFaixa, produtosByFornecedor, produtosACotar } = derivedData;
 
   const fornecedorOptions = useMemo(() => {
     const options = fornecedoresBasicos.map((item) => ({
@@ -546,21 +824,21 @@ export function GestaoComprasPage() {
 
   const clienteOptions = useMemo(() => {
     const clientes = new Set<string>();
-    produtos.forEach((item) => {
+    produtosCache.forEach((item) => {
       if (item.cliente) clientes.add(item.cliente);
     });
     const options = Array.from(clientes).sort().map((cliente) => ({ key: cliente, text: cliente }));
     return [{ key: 'all', text: 'Todos' }, ...options];
-  }, [produtos]);
+  }, [produtosCache]);
 
   const fabricanteOptions = useMemo(() => {
     const fabricantes = new Set<string>();
-    produtos.forEach((item) => {
+    produtosCache.forEach((item) => {
       if (item.fabricante) fabricantes.add(item.fabricante);
     });
     const options = Array.from(fabricantes).sort().map((fabricante) => ({ key: fabricante, text: fabricante }));
     return [{ key: 'all', text: 'Todos' }, ...options];
-  }, [produtos]);
+  }, [produtosCache]);
 
   const prazoOptions = useMemo(() => [
     { key: 'all', text: 'Todos' },
@@ -594,7 +872,7 @@ export function GestaoComprasPage() {
   ), [clienteFilter, fabricanteFilter, fornecedorFilter, prazoFilter, searchValue]);
 
   const emptyState = useMemo(() => {
-    if (!hasActiveFilters && produtos.length === 0) {
+    if (!hasActiveFilters && produtosCache.length === 0) {
       return (
         <EmptyState
           title="Snapshot do dia ainda não foi gerado"
@@ -608,7 +886,7 @@ export function GestaoComprasPage() {
         description="Nenhum item encontrado com os filtros atuais."
       />
     );
-  }, [hasActiveFilters, produtos.length]);
+  }, [hasActiveFilters, produtosCache.length]);
 
   const handleClearFilter = (id: string) => {
     if (id === 'prazo') setPrazoFilter('all');
@@ -632,7 +910,7 @@ export function GestaoComprasPage() {
     new Set(selectedProdutos.map((item) => item.id))
   ), [selectedProdutos]);
 
-  const listItems = produtos;
+  const listItems = produtosACotar;
 
   const fornecedoresComItens = useMemo(() => {
     const base = fornecedoresBasicos;
@@ -715,8 +993,8 @@ export function GestaoComprasPage() {
   const kanbanColumns = useMemo(() => ([
     { key: 'acotar', label: 'A Cotar', items: produtosACotar },
     { key: 'cotado', label: 'Cotado', items: produtosCotados },
-    { key: 'pedido', label: 'Pedido', items: [] as ProdutoCompraItem[] },
-  ]), [produtosACotar, produtosCotados]);
+    { key: 'pedido', label: 'Pedido', items: produtosPedidos },
+  ]), [produtosACotar, produtosCotados, produtosPedidos]);
 
   const handleGroupSelection = useCallback((groupItems: ProdutoCompraItem[], selectedInGroup: ProdutoCompraItem[]) => {
     const groupIds = new Set(groupItems.map((item) => item.id));
@@ -876,7 +1154,10 @@ export function GestaoComprasPage() {
 
       showSuccess('Cotação criada', `Itens vinculados: ${itensSemCotacao.length}`);
       setSelectedProdutos([]);
-      await loadProdutos();
+      await loadProdutosCache();
+      if (selectedTab === 'kanban') {
+        await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
+      }
 
       window.open(
         `https://unium.crm2.dynamics.com/main.aspx?appid=${CRM_APP_ID}&forceUCI=1&pagetype=entityrecord&etn=new_cotacao&id=${cotacaoId}`,
@@ -888,7 +1169,17 @@ export function GestaoComprasPage() {
     } finally {
       setProcessing(false);
     }
-  }, [loadProdutos, resolveFornecedorBindId, selectedFornecedorId, selectedProdutos, showError, showSuccess]);
+  }, [
+    loadCotadosFromProdutoServico,
+    loadPedidosFromProdutoServico,
+    loadProdutosCache,
+    resolveFornecedorBindId,
+    selectedFornecedorId,
+    selectedProdutos,
+    selectedTab,
+    showError,
+    showSuccess,
+  ]);
 
   const handleCopyToClipboard = useCallback(async () => {
     try {
@@ -1039,14 +1330,56 @@ export function GestaoComprasPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {kanbanColumns.map((col) => {
               const items = col.items;
+              const isPedido = col.key === 'pedido';
+              const isCotado = col.key === 'cotado';
+              const isAcotar = col.key === 'acotar';
+              const isLoading = isAcotar ? loadingProdutos : isCotado ? loadingCotados : loadingPedidos;
               return (
                 <Card key={col.key} style={{ padding: '12px' }}>
                   <div className="flex items-center justify-between mb-2">
                     <Text weight="semibold">{col.label}</Text>
                     <Badge appearance="filled">{items.length}</Badge>
                   </div>
+                  {isPedido && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <Input
+                        value={pedidoSearchInput}
+                        onChange={(_, data) => setPedidoSearchInput(data.value)}
+                        placeholder="Buscar pedidos (todos os tempos)"
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            setPedidoSearchValue(pedidoSearchInput.trim());
+                          }
+                        }}
+                      />
+                      <Button
+                        appearance="secondary"
+                        onClick={() => setPedidoSearchValue(pedidoSearchInput.trim())}
+                        disabled={loadingPedidos || pedidoLoadingMore}
+                      >
+                        Buscar
+                      </Button>
+                      {pedidoSearchValue && (
+                        <Button
+                          appearance="subtle"
+                          onClick={() => {
+                            setPedidoSearchInput('');
+                            setPedidoSearchValue('');
+                          }}
+                          disabled={loadingPedidos || pedidoLoadingMore}
+                        >
+                          Limpar
+                        </Button>
+                      )}
+                    </div>
+                  )}
                   <div className="flex flex-col gap-2">
-                    {items.map((item) => (
+                    {isLoading && items.length === 0 && (
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                        Carregando itens...
+                      </Text>
+                    )}
+                    {!isLoading && items.map((item) => (
                       <Card key={item.id} style={{ padding: '10px' }}>
                         <div className="flex items-start justify-between">
                           <div>
@@ -1075,10 +1408,19 @@ export function GestaoComprasPage() {
                         </Text>
                       </Card>
                     ))}
-                    {items.length === 0 && (
+                    {!isLoading && items.length === 0 && (
                       <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
                         Nenhum item nesta coluna.
                       </Text>
+                    )}
+                    {isPedido && pedidoHasMore && (
+                      <Button
+                        appearance="secondary"
+                        onClick={() => void loadPedidosFromProdutoServico({ append: true })}
+                        disabled={pedidoLoadingMore || loadingPedidos}
+                      >
+                        {pedidoLoadingMore ? 'Carregando...' : 'Carregar mais'}
+                      </Button>
                     )}
                   </div>
                 </Card>
