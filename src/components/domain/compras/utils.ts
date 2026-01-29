@@ -14,6 +14,9 @@ import {
   MonthCell,
   FornecedorTimelineGroup,
   MonthlyPurchase,
+  GroupingPeriod,
+  PeriodCell,
+  PeriodPurchase,
 } from './types';
 
 /**
@@ -292,9 +295,12 @@ export function getMonthsInRange(start: Date, end: Date): MonthCell[] {
   while (current <= endMonth) {
     const mes = current.getMonth();
     const ano = current.getFullYear();
+    const periodEnd = new Date(ano, mes + 1, 0); // Último dia do mês
     months.push({
-      mes,
+      periodo: mes,
       ano,
+      startDate: new Date(ano, mes, 1),
+      endDate: periodEnd,
       label: current.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
       key: `${ano}-${String(mes).padStart(2, '0')}`,
     });
@@ -302,6 +308,121 @@ export function getMonthsInRange(start: Date, end: Date): MonthCell[] {
   }
 
   return months;
+}
+
+/**
+ * Get week number of the year (1-53)
+ */
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
+/**
+ * Get start of week (Monday)
+ */
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+}
+
+/**
+ * Get end of week (Sunday)
+ */
+function getWeekEnd(date: Date): Date {
+  const start = getWeekStart(date);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  return end;
+}
+
+/**
+ * Generate array of weeks within a date range
+ */
+export function getWeeksInRange(start: Date, end: Date): PeriodCell[] {
+  const weeks: PeriodCell[] = [];
+  const current = getWeekStart(new Date(start));
+  
+  while (current <= end) {
+    const weekNum = getWeekNumber(current);
+    const ano = current.getFullYear();
+    const weekEnd = getWeekEnd(current);
+    
+    weeks.push({
+      periodo: weekNum,
+      ano,
+      startDate: new Date(current),
+      endDate: weekEnd,
+      label: `S${weekNum}`,
+      key: `${ano}-W${String(weekNum).padStart(2, '0')}`,
+    });
+    
+    current.setDate(current.getDate() + 7);
+  }
+
+  return weeks;
+}
+
+/**
+ * Get quarter number (0-3) from month
+ */
+function getQuarter(month: number): number {
+  return Math.floor(month / 3);
+}
+
+/**
+ * Generate array of quarters within a date range
+ */
+export function getQuartersInRange(start: Date, end: Date): PeriodCell[] {
+  const quarters: PeriodCell[] = [];
+  const startQuarter = getQuarter(start.getMonth());
+  const endQuarter = getQuarter(end.getMonth());
+  const startYear = start.getFullYear();
+  const endYear = end.getFullYear();
+
+  for (let year = startYear; year <= endYear; year++) {
+    const firstQ = year === startYear ? startQuarter : 0;
+    const lastQ = year === endYear ? endQuarter : 3;
+
+    for (let q = firstQ; q <= lastQ; q++) {
+      const startMonth = q * 3;
+      const endMonth = startMonth + 2;
+      quarters.push({
+        periodo: q,
+        ano: year,
+        startDate: new Date(year, startMonth, 1),
+        endDate: new Date(year, endMonth + 1, 0), // Último dia do terceiro mês
+        label: `T${q + 1}`,
+        key: `${year}-Q${q}`,
+      });
+    }
+  }
+
+  return quarters;
+}
+
+/**
+ * Get periods in range based on grouping period
+ */
+export function getPeriodsInRange(
+  start: Date,
+  end: Date,
+  grouping: GroupingPeriod
+): PeriodCell[] {
+  switch (grouping) {
+    case 'weekly':
+      return getWeeksInRange(start, end);
+    case 'quarterly':
+      return getQuartersInRange(start, end);
+    case 'monthly':
+    default:
+      return getMonthsInRange(start, end);
+  }
 }
 
 /**
@@ -346,17 +467,49 @@ function getMonthKey(date: Date): string {
 }
 
 /**
- * Group timeline items by supplier and month
+ * Get week key from a date
+ */
+function getWeekKey(date: Date): string {
+  const weekNum = getWeekNumber(date);
+  return `${date.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+}
+
+/**
+ * Get quarter key from a date
+ */
+function getQuarterKey(date: Date): string {
+  const quarter = getQuarter(date.getMonth());
+  return `${date.getFullYear()}-Q${quarter}`;
+}
+
+/**
+ * Get period key from a date based on grouping
+ */
+function getPeriodKey(date: Date, grouping: GroupingPeriod): string {
+  switch (grouping) {
+    case 'weekly':
+      return getWeekKey(date);
+    case 'quarterly':
+      return getQuarterKey(date);
+    case 'monthly':
+    default:
+      return getMonthKey(date);
+  }
+}
+
+/**
+ * Group timeline items by supplier and period (week/month/quarter)
  * Uses dataLimite (data para fazer pedido) as reference date
  */
-export function groupBySupplierAndMonth(
+export function groupBySupplierAndPeriod(
   items: ProcurementTimelineItem[],
-  dateRange: DateRange
+  dateRange: DateRange,
+  grouping: GroupingPeriod = 'monthly'
 ): FornecedorTimelineGroup[] {
   const supplierMap = new Map<string, {
     fornecedorId: string;
     fornecedorNome: string;
-    monthMap: Map<string, ProcurementTimelineItem[]>;
+    periodMap: Map<string, ProcurementTimelineItem[]>;
   }>();
 
   // Filter items within date range and group by supplier
@@ -376,47 +529,49 @@ export function groupBySupplierAndMonth(
       supplierMap.set(supplierId, {
         fornecedorId: supplierId,
         fornecedorNome: supplierName,
-        monthMap: new Map(),
+        periodMap: new Map(),
       });
     }
 
     const supplier = supplierMap.get(supplierId)!;
-    const monthKey = getMonthKey(refDate);
+    const periodKey = getPeriodKey(refDate, grouping);
 
-    if (!supplier.monthMap.has(monthKey)) {
-      supplier.monthMap.set(monthKey, []);
+    if (!supplier.periodMap.has(periodKey)) {
+      supplier.periodMap.set(periodKey, []);
     }
-    supplier.monthMap.get(monthKey)!.push(item);
+    supplier.periodMap.get(periodKey)!.push(item);
   });
 
-  // Get all months in range for consistent structure
-  const allMonths = getMonthsInRange(dateRange.start, dateRange.end);
+  // Get all periods in range for consistent structure
+  const allPeriods = getPeriodsInRange(dateRange.start, dateRange.end, grouping);
 
   // Convert to array format
   const groups: FornecedorTimelineGroup[] = Array.from(supplierMap.values())
     .map((supplier) => {
-      const meses: MonthlyPurchase[] = allMonths.map((monthCell) => {
-        const monthKey = monthCell.key;
-        const produtos = supplier.monthMap.get(monthKey) || [];
+      const periodos: PeriodPurchase[] = allPeriods.map((periodCell) => {
+        const periodKey = periodCell.key;
+        const produtos = supplier.periodMap.get(periodKey) || [];
         const valor = produtos.reduce((sum, p) => sum + (p.valorTotal ?? 0), 0);
         const quantidade = produtos.reduce((sum, p) => sum + (p.quantidade ?? 0), 0);
 
         return {
-          mes: monthCell.mes,
-          ano: monthCell.ano,
+          periodo: periodCell.periodo,
+          ano: periodCell.ano,
+          startDate: periodCell.startDate,
+          endDate: periodCell.endDate,
           valor,
           quantidade,
           produtos,
         };
       });
 
-      const totalGeral = meses.reduce((sum, m) => sum + m.valor, 0);
-      const totalQuantidade = meses.reduce((sum, m) => sum + m.quantidade, 0);
+      const totalGeral = periodos.reduce((sum, m) => sum + m.valor, 0);
+      const totalQuantidade = periodos.reduce((sum, m) => sum + m.quantidade, 0);
 
       return {
         fornecedorId: supplier.fornecedorId,
         fornecedorNome: supplier.fornecedorNome,
-        meses,
+        periodos,
         totalGeral,
         totalQuantidade,
       };
@@ -425,6 +580,18 @@ export function groupBySupplierAndMonth(
     .sort((a, b) => b.totalGeral - a.totalGeral);
 
   return groups;
+}
+
+/**
+ * Group timeline items by supplier and month
+ * Uses dataLimite (data para fazer pedido) as reference date
+ * @deprecated Use groupBySupplierAndPeriod instead
+ */
+export function groupBySupplierAndMonth(
+  items: ProcurementTimelineItem[],
+  dateRange: DateRange
+): FornecedorTimelineGroup[] {
+  return groupBySupplierAndPeriod(items, dateRange, 'monthly');
 }
 
 /**

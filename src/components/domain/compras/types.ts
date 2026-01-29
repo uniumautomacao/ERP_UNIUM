@@ -133,15 +133,27 @@ export interface BarPosition {
 // ============================================
 
 /**
- * Compra mensal agregada por fornecedor
+ * Período de agrupamento para timeline
  */
-export interface MonthlyPurchase {
-  mes: number;        // 0-11 (janeiro = 0)
+export type GroupingPeriod = 'weekly' | 'monthly' | 'quarterly';
+
+/**
+ * Compra agregada por período (semanal, mensal ou trimestral)
+ */
+export interface PeriodPurchase {
+  periodo: number;    // Número do período (semana: 1-53, mês: 0-11, trimestre: 0-3)
   ano: number;
+  startDate: Date;    // Data de início do período
+  endDate: Date;      // Data de fim do período
   valor: number;
   quantidade: number;
   produtos: ProcurementTimelineItem[];
 }
+
+/**
+ * Compra mensal agregada por fornecedor (alias para compatibilidade)
+ */
+export type MonthlyPurchase = PeriodPurchase;
 
 /**
  * Grupo de compras agrupadas por fornecedor
@@ -149,19 +161,21 @@ export interface MonthlyPurchase {
 export interface FornecedorTimelineGroup {
   fornecedorId: string;
   fornecedorNome: string;
-  meses: MonthlyPurchase[];
+  periodos: PeriodPurchase[];
   totalGeral: number;
   totalQuantidade: number;
 }
 
 /**
- * Dados para o modal de detalhes do mês/fornecedor
+ * Dados para o modal de detalhes do período/fornecedor
  */
 export interface SupplierMonthModalData {
   fornecedorId: string;
   fornecedorNome: string;
-  mes: number;
+  periodo: number;
   ano: number;
+  startDate: Date;
+  endDate: Date;
   valor: number;
   produtos: ProcurementTimelineItem[];
 }
@@ -175,14 +189,21 @@ export interface DateRange {
 }
 
 /**
- * Estrutura de mês para renderização
+ * Estrutura de período para renderização
  */
-export interface MonthCell {
-  mes: number;
+export interface PeriodCell {
+  periodo: number;
   ano: number;
+  startDate: Date;
+  endDate: Date;
   label: string;
   key: string;
 }
+
+/**
+ * Estrutura de mês para renderização (alias para compatibilidade)
+ */
+export type MonthCell = PeriodCell;
 
 /**
  * Props do componente principal ProcurementTimeline (modo fornecedor)

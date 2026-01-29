@@ -24,11 +24,6 @@ interface SupplierMonthModalProps {
   data: SupplierMonthModalData | null;
 }
 
-const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
-
 const FAIXAS_PRAZO: Record<number, { label: string; color: 'danger' | 'warning' | 'informative' | 'subtle' }> = {
   100000000: { label: 'Atrasado', color: 'danger' },
   100000001: { label: 'Pedir agora', color: 'warning' },
@@ -44,10 +39,27 @@ function getFaixaBadge(faixaPrazo: number | null) {
   return <Badge color={faixa.color}>{faixa.label}</Badge>;
 }
 
+function formatPeriodLabel(startDate: Date, endDate: Date): string {
+  const start = formatDateBR(startDate);
+  const end = formatDateBR(endDate);
+  
+  // Se for o mesmo dia, mostrar apenas uma data
+  if (start === end) {
+    return start;
+  }
+  
+  // Se for o mesmo mês, mostrar de forma compacta
+  if (startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()) {
+    return `${startDate.getDate()} a ${end}`;
+  }
+  
+  return `${start} a ${end}`;
+}
+
 export function SupplierMonthModal({ open, onClose, data }: SupplierMonthModalProps) {
   if (!data) return null;
 
-  const monthLabel = `${MONTH_NAMES[data.mes]} ${data.ano}`;
+  const periodLabel = formatPeriodLabel(data.startDate, data.endDate);
   const totalQuantidade = data.produtos.reduce((sum, p) => sum + (p.quantidade ?? 0), 0);
 
   // Group products by reference to aggregate quantities
@@ -110,7 +122,7 @@ export function SupplierMonthModal({ open, onClose, data }: SupplierMonthModalPr
                 }}
               >
                 <Text size={400} weight="semibold" block>
-                  {monthLabel}
+                  {periodLabel}
                 </Text>
                 <div className="flex items-center gap-4 mt-2">
                   <Text size={300}>

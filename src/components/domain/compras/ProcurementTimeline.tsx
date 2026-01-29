@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo, useCallback, useRef } from 'react';
-import { Card, Text, Button, Input, tokens, Tooltip } from '@fluentui/react-components';
+import { Card, Text, Button, Input, tokens, Tooltip, Dropdown, Option } from '@fluentui/react-components';
 import {
   ChevronDown24Filled,
   ChevronRight24Filled,
@@ -15,14 +15,15 @@ import {
   SupplierTimelineProps,
   DateRange,
   FornecedorTimelineGroup,
-  MonthCell,
+  PeriodCell,
   SupplierMonthModalData,
+  GroupingPeriod,
 } from './types';
 import {
   transformToSupplierTimelineItems,
-  groupBySupplierAndMonth,
+  groupBySupplierAndPeriod,
   getDefaultSupplierDateRange,
-  getMonthsInRange,
+  getPeriodsInRange,
   formatCurrencyBR,
   formatCurrencyCompact,
   getValueIntensity,
@@ -34,7 +35,13 @@ const ROW_HEIGHT = 56;
 const HEADER_HEIGHT = 80;
 const LEFT_PANEL_WIDTH = 280;
 const TIMELINE_MIN_HEIGHT = 500;
-const MONTH_CELL_MIN_WIDTH = 80;
+const PERIOD_CELL_MIN_WIDTH = 80;
+
+const GROUPING_OPTIONS = [
+  { key: 'weekly', label: 'Semanal' },
+  { key: 'monthly', label: 'Mensal' },
+  { key: 'quarterly', label: 'Trimestral' },
+];
 
 export function ProcurementTimeline({
   items,
@@ -45,6 +52,7 @@ export function ProcurementTimeline({
   const [dateRange, setDateRange] = useState<DateRange>(() => 
     initialDateRange ?? getDefaultSupplierDateRange()
   );
+  const [grouping, setGrouping] = useState<GroupingPeriod>('monthly');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [searchFilter, setSearchFilter] = useState('');
   const [modalData, setModalData] = useState<SupplierMonthModalData | null>(null);
@@ -62,10 +70,10 @@ export function ProcurementTimeline({
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
 
-  // Get months in range
-  const monthsInRange = useMemo(
-    () => getMonthsInRange(dateRange.start, dateRange.end),
-    [dateRange]
+  // Get periods in range
+  const periodsInRange = useMemo(
+    () => getPeriodsInRange(dateRange.start, dateRange.end, grouping),
+    [dateRange, grouping]
   );
 
   // Transform and group data
@@ -75,7 +83,7 @@ export function ProcurementTimeline({
   );
 
   const supplierGroups = useMemo(() => {
-    let groups = groupBySupplierAndMonth(timelineItems, dateRange);
+    let groups = groupBySupplierAndPeriod(timelineItems, dateRange, grouping);
 
     // Apply search filter
     if (searchFilter.trim()) {
@@ -86,14 +94,14 @@ export function ProcurementTimeline({
     }
 
     return groups;
-  }, [timelineItems, dateRange, searchFilter]);
+  }, [timelineItems, dateRange, grouping, searchFilter]);
 
   // Calculate max value for color intensity
   const maxMonthValue = useMemo(() => {
     let max = 0;
     supplierGroups.forEach((group) => {
-      group.meses.forEach((mes) => {
-        if (mes.valor > max) max = mes.valor;
+      group.periodos.forEach((periodo) => {
+        if (periodo.valor > max) max = periodo.valor;
       });
     });
     return max;
@@ -112,20 +120,22 @@ export function ProcurementTimeline({
     });
   }, []);
 
-  const handleMonthClick = useCallback(
-    (group: FornecedorTimelineGroup, monthCell: MonthCell) => {
-      const monthData = group.meses.find(
-        (m) => m.mes === monthCell.mes && m.ano === monthCell.ano
+  const handlePeriodClick = useCallback(
+    (group: FornecedorTimelineGroup, periodCell: PeriodCell) => {
+      const periodData = group.periodos.find(
+        (p) => p.periodo === periodCell.periodo && p.ano === periodCell.ano
       );
-      if (!monthData || monthData.produtos.length === 0) return;
+      if (!periodData || periodData.produtos.length === 0) return;
 
       const data: SupplierMonthModalData = {
         fornecedorId: group.fornecedorId,
         fornecedorNome: group.fornecedorNome,
-        mes: monthCell.mes,
-        ano: monthCell.ano,
-        valor: monthData.valor,
-        produtos: monthData.produtos,
+        periodo: periodCell.periodo,
+        ano: periodCell.ano,
+        startDate: periodCell.startDate,
+        endDate: periodCell.endDate,
+        valor: periodData.valor,
+        produtos: periodData.produtos,
       };
 
       setModalData(data);
@@ -186,13 +196,27 @@ export function ProcurementTimeline({
           backgroundColor: tokens.colorNeutralBackground2,
         }}
       >
-        <Input
-          value={searchFilter}
-          onChange={(_, data) => setSearchFilter(data.value)}
-          placeholder="Filtrar fornecedor..."
-          contentBefore={<Search24Regular />}
-          style={{ width: '240px' }}
-        />
+        <div className="flex items-center gap-3">
+          <Input
+            value={searchFilter}
+            onChange={(_, data) => setSearchFilter(data.value)}
+            placeholder="Filtrar fornecedor..."
+            contentBefore={<Search24Regular />}
+            style={{ width: '200px' }}
+          />
+          
+          <Dropdown
+            value={GROUPING_OPTIONS.find((opt) => opt.key === grouping)?.label ?? 'Mensal'}
+            onOptionSelect={(_, data) => setGrouping(data.optionValue as GroupingPeriod)}
+            style={{ width: '130px' }}
+          >
+            {GROUPING_OPTIONS.map((option) => (
+              <Option key={option.key} value={option.key}>
+                {option.label}
+              </Option>
+            ))}
+          </Dropdown>
+        </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <Calendar24Regular style={{ color: tokens.colorNeutralForeground3 }} />
@@ -319,14 +343,14 @@ export function ProcurementTimeline({
           </div>
         </div>
 
-        {/* Right Panel - Monthly Bars */}
+        {/* Right Panel - Period Bars */}
         <div
           ref={rightPanelRef}
           onScroll={handleRightScroll}
           className="flex-grow"
           style={{ overflow: 'auto', position: 'relative' }}
         >
-          {/* Month Headers */}
+          {/* Period Headers */}
           <div
             style={{
               display: 'flex',
@@ -336,15 +360,15 @@ export function ProcurementTimeline({
               position: 'sticky',
               top: 0,
               zIndex: 10,
-              minWidth: `${monthsInRange.length * MONTH_CELL_MIN_WIDTH}px`,
+              minWidth: `${periodsInRange.length * PERIOD_CELL_MIN_WIDTH}px`,
             }}
           >
-            {monthsInRange.map((monthCell) => (
+            {periodsInRange.map((periodCell) => (
               <div
-                key={monthCell.key}
+                key={periodCell.key}
                 style={{
                   flex: 1,
-                  minWidth: `${MONTH_CELL_MIN_WIDTH}px`,
+                  minWidth: `${PERIOD_CELL_MIN_WIDTH}px`,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -354,17 +378,17 @@ export function ProcurementTimeline({
                 }}
               >
                 <Text size={300} weight="semibold" style={{ textTransform: 'capitalize' }}>
-                  {monthCell.label}
+                  {periodCell.label}
                 </Text>
                 <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                  {monthCell.ano}
+                  {periodCell.ano}
                 </Text>
               </div>
             ))}
           </div>
 
-          {/* Supplier Month Bars */}
-          <div style={{ position: 'relative', minHeight: contentHeight, minWidth: `${monthsInRange.length * MONTH_CELL_MIN_WIDTH}px` }}>
+          {/* Supplier Period Bars */}
+          <div style={{ position: 'relative', minHeight: contentHeight, minWidth: `${periodsInRange.length * PERIOD_CELL_MIN_WIDTH}px` }}>
             {supplierGroups.map((group) => (
               <div
                 key={group.fornecedorId}
@@ -377,20 +401,20 @@ export function ProcurementTimeline({
                     : tokens.colorNeutralBackground1,
                 }}
               >
-                {monthsInRange.map((monthCell) => {
-                  const monthData = group.meses.find(
-                    (m) => m.mes === monthCell.mes && m.ano === monthCell.ano
+                {periodsInRange.map((periodCell) => {
+                  const periodData = group.periodos.find(
+                    (p) => p.periodo === periodCell.periodo && p.ano === periodCell.ano
                   );
-                  const valor = monthData?.valor ?? 0;
+                  const valor = periodData?.valor ?? 0;
                   const hasValue = valor > 0;
                   const barColor = getBarColor(valor);
 
                   return (
                     <div
-                      key={monthCell.key}
+                      key={periodCell.key}
                       style={{
                         flex: 1,
-                        minWidth: `${MONTH_CELL_MIN_WIDTH}px`,
+                        minWidth: `${PERIOD_CELL_MIN_WIDTH}px`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -398,16 +422,16 @@ export function ProcurementTimeline({
                         borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
                         cursor: hasValue ? 'pointer' : 'default',
                       }}
-                      onClick={() => hasValue && handleMonthClick(group, monthCell)}
+                      onClick={() => hasValue && handlePeriodClick(group, periodCell)}
                     >
                       {hasValue && (
                         <Tooltip
                           content={
                             <div>
                               <Text weight="semibold" block>{group.fornecedorNome}</Text>
-                              <Text block>{monthCell.label} {monthCell.ano}</Text>
+                              <Text block>{periodCell.label} {periodCell.ano}</Text>
                               <Text block>{formatCurrencyBR(valor)}</Text>
-                              <Text size={200}>{monthData?.produtos.length ?? 0} produtos</Text>
+                              <Text size={200}>{periodData?.produtos.length ?? 0} produtos</Text>
                             </div>
                           }
                           relationship="label"
