@@ -269,6 +269,7 @@ export function GestaoComprasPage() {
   const [produtosCache, setProdutosCache] = useState<ProdutoCompraItem[]>([]);
   const [produtosCotados, setProdutosCotados] = useState<ProdutoCompraItem[]>([]);
   const [cotacoesAgrupadas, setCotacoesAgrupadas] = useState<CotacaoKanbanGroup[]>([]);
+  const [cotacoesPedidosAgrupadas, setCotacoesPedidosAgrupadas] = useState<CotacaoKanbanGroup[]>([]);
   const [expandedCotacaoIds, setExpandedCotacaoIds] = useState<Record<string, boolean>>({});
   const [cotacaoModalId, setCotacaoModalId] = useState<string | null>(null);
   const [cotacaoModalOpen, setCotacaoModalOpen] = useState(false);
@@ -342,6 +343,13 @@ export function GestaoComprasPage() {
       console.debug(`[GestaoCompras] ${label}`, meta);
     }
   }, [timingEnabled]);
+
+  const cotacoesKanbanMap = useMemo(() => {
+    const map = new Map<string, CotacaoKanbanGroup>();
+    cotacoesAgrupadas.forEach((grupo) => map.set(grupo.cotacaoId, grupo));
+    cotacoesPedidosAgrupadas.forEach((grupo) => map.set(grupo.cotacaoId, grupo));
+    return map;
+  }, [cotacoesAgrupadas, cotacoesPedidosAgrupadas]);
 
   const loadFornecedores = useCallback(async (ids?: string[]) => {
     setFornecedoresDetalhesLoading(true);
@@ -765,6 +773,139 @@ export function GestaoComprasPage() {
     try {
       const hasPedidoSearch = pedidoSearchValue.trim().length > 0;
       const searchTerm = hasPedidoSearch ? pedidoSearchValue : searchValue;
+      if (!hasPedidoSearch) {
+        const rangeDays = Number(pedidoRangeDays) || 30;
+        const isoCutoff = new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString();
+
+        const cotacoesResult = await NewCotacaoService.getAll({
+          filter: `statecode eq 0 and new_aprovarcotacao eq true and new_datadeaprovacao ge ${isoCutoff}`,
+          select: [
+            'new_cotacaoid',
+            'new_name',
+            'new_nomedofornecedor',
+            'new_valortotal',
+            'new_opcaodeentrega',
+            'new_enderecodeentrega',
+            'new_observacoes',
+            'new_datadeaprovacao',
+            'createdon',
+            'new_prazodeenvio',
+            'new_aprovarcotacao',
+            'statecode',
+          ],
+          orderBy: ['new_datadeaprovacao desc'],
+          top: 200,
+        });
+        if (requestId !== pedidosRequestId.current) return;
+
+        const cotacoes = cotacoesResult.data ?? [];
+        const cotacaoIds = cotacoes.map((item: any) => item.new_cotacaoid).filter(Boolean) as string[];
+
+        if (cotacaoIds.length === 0) {
+          setProdutosPedidos([]);
+          setCotacoesPedidosAgrupadas([]);
+          setPedidoHasMore(false);
+          setPedidoSkipToken(null);
+          pedidoSkipTokenRef.current = null;
+          return;
+        }
+
+        const cotacoesDetalhesMap = new Map<string, CotacaoDetalhes>();
+        cotacoes.forEach((item: any) => {
+          cotacoesDetalhesMap.set(item.new_cotacaoid, {
+            id: item.new_cotacaoid,
+            nome: item.new_name ?? null,
+            fornecedor: item.new_nomedofornecedor ?? null,
+            valorTotal: item.new_valortotal ?? null,
+            opcaoEntrega: item.new_opcaodeentrega ?? null,
+            enderecoEntrega: item.new_enderecodeentrega ?? null,
+            observacoes: item.new_observacoes ?? null,
+            dataAprovacao: item.new_datadeaprovacao ?? null,
+            dataCriacao: item.createdon ?? null,
+            prazodeEnvio: item.new_prazodeenvio ?? null,
+            aprovado: item.new_aprovarcotacao ?? null,
+            statecode: item.statecode ?? null,
+          });
+        });
+
+        const produtoFilters = buildProdutoServicoFilters({
+          search: searchTerm,
+          prazo: prazoFilter,
+          fornecedorId: fornecedorFilter === 'all' ? undefined : fornecedorFilter,
+          cliente: clienteFilter === 'all' ? undefined : clienteFilter,
+          fabricante: fabricanteFilter === 'all' ? undefined : fabricanteFilter,
+        });
+        produtoFilters.push('_new_cotacao_value ne null');
+
+        const produtosResults = await Promise.all(
+          chunkIds(cotacaoIds, REFERENCE_CHUNK_SIZE).map((chunk) => (
+            NewProdutoServicoService.getAll({
+              select: [
+                'new_produtoservicoid',
+                'new_referenciadoproduto',
+                'new_descricao',
+                'new_quantidade',
+                'new_nomedoclientefx',
+                'new_previsaodeentrega',
+                'new_datalimiteparapedido',
+                'new_diasparapedido',
+                'new_faixadeprazo',
+                'new_nomedofornecedorprincipal',
+                'new_fornecedorprincipalid',
+                'new_nomedofabricante',
+                '_new_modelodeprodutooriginal_value',
+                '_new_cotacao_value',
+                'createdon',
+              ],
+              filter: [
+                ...produtoFilters,
+                `(${chunk.map((id) => `_new_cotacao_value eq '${escapeODataString(id)}'`).join(' or ')})`,
+              ].join(' and '),
+              orderBy: ['createdon desc'],
+              top: 500,
+            })
+          ))
+        );
+        if (requestId !== pedidosRequestId.current) return;
+
+        const fetched = produtosResults
+          .flatMap((result) => result.data ?? [])
+          .map((item: any) => mapProdutoServicoItem(item))
+          .filter((item: ProdutoCompraItem) => Boolean(item.id));
+
+        setProdutosPedidos(fetched);
+        setPedidoHasMore(false);
+        setPedidoSkipToken(null);
+        pedidoSkipTokenRef.current = null;
+
+        await enrichProdutosComPrecos(fetched, requestId, pedidosRequestId, setProdutosPedidos);
+
+        const cotacaoMap = new Map<string, ProdutoCompraItem[]>();
+        fetched.forEach((item) => {
+          if (!item.cotacaoId) return;
+          if (!cotacaoMap.has(item.cotacaoId)) cotacaoMap.set(item.cotacaoId, []);
+          cotacaoMap.get(item.cotacaoId)!.push(item);
+        });
+
+        const grupos = Array.from(cotacaoMap.entries()).map(([cotacaoId, produtos]) => {
+          const totalValor = produtos.reduce((acc, p) => acc + (p.valorTotal ?? 0), 0);
+          const datasLimite = produtos.map((p) => p.dataLimite).filter(Boolean) as string[];
+          const minDataLimite = datasLimite.length > 0 ? datasLimite.sort()[0] : null;
+
+          return {
+            cotacaoId,
+            cotacao: cotacoesDetalhesMap.get(cotacaoId),
+            produtos,
+            totalProdutos: produtos.length,
+            totalValorProdutos: totalValor,
+            minDataLimite,
+          } as CotacaoKanbanGroup;
+        }).filter((grupo) => grupo.produtos.length > 0);
+
+        setCotacoesPedidosAgrupadas(grupos);
+        return;
+      }
+
       const filters = buildProdutoServicoFilters({
         search: searchTerm,
         prazo: prazoFilter,
@@ -774,11 +915,6 @@ export function GestaoComprasPage() {
       });
       filters.push('_new_cotacao_value ne null');
       filters.push('new_Cotacao/new_aprovarcotacao eq true');
-      if (!hasPedidoSearch) {
-        const rangeDays = Number(pedidoRangeDays) || 30;
-        const isoCutoff = new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString();
-        filters.push(`new_Cotacao/new_datadeaprovacao ge ${isoCutoff}`);
-      }
 
       const result = await NewProdutoServicoService.getAll({
         select: [
@@ -800,7 +936,7 @@ export function GestaoComprasPage() {
         ],
         filter: filters.join(' and '),
         orderBy: ['createdon desc'],
-        top: hasPedidoSearch ? 100 : 500,
+        top: 100,
         ...(append && skipToken ? { skipToken } : {}),
       });
       if (requestId !== pedidosRequestId.current) return;
@@ -821,9 +957,79 @@ export function GestaoComprasPage() {
       setPedidoHasMore(Boolean(nextToken) && hasPedidoSearch);
 
       await enrichProdutosComPrecos(nextItems, requestId, pedidosRequestId, setProdutosPedidos);
+
+      const cotacaoIds = Array.from(new Set(
+        nextItems.map((item) => item.cotacaoId).filter((id): id is string => Boolean(id))
+      ));
+
+      const cotacoesResults = await Promise.all(
+        chunkIds(cotacaoIds, REFERENCE_CHUNK_SIZE).map((chunk) => (
+          NewCotacaoService.getAll({
+            filter: `statecode eq 0 and (${chunk.map((id) => `new_cotacaoid eq '${escapeODataString(id)}'`).join(' or ')})`,
+            select: [
+              'new_cotacaoid',
+              'new_name',
+              'new_nomedofornecedor',
+              'new_valortotal',
+              'new_opcaodeentrega',
+              'new_enderecodeentrega',
+              'new_observacoes',
+              'new_datadeaprovacao',
+              'createdon',
+              'new_prazodeenvio',
+              'new_aprovarcotacao',
+              'statecode',
+            ],
+          })
+        ))
+      );
+      if (requestId !== pedidosRequestId.current) return;
+
+      const cotacoesDetalhesMap = new Map<string, CotacaoDetalhes>();
+      cotacoesResults.flatMap((res) => res.data ?? []).forEach((item: any) => {
+        cotacoesDetalhesMap.set(item.new_cotacaoid, {
+          id: item.new_cotacaoid,
+          nome: item.new_name ?? null,
+          fornecedor: item.new_nomedofornecedor ?? null,
+          valorTotal: item.new_valortotal ?? null,
+          opcaoEntrega: item.new_opcaodeentrega ?? null,
+          enderecoEntrega: item.new_enderecodeentrega ?? null,
+          observacoes: item.new_observacoes ?? null,
+          dataAprovacao: item.new_datadeaprovacao ?? null,
+          dataCriacao: item.createdon ?? null,
+          prazodeEnvio: item.new_prazodeenvio ?? null,
+          aprovado: item.new_aprovarcotacao ?? null,
+          statecode: item.statecode ?? null,
+        });
+      });
+
+      const cotacaoMap = new Map<string, ProdutoCompraItem[]>();
+      nextItems.forEach((item) => {
+        if (!item.cotacaoId) return;
+        if (!cotacaoMap.has(item.cotacaoId)) cotacaoMap.set(item.cotacaoId, []);
+        cotacaoMap.get(item.cotacaoId)!.push(item);
+      });
+
+      const grupos = Array.from(cotacaoMap.entries()).map(([cotacaoId, produtos]) => {
+        const totalValor = produtos.reduce((acc, p) => acc + (p.valorTotal ?? 0), 0);
+        const datasLimite = produtos.map((p) => p.dataLimite).filter(Boolean) as string[];
+        const minDataLimite = datasLimite.length > 0 ? datasLimite.sort()[0] : null;
+
+        return {
+          cotacaoId,
+          cotacao: cotacoesDetalhesMap.get(cotacaoId),
+          produtos,
+          totalProdutos: produtos.length,
+          totalValorProdutos: totalValor,
+          minDataLimite,
+        } as CotacaoKanbanGroup;
+      }).filter((grupo) => grupo.produtos.length > 0);
+
+      setCotacoesPedidosAgrupadas(grupos);
     } catch (error) {
       console.error('[GestaoCompras] erro ao carregar produtos pedidos', error);
       setProdutosPedidos([]);
+      setCotacoesPedidosAgrupadas([]);
     } finally {
       if (requestId === pedidosRequestId.current) {
         setLoadingPedidos(false);
@@ -979,9 +1185,7 @@ export function GestaoComprasPage() {
   ]);
 
   useEffect(() => {
-    const group = cotacaoModalId
-      ? cotacoesAgrupadas.find((item) => item.cotacaoId === cotacaoModalId)
-      : null;
+    const group = cotacaoModalId ? cotacoesKanbanMap.get(cotacaoModalId) : null;
     if (!cotacaoModalOpen || !group) {
       setCotacaoActionDisabled(true);
       return;
@@ -1016,7 +1220,7 @@ export function GestaoComprasPage() {
     return () => {
       alive = false;
     };
-  }, [cotacaoModalId, cotacaoModalOpen, cotacoesAgrupadas]);
+  }, [cotacaoModalId, cotacaoModalOpen, cotacoesKanbanMap]);
 
   const fornecedoresLookup = useMemo(() => {
     const merged = new Map<string, FornecedorItem>();
@@ -1031,7 +1235,7 @@ export function GestaoComprasPage() {
 
   useEffect(() => {
     if (!cotacaoModalOpen || !cotacaoModalId) return;
-    const grupo = cotacoesAgrupadas.find((item) => item.cotacaoId === cotacaoModalId);
+    const grupo = cotacaoModalId ? cotacoesKanbanMap.get(cotacaoModalId) : null;
     if (!grupo) return;
     const fornecedorId = grupo.produtos[0]?.fornecedorId ?? null;
     const fornecedor = fornecedorId ? fornecedorMap.get(fornecedorId) : null;
@@ -1040,7 +1244,7 @@ export function GestaoComprasPage() {
       opcaoEntrega: grupo.cotacao?.opcaoEntrega ?? null,
       prazoEnvio: prazoDefault ?? null,
     });
-  }, [cotacaoModalId, cotacaoModalOpen, cotacoesAgrupadas, fornecedorMap]);
+  }, [cotacaoModalId, cotacaoModalOpen, cotacoesKanbanMap, fornecedorMap]);
 
   const { fornecedorResumo, resumoPorFaixa, produtosByFornecedor, produtosACotar } = derivedData;
 
@@ -1230,8 +1434,8 @@ export function GestaoComprasPage() {
   const kanbanColumns = useMemo(() => ([
     { key: 'acotar', label: 'A Cotar', items: produtosACotar, type: 'produtos' as const },
     { key: 'cotado', label: 'Cotado', items: cotacoesAgrupadas, type: 'cotacoes' as const },
-    { key: 'pedido', label: 'Pedido', items: produtosPedidos, type: 'produtos' as const },
-  ]), [produtosACotar, cotacoesAgrupadas, produtosPedidos]);
+    { key: 'pedido', label: 'Pedido', items: cotacoesPedidosAgrupadas, type: 'cotacoes' as const },
+  ]), [produtosACotar, cotacoesAgrupadas, cotacoesPedidosAgrupadas]);
 
   const handleGroupSelection = useCallback((groupItems: ProdutoCompraItem[], selectedInGroup: ProdutoCompraItem[]) => {
     const groupIds = new Set(groupItems.map((item) => item.id));
@@ -1571,6 +1775,7 @@ export function GestaoComprasPage() {
               const isPedido = col.key === 'pedido';
               const isCotado = col.key === 'cotado';
               const isAcotar = col.key === 'acotar';
+              const isCotacaoColumn = col.type === 'cotacoes';
               const isLoading = isAcotar ? loadingProdutos : isCotado ? loadingCotados : loadingPedidos;
               return (
                 <Card key={col.key} style={{ padding: '12px' }}>
@@ -1628,7 +1833,7 @@ export function GestaoComprasPage() {
                         Carregando itens...
                       </Text>
                     )}
-                    {!isLoading && isCotado && (col.items as CotacaoKanbanGroup[]).map((grupo) => {
+                    {!isLoading && isCotacaoColumn && (col.items as CotacaoKanbanGroup[]).map((grupo) => {
                       const isExpanded = expandedCotacaoIds[grupo.cotacaoId] ?? false;
                       const MAX_PRODUTOS_PREVIEW = 8;
                       const produtosParaMostrar = isExpanded ? grupo.produtos.slice(0, MAX_PRODUTOS_PREVIEW) : [];
@@ -1864,7 +2069,7 @@ export function GestaoComprasPage() {
             <DialogTitle>Detalhes da Cotação</DialogTitle>
             <DialogContent>
               {cotacaoModalId && (() => {
-                const grupo = cotacoesAgrupadas.find((g) => g.cotacaoId === cotacaoModalId);
+                const grupo = cotacoesKanbanMap.get(cotacaoModalId);
                 if (!grupo) return <Text>Cotação não encontrada</Text>;
                 const isCotacaoBloqueada = grupo.cotacao?.aprovado === true || grupo.cotacao?.statecode === 1;
 
@@ -1989,7 +2194,7 @@ export function GestaoComprasPage() {
                 disabled={cotacaoActionDisabled || cotacaoActionLoading}
                 onClick={async () => {
                   if (!cotacaoModalId) return;
-                  const grupo = cotacoesAgrupadas.find((g) => g.cotacaoId === cotacaoModalId);
+                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
                   if (!grupo) {
                     showError('Falha ao obter cotação');
                     return;
@@ -2029,7 +2234,7 @@ export function GestaoComprasPage() {
                 disabled={cotacaoActionDisabled || cotacaoActionLoading}
                 onClick={async () => {
                   if (!cotacaoModalId) return;
-                  const grupo = cotacoesAgrupadas.find((g) => g.cotacaoId === cotacaoModalId);
+                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
                   if (!grupo) {
                     showError('Falha ao obter cotação');
                     return;
