@@ -42,8 +42,8 @@ import { LoadingState } from '../../components/shared/LoadingState';
 import { buildProdutoServicoSearchFilter, chunkIds, escapeODataString } from '../../features/remessas/utils';
 import {
   Cr22fFornecedoresFromSharepointListService,
+  Cr22fModelosdeProdutoFromSharepointListService,
   NewCacheComprasProdutosPendentesService,
-  NewPrecodeProdutoService,
   NewProdutoServicoService,
 } from '../../generated';
 import { NewCotacaoService } from '../../services/NewCotacaoService';
@@ -408,9 +408,9 @@ export function GestaoComprasPage() {
       timeStart('compras.precos');
       const results = await Promise.all(
         chunks.map((chunk) => (
-          NewPrecodeProdutoService.getAll({
-            select: ['new_precodecompra', '_new_modelodeproduto_value'],
-            filter: `statecode eq 0 and (${chunk.map((id) => `_new_modelodeproduto_value eq '${id}'`).join(' or ')})`,
+          Cr22fModelosdeProdutoFromSharepointListService.getAll({
+            select: ['cr22f_modelosdeprodutofromsharepointlistid', 'new_precodecompra'],
+            filter: `statecode eq 0 and (${chunk.map((id) => `cr22f_modelosdeprodutofromsharepointlistid eq '${id}'`).join(' or ')})`,
           })
         ))
       );
@@ -418,7 +418,7 @@ export function GestaoComprasPage() {
 
       const stillMissing = new Set(missingIds);
       results.flatMap((res) => res.data ?? []).forEach((item: any) => {
-        const modeloId = item._new_modelodeproduto_value;
+        const modeloId = item.cr22f_modelosdeprodutofromsharepointlistid;
         const preco = item.new_precodecompra;
         if (modeloId && typeof preco === 'number') {
           cache.set(modeloId, preco);
