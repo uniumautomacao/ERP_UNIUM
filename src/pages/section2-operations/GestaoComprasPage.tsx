@@ -92,6 +92,8 @@ type CotacaoDetalhes = {
   dataAprovacao?: string | null;
   dataCriacao?: string | null;
   prazodeEnvio?: number | null;
+  aprovado?: boolean | null;
+  statecode?: number | null;
 };
 
 type CotacaoKanbanGroup = {
@@ -144,16 +146,40 @@ const formatOpcaoEntrega = (value?: number | null) => {
 
 const formatPrazoEnvio = (value?: number | null) => {
   if (value === null || value === undefined) return '-';
-  // Mapeamento baseado nos valores comuns de prazo de envio no Dataverse
   const prazos: Record<number, string> = {
-    100000000: 'Imediato',
-    100000001: '1-3 dias',
-    100000002: '4-7 dias',
-    100000003: '8-15 dias',
-    100000004: '16-30 dias',
-    100000005: 'Mais de 30 dias',
+    100000030: '30 dias',
+    100000060: '60 dias',
+    100000090: '90 dias',
+    100000120: '120 dias',
+    100000180: '180 dias',
+    900000000: 'Mais de 180 dias',
   };
-  return prazos[value] || `${value} dias`;
+  return prazos[value] || `Prazo ${value}`;
+};
+
+const OPCAO_ENTREGA_OPTIONS = [
+  { value: 100000000, label: 'Retirada' },
+  { value: 100000001, label: 'Entrega no endereço' },
+  { value: 100000002, label: 'Transportadora' },
+];
+
+const PRAZO_ENVIO_OPTIONS = [
+  { value: 100000030, label: '30 dias' },
+  { value: 100000060, label: '60 dias' },
+  { value: 100000090, label: '90 dias' },
+  { value: 100000120, label: '120 dias' },
+  { value: 100000180, label: '180 dias' },
+  { value: 900000000, label: 'Mais de 180 dias' },
+];
+
+const resolvePrazoEnvioDefault = (prazoDias?: number | null) => {
+  if (!prazoDias || prazoDias <= 0) return null;
+  if (prazoDias <= 30) return 100000030;
+  if (prazoDias <= 60) return 100000060;
+  if (prazoDias <= 90) return 100000090;
+  if (prazoDias <= 120) return 100000120;
+  if (prazoDias <= 180) return 100000180;
+  return 900000000;
 };
 
 const buildCacheProdutosFilter = (params: {
@@ -246,6 +272,9 @@ export function GestaoComprasPage() {
   const [expandedCotacaoIds, setExpandedCotacaoIds] = useState<Record<string, boolean>>({});
   const [cotacaoModalId, setCotacaoModalId] = useState<string | null>(null);
   const [cotacaoModalOpen, setCotacaoModalOpen] = useState(false);
+  const [cotacaoActionLoading, setCotacaoActionLoading] = useState(false);
+  const [cotacaoActionDisabled, setCotacaoActionDisabled] = useState(true);
+  const [cotacaoDraft, setCotacaoDraft] = useState<{ opcaoEntrega?: number | null; prazoEnvio?: number | null }>({});
   const [produtosPedidos, setProdutosPedidos] = useState<ProdutoCompraItem[]>([]);
   const [fornecedoresDetalhados, setFornecedoresDetalhados] = useState<FornecedorItem[]>([]);
   const [selectedProdutos, setSelectedProdutos] = useState<ProdutoCompraItem[]>([]);
@@ -657,6 +686,8 @@ export function GestaoComprasPage() {
               'new_datadeaprovacao',
               'createdon',
               'new_prazodeenvio',
+              'new_aprovarcotacao',
+              'statecode',
             ],
           })
         )
@@ -678,6 +709,8 @@ export function GestaoComprasPage() {
           dataAprovacao: item.new_datadeaprovacao ?? null,
           dataCriacao: item.createdon ?? null,
           prazodeEnvio: item.new_prazodeenvio ?? null,
+          aprovado: item.new_aprovarcotacao ?? null,
+          statecode: item.statecode ?? null,
         });
       });
 
@@ -945,6 +978,46 @@ export function GestaoComprasPage() {
     selectedTab,
   ]);
 
+  useEffect(() => {
+    const group = cotacaoModalId
+      ? cotacoesAgrupadas.find((item) => item.cotacaoId === cotacaoModalId)
+      : null;
+    if (!cotacaoModalOpen || !group) {
+      setCotacaoActionDisabled(true);
+      return;
+    }
+
+    const nomeCotacao = group.cotacao?.nome?.trim();
+    if (!nomeCotacao) {
+      const aprovado = group.cotacao?.aprovado === true;
+      const inativo = group.cotacao?.statecode === 1;
+      setCotacaoActionDisabled(aprovado || inativo);
+      return;
+    }
+
+    let alive = true;
+    void (async () => {
+      try {
+        const lookup = await NewCotacaoService.getAll({
+          filter: `new_name eq '${escapeODataString(nomeCotacao)}' and (new_aprovarcotacao eq true or statecode eq 1)`,
+          select: ['new_cotacaoid'],
+          top: 1,
+        });
+        if (!alive) return;
+        setCotacaoActionDisabled((lookup.data?.length ?? 0) > 0);
+      } catch (err) {
+        console.error('[GestaoCompras] erro ao validar aprovação/cancelamento', err);
+        const aprovado = group.cotacao?.aprovado === true;
+        const inativo = group.cotacao?.statecode === 1;
+        setCotacaoActionDisabled(aprovado || inativo);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [cotacaoModalId, cotacaoModalOpen, cotacoesAgrupadas]);
+
   const fornecedoresLookup = useMemo(() => {
     const merged = new Map<string, FornecedorItem>();
     fornecedoresBasicos.forEach((item) => merged.set(item.id, item));
@@ -955,6 +1028,19 @@ export function GestaoComprasPage() {
   const fornecedorMap = useMemo(() => {
     return new Map(fornecedoresLookup.map((item) => [item.id, item]));
   }, [fornecedoresLookup]);
+
+  useEffect(() => {
+    if (!cotacaoModalOpen || !cotacaoModalId) return;
+    const grupo = cotacoesAgrupadas.find((item) => item.cotacaoId === cotacaoModalId);
+    if (!grupo) return;
+    const fornecedorId = grupo.produtos[0]?.fornecedorId ?? null;
+    const fornecedor = fornecedorId ? fornecedorMap.get(fornecedorId) : null;
+    const prazoDefault = grupo.cotacao?.prazodeEnvio ?? resolvePrazoEnvioDefault(fornecedor?.prazoFrete ?? null);
+    setCotacaoDraft({
+      opcaoEntrega: grupo.cotacao?.opcaoEntrega ?? null,
+      prazoEnvio: prazoDefault ?? null,
+    });
+  }, [cotacaoModalId, cotacaoModalOpen, cotacoesAgrupadas, fornecedorMap]);
 
   const { fornecedorResumo, resumoPorFaixa, produtosByFornecedor, produtosACotar } = derivedData;
 
@@ -1294,9 +1380,10 @@ export function GestaoComprasPage() {
 
       await Promise.all(
         itensSemCotacao.map((item) =>
-          NewProdutoServicoService.update(item.id, {
-            'new_Cotacao@odata.bind': `/new_cotacaos(${cotacaoId})`,
-          })
+          NewProdutoServicoService.update(
+            item.id,
+            { 'new_Cotacao@odata.bind': `/new_cotacaos(${cotacaoId})` } as unknown as Record<string, unknown>
+          )
         )
       );
 
@@ -1779,6 +1866,7 @@ export function GestaoComprasPage() {
               {cotacaoModalId && (() => {
                 const grupo = cotacoesAgrupadas.find((g) => g.cotacaoId === cotacaoModalId);
                 if (!grupo) return <Text>Cotação não encontrada</Text>;
+                const isCotacaoBloqueada = grupo.cotacao?.aprovado === true || grupo.cotacao?.statecode === 1;
 
                 return (
                   <div className="flex flex-col gap-3">
@@ -1804,7 +1892,23 @@ export function GestaoComprasPage() {
                     )}
                     <div>
                       <Text weight="semibold" block>Opção de Entrega</Text>
-                      <Text>{formatOpcaoEntrega(grupo.cotacao?.opcaoEntrega)}</Text>
+                      {isCotacaoBloqueada ? (
+                        <Text>{formatOpcaoEntrega(grupo.cotacao?.opcaoEntrega ?? null)}</Text>
+                      ) : (
+                        <Dropdown
+                          placeholder="Selecione..."
+                          value={OPCAO_ENTREGA_OPTIONS.find((opt) => opt.value === cotacaoDraft.opcaoEntrega)?.label ?? ''}
+                          onOptionSelect={(_, data) => {
+                            setCotacaoDraft((prev) => ({ ...prev, opcaoEntrega: Number(data.optionValue) }));
+                          }}
+                        >
+                          {OPCAO_ENTREGA_OPTIONS.map((option) => (
+                            <Option key={option.value} value={String(option.value)}>
+                              {option.label}
+                            </Option>
+                          ))}
+                        </Dropdown>
+                      )}
                     </div>
                     {grupo.cotacao?.enderecoEntrega && (
                       <div>
@@ -1814,7 +1918,23 @@ export function GestaoComprasPage() {
                     )}
                     <div>
                       <Text weight="semibold" block>Prazo de Envio</Text>
-                      <Text>{formatPrazoEnvio(grupo.cotacao?.prazodeEnvio)}</Text>
+                      {isCotacaoBloqueada ? (
+                        <Text>{formatPrazoEnvio(grupo.cotacao?.prazodeEnvio ?? null)}</Text>
+                      ) : (
+                        <Dropdown
+                          placeholder="Selecione..."
+                          value={PRAZO_ENVIO_OPTIONS.find((opt) => opt.value === cotacaoDraft.prazoEnvio)?.label ?? ''}
+                          onOptionSelect={(_, data) => {
+                            setCotacaoDraft((prev) => ({ ...prev, prazoEnvio: Number(data.optionValue) }));
+                          }}
+                        >
+                          {PRAZO_ENVIO_OPTIONS.map((option) => (
+                            <Option key={option.value} value={String(option.value)}>
+                              {option.label}
+                            </Option>
+                          ))}
+                        </Dropdown>
+                      )}
                     </div>
                     {grupo.cotacao?.observacoes && (
                       <div>
@@ -1864,6 +1984,87 @@ export function GestaoComprasPage() {
               })()}
             </DialogContent>
             <DialogActions>
+              <Button
+                appearance="secondary"
+                disabled={cotacaoActionDisabled || cotacaoActionLoading}
+                onClick={async () => {
+                  if (!cotacaoModalId) return;
+                  const grupo = cotacoesAgrupadas.find((g) => g.cotacaoId === cotacaoModalId);
+                  if (!grupo) {
+                    showError('Falha ao obter cotação');
+                    return;
+                  }
+                  setCotacaoActionLoading(true);
+                  try {
+                    const result = await NewCotacaoService.update(cotacaoModalId, {
+                      statecode: 1,
+                      statuscode: 2,
+                    } as any);
+                    if (!result.success) {
+                      throw result.error ?? new Error('Falha ao cancelar cotação.');
+                    }
+                    await Promise.all(
+                      grupo.produtos.map((produto) =>
+                        NewProdutoServicoService.update(
+                          produto.id,
+                          { 'new_Cotacao@odata.bind': null } as unknown as Record<string, unknown>
+                        )
+                      )
+                    );
+                    showSuccess('Cotação cancelada');
+                    setCotacaoModalOpen(false);
+                    await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
+                  } catch (error) {
+                    console.error('[GestaoCompras] erro ao cancelar cotação', error);
+                    showError('Erro ao cancelar cotação', error instanceof Error ? error.message : undefined);
+                  } finally {
+                    setCotacaoActionLoading(false);
+                  }
+                }}
+              >
+                Cancelar cotação
+              </Button>
+              <Button
+                appearance="primary"
+                disabled={cotacaoActionDisabled || cotacaoActionLoading}
+                onClick={async () => {
+                  if (!cotacaoModalId) return;
+                  const grupo = cotacoesAgrupadas.find((g) => g.cotacaoId === cotacaoModalId);
+                  if (!grupo) {
+                    showError('Falha ao obter cotação');
+                    return;
+                  }
+                  const missing: string[] = [];
+                  if (!cotacaoDraft.prazoEnvio) missing.push('Prazo de Envio');
+                  if (!cotacaoDraft.opcaoEntrega) missing.push('Opção de Entrega');
+                  if (missing.length > 0) {
+                    showError(`Verifique se os campos obrigatórios estão preenchidos: ${missing.join(', ')}`);
+                    return;
+                  }
+                  setCotacaoActionLoading(true);
+                  try {
+                    const result = await NewCotacaoService.update(cotacaoModalId, {
+                      new_aprovarcotacao: true,
+                      new_datadeaprovacao: new Date().toISOString(),
+                      new_opcaodeentrega: cotacaoDraft.opcaoEntrega,
+                      new_prazodeenvio: cotacaoDraft.prazoEnvio,
+                    } as any);
+                    if (!result.success) {
+                      throw result.error ?? new Error('Falha ao aprovar cotação.');
+                    }
+                    showSuccess('Cotação aprovada');
+                    setCotacaoModalOpen(false);
+                    await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
+                  } catch (error) {
+                    console.error('[GestaoCompras] erro ao aprovar cotação', error);
+                    showError('Erro ao aprovar cotação', error instanceof Error ? error.message : undefined);
+                  } finally {
+                    setCotacaoActionLoading(false);
+                  }
+                }}
+              >
+                Aprovar cotação
+              </Button>
               <Button 
                 appearance="secondary" 
                 icon={<Open24Regular />}
