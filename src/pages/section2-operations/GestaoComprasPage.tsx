@@ -1613,6 +1613,7 @@ export function GestaoComprasPage() {
                                 <Button
                                   appearance="subtle"
                                   size="small"
+                                  style={{ minHeight: '28px', padding: '6px 10px' }}
                                   onClick={() => {
                                     setCotacaoModalId(grupo.cotacaoId);
                                     setCotacaoModalOpen(true);
