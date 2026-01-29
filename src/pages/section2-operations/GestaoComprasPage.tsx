@@ -1071,7 +1071,6 @@ export function GestaoComprasPage() {
 
   const derivedData = useMemo(() => {
     const produtosByFaixa = new Map<number, ProdutoCompraItem[]>();
-    const produtosByFornecedor = new Map<string, ProdutoCompraItem[]>();
     const fornecedorResumo = new Map<string, { count: number; total: number; faixas: Map<number, number> }>();
     const resumoPorFaixaMap = new Map<number, { count: number; total: number; fornecedores: Set<string> }>();
     const produtosACotar: ProdutoCompraItem[] = [];
@@ -1099,9 +1098,6 @@ export function GestaoComprasPage() {
       }
 
       if (item.fornecedorId) {
-        if (!produtosByFornecedor.has(item.fornecedorId)) produtosByFornecedor.set(item.fornecedorId, []);
-        produtosByFornecedor.get(item.fornecedorId)!.push(item);
-
         if (!fornecedorResumo.has(item.fornecedorId)) {
           fornecedorResumo.set(item.fornecedorId, { count: 0, total: 0, faixas: new Map() });
         }
@@ -1133,7 +1129,6 @@ export function GestaoComprasPage() {
 
     return {
       produtosByFaixa,
-      produtosByFornecedor,
       fornecedorResumo,
       resumoPorFaixa,
       produtosACotar,
@@ -1159,27 +1154,20 @@ export function GestaoComprasPage() {
   ), [fornecedoresBasicos]);
 
   useEffect(() => {
-    const shouldLoad = selectedTab === 'fornecedor' || selectedTab === 'lista';
-    if (!shouldLoad) return;
+    if (selectedTab !== 'lista') return;
     if (fornecedoresDetalhados.length > 0 || fornecedoresDetalhesLoading) return;
     void loadFornecedores(fornecedorIds);
   }, [fornecedoresDetalhados.length, fornecedoresDetalhesLoading, fornecedorIds, loadFornecedores, selectedTab]);
 
   const refreshAll = useCallback(async () => {
     clearPrecoCache();
-    if (selectedTab === 'fornecedor') {
-      await Promise.all([loadFornecedores(fornecedorIds), loadProdutosCache()]);
-      return;
-    }
     await loadProdutosCache();
     if (selectedTab === 'kanban') {
       await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
     }
   }, [
     clearPrecoCache,
-    fornecedorIds,
     loadCotadosFromProdutoServico,
-    loadFornecedores,
     loadPedidosFromProdutoServico,
     loadProdutosCache,
     selectedTab,
@@ -1247,7 +1235,7 @@ export function GestaoComprasPage() {
     });
   }, [cotacaoModalId, cotacaoModalOpen, cotacoesKanbanMap, fornecedorMap]);
 
-  const { fornecedorResumo, resumoPorFaixa, produtosByFornecedor, produtosACotar } = derivedData;
+  const { fornecedorResumo, resumoPorFaixa, produtosACotar } = derivedData;
 
   const fornecedorOptions = useMemo(() => {
     const options = fornecedoresBasicos.map((item) => ({
@@ -1644,7 +1632,6 @@ export function GestaoComprasPage() {
           { value: 'lista', label: 'Lista' },
           { value: 'timeline', label: 'Timeline' },
           { value: 'kanban', label: 'Kanban' },
-          { value: 'fornecedor', label: 'Por fornecedor' },
         ]}
         selectedTab={selectedTab}
         onTabSelect={setSelectedTab}
@@ -1971,73 +1958,6 @@ export function GestaoComprasPage() {
           </div>
         )}
 
-        {selectedTab === 'fornecedor' && (
-          <div className="flex flex-col gap-4">
-            {fornecedoresDetalhesLoading ? (
-              <LoadingState label="Carregando fornecedores..." />
-            ) : (
-              fornecedoresExibicao.map((fornecedor) => {
-                const resumo = fornecedorResumo.get(fornecedor.id);
-                const itens = produtosByFornecedor.get(fornecedor.id) || [];
-                if (itens.length === 0) return null;
-                return (
-                  <Card key={fornecedor.id} style={{ padding: '16px' }}>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <Text weight="semibold" block>{resolveFornecedorNome(fornecedor)}</Text>
-                        <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                          Lead time: {fornecedor.leadTimeTotal ?? '-'} dias • Total {formatCurrency(resumo?.total ?? 0)}
-                        </Text>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button appearance="secondary" icon={<Copy24Regular />} onClick={() => {
-                          setSelectedFornecedorId(fornecedor.id);
-                          handleCopyResumo();
-                        }}>
-                          Copiar resumo
-                        </Button>
-                        <Button appearance="primary" icon={<DocumentBulletList24Regular />} onClick={() => {
-                          setSelectedFornecedorId(fornecedor.id);
-                          void handleIniciarCotacao();
-                        }}>
-                          Iniciar cotação
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex flex-col gap-2">
-                      {itens.map((item) => (
-                        <Card key={item.id} style={{ padding: '10px' }}>
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <Text weight="semibold" block>{item.referencia || item.descricao || 'Item'}</Text>
-                              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                                {item.cliente || '-'} • {item.entregaFmt ?? formatDate(item.entrega)}
-                              </Text>
-                              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                                {item.quantidade ?? 0} un • {formatCurrency(item.precoUnitario ?? 0)}
-                              </Text>
-                            </div>
-                            <Checkbox
-                              checked={selectedProdutoIds.has(item.id)}
-                              onChange={() => {
-                                setSelectedProdutos((prev) => {
-                                  if (prev.some((selected) => selected.id === item.id)) {
-                                    return prev.filter((selected) => selected.id !== item.id);
-                                  }
-                                  return [...prev, item];
-                                });
-                              }}
-                            />
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </Card>
-                );
-              })
-            )}
-          </div>
-        )}
       </PageContainer>
 
       <div style={{ borderTop: `1px solid ${tokens.colorNeutralStroke2}` }}>
