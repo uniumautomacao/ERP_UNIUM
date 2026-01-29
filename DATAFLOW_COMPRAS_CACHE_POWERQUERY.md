@@ -53,7 +53,6 @@ let
     "new_nomedofabricante",
     "new_apelidodoprojetofx",
     "_new_modelodeprodutooriginal_value",
-    "_new_cotacao_value",
     "modifiedon"
   }, ","),
 
@@ -99,8 +98,6 @@ let
 
     // Para mapear lookups opcionais no destino
     "_new_modelodeprodutooriginal_value",
-    "_new_cotacao_value",
-
     "new_source_modifiedon"
   })
 in

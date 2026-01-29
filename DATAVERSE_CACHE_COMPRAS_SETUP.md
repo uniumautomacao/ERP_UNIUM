@@ -29,10 +29,11 @@ para concluir o cache diario de compras.
 Relacionamentos 1:N (lookup) ja criados via script:
 1) `new_produtoservico` -> `new_produtoservicos`
    - Schema name: `new_CacheComprasProdutosPendentes_ProdutoServico`
-2) `new_cotacao` -> `new_cotacaos` (opcional)
-   - Schema name: `new_CacheComprasProdutosPendentes_Cotacao`
-3) `new_modelodeprodutooriginal` -> `cr22f_modelosdeprodutofromsharepointlists` (opcional)
+2) `new_modelodeprodutooriginal` -> `cr22f_modelosdeprodutofromsharepointlists` (opcional)
    - Schema name: `new_CacheComprasProdutosPendentes_ModeloDeProdutoOriginal`
+
+Observacao: o lookup `new_cotacao` foi removido do uso na tela. Se voce optar por excluir a coluna
+do Dataverse, faca a exclusao manual pelo Maker.
 
 ### Colunas calculadas (criar manualmente)
 Crie as colunas como **Calculated** (SourceType = Calculated), usando o
