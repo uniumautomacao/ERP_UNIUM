@@ -47,6 +47,7 @@ import {
   NewProdutoServicoService,
 } from '../../generated';
 import { NewCotacaoService } from '../../services/NewCotacaoService';
+import { ProcurementTimeline } from '../../components/domain/compras/ProcurementTimeline';
 
 const REFERENCE_CHUNK_SIZE = 25;
 const CRM_APP_ID = '3ec4d8a9-2a8e-ee11-8179-002248de6f66';
@@ -1760,12 +1761,13 @@ export function GestaoComprasPage() {
         )}
 
         {selectedTab === 'timeline' && (
-          <Card style={{ padding: '16px' }}>
-            <Text weight="semibold" block>Timeline</Text>
-            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-              MVP: a timeline será exibida aqui com agrupamento por cliente/projeto.
-            </Text>
-          </Card>
+          <ProcurementTimeline
+            items={produtosCache}
+            initialDateRange={{
+              start: new Date(2026, 0, 1),
+              end: new Date(2026, 11, 31),
+            }}
+          />
         )}
 
         {selectedTab === 'kanban' && (
