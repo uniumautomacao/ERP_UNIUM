@@ -10,7 +10,9 @@ import {
   DialogContent,
   DialogSurface,
   DialogTitle,
+  Dropdown,
   Input,
+  Option,
   Text,
   Toaster,
   Toast,
@@ -196,6 +198,7 @@ export function GestaoComprasPage() {
   const precosCacheRef = useRef(new Map<string, number>());
   const [pedidoSearchInput, setPedidoSearchInput] = useState('');
   const [pedidoSearchValue, setPedidoSearchValue] = useState('');
+  const [pedidoRangeDays, setPedidoRangeDays] = useState('30');
   const [pedidoSkipToken, setPedidoSkipToken] = useState<string | null>(null);
   const pedidoSkipTokenRef = useRef<string | null>(null);
   const [pedidoHasMore, setPedidoHasMore] = useState(false);
@@ -600,7 +603,8 @@ export function GestaoComprasPage() {
       filters.push('_new_cotacao_value ne null');
       filters.push('new_Cotacao/new_aprovarcotacao eq true');
       if (!hasPedidoSearch) {
-        const isoCutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const rangeDays = Number(pedidoRangeDays) || 30;
+        const isoCutoff = new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString();
         filters.push(`new_Cotacao/new_datadeaprovacao ge ${isoCutoff}`);
       }
 
@@ -659,6 +663,7 @@ export function GestaoComprasPage() {
     fornecedorFilter,
     fabricanteFilter,
     mapProdutoServicoItem,
+    pedidoRangeDays,
     pedidoSearchValue,
     prazoFilter,
     searchValue,
@@ -839,6 +844,13 @@ export function GestaoComprasPage() {
     const options = Array.from(fabricantes).sort().map((fabricante) => ({ key: fabricante, text: fabricante }));
     return [{ key: 'all', text: 'Todos' }, ...options];
   }, [produtosCache]);
+
+  const pedidoRangeOptions = useMemo(() => ([
+    { key: '7', text: 'Últimos 7 dias' },
+    { key: '30', text: 'Últimos 30 dias' },
+    { key: '60', text: 'Últimos 60 dias' },
+    { key: '90', text: 'Últimos 90 dias' },
+  ]), []);
 
   const prazoOptions = useMemo(() => [
     { key: 'all', text: 'Todos' },
@@ -1341,7 +1353,18 @@ export function GestaoComprasPage() {
                     <Badge appearance="filled">{items.length}</Badge>
                   </div>
                   {isPedido && (
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-col gap-2 mb-2">
+                      <Dropdown
+                        placeholder="Últimos 30 dias"
+                        value={pedidoRangeOptions.find((opt) => opt.key === pedidoRangeDays)?.text ?? ''}
+                        onOptionSelect={(_, data) => setPedidoRangeDays(String(data.optionValue))}
+                      >
+                        {pedidoRangeOptions.map((option) => (
+                          <Option key={option.key} value={option.key}>
+                            {option.text}
+                          </Option>
+                        ))}
+                      </Dropdown>
                       <Input
                         value={pedidoSearchInput}
                         onChange={(_, data) => setPedidoSearchInput(data.value)}
