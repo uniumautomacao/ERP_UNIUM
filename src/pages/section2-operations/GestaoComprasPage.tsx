@@ -2167,134 +2167,144 @@ export function GestaoComprasPage() {
               })()}
             </DialogContent>
             <DialogActions>
-              <Button
-                appearance="secondary"
-                disabled={cotacaoActionDisabled || cotacaoActionLoading}
-                onClick={async () => {
-                  if (!cotacaoModalId) return;
-                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
-                  if (!grupo) {
-                    showError('Falha ao obter cotação');
-                    return;
-                  }
-                  setCotacaoActionLoading(true);
-                  try {
-                    const result = await NewCotacaoService.update(cotacaoModalId, {
-                      statecode: 1,
-                      statuscode: 2,
-                    } as any);
-                    if (!result.success) {
-                      throw result.error ?? new Error('Falha ao cancelar cotação.');
+              <div className="flex items-center gap-2">
+                <Button
+                  size="small"
+                  appearance="secondary"
+                  disabled={cotacaoActionDisabled || cotacaoActionLoading}
+                  onClick={async () => {
+                    if (!cotacaoModalId) return;
+                    const grupo = cotacoesKanbanMap.get(cotacaoModalId);
+                    if (!grupo) {
+                      showError('Falha ao obter cotação');
+                      return;
                     }
-                    await Promise.all(
-                      grupo.produtos.map((produto) =>
-                        NewProdutoServicoService.update(
-                          produto.id,
-                          { 'new_Cotacao@odata.bind': null } as unknown as Record<string, unknown>
+                    setCotacaoActionLoading(true);
+                    try {
+                      const result = await NewCotacaoService.update(cotacaoModalId, {
+                        statecode: 1,
+                        statuscode: 2,
+                      } as any);
+                      if (!result.success) {
+                        throw result.error ?? new Error('Falha ao cancelar cotação.');
+                      }
+                      await Promise.all(
+                        grupo.produtos.map((produto) =>
+                          NewProdutoServicoService.update(
+                            produto.id,
+                            { 'new_Cotacao@odata.bind': null } as unknown as Record<string, unknown>
+                          )
                         )
-                      )
-                    );
-                    showSuccess('Cotação cancelada');
-                    setCotacaoModalOpen(false);
-                    await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
-                  } catch (error) {
-                    console.error('[GestaoCompras] erro ao cancelar cotação', error);
-                    showError('Erro ao cancelar cotação', error instanceof Error ? error.message : undefined);
-                  } finally {
-                    setCotacaoActionLoading(false);
-                  }
-                }}
-              >
-                Cancelar cotação
-              </Button>
-              <Button
-                appearance="primary"
-                disabled={cotacaoActionDisabled || cotacaoActionLoading}
-                onClick={async () => {
-                  if (!cotacaoModalId) return;
-                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
-                  if (!grupo) {
-                    showError('Falha ao obter cotação');
-                    return;
-                  }
-                  const missing: string[] = [];
-                  if (!cotacaoDraft.prazoEnvio) missing.push('Prazo de Envio');
-                  if (!cotacaoDraft.opcaoEntrega) missing.push('Opção de Entrega');
-                  if (missing.length > 0) {
-                    showError(`Verifique se os campos obrigatórios estão preenchidos: ${missing.join(', ')}`);
-                    return;
-                  }
-                  setCotacaoActionLoading(true);
-                  try {
-                    const result = await NewCotacaoService.update(cotacaoModalId, {
-                      new_aprovarcotacao: true,
-                      new_datadeaprovacao: new Date().toISOString(),
-                      new_opcaodeentrega: cotacaoDraft.opcaoEntrega,
-                      new_prazodeenvio: cotacaoDraft.prazoEnvio,
-                    } as any);
-                    if (!result.success) {
-                      throw result.error ?? new Error('Falha ao aprovar cotação.');
+                      );
+                      showSuccess('Cotação cancelada');
+                      setCotacaoModalOpen(false);
+                      await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
+                    } catch (error) {
+                      console.error('[GestaoCompras] erro ao cancelar cotação', error);
+                      showError('Erro ao cancelar cotação', error instanceof Error ? error.message : undefined);
+                    } finally {
+                      setCotacaoActionLoading(false);
                     }
-                    showSuccess('Cotação aprovada');
-                    setCotacaoModalOpen(false);
-                    await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
-                  } catch (error) {
-                    console.error('[GestaoCompras] erro ao aprovar cotação', error);
-                    showError('Erro ao aprovar cotação', error instanceof Error ? error.message : undefined);
-                  } finally {
-                    setCotacaoActionLoading(false);
-                  }
-                }}
-              >
-                Aprovar cotação
-              </Button>
-              <Button
-                appearance="secondary"
-                icon={<Copy24Regular />}
-                onClick={() => {
-                  if (!cotacaoModalId) return;
-                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
-                  if (!grupo) {
-                    showError('Falha ao obter cotação');
-                    return;
-                  }
-                  handleCopyResumoFromGroup(grupo);
-                }}
-              >
-                Copiar resumo
-              </Button>
-              <Button
-                appearance="secondary"
-                icon={<Share24Regular />}
-                onClick={() => {
-                  if (!cotacaoModalId) return;
-                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
-                  if (!grupo) {
-                    showError('Falha ao obter cotação');
-                    return;
-                  }
-                  handleExportCsvFromGroup(grupo);
-                }}
-              >
-                Exportar CSV
-              </Button>
-              <Button 
-                appearance="secondary" 
-                icon={<Open24Regular />}
-                onClick={() => {
-                  if (cotacaoModalId) {
-                    window.open(
-                      `https://unium.crm2.dynamics.com/main.aspx?appid=${CRM_APP_ID}&forceUCI=1&pagetype=entityrecord&etn=new_cotacao&id=${cotacaoModalId}`,
-                      '_blank'
-                    );
-                  }
-                }}
-              >
-                Abrir no CRM
-              </Button>
-              <Button appearance="primary" onClick={() => setCotacaoModalOpen(false)}>
-                Fechar
-              </Button>
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="small"
+                  appearance="primary"
+                  disabled={cotacaoActionDisabled || cotacaoActionLoading}
+                  onClick={async () => {
+                    if (!cotacaoModalId) return;
+                    const grupo = cotacoesKanbanMap.get(cotacaoModalId);
+                    if (!grupo) {
+                      showError('Falha ao obter cotação');
+                      return;
+                    }
+                    const missing: string[] = [];
+                    if (!cotacaoDraft.prazoEnvio) missing.push('Prazo de Envio');
+                    if (!cotacaoDraft.opcaoEntrega) missing.push('Opção de Entrega');
+                    if (missing.length > 0) {
+                      showError(`Verifique se os campos obrigatórios estão preenchidos: ${missing.join(', ')}`);
+                      return;
+                    }
+                    setCotacaoActionLoading(true);
+                    try {
+                      const result = await NewCotacaoService.update(cotacaoModalId, {
+                        new_aprovarcotacao: true,
+                        new_datadeaprovacao: new Date().toISOString(),
+                        new_opcaodeentrega: cotacaoDraft.opcaoEntrega,
+                        new_prazodeenvio: cotacaoDraft.prazoEnvio,
+                      } as any);
+                      if (!result.success) {
+                        throw result.error ?? new Error('Falha ao aprovar cotação.');
+                      }
+                      showSuccess('Cotação aprovada');
+                      setCotacaoModalOpen(false);
+                      await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
+                    } catch (error) {
+                      console.error('[GestaoCompras] erro ao aprovar cotação', error);
+                      showError('Erro ao aprovar cotação', error instanceof Error ? error.message : undefined);
+                    } finally {
+                      setCotacaoActionLoading(false);
+                    }
+                  }}
+                >
+                  Aprovar
+                </Button>
+                <Button
+                  size="small"
+                  appearance="secondary"
+                  icon={<Copy24Regular />}
+                  title="Copiar resumo"
+                  onClick={() => {
+                    if (!cotacaoModalId) return;
+                    const grupo = cotacoesKanbanMap.get(cotacaoModalId);
+                    if (!grupo) {
+                      showError('Falha ao obter cotação');
+                      return;
+                    }
+                    handleCopyResumoFromGroup(grupo);
+                  }}
+                >
+                  Copiar
+                </Button>
+                <Button
+                  size="small"
+                  appearance="secondary"
+                  icon={<Share24Regular />}
+                  title="Exportar CSV"
+                  onClick={() => {
+                    if (!cotacaoModalId) return;
+                    const grupo = cotacoesKanbanMap.get(cotacaoModalId);
+                    if (!grupo) {
+                      showError('Falha ao obter cotação');
+                      return;
+                    }
+                    handleExportCsvFromGroup(grupo);
+                  }}
+                >
+                  CSV
+                </Button>
+                <Button 
+                  size="small"
+                  appearance="secondary" 
+                  icon={<Open24Regular />}
+                  title="Abrir no CRM"
+                  onClick={() => {
+                    if (cotacaoModalId) {
+                      window.open(
+                        `https://unium.crm2.dynamics.com/main.aspx?appid=${CRM_APP_ID}&forceUCI=1&pagetype=entityrecord&etn=new_cotacao&id=${cotacaoModalId}`,
+                        '_blank'
+                      );
+                    }
+                  }}
+                >
+                  CRM
+                </Button>
+                <Button size="small" appearance="primary" onClick={() => setCotacaoModalOpen(false)}>
+                  Fechar
+                </Button>
+              </div>
             </DialogActions>
           </DialogBody>
         </DialogSurface>
