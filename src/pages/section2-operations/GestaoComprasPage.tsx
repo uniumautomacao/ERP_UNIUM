@@ -22,7 +22,17 @@ import {
   useId,
   useToastController,
 } from '@fluentui/react-components';
-import { ArrowSync24Regular, CheckmarkCircle24Regular, Copy24Regular, DocumentBulletList24Regular, Share24Regular } from '@fluentui/react-icons';
+import { 
+  ArrowSync24Regular, 
+  CheckmarkCircle24Regular, 
+  ChevronDown16Regular,
+  ChevronUp16Regular,
+  Copy24Regular, 
+  DocumentBulletList24Regular, 
+  Info24Regular,
+  Open24Regular,
+  Share24Regular 
+} from '@fluentui/react-icons';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { FilterBar } from '../../components/shared/FilterBar';
@@ -71,6 +81,28 @@ type FornecedorItem = {
   leadTimeTotal?: number | null;
 };
 
+type CotacaoDetalhes = {
+  id: string;
+  nome?: string | null;
+  fornecedor?: string | null;
+  valorTotal?: number | null;
+  opcaoEntrega?: number | null;
+  enderecoEntrega?: string | null;
+  observacoes?: string | null;
+  dataAprovacao?: string | null;
+  dataCriacao?: string | null;
+  prazodeEnvio?: number | null;
+};
+
+type CotacaoKanbanGroup = {
+  cotacaoId: string;
+  cotacao?: CotacaoDetalhes;
+  produtos: ProdutoCompraItem[];
+  totalProdutos: number;
+  totalValorProdutos: number;
+  minDataLimite?: string | null;
+};
+
 const FAIXAS_PRAZO = [
   { value: 100000000, label: 'Atrasado', color: 'danger' as const },
   { value: 100000001, label: 'Pedir agora', color: 'warning' as const },
@@ -97,6 +129,31 @@ const formatDate = (value?: string | null) => {
 const formatCurrency = (value?: number | null) => {
   if (value === null || value === undefined) return 'R$ 0,00';
   return currencyFormatter.format(value);
+};
+
+const formatOpcaoEntrega = (value?: number | null) => {
+  if (value === null || value === undefined) return '-';
+  // Mapeamento baseado nos valores comuns de opção de entrega no Dataverse
+  const opcoes: Record<number, string> = {
+    100000000: 'Retirada',
+    100000001: 'Entrega no endereço',
+    100000002: 'Transportadora',
+  };
+  return opcoes[value] || `Opção ${value}`;
+};
+
+const formatPrazoEnvio = (value?: number | null) => {
+  if (value === null || value === undefined) return '-';
+  // Mapeamento baseado nos valores comuns de prazo de envio no Dataverse
+  const prazos: Record<number, string> = {
+    100000000: 'Imediato',
+    100000001: '1-3 dias',
+    100000002: '4-7 dias',
+    100000003: '8-15 dias',
+    100000004: '16-30 dias',
+    100000005: 'Mais de 30 dias',
+  };
+  return prazos[value] || `${value} dias`;
 };
 
 const buildCacheProdutosFilter = (params: {
@@ -185,6 +242,10 @@ export function GestaoComprasPage() {
   const [fornecedoresDetalhesLoading, setFornecedoresDetalhesLoading] = useState(false);
   const [produtosCache, setProdutosCache] = useState<ProdutoCompraItem[]>([]);
   const [produtosCotados, setProdutosCotados] = useState<ProdutoCompraItem[]>([]);
+  const [cotacoesAgrupadas, setCotacoesAgrupadas] = useState<CotacaoKanbanGroup[]>([]);
+  const [expandedCotacaoIds, setExpandedCotacaoIds] = useState<Record<string, boolean>>({});
+  const [cotacaoModalId, setCotacaoModalId] = useState<string | null>(null);
+  const [cotacaoModalOpen, setCotacaoModalOpen] = useState(false);
   const [produtosPedidos, setProdutosPedidos] = useState<ProdutoCompraItem[]>([]);
   const [fornecedoresDetalhados, setFornecedoresDetalhados] = useState<FornecedorItem[]>([]);
   const [selectedProdutos, setSelectedProdutos] = useState<ProdutoCompraItem[]>([]);
@@ -560,9 +621,87 @@ export function GestaoComprasPage() {
         .filter((item: ProdutoCompraItem) => Boolean(item.id));
       setProdutosCotados(items);
       await enrichProdutosComPrecos(items, requestId, cotadosRequestId, setProdutosCotados);
+
+      // Agrupar produtos por cotação
+      const cotacaoMap = new Map<string, ProdutoCompraItem[]>();
+      items.forEach((item) => {
+        if (!item.cotacaoId) return;
+        if (!cotacaoMap.has(item.cotacaoId)) {
+          cotacaoMap.set(item.cotacaoId, []);
+        }
+        cotacaoMap.get(item.cotacaoId)!.push(item);
+      });
+
+      // Extrair IDs únicos de cotações
+      const cotacaoIds = Array.from(cotacaoMap.keys());
+      
+      if (cotacaoIds.length === 0) {
+        setCotacoesAgrupadas([]);
+        return;
+      }
+
+      // Carregar detalhes das cotações em chunks
+      const chunks = chunkIds(cotacaoIds, REFERENCE_CHUNK_SIZE);
+      const cotacoesResults = await Promise.all(
+        chunks.map((chunk) =>
+          NewCotacaoService.getAll({
+            filter: `statecode eq 0 and (${chunk.map((id) => `new_cotacaoid eq '${escapeODataString(id)}'`).join(' or ')})`,
+            select: [
+              'new_cotacaoid',
+              'new_name',
+              'new_nomedofornecedor',
+              'new_valortotal',
+              'new_opcaodeentrega',
+              'new_enderecodeentrega',
+              'new_observacoes',
+              'new_datadeaprovacao',
+              'createdon',
+              'new_prazodeenvio',
+            ],
+          })
+        )
+      );
+
+      if (requestId !== cotadosRequestId.current) return;
+
+      // Mapear detalhes das cotações
+      const cotacoesDetalhesMap = new Map<string, CotacaoDetalhes>();
+      cotacoesResults.flatMap((res) => res.data ?? []).forEach((item: any) => {
+        cotacoesDetalhesMap.set(item.new_cotacaoid, {
+          id: item.new_cotacaoid,
+          nome: item.new_name ?? null,
+          fornecedor: item.new_nomedofornecedor ?? null,
+          valorTotal: item.new_valortotal ?? null,
+          opcaoEntrega: item.new_opcaodeentrega ?? null,
+          enderecoEntrega: item.new_enderecodeentrega ?? null,
+          observacoes: item.new_observacoes ?? null,
+          dataAprovacao: item.new_datadeaprovacao ?? null,
+          dataCriacao: item.createdon ?? null,
+          prazodeEnvio: item.new_prazodeenvio ?? null,
+        });
+      });
+
+      // Montar grupos com detalhes
+      const grupos: CotacaoKanbanGroup[] = Array.from(cotacaoMap.entries()).map(([cotacaoId, produtos]) => {
+        const totalValor = produtos.reduce((acc, p) => acc + (p.valorTotal ?? 0), 0);
+        const datasLimite = produtos.map((p) => p.dataLimite).filter(Boolean) as string[];
+        const minDataLimite = datasLimite.length > 0 ? datasLimite.sort()[0] : null;
+
+        return {
+          cotacaoId,
+          cotacao: cotacoesDetalhesMap.get(cotacaoId),
+          produtos,
+          totalProdutos: produtos.length,
+          totalValorProdutos: totalValor,
+          minDataLimite,
+        };
+      });
+
+      setCotacoesAgrupadas(grupos);
     } catch (error) {
       console.error('[GestaoCompras] erro ao carregar produtos cotados', error);
       setProdutosCotados([]);
+      setCotacoesAgrupadas([]);
     } finally {
       if (requestId === cotadosRequestId.current) {
         setLoadingCotados(false);
@@ -1003,10 +1142,10 @@ export function GestaoComprasPage() {
   ], []);
 
   const kanbanColumns = useMemo(() => ([
-    { key: 'acotar', label: 'A Cotar', items: produtosACotar },
-    { key: 'cotado', label: 'Cotado', items: produtosCotados },
-    { key: 'pedido', label: 'Pedido', items: produtosPedidos },
-  ]), [produtosACotar, produtosCotados, produtosPedidos]);
+    { key: 'acotar', label: 'A Cotar', items: produtosACotar, type: 'produtos' as const },
+    { key: 'cotado', label: 'Cotado', items: cotacoesAgrupadas, type: 'cotacoes' as const },
+    { key: 'pedido', label: 'Pedido', items: produtosPedidos, type: 'produtos' as const },
+  ]), [produtosACotar, cotacoesAgrupadas, produtosPedidos]);
 
   const handleGroupSelection = useCallback((groupItems: ProdutoCompraItem[], selectedInGroup: ProdutoCompraItem[]) => {
     const groupIds = new Set(groupItems.map((item) => item.id));
@@ -1402,7 +1541,92 @@ export function GestaoComprasPage() {
                         Carregando itens...
                       </Text>
                     )}
-                    {!isLoading && items.map((item) => (
+                    {!isLoading && isCotado && (col.items as CotacaoKanbanGroup[]).map((grupo) => {
+                      const isExpanded = expandedCotacaoIds[grupo.cotacaoId] ?? false;
+                      const MAX_PRODUTOS_PREVIEW = 8;
+                      const produtosParaMostrar = isExpanded ? grupo.produtos.slice(0, MAX_PRODUTOS_PREVIEW) : [];
+                      const temMais = grupo.produtos.length > MAX_PRODUTOS_PREVIEW;
+
+                      return (
+                        <Card key={grupo.cotacaoId} style={{ padding: '12px' }}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div style={{ flex: 1 }}>
+                              <Text weight="semibold" block>
+                                {grupo.cotacao?.nome ? `${grupo.cotacao.nome} • ${grupo.cotacao.fornecedor || 'Fornecedor'}` : (grupo.cotacao?.fornecedor || 'Fornecedor')}
+                              </Text>
+                              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                                {formatCurrency(grupo.cotacao?.valorTotal ?? grupo.totalValorProdutos)} • {grupo.totalProdutos} {grupo.totalProdutos === 1 ? 'item' : 'itens'}
+                              </Text>
+                              {grupo.cotacao?.observacoes && (
+                                <Text size={200} style={{ color: tokens.colorNeutralForeground3 }} block>
+                                  {grupo.cotacao.observacoes.length > 60 
+                                    ? `${grupo.cotacao.observacoes.slice(0, 60)}...` 
+                                    : grupo.cotacao.observacoes}
+                                </Text>
+                              )}
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                appearance="subtle"
+                                size="small"
+                                icon={<Info24Regular />}
+                                onClick={() => {
+                                  setCotacaoModalId(grupo.cotacaoId);
+                                  setCotacaoModalOpen(true);
+                                }}
+                                title="Ver detalhes"
+                              />
+                              <Button
+                                appearance="subtle"
+                                size="small"
+                                icon={isExpanded ? <ChevronUp16Regular /> : <ChevronDown16Regular />}
+                                onClick={() => {
+                                  setExpandedCotacaoIds((prev) => ({
+                                    ...prev,
+                                    [grupo.cotacaoId]: !isExpanded,
+                                  }));
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {isExpanded && (
+                            <div className="flex flex-col gap-1 mt-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                              {produtosParaMostrar.map((produto) => (
+                                <div
+                                  key={produto.id}
+                                  style={{
+                                    padding: '6px',
+                                    border: `1px solid ${tokens.colorNeutralStroke2}`,
+                                    borderRadius: tokens.borderRadiusMedium,
+                                  }}
+                                >
+                                  <Text size={200} weight="semibold" block>
+                                    {produto.referencia || produto.descricao || 'Item'}
+                                  </Text>
+                                  <Text size={100} style={{ color: tokens.colorNeutralForeground3 }}>
+                                    {produto.quantidade ?? 0} un • {formatCurrency(produto.valorTotal ?? 0)}
+                                  </Text>
+                                </div>
+                              ))}
+                              {temMais && (
+                                <Button
+                                  appearance="subtle"
+                                  size="small"
+                                  onClick={() => {
+                                    setCotacaoModalId(grupo.cotacaoId);
+                                    setCotacaoModalOpen(true);
+                                  }}
+                                >
+                                  Ver todos ({grupo.produtos.length})
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </Card>
+                      );
+                    })}
+                    {!isLoading && !isCotado && (items as ProdutoCompraItem[]).map((item) => (
                       <Card key={item.id} style={{ padding: '10px' }}>
                         <div className="flex items-start justify-between">
                           <div>
@@ -1539,6 +1763,127 @@ export function GestaoComprasPage() {
           </div>
         </div>
       </div>
+
+      <Dialog 
+        open={cotacaoModalOpen} 
+        onOpenChange={(_, data) => {
+          setCotacaoModalOpen(Boolean(data.open));
+          if (!data.open) setCotacaoModalId(null);
+        }}
+      >
+        <DialogSurface style={{ maxWidth: '600px' }}>
+          <DialogBody>
+            <DialogTitle>Detalhes da Cotação</DialogTitle>
+            <DialogContent>
+              {cotacaoModalId && (() => {
+                const grupo = cotacoesAgrupadas.find((g) => g.cotacaoId === cotacaoModalId);
+                if (!grupo) return <Text>Cotação não encontrada</Text>;
+
+                return (
+                  <div className="flex flex-col gap-3">
+                    {grupo.cotacao?.nome && (
+                      <div>
+                        <Text weight="semibold" block>Nome da Cotação</Text>
+                        <Text>{grupo.cotacao.nome}</Text>
+                      </div>
+                    )}
+                    <div>
+                      <Text weight="semibold" block>Fornecedor</Text>
+                      <Text>{grupo.cotacao?.fornecedor || '-'}</Text>
+                    </div>
+                    <div>
+                      <Text weight="semibold" block>Valor Total</Text>
+                      <Text>{formatCurrency(grupo.cotacao?.valorTotal ?? grupo.totalValorProdutos)}</Text>
+                    </div>
+                    {grupo.cotacao?.dataCriacao && (
+                      <div>
+                        <Text weight="semibold" block>Data de Criação</Text>
+                        <Text>{formatDate(grupo.cotacao.dataCriacao)}</Text>
+                      </div>
+                    )}
+                    <div>
+                      <Text weight="semibold" block>Opção de Entrega</Text>
+                      <Text>{formatOpcaoEntrega(grupo.cotacao?.opcaoEntrega)}</Text>
+                    </div>
+                    {grupo.cotacao?.enderecoEntrega && (
+                      <div>
+                        <Text weight="semibold" block>Endereço de Entrega</Text>
+                        <Text>{grupo.cotacao.enderecoEntrega}</Text>
+                      </div>
+                    )}
+                    <div>
+                      <Text weight="semibold" block>Prazo de Envio</Text>
+                      <Text>{formatPrazoEnvio(grupo.cotacao?.prazodeEnvio)}</Text>
+                    </div>
+                    {grupo.cotacao?.observacoes && (
+                      <div>
+                        <Text weight="semibold" block>Observações</Text>
+                        <Text>{grupo.cotacao.observacoes}</Text>
+                      </div>
+                    )}
+                    {grupo.cotacao?.dataAprovacao && (
+                      <div>
+                        <Text weight="semibold" block>Data de Aprovação</Text>
+                        <Text>{formatDate(grupo.cotacao.dataAprovacao)}</Text>
+                      </div>
+                    )}
+                    <div>
+                      <Text weight="semibold" block>Produtos ({grupo.produtos.length})</Text>
+                      <div 
+                        className="flex flex-col gap-2 mt-2" 
+                        style={{ 
+                          maxHeight: '300px', 
+                          overflowY: 'auto',
+                          padding: '8px',
+                          border: `1px solid ${tokens.colorNeutralStroke2}`,
+                          borderRadius: tokens.borderRadiusMedium,
+                        }}
+                      >
+                        {grupo.produtos.map((produto) => (
+                          <div
+                            key={produto.id}
+                            style={{
+                              padding: '8px',
+                              borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+                            }}
+                          >
+                            <Text weight="semibold" block>{produto.referencia || produto.descricao || 'Item'}</Text>
+                            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                              Qtd: {produto.quantidade ?? 0} • {formatCurrency(produto.valorTotal ?? 0)}
+                            </Text>
+                            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                              Cliente: {produto.cliente || '-'} • Entrega: {produto.entregaFmt ?? formatDate(produto.entrega)}
+                            </Text>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </DialogContent>
+            <DialogActions>
+              <Button 
+                appearance="secondary" 
+                icon={<Open24Regular />}
+                onClick={() => {
+                  if (cotacaoModalId) {
+                    window.open(
+                      `https://unium.crm2.dynamics.com/main.aspx?appid=${CRM_APP_ID}&forceUCI=1&pagetype=entityrecord&etn=new_cotacao&id=${cotacaoModalId}`,
+                      '_blank'
+                    );
+                  }
+                }}
+              >
+                Abrir no CRM
+              </Button>
+              <Button appearance="primary" onClick={() => setCotacaoModalOpen(false)}>
+                Fechar
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
 
       <Dialog open={copyDialogOpen} onOpenChange={(_, data) => setCopyDialogOpen(Boolean(data.open))}>
         <DialogSurface>
