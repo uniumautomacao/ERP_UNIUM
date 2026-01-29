@@ -789,6 +789,22 @@ export function GestaoComprasPage() {
     URL.revokeObjectURL(url);
   }, [selectedProdutos, showError]);
 
+  const resolveFornecedorBindId = useCallback(async (fornecedorId: string) => {
+    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (guidRegex.test(fornecedorId)) {
+      return fornecedorId;
+    }
+    console.log('[GestaoCompras] fornecedor id nao GUID, resolvendo por cr22f_id', { fornecedorId });
+    const lookup = await Cr22fFornecedoresFromSharepointListService.getAll({
+      select: ['cr22f_fornecedoresfromsharepointlistid', 'cr22f_id'],
+      filter: `statecode eq 0 and cr22f_id eq '${escapeODataString(fornecedorId)}'`,
+      top: 1,
+    });
+    const resolvedId = (lookup.data as any)?.[0]?.cr22f_fornecedoresfromsharepointlistid as string | undefined;
+    console.log('[GestaoCompras] fornecedor id resolvido', { fornecedorId, resolvedId, lookup });
+    return resolvedId ?? null;
+  }, []);
+
   const handleIniciarCotacao = useCallback(async () => {
     if (!selectedFornecedorId) {
       showError('Selecione um fornecedor');
@@ -807,10 +823,42 @@ export function GestaoComprasPage() {
 
     setProcessing(true);
     try {
-      const novaCotacao = await NewCotacaoService.create({
-        'new_Fornecedor@odata.bind': `/cr22f_fornecedoresfromsharepointlists(${selectedFornecedorId})`,
+      const fornecedorBindId = await resolveFornecedorBindId(selectedFornecedorId);
+      if (!fornecedorBindId) {
+        throw new Error('Fornecedor inválido para criar cotação.');
+      }
+      const cotacaoPayload = {
+        'new_Fornecedor@odata.bind': `/cr22f_fornecedoresfromsharepointlists(${fornecedorBindId})`,
+      };
+      console.log('[GestaoCompras] criando cotacao', {
+        fornecedorId: selectedFornecedorId,
+        fornecedorBindId,
+        itensSelecionados: itensSemCotacao.length,
+        cotacaoPayload,
       });
-      const cotacaoId = (novaCotacao.data as any)?.new_cotacaoid;
+      const novaCotacao = await NewCotacaoService.create(cotacaoPayload);
+      console.log('[GestaoCompras] resultado create cotacao', novaCotacao);
+      if (!novaCotacao.success) {
+        console.error('[GestaoCompras] create cotacao falhou', {
+          error: novaCotacao.error,
+          cotacaoPayload,
+        });
+        throw novaCotacao.error ?? new Error('Falha ao criar cotação.');
+      }
+      let cotacaoId = (novaCotacao.data as any)?.new_cotacaoid || (novaCotacao as any).id;
+      if (!cotacaoId) {
+        console.log('[GestaoCompras] create sem id, buscando cotacao recente', {
+          fornecedorId: selectedFornecedorId,
+        });
+        const lookupResult = await NewCotacaoService.getAll({
+          filter: `statecode eq 0 and _new_fornecedor_value eq '${escapeODataString(selectedFornecedorId)}'`,
+          select: ['new_cotacaoid'],
+          orderBy: ['createdon desc'],
+          top: 1,
+        });
+        console.log('[GestaoCompras] resultado lookup cotacao', lookupResult);
+        cotacaoId = (lookupResult.data as any)?.[0]?.new_cotacaoid;
+      }
       if (!cotacaoId) {
         throw new Error('Cotação não retornou ID.');
       }
@@ -840,7 +888,7 @@ export function GestaoComprasPage() {
     } finally {
       setProcessing(false);
     }
-  }, [loadProdutos, selectedFornecedorId, selectedProdutos, showError, showSuccess]);
+  }, [loadProdutos, resolveFornecedorBindId, selectedFornecedorId, selectedProdutos, showError, showSuccess]);
 
   const handleCopyToClipboard = useCallback(async () => {
     try {

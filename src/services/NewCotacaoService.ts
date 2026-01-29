@@ -15,6 +15,7 @@ export interface NewCotacao {
   new_enderecodeentrega?: string;
   new_observacoes?: string;
   new_datadeaprovacao?: string;
+  'new_Fornecedor@odata.bind'?: string;
 }
 
 export class NewCotacaoService {
