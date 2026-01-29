@@ -13,6 +13,7 @@ L12:|| Atividade Field Control | `new_atividadefieldcontrol` | `new_atividadefie
 L13:|| Cor Colaborador Linha do Tempo | `new_corcolaboradorlinhadotempo` | `new_corcolaboradorlinhadotempos` | `new_corcolaboradorlinhadotempoid` |
 L14:|| Ordem de Serviço Field Control | `new_ordemdeservicofieldcontrol` | `new_ordemdeservicofieldcontrols` | `new_ordemdeservicofieldcontrolid` |
 L15:|| Produto-Serviço | `new_produtoservico` | `new_produtoservicos` | `new_produtoservicoid` |
+L15:|| Cache - Compras (Produtos pendentes) | `new_cachecomprasprodutospendentes` | `new_cachecomprasprodutospendentes` | `new_cachecomprasprodutospendentesid` |
 L16:|| Fabricantes From Sharepoint List | `cr22f_fabricantesfromsharpointlist` | `cr22f_fabricantesfromsharpointlists` | `cr22f_fabricantesfromsharpointlistid` |
 L17:|| Modelos de Produto From Sharepoint List | `cr22f_modelosdeprodutofromsharepointlist` | `cr22f_modelosdeprodutofromsharepointlists` | `cr22f_modelosdeprodutofromsharepointlistid` |
 L18:|| Device IO | `new_deviceio` | `new_deviceios` | `new_deviceioid` |
@@ -634,6 +635,25 @@ L633>|| new_produto | new_Produto | products |
 L634>|| new_remessa | new_Remessa | new_remessas |
 L635|
 L636|---
+L637|
+L637|## 🔵 new_cachecomprasprodutospendentes (Cache - Compras (Produtos pendentes))
+L637|
+L637|### Informações Básicas
+L637|```
+L637|EntityLogicalName:                new_cachecomprasprodutospendentes
+L637|EntityLogicalCollectionName:      new_cachecomprasprodutospendenteses
+L637|EntitySetName:                    new_cachecomprasprodutospendentes
+L637|PrimaryKey:                       new_cachecomprasprodutospendentesid
+L637|```
+L637|
+L637|### ⚡ Campos de Lookup (Navigation Properties)
+L637>|| Campo (AttributeLogicalName) | Navigation Property | Target EntitySet |
+L637>||------------------------------|---------------------|------------------|
+L637>|| new_produtoservico | new_ProdutoServico | new_produtoservicos |
+L637>|| new_cotacao | new_Cotacao | new_cotacaos |
+L637>|| new_modelodeprodutooriginal | new_ModeloDeProdutoOriginal | cr22f_modelosdeprodutofromsharepointlists |
+L637|
+L637|---
 L637|
 L638|## 🔵 new_historicoremessa (Histórico da Remessa)
 L639|

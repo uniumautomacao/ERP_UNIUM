@@ -15,6 +15,7 @@ export * as NewAtividadeFieldControlModel from './models/NewAtividadeFieldContro
 export * as NewCorColaboradorLinhadoTempoModel from './models/NewCorColaboradorLinhadoTempoModel';
 export * as NewOrdemdeServicoFieldControlModel from './models/NewOrdemdeServicoFieldControlModel';
 export * as NewProdutoServicoModel from './models/NewProdutoServicoModel';
+export * as NewCacheComprasProdutosPendentesModel from './models/NewCacheComprasProdutosPendentesModel';
 export * as Cr22fFabricantesFromSharpointListModel from './models/Cr22fFabricantesFromSharpointListModel';
 export * as Cr22fModelosdeProdutoFromSharepointListModel from './models/Cr22fModelosdeProdutoFromSharepointListModel';
 export * as NewDeviceIOModel from './models/NewDeviceIOModel';
@@ -54,6 +55,7 @@ export * from './services/NewAtividadeFieldControlService';
 export * from './services/NewCorColaboradorLinhadoTempoService';
 export * from './services/NewOrdemdeServicoFieldControlService';
 export * from './services/NewProdutoServicoService';
+export * from './services/NewCacheComprasProdutosPendentesService';
 export * from './services/Cr22fFabricantesFromSharpointListService';
 export * from './services/Cr22fModelosdeProdutoFromSharepointListService';
 export * from './services/NewDeviceIOService';

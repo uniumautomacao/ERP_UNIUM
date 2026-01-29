@@ -75,6 +75,13 @@ export const dataSourcesInfo = {
     "dataSourceType": "Dataverse",
     "apis": {}
   },
+  "new_cachecomprasprodutospendentes": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_cachecomprasprodutospendentesid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
   "cr22f_fabricantesfromsharpointlists": {
     "tableId": "",
     "version": "",

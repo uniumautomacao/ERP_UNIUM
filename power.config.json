@@ -63,6 +63,11 @@
           "logicalName": "new_produtoservico",
           "isHidden": false
         },
+        "new_cachecomprasprodutospendentes": {
+          "entitySetName": "new_cachecomprasprodutospendentes",
+          "logicalName": "new_cachecomprasprodutospendentes",
+          "isHidden": false
+        },
         "cr22f_fabricantesfromsharpointlists": {
           "entitySetName": "cr22f_fabricantesfromsharpointlists",
           "logicalName": "cr22f_fabricantesfromsharpointlist",
