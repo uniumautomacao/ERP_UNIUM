@@ -1497,6 +1497,64 @@ export function GestaoComprasPage() {
     URL.revokeObjectURL(url);
   }, [selectedProdutos, showError]);
 
+  const handleCopyResumoFromGroup = useCallback((grupo: CotacaoKanbanGroup) => {
+    const itens = grupo.produtos;
+    if (itens.length === 0) {
+      showError('Nenhum item na cotação');
+      return;
+    }
+    const fornecedorNome = grupo.cotacao?.fornecedor || itens[0]?.fornecedorNome || 'Fornecedor';
+    const lines = itens.reduce((acc, item) => {
+      const key = item.referencia || item.descricao || item.id;
+      acc.set(key, (acc.get(key) ?? 0) + (item.quantidade ?? 0));
+      return acc;
+    }, new Map<string, number>());
+
+    const body = Array.from(lines.entries())
+      .map(([label, qtd]) => `${qtd}x ${label}`)
+      .join('\n');
+
+    const resumo = [
+      `Fornecedor: ${fornecedorNome}`,
+      `Data: ${new Date().toLocaleDateString('pt-BR')}`,
+      '',
+      body,
+      '',
+      '---',
+      `Total: ${itens.length} itens`,
+      `Valor estimado: ${formatCurrency(itens.reduce((acc, item) => acc + (item.valorTotal ?? 0), 0))}`,
+    ].join('\n');
+
+    setCopyText(resumo);
+    setCopyDialogOpen(true);
+  }, [showError]);
+
+  const handleExportCsvFromGroup = useCallback((grupo: CotacaoKanbanGroup) => {
+    const itens = grupo.produtos;
+    if (itens.length === 0) {
+      showError('Nenhum item na cotação');
+      return;
+    }
+    const header = 'Referência;Descrição;Qtd;Cliente;Entrega;Valor Unit.;Valor Total';
+    const rows = itens.map((item) => [
+      item.referencia ?? '',
+      item.descricao ?? '',
+      item.quantidade ?? 0,
+      item.cliente ?? '',
+      item.entregaFmt ?? formatDate(item.entrega),
+      item.precoUnitario ?? 0,
+      item.valorTotal ?? 0,
+    ].join(';'));
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'cotacao-produtos.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [showError]);
+
   const resolveFornecedorBindId = useCallback(async (fornecedorId: string) => {
     const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (guidRegex.test(fornecedorId)) {
@@ -1590,10 +1648,8 @@ export function GestaoComprasPage() {
         await Promise.all([loadCotadosFromProdutoServico(), loadPedidosFromProdutoServico()]);
       }
 
-      window.open(
-        `https://unium.crm2.dynamics.com/main.aspx?appid=${CRM_APP_ID}&forceUCI=1&pagetype=entityrecord&etn=new_cotacao&id=${cotacaoId}`,
-        '_blank'
-      );
+      setCotacaoModalId(cotacaoId);
+      setCotacaoModalOpen(true);
     } catch (error) {
       console.error('[GestaoCompras] erro ao criar cotação', error);
       showError('Erro ao criar cotação', error instanceof Error ? error.message : undefined);
@@ -2191,6 +2247,36 @@ export function GestaoComprasPage() {
                 }}
               >
                 Aprovar cotação
+              </Button>
+              <Button
+                appearance="secondary"
+                icon={<Copy24Regular />}
+                onClick={() => {
+                  if (!cotacaoModalId) return;
+                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
+                  if (!grupo) {
+                    showError('Falha ao obter cotação');
+                    return;
+                  }
+                  handleCopyResumoFromGroup(grupo);
+                }}
+              >
+                Copiar resumo
+              </Button>
+              <Button
+                appearance="secondary"
+                icon={<Share24Regular />}
+                onClick={() => {
+                  if (!cotacaoModalId) return;
+                  const grupo = cotacoesKanbanMap.get(cotacaoModalId);
+                  if (!grupo) {
+                    showError('Falha ao obter cotação');
+                    return;
+                  }
+                  handleExportCsvFromGroup(grupo);
+                }}
+              >
+                Exportar CSV
               </Button>
               <Button 
                 appearance="secondary" 
