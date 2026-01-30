@@ -14,13 +14,7 @@ export function useOrcamentoServicos(items: ItemOrcamento[], orcamentoId: string
 
   // Extrair referências únicas
   const referencias = useMemo(() => {
-    const refs = [...new Set(items.map(i => i.new_ref).filter(Boolean))] as string[];
-    console.log('[useOrcamentoServicos] Referências extraídas dos items:', {
-      itemsCount: items.length,
-      referencias: refs,
-      itemsDetalhes: items.map(i => ({ new_ref: i.new_ref, new_descricao: i.new_descricao })),
-    });
-    return refs;
+    return [...new Set(items.map(i => i.new_ref).filter(Boolean))] as string[];
   }, [items]);
 
   // Buscar dados quando referências mudarem
@@ -48,11 +42,6 @@ export function useOrcamentoServicos(items: ItemOrcamento[], orcamentoId: string
         }
       } catch (error) {
         console.error('[useOrcamentoServicos] Erro ao buscar serviços:', error);
-        console.warn('[useOrcamentoServicos] Estado:', {
-          referencias: referencias.length,
-          refToPrecoId: refToPrecoId.size,
-          tiposServico: tiposServico.size,
-        });
         setRefToPrecoId(new Map());
         setTiposServico(new Map());
       } finally {
@@ -71,17 +60,7 @@ export function useOrcamentoServicos(items: ItemOrcamento[], orcamentoId: string
 
     // Permitir cálculo mesmo se alguns maps estiverem vazios
     // Apenas items com dados disponíveis gerarão serviços
-    const resultado = calcularServicosAgrupados(items, refToPrecoId, tiposServico);
-
-    console.log('[useOrcamentoServicos] Serviços calculados:', {
-      itemsCount: items.length,
-      refToPrecoIdSize: refToPrecoId.size,
-      tiposServicoSize: tiposServico.size,
-      servicosCount: resultado.length,
-      servicos: resultado,
-    });
-
-    return resultado;
+    return calcularServicosAgrupados(items, refToPrecoId, tiposServico);
   }, [items, refToPrecoId, tiposServico]);
 
   // Filtrar por seção

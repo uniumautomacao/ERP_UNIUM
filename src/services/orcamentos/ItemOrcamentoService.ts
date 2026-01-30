@@ -22,7 +22,7 @@ export class ItemOrcamentoService {
     orcamentoId: string,
     includeInactive: boolean = false
   ): Promise<ItemOrcamento[]> {
-    const filter = `_new_orcamento_value ne null and _new_orcamento_value eq '${orcamentoId}' and statecode eq 0 and new_removido ne true and (new_opcaodefornecimento eq 100000000 or new_opcaodefornecimento eq 100000001 or new_opcaodefornecimento eq 100000002)`;
+    const filter = `_new_produto_value ne null and _new_orcamento_value ne null and _new_orcamento_value eq '${orcamentoId}' and statecode eq 0 and new_removido ne true and (new_opcaodefornecimento eq 100000000 or new_opcaodefornecimento eq 100000001 or new_opcaodefornecimento eq 100000002)`;
 
     const options: IGetAllOptions = {
       filter,

@@ -24,32 +24,18 @@ export class ServicoService {
   ): Promise<Map<string, string>> {
     if (referencias.length === 0) return new Map();
 
-    console.log('[ServicoService.fetchPrecosPorReferencias] Buscando preços para referências:', referencias);
-
     // Construir filtro OData
     const filter = referencias
       .map(ref => `new_referenciadoproduto eq '${ref}'`)
       .join(' or ');
-
-    console.log('[ServicoService.fetchPrecosPorReferencias] Filtro OData:', `statecode eq 0 and (${filter})`);
 
     const result = await NewPrecodeProdutoService.getAll({
       filter: `statecode eq 0 and (${filter})`,
       select: ['new_precodeprodutoid', 'new_referenciadoproduto']
     });
 
-    console.log('[ServicoService.fetchPrecosPorReferencias] Resultado completo:', result);
-    console.log('[ServicoService.fetchPrecosPorReferencias] Resultado:', {
-      success: result.success,
-      isSuccess: (result as any).isSuccess,
-      valueLength: result.value?.length || 0,
-      dataLength: (result as any).data?.length || 0,
-      value: result.value,
-      data: (result as any).data,
-    });
-
     // A API pode retornar 'value' ou 'data' dependendo do método
-    const valores = result.value ?? (result as any).data;
+    const valores = (result as any).value ?? result.data;
 
     // Criar mapa de referência para ID
     const map = new Map<string, string>();
@@ -57,11 +43,6 @@ export class ServicoService {
       if (preco.new_referenciadoproduto && preco.new_precodeprodutoid) {
         map.set(preco.new_referenciadoproduto, preco.new_precodeprodutoid);
       }
-    });
-
-    console.log('[ServicoService.fetchPrecosPorReferencias] Map criado:', {
-      size: map.size,
-      entries: Array.from(map.entries()),
     });
 
     return map;
@@ -77,14 +58,10 @@ export class ServicoService {
   ): Promise<Map<string, TipoServicoPreco[]>> {
     if (precoProdutoIds.length === 0) return new Map();
 
-    console.log('[ServicoService.fetchTiposServicoPorPrecos] Buscando tipos de serviço para preços:', precoProdutoIds);
-
     // Construir filtro OData
     const filter = precoProdutoIds
       .map(id => `_new_precodeproduto_value eq '${id}'`)
       .join(' or ');
-
-    console.log('[ServicoService.fetchTiposServicoPorPrecos] Filtro OData:', `statecode eq 0 and (${filter})`);
 
     const result = await NewTiposervicoprecodeprodutoService.getAll({
       filter: `statecode eq 0 and (${filter})`,
@@ -98,18 +75,8 @@ export class ServicoService {
       ]
     });
 
-    console.log('[ServicoService.fetchTiposServicoPorPrecos] Resultado completo:', result);
-    console.log('[ServicoService.fetchTiposServicoPorPrecos] Resultado:', {
-      success: result.success,
-      isSuccess: (result as any).isSuccess,
-      valueLength: result.value?.length || 0,
-      dataLength: (result as any).data?.length || 0,
-      value: result.value,
-      data: (result as any).data,
-    });
-
     // A API pode retornar 'value' ou 'data' dependendo do método
-    const valores = result.value ?? (result as any).data;
+    const valores = (result as any).value ?? result.data;
 
     // Agrupar por precodeproduto
     const map = new Map<string, TipoServicoPreco[]>();
@@ -129,11 +96,6 @@ export class ServicoService {
         tipoDeServicoId: item._new_tipodeservico_value || '',
         precodeProdutoId: precoId
       });
-    });
-
-    console.log('[ServicoService.fetchTiposServicoPorPrecos] Map criado:', {
-      size: map.size,
-      entries: Array.from(map.entries()),
     });
 
     return map;
