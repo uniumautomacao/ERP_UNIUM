@@ -16,6 +16,7 @@ import {
   Toast,
   ToastTitle,
   ToastBody,
+  Button,
 } from '@fluentui/react-components';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { PageHeader } from '../../components/layout/PageHeader';
@@ -29,13 +30,22 @@ import { useOrcamentoTabs } from '../../hooks/orcamentos/useOrcamentoTabs';
 import { useOrcamentoItems } from '../../hooks/orcamentos/useOrcamentoItems';
 import { useOrcamentoData } from '../../hooks/orcamentos/useOrcamentoData';
 import { ItemOrcamentoService } from '../../services/orcamentos/ItemOrcamentoService';
+import { OpenOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/OpenOrcamentoDialog';
+import { NewOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/NewOrcamentoDialog';
+import { EditOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/EditOrcamentoDialog';
+import { NewItemDialog } from '../../components/domain/orcamentos/dialogs/NewItemDialog';
 import type { ItemOrcamento } from '../../features/orcamentos/types';
 import { formatarMoeda } from '../../features/orcamentos/utils';
 
 export function OrcamentosPage() {
-  // TODO: Replace with actual orçamento selection (from dialog or URL param)
-  // For now, set to null to show empty state
-  const [orcamentoId] = useState<string | null>(null);
+  // Estado do orçamento atual
+  const [orcamentoId, setOrcamentoId] = useState<string | null>(null);
+
+  // Estados dos dialogs
+  const [openDialogOpen, setOpenDialogOpen] = useState(false);
+  const [newDialogOpen, setNewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [newItemDialogOpen, setNewItemDialogOpen] = useState(false);
 
   // Hook de dados do Dataverse
   const {
@@ -120,14 +130,27 @@ export function OrcamentosPage() {
     }
   };
 
+  const handleSelectOrcamento = (id: string) => {
+    setOrcamentoId(id);
+    showSuccess('Orçamento carregado com sucesso');
+  };
+
+  const handleCreateOrcamento = (id: string) => {
+    setOrcamentoId(id);
+    showSuccess('Orçamento criado com sucesso');
+  };
+
   const handleNewItem = () => {
-    // TODO: Abrir dialog de novo item
-    console.log('Novo item');
+    if (!orcamentoId) {
+      showError('Selecione um orçamento primeiro');
+      return;
+    }
+    setNewItemDialogOpen(true);
   };
 
   const handleEditSelected = () => {
-    // TODO: Abrir dialog de edição em lote
     console.log('Editar selecionados:', Array.from(selectedItems));
+    // TODO: Implement EditItemDialog
   };
 
   const handleDeleteSelected = async () => {
@@ -188,201 +211,252 @@ export function OrcamentosPage() {
     );
   }
 
-  // No orçamento selected state
-  if (!orcamentoId || !orcamento) {
-    return (
-      <PageContainer>
-        <PageHeader title="Orçamentos" />
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-            color: tokens.colorNeutralForeground3,
-          }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: tokens.spacingVerticalM }}>
-              Nenhum orçamento selecionado
-            </div>
-            <div style={{ fontSize: '14px' }}>
-              Use o menu "Orçamento" para abrir ou criar um novo orçamento
-            </div>
-          </div>
+  // Empty state component when no orcamento
+  const EmptyState = () => (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100%',
+        color: tokens.colorNeutralForeground3,
+      }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: tokens.spacingVerticalM }}>
+          Nenhum orçamento selecionado
         </div>
-      </PageContainer>
-    );
-  }
+        <div style={{ fontSize: '14px', marginBottom: tokens.spacingVerticalL }}>
+          Use o menu "Orçamento" para abrir ou criar um novo orçamento
+        </div>
+        <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, justifyContent: 'center' }}>
+          <Button appearance="primary" onClick={() => setOpenDialogOpen(true)}>
+            Abrir Orçamento
+          </Button>
+          <Button appearance="secondary" onClick={() => setNewDialogOpen(true)}>
+            Novo Orçamento
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Determine what to show
+  const hasOrcamento = orcamentoId && orcamento;
 
   return (
     <PageContainer>
       <PageHeader
         title="Orçamentos"
         subtitle={
-          selectedTab
-            ? `Seção: ${selectedTab} • ${filteredItems.length} ${
-                filteredItems.length === 1 ? 'item' : 'itens'
-              }`
-            : `${items.length} ${items.length === 1 ? 'item' : 'itens'} no total`
+          hasOrcamento
+            ? selectedTab
+              ? `Seção: ${selectedTab} • ${filteredItems.length} ${
+                  filteredItems.length === 1 ? 'item' : 'itens'
+                }`
+              : `${items.length} ${items.length === 1 ? 'item' : 'itens'} no total`
+            : 'Gerencie seus orçamentos'
         }
       />
 
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <OrcamentoLayout
-          leftPanel={
-            <TabNavigation
-              tabs={tabs}
-              selectedTab={selectedTab}
-              onSelectTab={setSelectedTab}
-              onAddTab={addTab}
-              onRemoveTab={removeTab}
-              onRenameTab={renameTab}
-              onReorderTabs={reorderTabs}
-              onMoveTabUp={moveTabUp}
-              onMoveTabDown={moveTabDown}
-              canRemoveTab={canRemoveTab}
-              canMoveUp={canMoveUp}
-              canMoveDown={canMoveDown}
-            />
-          }
-          centerPanel={
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: tokens.spacingVerticalM,
-                height: '100%',
-              }}
-            >
-              {/* Command Bar */}
-              <OrcamentoCommandBar
-                hasSelection={selectedItems.size > 0}
-                onRefresh={handleRefresh}
-                onNewItem={handleNewItem}
-                onEditSelected={handleEditSelected}
-                onDeleteSelected={handleDeleteSelected}
-                disabled={isLoadingItems}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+        {/* Command Bar - sempre visível */}
+        <OrcamentoCommandBar
+          hasSelection={selectedItems.size > 0}
+          onRefresh={handleRefresh}
+          onNewItem={handleNewItem}
+          onEditSelected={handleEditSelected}
+          onDeleteSelected={handleDeleteSelected}
+          onOpenOrcamento={() => setOpenDialogOpen(true)}
+          onEditOrcamento={() => setEditDialogOpen(true)}
+          disabled={isLoadingItems || !hasOrcamento}
+        />
+
+        {/* Conteúdo ou empty state */}
+        {!hasOrcamento ? (
+          <EmptyState />
+        ) : (
+          <OrcamentoLayout
+            leftPanel={
+              <TabNavigation
+                tabs={tabs}
+                selectedTab={selectedTab}
+                onSelectTab={setSelectedTab}
+                onAddTab={addTab}
+                onRemoveTab={removeTab}
+                onRenameTab={renameTab}
+                onReorderTabs={reorderTabs}
+                onMoveTabUp={moveTabUp}
+                onMoveTabDown={moveTabDown}
+                canRemoveTab={canRemoveTab}
+                canMoveUp={canMoveUp}
+                canMoveDown={canMoveDown}
               />
+            }
+            centerPanel={
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: tokens.spacingVerticalM,
+                  height: '100%',
+                }}
+              >
 
-              {/* Product List */}
-              <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-                {isLoadingItems && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                      zIndex: 1,
-                    }}
-                  >
-                    <Spinner label="Carregando itens..." />
+                {/* Product List */}
+                <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+                  {isLoadingItems && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        zIndex: 1,
+                      }}
+                    >
+                      <Spinner label="Carregando itens..." />
+                    </div>
+                  )}
+                  <ProductList
+                    items={filteredItems}
+                    selectedItems={selectedItems}
+                    onSelectionChange={handleSelectionChange}
+                  />
+                </div>
+
+                {/* Footer com totais */}
+                <div
+                  style={{
+                    padding: tokens.spacingVerticalM,
+                    backgroundColor: tokens.colorNeutralBackground1,
+                    borderRadius: tokens.borderRadiusMedium,
+                    border: `1px solid ${tokens.colorNeutralStroke1}`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div>
+                    <span style={{ fontSize: '14px', color: tokens.colorNeutralForeground2 }}>
+                      {selectedItems.size > 0 && `${selectedItems.size} selecionados • `}
+                      {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'itens'}
+                    </span>
                   </div>
-                )}
-                <ProductList
-                  items={filteredItems}
-                  selectedItems={selectedItems}
-                  onSelectionChange={handleSelectionChange}
-                />
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '12px', color: tokens.colorNeutralForeground3 }}>
+                      Subtotal da seção
+                    </div>
+                    <div style={{ fontSize: '18px', fontWeight: 600 }}>
+                      {formatarMoeda(
+                        filteredItems.reduce((sum, item) => sum + (item.new_valortotal || 0), 0)
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              {/* Footer com totais */}
+            }
+              rightPanel={
               <div
                 style={{
                   padding: tokens.spacingVerticalM,
                   backgroundColor: tokens.colorNeutralBackground1,
                   borderRadius: tokens.borderRadiusMedium,
                   border: `1px solid ${tokens.colorNeutralStroke1}`,
+                  height: '100%',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  flexDirection: 'column',
+                  gap: tokens.spacingVerticalM,
                 }}
               >
+                {/* AI Chat Placeholder */}
+                <AIChatPlaceholder />
+
+                {/* Créditos */}
+                <CreditsDisplay
+                  availableCredits={creditosDisponiveis}
+                  usedCredits={creditosUtilizados}
+                />
+
+                {/* Totais gerais */}
                 <div>
-                  <span style={{ fontSize: '14px', color: tokens.colorNeutralForeground2 }}>
-                    {selectedItems.size > 0 && `${selectedItems.size} selecionados • `}
-                    {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'itens'}
-                  </span>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '12px', color: tokens.colorNeutralForeground3 }}>
-                    Subtotal da seção
-                  </div>
-                  <div style={{ fontSize: '18px', fontWeight: 600 }}>
-                    {formatarMoeda(
-                      filteredItems.reduce((sum, item) => sum + (item.new_valortotal || 0), 0)
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-          rightPanel={
-            <div
-              style={{
-                padding: tokens.spacingVerticalM,
-                backgroundColor: tokens.colorNeutralBackground1,
-                borderRadius: tokens.borderRadiusMedium,
-                border: `1px solid ${tokens.colorNeutralStroke1}`,
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: tokens.spacingVerticalM,
-              }}
-            >
-              {/* AI Chat Placeholder */}
-              <AIChatPlaceholder />
-
-              {/* Créditos */}
-              <CreditsDisplay
-                availableCredits={creditosDisponiveis}
-                usedCredits={creditosUtilizados}
-              />
-
-              {/* Totais gerais */}
-              <div>
-                <h3 style={{ margin: 0, marginBottom: tokens.spacingVerticalS }}>
-                  Resumo Geral
-                </h3>
-                <div style={{ fontSize: '14px', color: tokens.colorNeutralForeground2 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
-                    <span>Total de itens:</span>
-                    <strong>{dataverseTotals.totalItems}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
-                    <span>Produtos:</span>
-                    <strong>{formatarMoeda(dataverseTotals.totalProducts)}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
-                    <span>Serviços:</span>
-                    <strong>{formatarMoeda(dataverseTotals.totalServices)}</strong>
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginTop: tokens.spacingVerticalS,
-                      paddingTop: tokens.spacingVerticalS,
-                      borderTop: `1px solid ${tokens.colorNeutralStroke1}`,
-                      fontSize: '16px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <span>Total:</span>
-                    <span>{formatarMoeda(dataverseTotals.totalValue)}</span>
+                  <h3 style={{ margin: 0, marginBottom: tokens.spacingVerticalS }}>
+                    Resumo Geral
+                  </h3>
+                  <div style={{ fontSize: '14px', color: tokens.colorNeutralForeground2 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
+                      <span>Total de itens:</span>
+                      <strong>{dataverseTotals.totalItems}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
+                      <span>Produtos:</span>
+                      <strong>{formatarMoeda(dataverseTotals.totalProducts)}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
+                      <span>Serviços:</span>
+                      <strong>{formatarMoeda(dataverseTotals.totalServices)}</strong>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginTop: tokens.spacingVerticalS,
+                        paddingTop: tokens.spacingVerticalS,
+                        borderTop: `1px solid ${tokens.colorNeutralStroke1}`,
+                        fontSize: '16px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <span>Total:</span>
+                      <span>{formatarMoeda(dataverseTotals.totalValue)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          }
-        />
+            }
+          />
+        )}
       </div>
+
+      {/* Dialogs */}
+      <OpenOrcamentoDialog
+        open={openDialogOpen}
+        onClose={() => setOpenDialogOpen(false)}
+        onSelectOrcamento={handleSelectOrcamento}
+      />
+
+      <NewOrcamentoDialog
+        open={newDialogOpen}
+        onClose={() => setNewDialogOpen(false)}
+        onCreated={handleCreateOrcamento}
+      />
+
+      <EditOrcamentoDialog
+        open={editDialogOpen}
+        orcamento={orcamento}
+        onClose={() => setEditDialogOpen(false)}
+        onSaved={() => {
+          setEditDialogOpen(false);
+          handleRefresh();
+        }}
+      />
+
+      <NewItemDialog
+        open={newItemDialogOpen}
+        orcamentoId={orcamentoId || ''}
+        sections={tabs}
+        currentSection={selectedTab || undefined}
+        onClose={() => setNewItemDialogOpen(false)}
+        onCreated={() => {
+          setNewItemDialogOpen(false);
+          handleRefresh();
+        }}
+      />
     </PageContainer>
   );
 }
