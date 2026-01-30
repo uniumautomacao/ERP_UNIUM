@@ -24,9 +24,7 @@ export class ItemOrcamentoService {
   ): Promise<ItemOrcamento[]> {
     console.log('[ItemOrcamentoService.fetchItemsByOrcamento] Buscando itens do orçamento:', orcamentoId);
 
-    const filter = includeInactive
-      ? `_new_orcamento_value eq '${orcamentoId}'`
-      : `_new_orcamento_value eq '${orcamentoId}' and statecode eq 0`;
+    const filter = `_new_orcamento_value ne null and _new_orcamento_value eq '${orcamentoId}' and statecode eq 0 and new_removido ne true and (new_opcaodefornecimento eq 100000000 or new_opcaodefornecimento eq 100000001 or new_opcaodefornecimento eq 100000002)`;
 
     const options: IGetAllOptions = {
       filter,
