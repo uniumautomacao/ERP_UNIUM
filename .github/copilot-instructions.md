@@ -44,6 +44,13 @@ Atualizar `src/version.ts` **apenas quando**:
 - Refatorar arquivos > 200-300 linhas
 - Nunca sobrescrever `.env` sem confirmação
 
+## UI/UX - Template Fluent UI v9
+**ANTES de alterações de UI**: Consultar `TEMPLATE_README.md`
+- Usar Fluent UI v9 para TODOS os componentes
+- Tailwind apenas para layout (grid, flex, gap, spacing)
+- Nunca usar cores hardcoded - sempre `tokens.colorXxx`
+- Seguir estrutura de componentes (layout/, shared/, domain/)
+
 ## 🚨 Queries Delegáveis - OBRIGATÓRIO
 
 **NUNCA filtrar localmente dados do Dataverse!**
