@@ -114,22 +114,30 @@ export function OpenOrcamentoDialog({
     try {
       const data = await OrcamentoService.fetchAll({
         filter: 'statecode eq 0',
-        orderBy: 'createdon desc',
+        orderBy: ['createdon desc'],
         top: 100,
         select: [
           'new_orcamentoid',
           'new_name',
-          'new_nomecliente',
           'new_valortotal',
           'createdon',
           'new_publicado',
+          'new_nomecliente',
         ],
       });
-      setOrcamentos(data);
-      setFilteredOrcamentos(data);
+
+      // Mapear o nome do cliente do expand
+      const mappedData = data.map(orc => ({
+        ...orc,
+        new_nomecliente: orc.new_nomecliente || 'Cliente não identificado',
+      }));
+
+      console.log('Orçamentos carregados:', mappedData.length, mappedData);
+      setOrcamentos(mappedData);
+      setFilteredOrcamentos(mappedData);
     } catch (err) {
       console.error('Erro ao carregar orçamentos:', err);
-      setError('Erro ao carregar orçamentos');
+      setError(err instanceof Error ? err.message : 'Erro ao carregar orçamentos');
     } finally {
       setIsLoading(false);
     }
@@ -248,7 +256,21 @@ export function OpenOrcamentoDialog({
                 </div>
               ) : filteredOrcamentos.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <span>Nenhum orçamento encontrado</span>
+                  <div>
+                    <div style={{ marginBottom: tokens.spacingVerticalS }}>
+                      <span>Nenhum orçamento encontrado</span>
+                    </div>
+                    {searchText && (
+                      <div style={{ fontSize: '12px' }}>
+                        Tente ajustar os termos de busca
+                      </div>
+                    )}
+                    {!searchText && orcamentos.length === 0 && (
+                      <div style={{ fontSize: '12px' }}>
+                        Não há orçamentos cadastrados no sistema
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <DataGrid
