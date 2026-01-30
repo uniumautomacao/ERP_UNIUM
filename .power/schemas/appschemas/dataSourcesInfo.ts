@@ -222,6 +222,62 @@ export const dataSourcesInfo = {
     "dataSourceType": "Dataverse",
     "apis": {}
   },
+  "new_orcamentos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_orcamentoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_opcaodepagamentos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_opcaodepagamentoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_parcelaopcaodepagamentos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_parcelaopcaodepagamentoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_creditosdoclientes": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_creditosdoclienteid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_utilizacaodecreditos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_utilizacaodecreditoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_isencaodeservicoemorcamentos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_isencaodeservicoemorcamentoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "new_itemdeorcamentos": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "new_itemdeorcamentoid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "cr22f_uniumpedidoempdfs": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "cr22f_uniumpedidoempdfid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
   "new_cotacaos": {
     "tableId": "",
     "version": "",

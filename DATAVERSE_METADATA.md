@@ -34,6 +34,14 @@ L32:|| Preço de Produto | `new_precodeproduto` | `new_precodeprodutos` | `new_p
 L33:|| Fornecedores From Sharepoint List | `cr22f_fornecedoresfromsharepointlist` | `cr22f_fornecedoresfromsharepointlists` | `cr22f_fornecedoresfromsharepointlistid` |
 L34:|| TipoServiço-PreçodeProduto | `new_tiposervicoprecodeproduto` | `new_tiposervicoprecodeprodutos` | `new_tiposervicoprecodeprodutoid` |
 L35:|| Tipo de Serviço | `new_tipodeservico` | `new_tipodeservicos` | `new_tipodeservicoid` |
+L35:|| Orcamento | `new_orcamento` | `new_orcamentos` | `new_orcamentoid` |
+L35:|| Opção de Pagamento | `new_opcaodepagamento` | `new_opcaodepagamentos` | `new_opcaodepagamentoid` |
+L35:|| Parcela Opção de Pagamento | `new_parcelaopcaodepagamento` | `new_parcelaopcaodepagamentos` | `new_parcelaopcaodepagamentoid` |
+L35:|| Créditos do Cliente | `new_creditosdocliente` | `new_creditosdoclientes` | `new_creditosdoclienteid` |
+L35:|| Utilização de Crédito | `new_utilizacaodecredito` | `new_utilizacaodecreditos` | `new_utilizacaodecreditoid` |
+L35:|| Isenção de Serviço em Orcamento | `new_isencaodeservicoemorcamento` | `new_isencaodeservicoemorcamentos` | `new_isencaodeservicoemorcamentoid` |
+L35:|| Item de Orcamento | `new_itemdeorcamento` | `new_itemdeorcamentos` | `new_itemdeorcamentoid` |
+L35:|| UNIUM Pedido em PDF | `cr22f_uniumpedidoempdf` | `cr22f_uniumpedidoempdfs` | `cr22f_uniumpedidoempdfid` |
 L36:|| Cotação Temporária de Produto | `new_cotacaotemporariadeproduto` | `new_cotacaotemporariadeprodutos` | `new_cotacaotemporariadeprodutoid` |
 L37:|| Regime de Cotação Temporária | `new_regimedecotacaotemporaria` | `new_regimedecotacaotemporarias` | `new_regimedecotacaotemporariaid` |
 L38:|| Tipo de Serviço Regime de Cotação Temporária | `new_tipodeservicoregimedecotacaotemporaria` | `new_tipodeservicoregimedecotacaotemporarias` | `new_tipodeservicoregimedecotacaotemporariaid` |
@@ -711,3 +719,98 @@ L690>|| statuscode | OptionSet | Reason for Status |
 L691>|| createdon | DateTime | Data de criação |
 L692>|| modifiedon | DateTime | Data de modificação |
 L693|
+L694|---
+L695|
+L696|## 🔵 new_orcamento (Orcamento)
+L697|
+L698|### Informações Básicas
+L699|```
+L700|EntityLogicalName:                new_orcamento
+L701|EntityLogicalCollectionName:      new_orcamentos
+L702|EntitySetName:                    new_orcamentos
+L703|PrimaryKey:                       new_orcamentoid
+L704|```
+L705|
+L706|---
+L707|
+L708|## 🔵 new_opcaodepagamento (Opcao de Pagamento)
+L709|
+L710|### Informações Básicas
+L711|```
+L712|EntityLogicalName:                new_opcaodepagamento
+L713|EntityLogicalCollectionName:      new_opcaodepagamentos
+L714|EntitySetName:                    new_opcaodepagamentos
+L715|PrimaryKey:                       new_opcaodepagamentoid
+L716|```
+L717|
+L718|---
+L719|
+L720|## 🔵 new_parcelaopcaodepagamento (Parcela Opcao de Pagamento)
+L721|
+L722|### Informações Básicas
+L723|```
+L724|EntityLogicalName:                new_parcelaopcaodepagamento
+L725|EntityLogicalCollectionName:      new_parcelaopcaodepagamentos
+L726|EntitySetName:                    new_parcelaopcaodepagamentos
+L727|PrimaryKey:                       new_parcelaopcaodepagamentoid
+L728|```
+L729|
+L730|---
+L731|
+L732|## 🔵 new_creditosdocliente (Creditos do Cliente)
+L733|
+L734|### Informações Básicas
+L735|```
+L736|EntityLogicalName:                new_creditosdocliente
+L737|EntityLogicalCollectionName:      new_creditosdoclientes
+L738|EntitySetName:                    new_creditosdoclientes
+L739|PrimaryKey:                       new_creditosdoclienteid
+L740|```
+L741|
+L742|---
+L743|
+L744|## 🔵 new_utilizacaodecredito (Utilizacao de Credito)
+L745|
+L746|### Informações Básicas
+L747|```
+L748|EntityLogicalName:                new_utilizacaodecredito
+L749|EntityLogicalCollectionName:      new_utilizacaodecreditos
+L750|EntitySetName:                    new_utilizacaodecreditos
+L751|PrimaryKey:                       new_utilizacaodecreditoid
+L752|```
+L753|
+L754|---
+L755|
+L756|## 🔵 new_isencaodeservicoemorcamento (Isencao de Servico em Orcamento)
+L757|
+L758|### Informações Básicas
+L759|```
+L760|EntityLogicalName:                new_isencaodeservicoemorcamento
+L761|EntityLogicalCollectionName:      new_isencaodeservicoemorcamentos
+L762|EntitySetName:                    new_isencaodeservicoemorcamentos
+L763|PrimaryKey:                       new_isencaodeservicoemorcamentoid
+L764|```
+L765|
+L766|---
+L767|
+L768|## 🔵 new_itemdeorcamento (Item de Orcamento)
+L769|
+L770|### Informações Básicas
+L771|```
+L772|EntityLogicalName:                new_itemdeorcamento
+L773|EntityLogicalCollectionName:      new_itemdeorcamentos
+L774|EntitySetName:                    new_itemdeorcamentos
+L775|PrimaryKey:                       new_itemdeorcamentoid
+L776|```
+L777|
+L778|---
+L779|
+L780|## 🔵 cr22f_uniumpedidoempdf (UNIUM Pedido em PDF)
+L781|
+L782|### Informações Básicas
+L783|```
+L784|EntityLogicalName:                cr22f_uniumpedidoempdf
+L785|EntityLogicalCollectionName:      cr22f_uniumpedidoempdfs
+L786|EntitySetName:                    cr22f_uniumpedidoempdfs
+L787|PrimaryKey:                       cr22f_uniumpedidoempdfid
+L788|```

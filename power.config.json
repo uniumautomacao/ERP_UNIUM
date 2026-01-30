@@ -168,6 +168,46 @@
           "logicalName": "new_tipodeservico",
           "isHidden": false
         },
+        "new_orcamentos": {
+          "entitySetName": "new_orcamentos",
+          "logicalName": "new_orcamento",
+          "isHidden": false
+        },
+        "new_opcaodepagamentos": {
+          "entitySetName": "new_opcaodepagamentos",
+          "logicalName": "new_opcaodepagamento",
+          "isHidden": false
+        },
+        "new_parcelaopcaodepagamentos": {
+          "entitySetName": "new_parcelaopcaodepagamentos",
+          "logicalName": "new_parcelaopcaodepagamento",
+          "isHidden": false
+        },
+        "new_creditosdoclientes": {
+          "entitySetName": "new_creditosdoclientes",
+          "logicalName": "new_creditosdocliente",
+          "isHidden": false
+        },
+        "new_utilizacaodecreditos": {
+          "entitySetName": "new_utilizacaodecreditos",
+          "logicalName": "new_utilizacaodecredito",
+          "isHidden": false
+        },
+        "new_isencaodeservicoemorcamentos": {
+          "entitySetName": "new_isencaodeservicoemorcamentos",
+          "logicalName": "new_isencaodeservicoemorcamento",
+          "isHidden": false
+        },
+        "new_itemdeorcamentos": {
+          "entitySetName": "new_itemdeorcamentos",
+          "logicalName": "new_itemdeorcamento",
+          "isHidden": false
+        },
+        "cr22f_uniumpedidoempdfs": {
+          "entitySetName": "cr22f_uniumpedidoempdfs",
+          "logicalName": "cr22f_uniumpedidoempdf",
+          "isHidden": false
+        },
         "new_cotacaos": {
           "entitySetName": "new_cotacaos",
           "logicalName": "new_cotacao",
