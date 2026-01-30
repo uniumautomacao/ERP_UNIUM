@@ -19,18 +19,6 @@ import { EXPIRACAO_REGRAS, SECAO_ESPECIAL } from './constants';
 // ============================================================================
 
 /**
- * Calcula o valor total de um item
- * Fórmula: (Valor do Produto + Valor de Serviço) * Quantidade
- */
-export function calcularValorTotalItem(item: ItemOrcamento): number {
-  const valorProduto = item.new_valordeproduto ?? 0;
-  const valorServico = item.new_valordeservico ?? 0;
-  const quantidade = item.new_quantidade ?? 1;
-
-  return (valorProduto + valorServico) * quantidade;
-}
-
-/**
  * Calcula o resumo financeiro do orçamento
  */
 export function calcularResumoOrcamento(
@@ -98,7 +86,7 @@ export function extrairSecoes(itens: ItemOrcamento[]): OrcamentoSecao[] {
 
     const secao = secoesMap.get(sectionName)!;
     secao.itemCount++;
-    secao.valorTotal += calcularValorTotalItem(item);
+    secao.valorTotal += item.new_valortotal ?? 0;
   });
 
   // Ordenar seções
@@ -383,6 +371,12 @@ export function calcularServicosAgrupados(
   tiposServico: Map<string, TipoServicoPreco[]>,
   isencoesIds: Set<string> = new Set()
 ): ServicoCalculado[] {
+  console.log('[calcularServicosAgrupados] Iniciando', {
+    totalItems: items.length,
+    totalRefs: refToPrecoId.size,
+    totalTiposServico: tiposServico.size
+  });
+
   const servicosMap = new Map<string, ServicoCalculado>();
 
   items.forEach(item => {
@@ -396,6 +390,16 @@ export function calcularServicosAgrupados(
     // Buscar os tipos de serviço associados a este preço
     const tiposDoItem = tiposServico.get(precoId) || [];
 
+    // LOG: Dados do item sendo processado
+    console.log(`[Item: ${ref}]`, {
+      new_valordeproduto: item.new_valordeproduto,
+      new_valordeservico: item.new_valordeservico,
+      new_valortotal: item.new_valortotal,
+      new_quantidade: item.new_quantidade,
+      new_section: item.new_section,
+      tiposDeServicoCount: tiposDoItem.length
+    });
+
     tiposDoItem.forEach(tipo => {
       // Verificar se está isento
       if (isencoesIds.has(tipo.tipoDeServicoId)) return;
@@ -403,13 +407,26 @@ export function calcularServicosAgrupados(
       let valor = 0;
       const isVariavel = tipo.taxaPercentual > 0;
 
-      // Serviço variável (percentual sobre new_valordeproduto)
+      // LOG: Dados do tipo de serviço
+      console.log(`  [Serviço: ${tipo.descricaoDoServico}]`, {
+        taxaPercentual: tipo.taxaPercentual,
+        taxaFixa: tipo.taxaFixa,
+        isVariavel
+      });
+
+      // Serviço variável (percentual sobre new_valordeservico)
       if (isVariavel) {
-        valor = (item.new_valordeproduto || 0) * tipo.taxaPercentual * (item.new_quantidade || 1);
+        const valorBase = item.new_valordeservico || 0;
+        //const quantidade = item.new_quantidade || 1;
+        valor = valorBase ;// * tipo.taxaPercentual * quantidade;
       }
       // Serviço fixo
       else if (tipo.taxaFixa > 0) {
         valor = tipo.taxaFixa;
+        console.log(`    Cálculo fixo:`, {
+          taxaFixa: tipo.taxaFixa,
+          resultado: valor
+        });
       }
 
       if (valor <= 0) return;
@@ -419,12 +436,21 @@ export function calcularServicosAgrupados(
       const existing = servicosMap.get(key);
 
       if (existing) {
+        const valorAnterior = existing.valorTotal;
         // Para variáveis: soma / Para fixos: pega o maior
         if (isVariavel) {
           existing.valorTotal += valor;
         } else {
           existing.valorTotal = Math.max(existing.valorTotal, valor);
         }
+
+        // LOG: Agrupamento
+        console.log(`    Agrupando:`, {
+          valorAnterior,
+          valorNovo: valor,
+          valorFinal: existing.valorTotal,
+          operacao: isVariavel ? 'soma' : 'max'
+        });
       } else {
         servicosMap.set(key, {
           id: crypto.randomUUID(),
@@ -434,9 +460,25 @@ export function calcularServicosAgrupados(
           remocaoPermitida: tipo.remocaoPermitida,
           isServico: true
         });
+
+        console.log(`    Criando novo serviço:`, {
+          key,
+          valorTotal: valor
+        });
       }
     });
   });
 
-  return Array.from(servicosMap.values());
+  const resultado = Array.from(servicosMap.values());
+
+  console.log('[calcularServicosAgrupados] Resultado:', {
+    totalServicos: resultado.length,
+    servicos: resultado.map(s => ({
+      descricao: s.descricao,
+      valorTotal: s.valorTotal,
+      section: s.section
+    }))
+  });
+
+  return resultado;
 }
