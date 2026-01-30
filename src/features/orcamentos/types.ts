@@ -21,6 +21,7 @@ export interface Orcamento {
   new_consultor?: string | null; // ID do systemuser
   new_nomeconsultor?: string | null; // Computed
   new_projeto?: string | null; // ID do projeto
+  new_nomeprojeto?: string | null; // Computed
 
   // Informações financeiras
   new_valortotal?: number | null;

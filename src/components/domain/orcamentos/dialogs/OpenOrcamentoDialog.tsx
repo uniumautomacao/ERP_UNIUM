@@ -120,18 +120,21 @@ export function OpenOrcamentoDialog({
           'createdon',
           '_new_cliente_value', // Lookup ID do cliente
           '_new_consultor_value', // Lookup ID do consultor
+          '_new_projeto_value', // Lookup ID do projeto
         ],
       } as IGetAllOptions);
 
-      // Mapear o nome do cliente e consultor usando os lookups formatados
+      // Mapear o nome do cliente, consultor e projeto usando os lookups formatados
       const mappedData = data.map(orc => {
         const clienteFormatado = (orc as any)['_new_cliente_value@OData.Community.Display.V1.FormattedValue'];
         const consultorFormatado = (orc as any)['_new_consultor_value@OData.Community.Display.V1.FormattedValue'];
+        const projetoFormatado = (orc as any)['_new_projeto_value@OData.Community.Display.V1.FormattedValue'];
 
         return {
           ...orc,
           new_nomecliente: clienteFormatado || 'Cliente não identificado',
           new_nomeconsultor: consultorFormatado || '-',
+          new_nomeprojeto: projetoFormatado || '-',
         };
       });
 
@@ -242,6 +245,14 @@ export function OpenOrcamentoDialog({
       renderHeaderCell: () => 'Consultor',
       renderCell: (item) => (
         <TableCellLayout>{item.new_nomeconsultor || '-'}</TableCellLayout>
+      ),
+    }),
+    createTableColumn<Orcamento>({
+      columnId: 'projeto',
+      compare: (a, b) => (a.new_nomeprojeto || '').localeCompare(b.new_nomeprojeto || ''),
+      renderHeaderCell: () => 'Projeto',
+      renderCell: (item) => (
+        <TableCellLayout>{item.new_nomeprojeto || '-'}</TableCellLayout>
       ),
     }),
     createTableColumn<Orcamento>({
