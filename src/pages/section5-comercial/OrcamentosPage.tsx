@@ -29,6 +29,7 @@ import { CreditsDisplay } from '../../components/domain/orcamentos/CreditsDispla
 import { useOrcamentoTabs } from '../../hooks/orcamentos/useOrcamentoTabs';
 import { useOrcamentoItems } from '../../hooks/orcamentos/useOrcamentoItems';
 import { useOrcamentoData } from '../../hooks/orcamentos/useOrcamentoData';
+import { useOrcamentoServicos } from '../../hooks/orcamentos/useOrcamentoServicos';
 import { ItemOrcamentoService } from '../../services/orcamentos/ItemOrcamentoService';
 import { OpenOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/OpenOrcamentoDialog';
 import { NewOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/NewOrcamentoDialog';
@@ -70,11 +71,7 @@ export function OrcamentosPage() {
     removeTab,
     renameTab,
     reorderTabs,
-    moveTabUp,
-    moveTabDown,
     canRemoveTab,
-    canMoveUp,
-    canMoveDown,
   } = useOrcamentoTabs(dataverseSections);
 
   const {
@@ -115,6 +112,14 @@ export function OrcamentosPage() {
     return getItemsBySection(selectedTab);
   }, [getItemsBySection, selectedTab]);
 
+  // Hook de serviços
+  const { servicos, getServicosBySection } = useOrcamentoServicos(items, orcamentoId);
+
+  // Filtrar serviços pela seção selecionada
+  const filteredServicos = useMemo(() => {
+    return getServicosBySection(selectedTab);
+  }, [getServicosBySection, selectedTab]);
+
   const handleSelectionChange = (selected: ItemOrcamento[]) => {
     clearSelection();
     selected.forEach((item) => toggleItemSelection(item.new_itemdeorcamentoid));
@@ -149,7 +154,6 @@ export function OrcamentosPage() {
   };
 
   const handleEditSelected = () => {
-    console.log('Editar selecionados:', Array.from(selectedItems));
     // TODO: Implement EditItemDialog
   };
 
@@ -244,26 +248,13 @@ export function OrcamentosPage() {
   // Determine what to show
   const hasOrcamento = orcamentoId && orcamento;
 
-  console.log('[OrcamentosPage] Estado de renderização:', {
-    orcamentoId,
-    hasOrcamento: !!orcamento,
-    orcamentoName: orcamento?.new_name,
-    isLoading,
-    error,
-    itemsCount: items.length,
-  });
-
   return (
     <PageContainer>
       <PageHeader
-        title="Orçamentos"
+        title={hasOrcamento ? (orcamento.new_name || 'Orçamento sem nome') : 'Orçamentos'}
         subtitle={
           hasOrcamento
-            ? selectedTab
-              ? `Seção: ${selectedTab} • ${filteredItems.length} ${
-                  filteredItems.length === 1 ? 'item' : 'itens'
-                }`
-              : `${items.length} ${items.length === 1 ? 'item' : 'itens'} no total`
+            ? `${orcamento.new_nomecliente || 'Cliente não definido'} • ${orcamento.new_nomeprojeto || 'Sem projeto'}`
             : 'Gerencie seus orçamentos'
         }
       />
@@ -295,11 +286,7 @@ export function OrcamentosPage() {
                 onRemoveTab={removeTab}
                 onRenameTab={renameTab}
                 onReorderTabs={reorderTabs}
-                onMoveTabUp={moveTabUp}
-                onMoveTabDown={moveTabDown}
                 canRemoveTab={canRemoveTab}
-                canMoveUp={canMoveUp}
-                canMoveDown={canMoveDown}
               />
             }
             centerPanel={
@@ -334,6 +321,7 @@ export function OrcamentosPage() {
                   )}
                   <ProductList
                     items={filteredItems}
+                    servicos={filteredServicos}
                     selectedItems={selectedItems}
                     onSelectionChange={handleSelectionChange}
                   />

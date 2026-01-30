@@ -11,6 +11,7 @@ import type {
   ExpiracaoStatus,
   ItemStatus,
 } from './types';
+import type { TipoServicoPreco } from '../../services/orcamentos/ServicoService';
 import { EXPIRACAO_REGRAS, SECAO_ESPECIAL } from './constants';
 
 // ============================================================================
@@ -348,4 +349,94 @@ export function podePublicarOrcamento(orcamento: Orcamento, itens: ItemOrcamento
   if (orcamento.new_publicado) return false;
 
   return true;
+}
+
+// ============================================================================
+// Cálculo de Serviços
+// ============================================================================
+
+/**
+ * Interface para serviço calculado e agrupado
+ */
+export interface ServicoCalculado {
+  id: string; // GUID gerado para identificar a linha
+  descricao: string;
+  valorTotal: number;
+  section: string;
+  remocaoPermitida: boolean;
+  isServico: true;
+}
+
+/**
+ * Calcula e agrupa serviços baseados nos itens do orçamento
+ * Replica a lógica do BudgetViewComponent do PowerApps
+ *
+ * @param items - Itens do orçamento
+ * @param refToPrecoId - Map de referência → precodeprodutoid
+ * @param tiposServico - Map de precodeprodutoid → tipos de serviço
+ * @param isencoesIds - Set de IDs de tipos de serviço isentos
+ * @returns Array de serviços calculados e agrupados por descrição/seção
+ */
+export function calcularServicosAgrupados(
+  items: ItemOrcamento[],
+  refToPrecoId: Map<string, string>,
+  tiposServico: Map<string, TipoServicoPreco[]>,
+  isencoesIds: Set<string> = new Set()
+): ServicoCalculado[] {
+  const servicosMap = new Map<string, ServicoCalculado>();
+
+  items.forEach(item => {
+    const ref = item.new_ref;
+    if (!ref) return;
+
+    // Buscar o ID do preço de produto
+    const precoId = refToPrecoId.get(ref);
+    if (!precoId) return;
+
+    // Buscar os tipos de serviço associados a este preço
+    const tiposDoItem = tiposServico.get(precoId) || [];
+
+    tiposDoItem.forEach(tipo => {
+      // Verificar se está isento
+      if (isencoesIds.has(tipo.tipoDeServicoId)) return;
+
+      let valor = 0;
+      const isVariavel = tipo.taxaPercentual > 0;
+
+      // Serviço variável (percentual sobre new_valordeservico)
+      if (isVariavel) {
+        valor = (item.new_valordeservico || 0) * tipo.taxaPercentual * (item.new_quantidade || 1);
+      }
+      // Serviço fixo
+      else if (tipo.taxaFixa > 0) {
+        valor = tipo.taxaFixa;
+      }
+
+      if (valor <= 0) return;
+
+      // Criar chave única por descrição e seção
+      const key = `${item.new_section || ''}_${tipo.descricaoDoServico}`;
+      const existing = servicosMap.get(key);
+
+      if (existing) {
+        // Para variáveis: soma / Para fixos: pega o maior
+        if (isVariavel) {
+          existing.valorTotal += valor;
+        } else {
+          existing.valorTotal = Math.max(existing.valorTotal, valor);
+        }
+      } else {
+        servicosMap.set(key, {
+          id: crypto.randomUUID(),
+          descricao: tipo.descricaoDoServico,
+          valorTotal: valor,
+          section: item.new_section || '',
+          remocaoPermitida: tipo.remocaoPermitida,
+          isServico: true
+        });
+      }
+    });
+  });
+
+  return Array.from(servicosMap.values());
 }

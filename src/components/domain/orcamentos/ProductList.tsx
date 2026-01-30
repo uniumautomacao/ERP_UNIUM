@@ -1,6 +1,7 @@
 /**
  * Lista de produtos do orçamento
  * Usa DataGrid com colunas customizadas
+ * Exibe produtos e serviços agrupados
  */
 
 import { useMemo } from 'react';
@@ -9,118 +10,99 @@ import {
   createTableColumn,
   tokens,
   Badge,
-  Tooltip,
 } from '@fluentui/react-components';
-import {
-  CheckmarkCircle24Filled,
-  Warning24Filled,
-  ErrorCircle24Filled,
-} from '@fluentui/react-icons';
 import { DataGrid } from '../../shared/DataGrid';
-import type { ItemOrcamento, ItemStatus } from '../../../features/orcamentos/types';
-import { formatarMoeda } from '../../../features/orcamentos/utils';
+import type { ItemOrcamento } from '../../../features/orcamentos/types';
+import { formatarMoeda, ServicoCalculado } from '../../../features/orcamentos/utils';
 import { PRODUCT_LIST_COLUMNS } from '../../../features/orcamentos/constants';
 
-interface ItemOrcamentoWithStatus extends ItemOrcamento {
-  _status?: ItemStatus;
+// Tipo união para linhas da tabela (produtos ou serviços)
+type TableRow = ItemOrcamento | ServicoCalculado;
+
+// Type guard para verificar se é serviço
+function isServico(row: TableRow): row is ServicoCalculado {
+  return 'isServico' in row && row.isServico === true;
 }
 
 interface ProductListProps {
-  items: ItemOrcamentoWithStatus[];
+  items: ItemOrcamento[];
+  servicos?: ServicoCalculado[];
   selectedItems: Set<string>;
-  onSelectionChange: (items: ItemOrcamentoWithStatus[]) => void;
-  onItemDoubleClick?: (item: ItemOrcamentoWithStatus) => void;
-}
-
-/**
- * Componente de ícone de status
- */
-function StatusIcon({ status }: { status?: ItemStatus }) {
-  if (!status) {
-    return <CheckmarkCircle24Filled style={{ color: tokens.colorPaletteGreenForeground1 }} />;
-  }
-
-  if (status.expired) {
-    return (
-      <Tooltip content="Item expirado (preço desatualizado)" relationship="label">
-        <ErrorCircle24Filled style={{ color: tokens.colorPaletteRedForeground1 }} />
-      </Tooltip>
-    );
-  }
-
-  if (status.unavailable) {
-    return (
-      <Tooltip content="Indisponível em estoque" relationship="label">
-        <ErrorCircle24Filled style={{ color: tokens.colorPaletteRedForeground1 }} />
-      </Tooltip>
-    );
-  }
-
-  if (status.partial) {
-    return (
-      <Tooltip content="Parcialmente disponível" relationship="label">
-        <Warning24Filled style={{ color: tokens.colorPaletteYellowForeground1 }} />
-      </Tooltip>
-    );
-  }
-
-  return (
-    <Tooltip content="Disponível" relationship="label">
-      <CheckmarkCircle24Filled style={{ color: tokens.colorPaletteGreenForeground1 }} />
-    </Tooltip>
-  );
+  onSelectionChange: (items: ItemOrcamento[]) => void;
+  onItemDoubleClick?: (item: ItemOrcamento) => void;
 }
 
 export function ProductList({
   items,
+  servicos = [],
   selectedItems,
   onSelectionChange,
   onItemDoubleClick,
 }: ProductListProps) {
-  const columns: TableColumnDefinition<ItemOrcamentoWithStatus>[] = useMemo(
+  // Combinar produtos e serviços em uma única lista
+  const allRows = useMemo<TableRow[]>(() => {
+    return [...items, ...servicos];
+  }, [items, servicos]);
+
+  const columns: TableColumnDefinition<TableRow>[] = useMemo(
     () => [
-      createTableColumn<ItemOrcamentoWithStatus>({
-        columnId: 'status',
-        compare: (a, b) => {
-          const aExpired = a._status?.expired ? 1 : 0;
-          const bExpired = b._status?.expired ? 1 : 0;
-          return bExpired - aExpired;
-        },
-        renderHeaderCell: () => '',
-        renderCell: (item) => <StatusIcon status={item._status} />,
-        ...PRODUCT_LIST_COLUMNS.STATUS_ICON,
-      }),
-      createTableColumn<ItemOrcamentoWithStatus>({
+      createTableColumn<TableRow>({
         columnId: 'ambiente',
-        compare: (a, b) => (a.new_ambiente || '').localeCompare(b.new_ambiente || ''),
+        compare: (a, b) => {
+          if (isServico(a) || isServico(b)) return 0;
+          return (a.new_ambiente || '').localeCompare(b.new_ambiente || '');
+        },
         renderHeaderCell: () => 'Ambiente',
-        renderCell: (item) => (
-          <span style={{ fontSize: '14px' }}>{item.new_ambiente || '-'}</span>
+        renderCell: (row) => (
+          <span style={{ fontSize: '14px' }}>
+            {isServico(row) ? '' : row.new_ambiente || '-'}
+          </span>
         ),
         ...PRODUCT_LIST_COLUMNS.AMBIENTE,
       }),
-      createTableColumn<ItemOrcamentoWithStatus>({
+      createTableColumn<TableRow>({
         columnId: 'ref',
-        compare: (a, b) => (a.new_ref || '').localeCompare(b.new_ref || ''),
+        compare: (a, b) => {
+          if (isServico(a) || isServico(b)) return 0;
+          return (a.new_ref || '').localeCompare(b.new_ref || '');
+        },
         renderHeaderCell: () => 'REF',
-        renderCell: (item) => (
-          <span style={{ fontSize: '14px', fontWeight: 600 }}>{item.new_ref || '-'}</span>
+        renderCell: (row) => (
+          <span style={{ fontSize: '14px', fontWeight: 600 }}>
+            {isServico(row) ? '' : row.new_ref || '-'}
+          </span>
         ),
         ...PRODUCT_LIST_COLUMNS.REF,
       }),
-      createTableColumn<ItemOrcamentoWithStatus>({
+      createTableColumn<TableRow>({
         columnId: 'descricao',
-        compare: (a, b) =>
-          (a.new_descricaocalculada || a.new_descricao || '').localeCompare(
-            b.new_descricaocalculada || b.new_descricao || ''
-          ),
+        compare: (a, b) => {
+          const aDesc = isServico(a) ? a.descricao : (a.new_descricaocalculada || a.new_descricao || '');
+          const bDesc = isServico(b) ? b.descricao : (b.new_descricaocalculada || b.new_descricao || '');
+          return aDesc.localeCompare(bDesc);
+        },
         renderHeaderCell: () => 'Descrição',
-        renderCell: (item) => {
-          const descricao = item.new_descricaocalculada || item.new_descricao || '-';
+        renderCell: (row) => {
+          if (isServico(row)) {
+            return (
+              <div style={{ fontSize: '14px', fontStyle: 'italic' }}>
+                {row.descricao}
+                <Badge
+                  size="small"
+                  appearance="tint"
+                  color="success"
+                  style={{ marginLeft: tokens.spacingHorizontalXS }}
+                >
+                  SERVIÇO
+                </Badge>
+              </div>
+            );
+          }
+          const descricao = row.new_descricaocalculada || row.new_descricao || '-';
           return (
             <div style={{ fontSize: '14px' }}>
               {descricao}
-              {item.new_kit && (
+              {row.new_kit && (
                 <Badge
                   size="small"
                   appearance="tint"
@@ -135,46 +117,43 @@ export function ProductList({
         },
         ...PRODUCT_LIST_COLUMNS.DESCRICAO,
       }),
-      createTableColumn<ItemOrcamentoWithStatus>({
+      createTableColumn<TableRow>({
         columnId: 'quantidade',
-        compare: (a, b) => (a.new_quantidade || 0) - (b.new_quantidade || 0),
+        compare: (a, b) => {
+          if (isServico(a) || isServico(b)) return 0;
+          return (a.new_quantidade || 0) - (b.new_quantidade || 0);
+        },
         renderHeaderCell: () => 'Qtd',
-        renderCell: (item) => (
+        renderCell: (row) => (
           <span style={{ fontSize: '14px', textAlign: 'right', display: 'block' }}>
-            {item.new_quantidade || 0}
+            {isServico(row) ? '-' : row.new_quantidade || 0}
           </span>
         ),
         ...PRODUCT_LIST_COLUMNS.QUANTIDADE,
       }),
-      createTableColumn<ItemOrcamentoWithStatus>({
-        columnId: 'valorUnitario',
-        compare: (a, b) =>
-          (a.new_valordeproduto || 0) - (b.new_valordeproduto || 0),
-        renderHeaderCell: () => 'Valor Unit.',
-        renderCell: (item) => (
-          <span style={{ fontSize: '14px', textAlign: 'right', display: 'block' }}>
-            {formatarMoeda(item.new_valordeproduto)}
-          </span>
-        ),
-        ...PRODUCT_LIST_COLUMNS.VALOR_UNITARIO,
-      }),
-      createTableColumn<ItemOrcamentoWithStatus>({
+      createTableColumn<TableRow>({
         columnId: 'valorTotal',
-        compare: (a, b) =>
-          (a.new_valortotal || 0) - (b.new_valortotal || 0),
+        compare: (a, b) => {
+          const aVal = isServico(a) ? a.valorTotal : (a.new_valortotal || 0);
+          const bVal = isServico(b) ? b.valorTotal : (b.new_valortotal || 0);
+          return aVal - bVal;
+        },
         renderHeaderCell: () => 'Valor Total',
-        renderCell: (item) => (
-          <span
-            style={{
-              fontSize: '14px',
-              fontWeight: 600,
-              textAlign: 'right',
-              display: 'block',
-            }}
-          >
-            {formatarMoeda(item.new_valortotal)}
-          </span>
-        ),
+        renderCell: (row) => {
+          const valor = isServico(row) ? row.valorTotal : row.new_valortotal;
+          return (
+            <span
+              style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                textAlign: 'right',
+                display: 'block',
+              }}
+            >
+              {formatarMoeda(valor)}
+            </span>
+          );
+        },
         ...PRODUCT_LIST_COLUMNS.VALOR_TOTAL,
       }),
     ],
@@ -187,12 +166,15 @@ export function ProductList({
 
   return (
     <DataGrid
-      items={items}
+      items={allRows}
       columns={columns}
       selectionMode="multiselect"
       selectedItems={selectedItemsArray}
       onSelectionChange={onSelectionChange}
-      getRowId={(item) => item.new_itemdeorcamentoid}
+      getRowId={(row) => isServico(row) ? row.id : row.new_itemdeorcamentoid}
+      getRowStyle={(row) => isServico(row) ? {
+        backgroundColor: tokens.colorNeutralBackground1Hover,
+      } : undefined}
       emptyState={
         <div
           style={{

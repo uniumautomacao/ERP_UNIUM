@@ -12,8 +12,6 @@ import {
 } from '@fluentui/react-components';
 import {
   Add24Regular,
-  ArrowUp24Regular,
-  ArrowDown24Regular,
   Edit24Regular,
   Delete24Regular,
 } from '@fluentui/react-icons';
@@ -65,7 +63,7 @@ const useStyles = makeStyles({
     overflow: 'auto',
   },
   tabItem: {
-    padding: tokens.spacingVerticalS,
+    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
     backgroundColor: tokens.colorNeutralBackground1,
     borderRadius: tokens.borderRadiusMedium,
     border: `1px solid ${tokens.colorNeutralStroke1}`,
@@ -90,28 +88,23 @@ const useStyles = makeStyles({
   },
   tabContent: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalXXS,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: tokens.spacingHorizontalXS,
   },
   tabName: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 600,
-    marginBottom: tokens.spacingVerticalXXS,
   },
   tabInfo: {
-    fontSize: '12px',
-    opacity: 0.8,
+    fontSize: '11px',
+    opacity: 0.7,
   },
   tabActions: {
     display: 'flex',
     gap: tokens.spacingHorizontalXS,
     marginTop: tokens.spacingVerticalXS,
-  },
-  moveButtons: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalXXS,
-    marginTop: tokens.spacingVerticalS,
   },
 });
 
@@ -121,10 +114,6 @@ interface SortableTabItemProps {
   onSelect: () => void;
   onRename: () => void;
   onDelete: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
   canDelete: boolean;
 }
 
@@ -134,10 +123,6 @@ function SortableTabItem({
   onSelect,
   onRename,
   onDelete,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
   canDelete,
 }: SortableTabItemProps) {
   const styles = useStyles();
@@ -202,33 +187,6 @@ function SortableTabItem({
               />
             </Tooltip>
           </div>
-
-          <div className={styles.moveButtons}>
-            <Button
-              size="small"
-              appearance="subtle"
-              icon={<ArrowUp24Regular />}
-              onClick={(e) => {
-                e.stopPropagation();
-                onMoveUp();
-              }}
-              disabled={!canMoveUp}
-            >
-              Mover para cima
-            </Button>
-            <Button
-              size="small"
-              appearance="subtle"
-              icon={<ArrowDown24Regular />}
-              onClick={(e) => {
-                e.stopPropagation();
-                onMoveDown();
-              }}
-              disabled={!canMoveDown}
-            >
-              Mover para baixo
-            </Button>
-          </div>
         </>
       )}
     </div>
@@ -243,11 +201,7 @@ interface TabNavigationProps {
   onRemoveTab: (name: string) => void;
   onRenameTab: (oldName: string, newName: string) => void;
   onReorderTabs: (startIndex: number, endIndex: number) => void;
-  onMoveTabUp: (name: string) => void;
-  onMoveTabDown: (name: string) => void;
   canRemoveTab: (name: string) => boolean;
-  canMoveUp: (name: string) => boolean;
-  canMoveDown: (name: string) => boolean;
 }
 
 export function TabNavigation({
@@ -258,18 +212,18 @@ export function TabNavigation({
   onRemoveTab,
   onRenameTab,
   onReorderTabs,
-  onMoveTabUp,
-  onMoveTabDown,
   canRemoveTab,
-  canMoveUp,
-  canMoveDown,
 }: TabNavigationProps) {
   const styles = useStyles();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [tabToRename, setTabToRename] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -340,10 +294,6 @@ export function TabNavigation({
                 onSelect={() => onSelectTab(tab.name)}
                 onRename={() => handleRenameClick(tab.name)}
                 onDelete={() => onRemoveTab(tab.name)}
-                onMoveUp={() => onMoveTabUp(tab.name)}
-                onMoveDown={() => onMoveTabDown(tab.name)}
-                canMoveUp={canMoveUp(tab.name)}
-                canMoveDown={canMoveDown(tab.name)}
                 canDelete={canRemoveTab(tab.name)}
               />
             ))}

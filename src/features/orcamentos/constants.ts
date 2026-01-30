@@ -96,17 +96,10 @@ export const QUERY_LIMITS = {
 // ============================================================================
 
 export const PRODUCT_LIST_COLUMNS = {
-  STATUS_ICON: { key: 'statusIcon', width: 30, minWidth: 30, maxWidth: 30 },
   AMBIENTE: { key: 'ambiente', width: 100, minWidth: 80, maxWidth: 150 },
   REF: { key: 'ref', width: 80, minWidth: 60, maxWidth: 120 },
-  DESCRICAO: { key: 'descricao', width: 300, minWidth: 200, maxWidth: 500 },
-  QUANTIDADE: { key: 'quantidade', width: 80, minWidth: 60, maxWidth: 100 },
-  VALOR_UNITARIO: {
-    key: 'valorUnitario',
-    width: 120,
-    minWidth: 100,
-    maxWidth: 150,
-  },
+  DESCRICAO: { key: 'descricao', width: 400, minWidth: 300, maxWidth: 600 },
+  QUANTIDADE: { key: 'quantidade', width: 70, minWidth: 50, maxWidth: 90 },
   VALOR_TOTAL: { key: 'valorTotal', width: 120, minWidth: 100, maxWidth: 150 },
 } as const;
 

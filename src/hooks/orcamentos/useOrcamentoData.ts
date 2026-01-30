@@ -70,43 +70,26 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
    * Carregar orçamento por ID
    */
   const loadOrcamento = useCallback(async (id: string) => {
-    console.log('[useOrcamentoData.loadOrcamento] Iniciando carregamento do orçamento:', id);
     const requestId = ++orcamentoRequestId.current;
-    console.log('[useOrcamentoData.loadOrcamento] Request ID:', requestId);
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('[useOrcamentoData.loadOrcamento] Chamando OrcamentoService.fetchOrcamentoById');
       const orcamentoData = await OrcamentoService.fetchOrcamentoById(id);
-      console.log('[useOrcamentoData.loadOrcamento] Dados retornados:', orcamentoData);
 
       // Verificar se request ainda é atual
       if (requestId !== orcamentoRequestId.current) {
-        console.log('[useOrcamentoData.loadOrcamento] Request cancelado (não é mais atual)');
         return;
       }
 
       if (!orcamentoData) {
-        console.error('[useOrcamentoData.loadOrcamento] Orçamento retornou null');
         throw new Error('Orçamento não encontrado');
       }
 
-      console.log('[useOrcamentoData.loadOrcamento] Orçamento carregado com sucesso');
-      console.log('[useOrcamentoData.loadOrcamento] Cliente do orçamento:', {
-        new_cliente: orcamentoData.new_cliente,
-        _new_cliente_value: (orcamentoData as any)._new_cliente_value,
-      });
-      console.log('[useOrcamentoData.loadOrcamento] Atualizando estado do orçamento com dados:', {
-        id: orcamentoData.new_orcamentoid,
-        name: orcamentoData.new_name,
-      });
       setOrcamento(orcamentoData);
-      console.log('[useOrcamentoData.loadOrcamento] Estado do orçamento atualizado');
 
       // Carregar dados relacionados em paralelo
       const clienteId = orcamentoData.new_cliente || (orcamentoData as any)._new_cliente_value || '';
-      console.log('[useOrcamentoData.loadOrcamento] Chamando carregamento de dados relacionados com clienteId:', clienteId);
 
       await Promise.all([
         loadItems(id, requestId),
@@ -128,30 +111,23 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
    * Carregar itens do orçamento
    */
   const loadItems = useCallback(async (id: string, parentRequestId?: number) => {
-    console.log('[useOrcamentoData.loadItems] Iniciando carregamento de itens:', { id, parentRequestId });
     const requestId = parentRequestId ?? ++itemsRequestId.current;
-    console.log('[useOrcamentoData.loadItems] Request ID:', requestId);
     setIsLoadingItems(true);
 
     try {
-      console.log('[useOrcamentoData.loadItems] Chamando ItemOrcamentoService.fetchItemsByOrcamento');
       const itemsData = await ItemOrcamentoService.fetchItemsByOrcamento(id);
-      console.log('[useOrcamentoData.loadItems] Itens retornados:', itemsData.length);
 
       // Verificar se request ainda é atual
       if (requestId !== itemsRequestId.current && !parentRequestId) {
-        console.log('[useOrcamentoData.loadItems] Request cancelado (items)');
         return;
       }
       if (parentRequestId && requestId !== orcamentoRequestId.current) {
-        console.log('[useOrcamentoData.loadItems] Request cancelado (parent)');
         return;
       }
 
-      console.log('[useOrcamentoData.loadItems] Atualizando estado com itens');
       setItems(itemsData);
     } catch (err) {
-      console.error('[useOrcamentoData.loadItems] Erro ao carregar itens:', err);
+      console.error('Erro ao carregar itens:', err);
       if (!parentRequestId) {
         setError(err instanceof Error ? err.message : 'Erro ao carregar itens');
       }
@@ -167,18 +143,14 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
    * Carregar créditos do cliente
    */
   const loadCreditos = useCallback(async (clienteId: string, parentRequestId?: number) => {
-    console.log('[useOrcamentoData.loadCreditos] Iniciando carregamento de créditos:', { clienteId, parentRequestId });
     if (!clienteId) {
-      console.log('[useOrcamentoData.loadCreditos] clienteId vazio, abortando');
       return;
     }
 
     const requestId = parentRequestId ?? ++creditosRequestId.current;
-    console.log('[useOrcamentoData.loadCreditos] Request ID:', requestId);
     setIsLoadingCreditos(true);
 
     try {
-      console.log('[useOrcamentoData.loadCreditos] Chamando serviços de crédito em paralelo');
       const [creditosData, utilizacoesData] = await Promise.all([
         CreditoService.fetchCreditosByCliente(clienteId),
         orcamentoId ? CreditoService.fetchUtilizacoesByOrcamento(orcamentoId) : Promise.resolve([]),
@@ -207,19 +179,14 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
    * Carregar opções de pagamento
    */
   const loadPagamentos = useCallback(async (id: string, parentRequestId?: number) => {
-    console.log('[useOrcamentoData.loadPagamentos] Iniciando carregamento de pagamentos:', { id, parentRequestId });
     try {
-      console.log('[useOrcamentoData.loadPagamentos] Chamando PagamentoService.fetchOpcoesByOrcamento');
       const pagamentosData = await PagamentoService.fetchOpcoesByOrcamento(id);
-      console.log('[useOrcamentoData.loadPagamentos] Pagamentos retornados:', pagamentosData.length);
 
       // Verificar se request ainda é atual
       if (parentRequestId && parentRequestId !== orcamentoRequestId.current) {
-        console.log('[useOrcamentoData.loadPagamentos] Request cancelado');
         return;
       }
 
-      console.log('[useOrcamentoData.loadPagamentos] Atualizando estado com pagamentos');
       setOpcoesPagamento(pagamentosData);
     } catch (err) {
       console.error('Erro ao carregar opções de pagamento:', err);
@@ -323,12 +290,9 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
    * Carregar orçamento quando ID muda
    */
   useEffect(() => {
-    console.log('[useOrcamentoData] useEffect - orcamentoId mudou:', orcamentoId);
     if (orcamentoId) {
-      console.log('[useOrcamentoData] useEffect - Chamando loadOrcamento com ID:', orcamentoId);
       loadOrcamento(orcamentoId);
     } else {
-      console.log('[useOrcamentoData] useEffect - orcamentoId é null, limpando estado');
       setOrcamento(null);
       setItems([]);
       setCreditos([]);
@@ -337,16 +301,6 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
       setError(null);
     }
   }, [orcamentoId, loadOrcamento]);
-
-  console.log('[useOrcamentoData] Estado atual do hook:', {
-    hasOrcamento: !!orcamento,
-    orcamentoId: orcamento?.new_orcamentoid,
-    orcamentoName: orcamento?.new_name,
-    itemsCount: items.length,
-    sectionsCount: sections.length,
-    isLoading,
-    error,
-  });
 
   return {
     // Estado
