@@ -33,11 +33,13 @@ import type { IGetAllOptions } from '../../../../generated/models/CommonModels';
 import type { Orcamento } from '../../../../features/orcamentos/types';
 import { formatarMoeda, formatarData } from '../../../../features/orcamentos/utils';
 import { escapeODataValue } from '../../../../utils/guia-conexoes/odata';
+import { getClient } from '@microsoft/power-apps/data';
+import { dataSourcesInfo } from '../../../../../.power/schemas/appschemas/dataSourcesInfo';
 
 const useStyles = makeStyles({
   surface: {
-    maxWidth: '800px',
-    width: '90vw',
+    maxWidth: '1200px',
+    width: '95vw',
   },
   content: {
     display: 'flex',
@@ -56,7 +58,7 @@ const useStyles = makeStyles({
     minWidth: '200px',
   },
   gridContainer: {
-    height: '400px',
+    height: '500px',
     overflow: 'auto',
     border: `1px solid ${tokens.colorNeutralStroke1}`,
     borderRadius: tokens.borderRadiusMedium,
@@ -102,10 +104,34 @@ export function OpenOrcamentoDialog({
       // Adicionar busca delegável com contains() se houver termo
       if (searchTerm?.trim()) {
         const escaped = escapeODataValue(searchTerm.trim());
-        const searchFilters = [
-          `(contains(new_name, '${escaped}') or contains(new_nomedocliente, '${escaped}'))`,
-          // Não podemos buscar diretamente em lookups formatados, apenas no nome do orçamento
-        ];
+        const searchFilters = [];
+
+        // Busca no nome do orçamento e nome do cliente
+        searchFilters.push(`(contains(new_name, '${escaped}') or contains(new_nomedocliente, '${escaped}'))`);
+
+        // Buscar projetos que contenham o termo para incluir no filtro
+        try {
+          const client = getClient(dataSourcesInfo);
+          const projetosResult = await client.retrieveMultipleRecordsAsync(
+            'cr22f_projetos',
+            {
+              filter: `contains(cr22f_apelido, '${escaped}')`,
+              select: ['cr22f_projetoid'],
+              top: 50,
+            } as IGetAllOptions
+          );
+
+          if (projetosResult.success && projetosResult.data && projetosResult.data.length > 0) {
+            // Criar filtro com os IDs dos projetos encontrados
+            const projetoIds = projetosResult.data.map((p: any) => p.cr22f_projetoid);
+            const projetoFilters = projetoIds.map((id: string) => `_new_projeto_value eq '${id}'`);
+            searchFilters.push(`(${projetoFilters.join(' or ')})`);
+          }
+        } catch (err) {
+          console.warn('[OpenOrcamentoDialog] erro ao buscar projetos:', err);
+          // Continuar mesmo se a busca de projetos falhar
+        }
+
         filter += ` and (${searchFilters.join(' or ')})`;
       }
 
@@ -288,7 +314,7 @@ export function OpenOrcamentoDialog({
                 className={styles.searchInput}
                 value={searchText}
                 onChange={(_, data) => setSearchText(data.value)}
-                placeholder="Buscar por nome, cliente ou consultor..."
+                placeholder="Buscar por nome, cliente, consultor ou projeto..."
                 contentBefore={<Search24Regular />}
                 autoFocus
               />
