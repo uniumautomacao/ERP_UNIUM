@@ -14,6 +14,7 @@
 export interface Orcamento {
   new_orcamentoid: string;
   new_name?: string | null;
+  new_numerodaproposta?: string | null;
 
   // Relacionamentos
   new_cliente?: string | null; // ID do contact

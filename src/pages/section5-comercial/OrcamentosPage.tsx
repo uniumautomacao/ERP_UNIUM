@@ -279,14 +279,30 @@ export function OrcamentosPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title={hasOrcamento ? (orcamento.new_name || 'Orçamento sem nome') : 'Orçamentos'}
-        subtitle={
-          hasOrcamento
-            ? `${orcamento.new_nomecliente || 'Cliente não definido'} • ${orcamento.new_nomeprojeto || 'Sem projeto'}`
-            : 'Gerencie seus orçamentos'
-        }
-      />
+      <div style={{ position: 'relative' }}>
+        <PageHeader
+          title={hasOrcamento ? (orcamento.new_name || 'Orçamento sem nome') : 'Orçamentos'}
+          subtitle={
+            hasOrcamento
+              ? `${orcamento.new_nomecliente || 'Cliente não definido'} • ${orcamento.new_nomeprojeto || 'Sem projeto'}`
+              : 'Gerencie seus orçamentos'
+          }
+        />
+        {hasOrcamento && orcamento.new_numerodaproposta && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '24px',
+              fontSize: '14px',
+              fontWeight: 600,
+              color: tokens.colorBrandForeground1,
+            }}
+          >
+            Proposta #{orcamento.new_numerodaproposta}
+          </div>
+        )}
+      </div>
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
         {/* Command Bar - sempre visível */}
