@@ -14,7 +14,6 @@ export function useCurrentSystemUser() {
   const [state, setState] = useState<CurrentSystemUserState>({
     loading: true,
   });
-  const isDev = import.meta.env.DEV;
 
   const loadUser = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: undefined }));
@@ -35,9 +34,6 @@ export function useCurrentSystemUser() {
       }
 
       const user = result.data[0];
-      if (isDev) {
-        console.log('[useCurrentSystemUser] systemuserid:', user.systemuserid);
-      }
 
       setState({
         systemUserId: user.systemuserid,
@@ -52,7 +48,7 @@ export function useCurrentSystemUser() {
         error: err.message || 'Erro ao carregar usuário atual.',
       });
     }
-  }, [isDev]);
+  }, []);
 
   useEffect(() => {
     loadUser();
