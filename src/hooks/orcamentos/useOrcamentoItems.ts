@@ -4,7 +4,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ItemOrcamento } from '../../features/orcamentos/types';
-import { calcularItemStatus } from '../../features/orcamentos/utils';
+import { calcularItemStatus, calcularValorTotalItem } from '../../features/orcamentos/utils';
 
 export function useOrcamentoItems(initialItems: ItemOrcamento[] = []) {
   const [items, setItems] = useState<ItemOrcamento[]>(initialItems);
@@ -106,9 +106,7 @@ export function useOrcamentoItems(initialItems: ItemOrcamento[] = []) {
   const totals = useMemo(() => {
     return items.reduce(
       (acc, item) => {
-        // new_valordeproduto e new_valordeservico já incluem quantidade
-        // Calcular valor total corretamente ao invés de usar new_valortotal do banco
-        const valorTotal = (item.new_valordeproduto ?? 0) + (item.new_valordeservico ?? 0);
+        const valorTotal = calcularValorTotalItem(item);
         return {
           totalItems: acc.totalItems + 1,
           totalValue: acc.totalValue + valorTotal,

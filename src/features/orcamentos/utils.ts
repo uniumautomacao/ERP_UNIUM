@@ -19,6 +19,17 @@ import { EXPIRACAO_REGRAS, SECAO_ESPECIAL } from './constants';
 // ============================================================================
 
 /**
+ * Calcula o valor total de um item de orçamento
+ *
+ * IMPORTANTE: new_valortotal no banco Dataverse está incorreto (multiplicado por quantidade 2x)
+ * Por isso calculamos: new_valordeproduto + new_valordeservico
+ * (ambos já incluem quantidade multiplicada corretamente)
+ */
+export function calcularValorTotalItem(item: ItemOrcamento): number {
+  return (item.new_valordeproduto ?? 0) + (item.new_valordeservico ?? 0);
+}
+
+/**
  * Calcula o resumo financeiro do orçamento
  */
 export function calcularResumoOrcamento(
@@ -90,8 +101,7 @@ export function extrairSecoes(itens: ItemOrcamento[]): OrcamentoSecao[] {
 
     const secao = secoesMap.get(sectionName)!;
     const valorAnterior = secao.valorTotal;
-    // Calcular valor total corretamente ao invés de usar new_valortotal do banco
-    const valorItem = (item.new_valordeproduto ?? 0) + (item.new_valordeservico ?? 0);
+    const valorItem = calcularValorTotalItem(item);
     secao.itemCount++;
     secao.valorTotal += valorItem;
 

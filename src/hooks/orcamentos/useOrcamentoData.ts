@@ -7,6 +7,7 @@ import { OrcamentoService } from '../../services/orcamentos/OrcamentoService';
 import { ItemOrcamentoService } from '../../services/orcamentos/ItemOrcamentoService';
 import { CreditoService } from '../../services/orcamentos/CreditoService';
 import { PagamentoService } from '../../services/orcamentos/PagamentoService';
+import { calcularValorTotalItem } from '../../features/orcamentos/utils';
 import type {
   Orcamento,
   ItemOrcamento,
@@ -234,8 +235,7 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
     items.forEach(item => {
       const sectionName = item.new_section || 'Sem seção';
       const existing = sectionMap.get(sectionName);
-      // Calcular valor total corretamente ao invés de usar new_valortotal do banco
-      const valorItem = (item.new_valordeproduto || 0) + (item.new_valordeservico || 0);
+      const valorItem = calcularValorTotalItem(item);
 
       if (existing) {
         existing.itemCount++;
@@ -259,11 +259,9 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
   const totals = useMemo((): OrcamentoTotals => {
     return items.reduce(
       (acc, item) => {
-        // new_valordeproduto e new_valordeservico já incluem quantidade
         const valorProduto = item.new_valordeproduto || 0;
         const valorServico = item.new_valordeservico || 0;
-        // Calcular valor total corretamente ao invés de usar new_valortotal do banco
-        const valorTotal = valorProduto + valorServico;
+        const valorTotal = calcularValorTotalItem(item);
 
         return {
           totalItems: acc.totalItems + 1,
