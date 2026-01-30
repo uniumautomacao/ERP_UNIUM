@@ -7,7 +7,14 @@ import type { OrcamentoSecao } from '../../features/orcamentos/types';
 import { ordenarSecoes, recalcularOrderIndex } from '../../features/orcamentos/utils';
 import { DEFAULTS, SECAO_ESPECIAL } from '../../features/orcamentos/constants';
 
-export function useOrcamentoTabs(initialTabs: OrcamentoSecao[] = []) {
+export interface UseOrcamentoTabsOptions {
+  onRenameTabPersist?: (oldName: string, newName: string) => Promise<void>;
+}
+
+export function useOrcamentoTabs(
+  initialTabs: OrcamentoSecao[] = [],
+  options?: UseOrcamentoTabsOptions
+) {
   const [tabs, setTabs] = useState<OrcamentoSecao[]>(ordenarSecoes(initialTabs));
   const [selectedTab, setSelectedTab] = useState<string | null>(
     initialTabs.length > 0 ? initialTabs[0].name : null
@@ -86,25 +93,32 @@ export function useOrcamentoTabs(initialTabs: OrcamentoSecao[] = []) {
   /**
    * Renomeia uma aba
    */
-  const renameTab = useCallback((oldName: string, newName: string) => {
-    setTabs((prevTabs) => {
-      // Verificar se o novo nome já existe
-      if (prevTabs.some((tab) => tab.name === newName && tab.name !== oldName)) {
-        return prevTabs;
-      }
+  const renameTab = useCallback(async (oldName: string, newName: string) => {
+    // Verificar se o novo nome já existe
+    const exists = tabs.some((tab) => tab.name === newName && tab.name !== oldName);
+    if (exists) {
+      throw new Error('Já existe uma seção com este nome');
+    }
 
+    // Chamar callback de persistência se existir
+    if (options?.onRenameTabPersist) {
+      await options.onRenameTabPersist(oldName, newName);
+    }
+
+    // Atualizar estado local
+    setTabs((prevTabs) => {
       const updated = prevTabs.map((tab) =>
         tab.name === oldName ? { ...tab, name: newName } : tab
       );
 
-      // Atualizar seleção se necessário
-      if (selectedTab === oldName) {
-        setSelectedTab(newName);
-      }
-
       return ordenarSecoes(updated);
     });
-  }, [selectedTab]);
+
+    // Atualizar seleção se necessário
+    if (selectedTab === oldName) {
+      setSelectedTab(newName);
+    }
+  }, [selectedTab, tabs, options]);
 
   /**
    * Reordena abas após drag-and-drop

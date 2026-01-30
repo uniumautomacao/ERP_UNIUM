@@ -142,7 +142,10 @@ export class ItemOrcamentoService {
       changedFields
     );
 
-    if (!result.isSuccess) {
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = (result as any).isSuccess ?? (result as any).success;
+
+    if (!success) {
       throw new Error('Falha ao atualizar item de orçamento');
     }
   }
@@ -260,6 +263,35 @@ export class ItemOrcamentoService {
 
       const chunkPromises = chunk.map(({ id, position }) =>
         ItemOrcamentoService.updateItem(id, { new_position: position })
+      );
+
+      await Promise.all(chunkPromises);
+    }
+  }
+
+  /**
+   * Renomear seção - atualiza todos os itens dessa seção
+   */
+  public static async renameSection(
+    orcamentoId: string,
+    oldSectionName: string,
+    newSectionName: string
+  ): Promise<void> {
+    // Buscar todos os itens da seção
+    const items = await ItemOrcamentoService.fetchItemsBySection(orcamentoId, oldSectionName);
+
+    if (items.length === 0) {
+      return;
+    }
+
+    // Atualizar todos os itens em batch (chunks de 10)
+    const BATCH_SIZE = 10;
+    const itemIds = items.map(item => item.new_itemdeorcamentoid);
+
+    for (let i = 0; i < itemIds.length; i += BATCH_SIZE) {
+      const chunk = itemIds.slice(i, i + BATCH_SIZE);
+      const chunkPromises = chunk.map(id =>
+        ItemOrcamentoService.updateItem(id, { new_section: newSectionName })
       );
 
       await Promise.all(chunkPromises);

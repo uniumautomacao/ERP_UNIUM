@@ -108,8 +108,10 @@ export function OpenOrcamentoDialog({
 
         const searchFilters = [];
 
-        // Busca no nome do orçamento e nome do cliente
-        searchFilters.push(`(contains(new_name, '${escaped}') or contains(new_nomedocliente, '${escaped}'))`);
+        // Busca no nome do orçamento, nome do cliente e numero da proposta
+        searchFilters.push(
+          `(contains(new_name, '${escaped}') or contains(new_nomedocliente, '${escaped}') or contains(new_numerodaproposta, '${escaped}'))`
+        );
 
         // Buscar projetos que contenham o termo para incluir no filtro
         try {
@@ -146,6 +148,7 @@ export function OpenOrcamentoDialog({
         select: [
           'new_orcamentoid',
           'new_name',
+          'new_numerodaproposta',
           'new_valortotal',
           'createdon',
           '_new_cliente_value', // Lookup ID do cliente
@@ -264,6 +267,17 @@ export function OpenOrcamentoDialog({
       ),
     }),
     createTableColumn<Orcamento>({
+      columnId: 'proposta',
+      compare: (a, b) =>
+        (a.new_numerodaproposta || '').localeCompare(b.new_numerodaproposta || ''),
+      renderHeaderCell: () => 'Proposta',
+      renderCell: (item) => (
+        <TableCellLayout>
+          {item.new_numerodaproposta ? `#${item.new_numerodaproposta}` : '-'}
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<Orcamento>({
       columnId: 'cliente',
       compare: (a, b) => (a.new_nomecliente || '').localeCompare(b.new_nomecliente || ''),
       renderHeaderCell: () => 'Cliente',
@@ -320,7 +334,7 @@ export function OpenOrcamentoDialog({
                 className={styles.searchInput}
                 value={searchText}
                 onChange={(_, data) => setSearchText(data.value)}
-                placeholder="Buscar por nome, cliente, consultor ou projeto..."
+                placeholder="Buscar por nome, cliente, proposta ou projeto..."
                 contentBefore={<Search24Regular />}
                 autoFocus
               />

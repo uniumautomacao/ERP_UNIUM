@@ -13,7 +13,9 @@ import {
   Button,
   Input,
   Label,
+  Text,
   makeStyles,
+  tokens,
 } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
@@ -28,7 +30,8 @@ interface TabRenameDialogProps {
   open: boolean;
   currentName: string;
   onClose: () => void;
-  onRename: (newName: string) => void;
+  onRename: (newName: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
 export function TabRenameDialog({
@@ -36,22 +39,30 @@ export function TabRenameDialog({
   currentName,
   onClose,
   onRename,
+  isLoading = false,
 }: TabRenameDialogProps) {
   const styles = useStyles();
   const [newName, setNewName] = useState(currentName);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Resetar quando abrir
   useEffect(() => {
     if (open) {
       setNewName(currentName);
+      setErrorMessage(null);
     }
   }, [open, currentName]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmedName = newName.trim();
     if (trimmedName && trimmedName !== currentName) {
-      onRename(trimmedName);
-      onClose();
+      setErrorMessage(null);
+      try {
+        await onRename(trimmedName);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erro ao renomear seção';
+        setErrorMessage(message);
+      }
     }
   };
 
@@ -81,17 +92,22 @@ export function TabRenameDialog({
                 autoFocus
               />
             </div>
+            {errorMessage && (
+              <Text size={200} style={{ color: tokens.colorPaletteRedForeground1 }}>
+                {errorMessage}
+              </Text>
+            )}
           </DialogContent>
           <DialogActions>
-            <Button appearance="secondary" onClick={onClose}>
+            <Button appearance="secondary" onClick={onClose} disabled={isLoading}>
               Cancelar
             </Button>
             <Button
               appearance="primary"
               onClick={handleSubmit}
-              disabled={!newName.trim() || newName.trim() === currentName}
+              disabled={!newName.trim() || newName.trim() === currentName || isLoading}
             >
-              Renomear
+              {isLoading ? 'Renomeando...' : 'Renomear'}
             </Button>
           </DialogActions>
         </DialogBody>

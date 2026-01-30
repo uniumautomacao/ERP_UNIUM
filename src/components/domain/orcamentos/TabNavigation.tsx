@@ -207,9 +207,10 @@ interface TabNavigationProps {
   onSelectTab: (tabName: string) => void;
   onAddTab: (name: string) => void;
   onRemoveTab: (name: string) => void;
-  onRenameTab: (oldName: string, newName: string) => void;
+  onRenameTab: (oldName: string, newName: string) => Promise<void>;
   onReorderTabs: (startIndex: number, endIndex: number) => void;
   canRemoveTab: (name: string) => boolean;
+  onRenameError?: (error: string) => void;
 }
 
 export function TabNavigation({
@@ -221,10 +222,12 @@ export function TabNavigation({
   onRenameTab,
   onReorderTabs,
   canRemoveTab,
+  onRenameError,
 }: TabNavigationProps) {
   const styles = useStyles();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [tabToRename, setTabToRename] = useState<string | null>(null);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -262,12 +265,21 @@ export function TabNavigation({
     setRenameDialogOpen(true);
   };
 
-  const handleRename = (newName: string) => {
-    if (tabToRename) {
-      onRenameTab(tabToRename, newName);
+  const handleRename = async (newName: string) => {
+    if (!tabToRename) return;
+
+    setIsRenaming(true);
+    try {
+      await onRenameTab(tabToRename, newName);
+      setRenameDialogOpen(false);
+      setTabToRename(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao renomear seção';
+      onRenameError?.(errorMessage);
+      throw err;
+    } finally {
+      setIsRenaming(false);
     }
-    setRenameDialogOpen(false);
-    setTabToRename(null);
   };
 
   return (
@@ -318,6 +330,7 @@ export function TabNavigation({
             setTabToRename(null);
           }}
           onRename={handleRename}
+          isLoading={isRenaming}
         />
       )}
     </div>

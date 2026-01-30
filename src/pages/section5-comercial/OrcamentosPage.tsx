@@ -7,7 +7,7 @@
  * - AI Chat + Credits (direita)
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   tokens,
   Spinner,
@@ -85,6 +85,15 @@ export function OrcamentosPage() {
     });
   }, [dataverseSections, servicos]);
 
+  // Callback para persistir renomeação de seção
+  const handleRenameTabPersist = useCallback(async (oldName: string, newName: string) => {
+    if (!orcamentoId) {
+      throw new Error('Nenhum orçamento selecionado');
+    }
+    await ItemOrcamentoService.renameSection(orcamentoId, oldName, newName);
+    await refreshItems();
+  }, [orcamentoId, refreshItems]);
+
   // Hooks locais para gerenciamento de tabs e seleção
   const {
     tabs,
@@ -95,7 +104,9 @@ export function OrcamentosPage() {
     renameTab,
     reorderTabs,
     canRemoveTab,
-  } = useOrcamentoTabs(sectionsComServicos);
+  } = useOrcamentoTabs(sectionsComServicos, {
+    onRenameTabPersist: handleRenameTabPersist,
+  });
 
   // Toast notifications
   const toasterId = useId('orcamentos-toast');
@@ -332,6 +343,7 @@ export function OrcamentosPage() {
                 onRenameTab={renameTab}
                 onReorderTabs={reorderTabs}
                 canRemoveTab={canRemoveTab}
+                onRenameError={showError}
               />
             }
             centerPanel={
