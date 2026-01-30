@@ -33,6 +33,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import type { OrcamentoSecao } from '../../../features/orcamentos/types';
 import { TabRenameDialog } from './dialogs/TabRenameDialog';
+import { TabMergeDialog } from './dialogs/TabMergeDialog';
 import { formatarMoeda } from '../../../features/orcamentos/utils';
 
 const useStyles = makeStyles({
@@ -121,8 +122,10 @@ interface SortableTabItemProps {
   isSelected: boolean;
   onSelect: () => void;
   onRename: () => void;
+  onMerge: () => void;
   onDelete: () => void;
   canDelete: boolean;
+  canMerge: boolean;
 }
 
 function SortableTabItem({
@@ -130,8 +133,10 @@ function SortableTabItem({
   isSelected,
   onSelect,
   onRename,
+  onMerge,
   onDelete,
   canDelete,
+  canMerge,
 }: SortableTabItemProps) {
   const styles = useStyles();
   const {
@@ -182,6 +187,19 @@ function SortableTabItem({
                 }}
               />
             </Tooltip>
+            <Tooltip content="Mesclar" relationship="label">
+              <Button
+                size="small"
+                appearance="subtle"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMerge();
+                }}
+                disabled={!canMerge}
+              >
+                Mesclar
+              </Button>
+            </Tooltip>
             <Tooltip content="Excluir" relationship="label">
               <Button
                 size="small"
@@ -208,9 +226,11 @@ interface TabNavigationProps {
   onAddTab: (name: string) => void;
   onRemoveTab: (name: string) => void;
   onRenameTab: (oldName: string, newName: string) => Promise<void>;
+  onMergeTab: (sourceName: string, targetName: string) => Promise<void>;
   onReorderTabs: (startIndex: number, endIndex: number) => void;
   canRemoveTab: (name: string) => boolean;
   onRenameError?: (error: string) => void;
+  onMergeError?: (error: string) => void;
 }
 
 export function TabNavigation({
@@ -220,14 +240,19 @@ export function TabNavigation({
   onAddTab,
   onRemoveTab,
   onRenameTab,
+  onMergeTab,
   onReorderTabs,
   canRemoveTab,
   onRenameError,
+  onMergeError,
 }: TabNavigationProps) {
   const styles = useStyles();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [tabToRename, setTabToRename] = useState<string | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+  const [tabToMerge, setTabToMerge] = useState<string | null>(null);
+  const [isMerging, setIsMerging] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -265,6 +290,11 @@ export function TabNavigation({
     setRenameDialogOpen(true);
   };
 
+  const handleMergeClick = (tabName: string) => {
+    setTabToMerge(tabName);
+    setMergeDialogOpen(true);
+  };
+
   const handleRename = async (newName: string) => {
     if (!tabToRename) return;
 
@@ -279,6 +309,23 @@ export function TabNavigation({
       throw err;
     } finally {
       setIsRenaming(false);
+    }
+  };
+
+  const handleMerge = async (targetName: string) => {
+    if (!tabToMerge) return;
+
+    setIsMerging(true);
+    try {
+      await onMergeTab(tabToMerge, targetName);
+      setMergeDialogOpen(false);
+      setTabToMerge(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao mesclar seções';
+      onMergeError?.(errorMessage);
+      throw err;
+    } finally {
+      setIsMerging(false);
     }
   };
 
@@ -313,8 +360,10 @@ export function TabNavigation({
                 isSelected={selectedTab === tab.name}
                 onSelect={() => onSelectTab(tab.name)}
                 onRename={() => handleRenameClick(tab.name)}
+                onMerge={() => handleMergeClick(tab.name)}
                 onDelete={() => onRemoveTab(tab.name)}
                 canDelete={canRemoveTab(tab.name)}
+                canMerge={tabs.length > 1}
               />
             ))}
           </div>
@@ -331,6 +380,20 @@ export function TabNavigation({
           }}
           onRename={handleRename}
           isLoading={isRenaming}
+        />
+      )}
+
+      {tabToMerge && (
+        <TabMergeDialog
+          open={mergeDialogOpen}
+          sourceName={tabToMerge}
+          availableTargets={tabs.map((tab) => tab.name).filter((name) => name !== tabToMerge)}
+          onClose={() => {
+            setMergeDialogOpen(false);
+            setTabToMerge(null);
+          }}
+          onMerge={handleMerge}
+          isLoading={isMerging}
         />
       )}
     </div>

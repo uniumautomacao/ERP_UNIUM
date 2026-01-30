@@ -299,6 +299,40 @@ export class ItemOrcamentoService {
   }
 
   /**
+   * Mesclar duas seções - move itens da seção origem para a seção destino
+   */
+  public static async mergeSections(
+    orcamentoId: string,
+    sourceSectionName: string,
+    targetSectionName: string,
+    targetSectionOrderIndex?: number
+  ): Promise<void> {
+    const items = await ItemOrcamentoService.fetchItemsBySection(orcamentoId, sourceSectionName);
+
+    if (items.length === 0) {
+      return;
+    }
+
+    const itemIds = items.map(item => item.new_itemdeorcamentoid);
+    const updatePayload: Partial<ItemOrcamento> = {
+      new_section: targetSectionName,
+    };
+
+    if (typeof targetSectionOrderIndex === 'number') {
+      updatePayload.new_sectionorderindex = targetSectionOrderIndex;
+    }
+
+    for (let i = 0; i < itemIds.length; i += ITEM_CHUNK_SIZE) {
+      const chunk = itemIds.slice(i, i + ITEM_CHUNK_SIZE);
+      const chunkPromises = chunk.map(id =>
+        ItemOrcamentoService.updateItem(id, updatePayload)
+      );
+
+      await Promise.all(chunkPromises);
+    }
+  }
+
+  /**
    * Calcular totais da seção
    */
   public static calcularTotaisSecao(items: ItemOrcamento[]): {

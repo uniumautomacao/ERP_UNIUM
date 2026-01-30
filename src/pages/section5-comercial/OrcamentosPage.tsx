@@ -108,6 +108,21 @@ export function OrcamentosPage() {
     onRenameTabPersist: handleRenameTabPersist,
   });
 
+  const handleMergeTabPersist = useCallback(async (sourceName: string, targetName: string) => {
+    if (!orcamentoId) {
+      throw new Error('Nenhum orçamento selecionado');
+    }
+
+    const targetSection = sectionsComServicos.find(secao => secao.name === targetName);
+    await ItemOrcamentoService.mergeSections(
+      orcamentoId,
+      sourceName,
+      targetName,
+      targetSection?.orderIndex
+    );
+    await refreshItems();
+  }, [orcamentoId, sectionsComServicos, refreshItems]);
+
   // Toast notifications
   const toasterId = useId('orcamentos-toast');
   const { dispatchToast } = useToastController(toasterId);
@@ -341,9 +356,11 @@ export function OrcamentosPage() {
                 onAddTab={addTab}
                 onRemoveTab={removeTab}
                 onRenameTab={renameTab}
+                onMergeTab={handleMergeTabPersist}
                 onReorderTabs={reorderTabs}
                 canRemoveTab={canRemoveTab}
                 onRenameError={showError}
+                onMergeError={showError}
               />
             }
             centerPanel={
