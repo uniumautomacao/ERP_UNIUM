@@ -27,7 +27,8 @@ import {
   CalendarClock24Regular,
 } from '@fluentui/react-icons';
 import type { ItemOrcamento, OrcamentoSecao } from '../../../features/orcamentos/types';
-import { PrecoProdutoCombobox } from './PrecoProdutoCombobox';
+import { ProdutoCombobox } from './ProdutoCombobox';
+import { ItemOrcamentoService } from '../../../services/orcamentos/ItemOrcamentoService';
 
 const useStyles = makeStyles({
   drawer: {
@@ -86,7 +87,7 @@ export function EditItemSidebar({
   const styles = useStyles();
 
   // Estado local dos campos editáveis
-  const [precoId, setPrecoId] = useState<string>('');
+  const [produtoId, setProdutoId] = useState<string>('');
   const [quantidade, setQuantidade] = useState<string>('');
   const [ambiente, setAmbiente] = useState<string>('');
   const [section, setSection] = useState<string>('');
@@ -98,7 +99,8 @@ export function EditItemSidebar({
   // Inicializar campos quando o item mudar
   useEffect(() => {
     if (item) {
-      setPrecoId(item._new_precodeproduto_value || '');
+      const produtoValue = item._new_produto_value || item.new_produto || '';
+      setProdutoId(produtoValue);
       setQuantidade(String(item.new_quantidade || 1));
       setAmbiente(item.new_ambiente || '');
       setSection(item.new_section || '');
@@ -107,19 +109,41 @@ export function EditItemSidebar({
     }
   }, [item]);
 
+  // Buscar produto atual se não veio no payload
+  useEffect(() => {
+    if (!item) return;
+    if (item._new_produto_value || item.new_produto) return;
+
+    let isActive = true;
+    ItemOrcamentoService.fetchItemById(item.new_itemdeorcamentoid, {
+      select: ['_new_produto_value', 'new_produto'],
+    })
+      .then((fullItem) => {
+        if (!isActive || !fullItem) return;
+        const prodId = fullItem._new_produto_value || fullItem.new_produto;
+        if (!prodId) return;
+        setProdutoId(prodId);
+      })
+      .catch((err) => console.error('Erro ao carregar produto do item:', err));
+
+    return () => {
+      isActive = false;
+    };
+  }, [item]);
+
   // Detectar mudanças
   useEffect(() => {
     if (!item) return;
 
     const changed =
-      precoId !== (item._new_precodeproduto_value || '') ||
+      produtoId !== (item._new_produto_value || item.new_produto || '') ||
       quantidade !== String(item.new_quantidade || 1) ||
       ambiente !== (item.new_ambiente || '') ||
       section !== (item.new_section || '') ||
       opcaoFornecimento !== (item.new_opcaodefornecimento || 100000000);
 
     setHasChanges(changed);
-  }, [item, precoId, quantidade, ambiente, section, opcaoFornecimento]);
+  }, [item, produtoId, quantidade, ambiente, section, opcaoFornecimento]);
 
   // Pode definir como compra futura?
   const canSetCompraFutura = useMemo(() => {
@@ -138,8 +162,8 @@ export function EditItemSidebar({
     try {
       const updates: Partial<ItemOrcamento> = {};
 
-      if (precoId !== (item._new_precodeproduto_value || '')) {
-        updates._new_precodeproduto_value = precoId || undefined;
+      if (produtoId !== (item._new_produto_value || item.new_produto || '')) {
+        updates.new_produto = produtoId || undefined;
       }
       if (quantidade !== String(item.new_quantidade || 1)) {
         const parsedQuantidade = Number(quantidade);
@@ -175,7 +199,7 @@ export function EditItemSidebar({
 
   const handleDiscard = () => {
     if (!item) return;
-    setPrecoId(item._new_precodeproduto_value || '');
+    setProdutoId(item._new_produto_value || item.new_produto || '');
     setQuantidade(String(item.new_quantidade || 1));
     setAmbiente(item.new_ambiente || '');
     setSection(item.new_section || '');
@@ -183,8 +207,8 @@ export function EditItemSidebar({
     setHasChanges(false);
   };
 
-  const handlePrecoProdutoChange = (value: string | null) => {
-    setPrecoId(value || '');
+  const handleProdutoChange = (value: string | null) => {
+    setProdutoId(value || '');
   };
 
   const handleSetCompraFutura = async () => {
@@ -283,10 +307,10 @@ export function EditItemSidebar({
 
         {/* Campos editáveis */}
         <div className={styles.fieldGroup}>
-          <Field label="Preço de Produto" hint="Busque por nome, referência ou descrição">
-            <PrecoProdutoCombobox
-              value={precoId}
-              onChange={handlePrecoProdutoChange}
+          <Field label="Produto" hint="Busque por nome, referência ou descrição">
+            <ProdutoCombobox
+              value={produtoId}
+              onChange={handleProdutoChange}
               disabled={isSubmitting}
             />
           </Field>

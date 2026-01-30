@@ -2,7 +2,7 @@
  * Service para a tabela new_itemdeorcamento
  * Gerencia operações CRUD de itens de orçamento
  */
-import type { IGetAllOptions } from '../../generated/models/CommonModels';
+import type { IGetAllOptions, IGetOptions } from '../../generated/models/CommonModels';
 import type { IOperationResult } from '@microsoft/power-apps/data';
 import { dataSourcesInfo } from '../../../.power/schemas/appschemas/dataSourcesInfo';
 import { getClient } from '@microsoft/power-apps/data';
@@ -43,6 +43,29 @@ export class ItemOrcamentoService {
     }
 
     return [];
+  }
+
+  /**
+   * Buscar item por ID
+   */
+  public static async fetchItemById(
+    itemId: string,
+    options?: IGetOptions
+  ): Promise<ItemOrcamento | null> {
+    const result = await ItemOrcamentoService.client.retrieveRecordAsync(
+      ItemOrcamentoService.dataSourceName,
+      itemId,
+      options
+    );
+
+    const success = (result as any).isSuccess ?? (result as any).success;
+    const value = (result as any).value ?? (result as any).data;
+
+    if (success && value) {
+      return value as ItemOrcamento;
+    }
+
+    return null;
   }
 
   /**
@@ -134,10 +157,6 @@ export class ItemOrcamentoService {
     if (data.new_parent) {
       changedFields['new_parent@odata.bind'] = `/new_itemdeorcamentos(${data.new_parent})`;
       delete changedFields.new_parent;
-    }
-    if (data._new_precodeproduto_value) {
-      changedFields['new_precodeproduto@odata.bind'] = `/new_precodeprodutos(${data._new_precodeproduto_value})`;
-      delete changedFields._new_precodeproduto_value;
     }
     // Remove campos indefinidos para evitar erro no update
     Object.keys(changedFields).forEach((key) => {

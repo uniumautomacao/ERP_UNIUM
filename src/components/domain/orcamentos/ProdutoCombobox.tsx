@@ -1,5 +1,5 @@
 /**
- * Combobox para selecionar Preço de Produto
+ * Combobox para selecionar Produto (via Preço de Produto)
  * Busca na tabela new_precodeproduto com filtro de pesquisa
  */
 
@@ -32,39 +32,49 @@ const useStyles = makeStyles({
   },
 });
 
-interface PrecoProdutoComboboxProps extends Omit<ComboboxProps, 'value' | 'onChange'> {
+interface ProdutoComboboxProps extends Omit<ComboboxProps, 'value' | 'onChange'> {
   value?: string | null;
   onChange?: (value: string | null, item: NewPrecodeProduto | null) => void;
   disabled?: boolean;
 }
 
-export function PrecoProdutoCombobox({
+export function ProdutoCombobox({
   value,
   onChange,
   disabled,
   ...comboboxProps
-}: PrecoProdutoComboboxProps) {
+}: ProdutoComboboxProps) {
   const styles = useStyles();
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<NewPrecodeProduto[]>([]);
   const [selectedItem, setSelectedItem] = useState<NewPrecodeProduto | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Carregar item selecionado inicialmente
+  // Carregar item selecionado ao receber value
   useEffect(() => {
-    if (value && isInitialLoad) {
-      setIsInitialLoad(false);
-      NewPrecodeProdutoService.get(value)
-        .then((result) => {
-          if (result.success && result.data) {
-            setSelectedItem(result.data);
-            setItems([result.data]);
-          }
-        })
-        .catch((err) => console.error('Erro ao carregar preço de produto:', err));
+    console.log('[ProdutoCombobox] Value changed:', value);
+    
+    if (!value) {
+      setSelectedItem(null);
+      return;
     }
-  }, [value, isInitialLoad]);
+
+    if (selectedItem?.new_precodeprodutoid === value) {
+      console.log('[PrecoProdutoCombobox] Já está selecionado:', value);
+      return;
+    }
+
+    console.log('[PrecoProdutoCombobox] Buscando preço:', value);
+    NewPrecodeProdutoService.get(value)
+      .then((result) => {
+        const success = (result as any).success ?? (result as any).isSuccess;
+        const data = (result as any).data ?? (result as any).value;
+        if (success && data) {
+          setSelectedItem(data);
+          setItems([data]);
+        }
+      })
+      .catch((err) => console.error('Erro ao carregar produto:', err));
+  }, [value, selectedItem?.new_precodeprodutoid]);
 
   // Buscar itens com base na query de pesquisa
   const fetchItems = useCallback(async (query: string) => {
@@ -92,9 +102,11 @@ export function PrecoProdutoCombobox({
       };
 
       const result = await NewPrecodeProdutoService.getAll(options);
+      const success = (result as any).success ?? (result as any).isSuccess;
+      const data = (result as any).data ?? (result as any).value;
 
-      if (result.success && result.data) {
-        setItems(result.data);
+      if (success && data) {
+        setItems(data);
       } else {
         setItems([]);
       }
@@ -155,7 +167,7 @@ export function PrecoProdutoCombobox({
       onOptionSelect={handleOptionSelect}
       onOpenChange={(_, data) => handleOpenChange(data.open)}
       selectedOptions={selectedItem ? [selectedItem.new_precodeprodutoid] : []}
-      placeholder="Buscar preço de produto..."
+      placeholder="Buscar produto..."
       disabled={disabled}
       freeform
     >
