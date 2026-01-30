@@ -1,3 +1,4 @@
 {
-  "customInstructions": ".github/copilot-instructions.md"
+  "customInstructions": ".github/copilot-instructions.md",
+  "customInstructions": "/TEMPLATE_README.md"
 }
