@@ -36,7 +36,7 @@ import { NewOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/N
 import { EditOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/EditOrcamentoDialog';
 import { NewItemDialog } from '../../components/domain/orcamentos/dialogs/NewItemDialog';
 import type { ItemOrcamento } from '../../features/orcamentos/types';
-import { formatarMoeda, somarValorTotalItens } from '../../features/orcamentos/utils';
+import { formatarMoeda, somarValorTotalItens, somarServicosCalculados } from '../../features/orcamentos/utils';
 
 export function OrcamentosPage() {
   // Estado do orçamento atual
@@ -62,6 +62,29 @@ export function OrcamentosPage() {
     creditosUtilizados,
   } = useOrcamentoData(orcamentoId);
 
+  const {
+    items,
+    selectedItems,
+    getItemsBySection,
+    toggleItemSelection,
+    clearSelection,
+  } = useOrcamentoItems(dataverseItems);
+
+  // Hook de serviços (precisa estar antes de useOrcamentoTabs para calcular seções corrigidas)
+  const { servicos, getServicosBySection } = useOrcamentoServicos(items, orcamentoId);
+
+  // Seções corrigidas com valores de serviços calculados incluídos
+  const sectionsComServicos = useMemo(() => {
+    return dataverseSections.map(secao => {
+      const servicosSecao = servicos.filter(s => s.section === secao.name);
+      const valorServicosSecao = somarServicosCalculados(servicosSecao);
+      return {
+        ...secao,
+        valorTotal: secao.valorTotal + valorServicosSecao,
+      };
+    });
+  }, [dataverseSections, servicos]);
+
   // Hooks locais para gerenciamento de tabs e seleção
   const {
     tabs,
@@ -72,16 +95,7 @@ export function OrcamentosPage() {
     renameTab,
     reorderTabs,
     canRemoveTab,
-  } = useOrcamentoTabs(dataverseSections);
-
-  const {
-    items,
-    selectedItems,
-    totals,
-    getItemsBySection,
-    toggleItemSelection,
-    clearSelection,
-  } = useOrcamentoItems(dataverseItems);
+  } = useOrcamentoTabs(sectionsComServicos);
 
   // Toast notifications
   const toasterId = useId('orcamentos-toast');
@@ -112,13 +126,28 @@ export function OrcamentosPage() {
     return getItemsBySection(selectedTab);
   }, [getItemsBySection, selectedTab]);
 
-  // Hook de serviços
-  const { servicos, getServicosBySection } = useOrcamentoServicos(items, orcamentoId);
-
   // Filtrar serviços pela seção selecionada
   const filteredServicos = useMemo(() => {
     return getServicosBySection(selectedTab);
   }, [getServicosBySection, selectedTab]);
+
+  // Subtotal da seção (itens + serviços calculados da seção)
+  const subtotalSecao = useMemo(() => {
+    const totalItens = somarValorTotalItens(filteredItems);
+    const totalServicosSecao = somarServicosCalculados(filteredServicos);
+    return totalItens + totalServicosSecao;
+  }, [filteredItems, filteredServicos]);
+
+  // Calcular totais corretos incluindo serviços calculados
+  const totals = useMemo(() => {
+    const servicosCalculadosTotal = somarServicosCalculados(servicos);
+    return {
+      totalItems: dataverseTotals.totalItems,
+      totalProducts: dataverseTotals.totalProducts,
+      totalServices: dataverseTotals.totalServices + servicosCalculadosTotal,
+      totalValue: dataverseTotals.totalValue + servicosCalculadosTotal,
+    };
+  }, [dataverseTotals, servicos]);
 
   const handleSelectionChange = (selected: ItemOrcamento[]) => {
     clearSelection();
@@ -350,7 +379,7 @@ export function OrcamentosPage() {
                       Subtotal da seção
                     </div>
                     <div style={{ fontSize: '18px', fontWeight: 600 }}>
-                      {formatarMoeda(somarValorTotalItens(filteredItems))}
+                      {formatarMoeda(subtotalSecao)}
                     </div>
                   </div>
                 </div>
@@ -386,15 +415,15 @@ export function OrcamentosPage() {
                   <div style={{ fontSize: '14px', color: tokens.colorNeutralForeground2 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
                       <span>Total de itens:</span>
-                      <strong>{dataverseTotals.totalItems}</strong>
+                      <strong>{totals.totalItems}</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
                       <span>Produtos:</span>
-                      <strong>{formatarMoeda(dataverseTotals.totalProducts)}</strong>
+                      <strong>{formatarMoeda(totals.totalProducts)}</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalXXS }}>
                       <span>Serviços:</span>
-                      <strong>{formatarMoeda(dataverseTotals.totalServices)}</strong>
+                      <strong>{formatarMoeda(totals.totalServices)}</strong>
                     </div>
                     <div
                       style={{
@@ -408,7 +437,7 @@ export function OrcamentosPage() {
                       }}
                     >
                       <span>Total:</span>
-                      <span>{formatarMoeda(dataverseTotals.totalValue)}</span>
+                      <span>{formatarMoeda(totals.totalValue)}</span>
                     </div>
                   </div>
                 </div>

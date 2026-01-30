@@ -45,20 +45,40 @@ export interface ItemTotals {
 }
 
 /**
+ * Verifica se um item é um serviço (não tem valor de produto)
+ */
+export function isItemServico(item: ItemOrcamento): boolean {
+  return (item.new_valordeproduto ?? 0) === 0 && (item.new_valordeservico ?? 0) > 0;
+}
+
+/**
+ * Calcula o valor exibido de um item (o que aparece na coluna "Valor Total" da lista)
+ * - Produtos: new_valordeproduto
+ * - Serviços: new_valordeservico
+ */
+export function calcularValorExibidoItem(item: ItemOrcamento): number {
+  const eServico = isItemServico(item);
+  return eServico ? (item.new_valordeservico ?? 0) : (item.new_valordeproduto ?? 0);
+}
+
+/**
  * Calcula totais agregados de uma lista de itens
+ * - totalProducts: soma de new_valordeproduto de todos os itens
+ * - totalServices: soma do valor de itens que SÃO serviços (new_valordeproduto = 0)
+ * - totalValue: totalProducts + totalServices
  */
 export function calcularTotaisItens(items: ItemOrcamento[]): ItemTotals {
   return items.reduce(
     (acc, item) => {
       const valorProduto = item.new_valordeproduto ?? 0;
-      const valorServico = item.new_valordeservico ?? 0;
-      const valorTotal = calcularValorTotalItem(item);
+      const eServico = isItemServico(item);
+      const valorServico = eServico ? (item.new_valordeservico ?? 0) : 0;
 
       return {
         totalItems: acc.totalItems + 1,
         totalProducts: acc.totalProducts + valorProduto,
         totalServices: acc.totalServices + valorServico,
-        totalValue: acc.totalValue + valorTotal,
+        totalValue: acc.totalValue + valorProduto + valorServico,
       };
     },
     { totalItems: 0, totalProducts: 0, totalServices: 0, totalValue: 0 }
@@ -66,10 +86,17 @@ export function calcularTotaisItens(items: ItemOrcamento[]): ItemTotals {
 }
 
 /**
- * Calcula o valor total de uma lista de itens (soma de todos os valores)
+ * Calcula o valor total de uma lista de itens (soma dos valores exibidos)
  */
 export function somarValorTotalItens(items: ItemOrcamento[]): number {
-  return items.reduce((sum, item) => sum + calcularValorTotalItem(item), 0);
+  return items.reduce((sum, item) => sum + calcularValorExibidoItem(item), 0);
+}
+
+/**
+ * Soma o valor total de serviços calculados
+ */
+export function somarServicosCalculados(servicos: ServicoCalculado[]): number {
+  return servicos.reduce((sum, servico) => sum + servico.valorTotal, 0);
 }
 
 /**
@@ -139,7 +166,7 @@ export function extrairSecoes(itens: ItemOrcamento[]): OrcamentoSecao[] {
     }
 
     const secao = secoesMap.get(sectionName)!;
-    const valorItem = calcularValorTotalItem(item);
+    const valorItem = calcularValorExibidoItem(item);
     secao.itemCount++;
     secao.valorTotal += valorItem;
   });
