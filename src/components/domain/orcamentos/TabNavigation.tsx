@@ -9,11 +9,17 @@ import {
   makeStyles,
   tokens,
   Tooltip,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItem,
 } from '@fluentui/react-components';
 import {
   Add24Regular,
   Edit24Regular,
   Delete24Regular,
+  MoreHorizontal24Regular,
 } from '@fluentui/react-icons';
 import {
   DndContext,
@@ -110,10 +116,8 @@ const useStyles = makeStyles({
     fontSize: '11px',
     opacity: 0.7,
   },
-  tabActions: {
-    display: 'flex',
-    gap: tokens.spacingHorizontalXS,
-    marginTop: tokens.spacingVerticalXS,
+  menuButton: {
+    minWidth: '28px',
   },
 });
 
@@ -174,23 +178,30 @@ function SortableTabItem({
       </div>
 
       {isSelected && (
-        <>
-          <div className={styles.tabActions}>
-            <Tooltip content="Renomear" relationship="label">
+        <Menu>
+          <MenuTrigger disableButtonEnhancement>
+            <Tooltip content="Ações" relationship="label">
               <Button
                 size="small"
                 appearance="subtle"
+                icon={<MoreHorizontal24Regular />}
+                className={styles.menuButton}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Tooltip>
+          </MenuTrigger>
+          <MenuPopover>
+            <MenuList>
+              <MenuItem
                 icon={<Edit24Regular />}
                 onClick={(e) => {
                   e.stopPropagation();
                   onRename();
                 }}
-              />
-            </Tooltip>
-            <Tooltip content="Mesclar" relationship="label">
-              <Button
-                size="small"
-                appearance="subtle"
+              >
+                Renomear
+              </MenuItem>
+              <MenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   onMerge();
@@ -198,22 +209,20 @@ function SortableTabItem({
                 disabled={!canMerge}
               >
                 Mesclar
-              </Button>
-            </Tooltip>
-            <Tooltip content="Excluir" relationship="label">
-              <Button
-                size="small"
-                appearance="subtle"
+              </MenuItem>
+              <MenuItem
                 icon={<Delete24Regular />}
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete();
                 }}
                 disabled={!canDelete}
-              />
-            </Tooltip>
-          </div>
-        </>
+              >
+                Excluir
+              </MenuItem>
+            </MenuList>
+          </MenuPopover>
+        </Menu>
       )}
     </div>
   );
