@@ -103,7 +103,8 @@ export function OpenOrcamentoDialog({
       const filtered = orcamentos.filter(
         (orc) =>
           orc.new_name?.toLowerCase().includes(searchLower) ||
-          orc.new_nomecliente?.toLowerCase().includes(searchLower)
+          orc.new_nomecliente?.toLowerCase().includes(searchLower) ||
+          orc.new_nomeconsultor?.toLowerCase().includes(searchLower)
       );
       setFilteredOrcamentos(filtered);
     }
@@ -123,16 +124,19 @@ export function OpenOrcamentoDialog({
           'new_valortotal',
           'createdon',
           '_new_cliente_value', // Lookup ID do cliente
+          '_new_consultor_value', // Lookup ID do consultor
         ],
-      });
+      } as IGetAllOptions);
 
-      // Mapear o nome do cliente usando o lookup formatado
+      // Mapear o nome do cliente e consultor usando os lookups formatados
       const mappedData = data.map(orc => {
         const clienteFormatado = (orc as any)['_new_cliente_value@OData.Community.Display.V1.FormattedValue'];
-        
+        const consultorFormatado = (orc as any)['_new_consultor_value@OData.Community.Display.V1.FormattedValue'];
+
         return {
           ...orc,
           new_nomecliente: clienteFormatado || 'Cliente não identificado',
+          new_nomeconsultor: consultorFormatado || '-',
         };
       });
 
@@ -190,6 +194,14 @@ export function OpenOrcamentoDialog({
       ),
     }),
     createTableColumn<Orcamento>({
+      columnId: 'consultor',
+      compare: (a, b) => (a.new_nomeconsultor || '').localeCompare(b.new_nomeconsultor || ''),
+      renderHeaderCell: () => 'Consultor',
+      renderCell: (item) => (
+        <TableCellLayout>{item.new_nomeconsultor || '-'}</TableCellLayout>
+      ),
+    }),
+    createTableColumn<Orcamento>({
       columnId: 'valor',
       compare: (a, b) => (a.new_valortotal || 0) - (b.new_valortotal || 0),
       renderHeaderCell: () => 'Valor Total',
@@ -222,7 +234,7 @@ export function OpenOrcamentoDialog({
                 className={styles.searchInput}
                 value={searchText}
                 onChange={(_, data) => setSearchText(data.value)}
-                placeholder="Buscar por nome ou cliente..."
+                placeholder="Buscar por nome, cliente ou consultor..."
                 contentBefore={<Search24Regular />}
                 autoFocus
               />
