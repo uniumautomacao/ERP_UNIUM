@@ -14,6 +14,7 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
+  mergeClasses,
 } from '@fluentui/react-components';
 import {
   Add24Regular,
@@ -103,7 +104,11 @@ const useStyles = makeStyles({
   },
   tabContent: {
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalXXS,
+  },
+  tabHeaderRow: {
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: tokens.spacingHorizontalXS,
@@ -118,6 +123,13 @@ const useStyles = makeStyles({
   },
   menuButton: {
     minWidth: '28px',
+  },
+  menuButtonSelected: {
+    color: tokens.colorNeutralForegroundOnBrand,
+    '&:hover, &:active, &:focus-visible': {
+      color: tokens.colorNeutralForegroundOnBrand,
+      backgroundColor: tokens.colorBrandBackgroundHover,
+    },
   },
 });
 
@@ -161,15 +173,69 @@ function SortableTabItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`${styles.tabItem} ${
-        isSelected ? styles.tabItemSelected : ''
-      } ${isDragging ? styles.tabItemDragging : ''}`}
+      className={mergeClasses(
+        styles.tabItem,
+        isSelected && styles.tabItemSelected,
+        isDragging && styles.tabItemDragging
+      )}
       {...attributes}
       {...listeners}
     >
       <div onClick={onSelect}>
         <div className={styles.tabContent}>
-          <div className={styles.tabName}>{tab.name}</div>
+          <div className={styles.tabHeaderRow}>
+            <div className={styles.tabName}>{tab.name}</div>
+            {isSelected && (
+              <Menu>
+                <MenuTrigger disableButtonEnhancement>
+                  <Tooltip content="Ações" relationship="label">
+                    <Button
+                      size="small"
+                      appearance="subtle"
+                      icon={<MoreHorizontal24Regular />}
+                      className={mergeClasses(
+                        styles.menuButton,
+                        isSelected && styles.menuButtonSelected
+                      )}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </Tooltip>
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    <MenuItem
+                      icon={<Edit24Regular />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRename();
+                      }}
+                    >
+                      Renomear
+                    </MenuItem>
+                    <MenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMerge();
+                      }}
+                      disabled={!canMerge}
+                    >
+                      Mesclar
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Delete24Regular />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete();
+                      }}
+                      disabled={!canDelete}
+                    >
+                      Excluir
+                    </MenuItem>
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            )}
+          </div>
           <div className={styles.tabInfo}>
             {tab.itemCount} {tab.itemCount === 1 ? 'item' : 'itens'} •{' '}
             {formatarMoeda(tab.valorTotal)}
@@ -177,53 +243,6 @@ function SortableTabItem({
         </div>
       </div>
 
-      {isSelected && (
-        <Menu>
-          <MenuTrigger disableButtonEnhancement>
-            <Tooltip content="Ações" relationship="label">
-              <Button
-                size="small"
-                appearance="subtle"
-                icon={<MoreHorizontal24Regular />}
-                className={styles.menuButton}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </Tooltip>
-          </MenuTrigger>
-          <MenuPopover>
-            <MenuList>
-              <MenuItem
-                icon={<Edit24Regular />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRename();
-                }}
-              >
-                Renomear
-              </MenuItem>
-              <MenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMerge();
-                }}
-                disabled={!canMerge}
-              >
-                Mesclar
-              </MenuItem>
-              <MenuItem
-                icon={<Delete24Regular />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                disabled={!canDelete}
-              >
-                Excluir
-              </MenuItem>
-            </MenuList>
-          </MenuPopover>
-        </Menu>
-      )}
     </div>
   );
 }
