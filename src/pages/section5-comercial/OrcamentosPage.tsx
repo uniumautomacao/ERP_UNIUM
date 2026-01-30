@@ -351,7 +351,7 @@ export function OrcamentosPage() {
                     </div>
                     <div style={{ fontSize: '18px', fontWeight: 600 }}>
                       {formatarMoeda(
-                        filteredItems.reduce((sum, item) => sum + (item.new_valortotal || 0), 0)
+                        filteredItems.reduce((sum, item) => sum + (item.new_valordeproduto || 0) + (item.new_valordeservico || 0), 0)
                       )}
                     </div>
                   </div>

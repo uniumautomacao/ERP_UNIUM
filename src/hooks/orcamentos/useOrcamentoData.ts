@@ -234,16 +234,18 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
     items.forEach(item => {
       const sectionName = item.new_section || 'Sem seção';
       const existing = sectionMap.get(sectionName);
+      // Calcular valor total corretamente ao invés de usar new_valortotal do banco
+      const valorItem = (item.new_valordeproduto || 0) + (item.new_valordeservico || 0);
 
       if (existing) {
         existing.itemCount++;
-        existing.valorTotal += item.new_valortotal || 0;
+        existing.valorTotal += valorItem;
       } else {
         sectionMap.set(sectionName, {
           name: sectionName,
           orderIndex: item.new_sectionorderindex || 0,
           itemCount: 1,
-          valorTotal: item.new_valortotal || 0,
+          valorTotal: valorItem,
         });
       }
     });
@@ -257,15 +259,17 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
   const totals = useMemo((): OrcamentoTotals => {
     return items.reduce(
       (acc, item) => {
-        const quantidade = item.new_quantidade || 0;
-        const valorProduto = (item.new_valordeproduto || 0) * quantidade;
-        const valorServico = (item.new_valordeservico || 0) * quantidade;
+        // new_valordeproduto e new_valordeservico já incluem quantidade
+        const valorProduto = item.new_valordeproduto || 0;
+        const valorServico = item.new_valordeservico || 0;
+        // Calcular valor total corretamente ao invés de usar new_valortotal do banco
+        const valorTotal = valorProduto + valorServico;
 
         return {
           totalItems: acc.totalItems + 1,
           totalProducts: acc.totalProducts + valorProduto,
           totalServices: acc.totalServices + valorServico,
-          totalValue: acc.totalValue + (item.new_valortotal || 0),
+          totalValue: acc.totalValue + valorTotal,
         };
       },
       { totalItems: 0, totalProducts: 0, totalServices: 0, totalValue: 0 }

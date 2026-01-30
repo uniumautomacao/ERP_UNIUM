@@ -106,11 +106,14 @@ export function useOrcamentoItems(initialItems: ItemOrcamento[] = []) {
   const totals = useMemo(() => {
     return items.reduce(
       (acc, item) => {
+        // new_valordeproduto e new_valordeservico já incluem quantidade
+        // Calcular valor total corretamente ao invés de usar new_valortotal do banco
+        const valorTotal = (item.new_valordeproduto ?? 0) + (item.new_valordeservico ?? 0);
         return {
           totalItems: acc.totalItems + 1,
-          totalValue: acc.totalValue + (item.new_valortotal ?? 0),
-          totalProducts: acc.totalProducts + (item.new_valordeproduto ?? 0) * (item.new_quantidade ?? 1),
-          totalServices: acc.totalServices + (item.new_valordeservico ?? 0) * (item.new_quantidade ?? 1),
+          totalValue: acc.totalValue + valorTotal,
+          totalProducts: acc.totalProducts + (item.new_valordeproduto ?? 0),
+          totalServices: acc.totalServices + (item.new_valordeservico ?? 0),
         };
       },
       { totalItems: 0, totalValue: 0, totalProducts: 0, totalServices: 0 }

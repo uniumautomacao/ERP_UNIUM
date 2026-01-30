@@ -25,14 +25,14 @@ export function calcularResumoOrcamento(
   orcamento: Orcamento,
   itens: ItemOrcamento[]
 ): OrcamentoResumo {
-  // Somar valores dos itens
+  // Somar valores dos itens (new_valordeproduto e new_valordeservico já incluem quantidade)
   const valorTotalProdutos = itens.reduce(
-    (acc, item) => acc + (item.new_valordeproduto ?? 0) * (item.new_quantidade ?? 1),
+    (acc, item) => acc + (item.new_valordeproduto ?? 0),
     0
   );
 
   const valorTotalServicos = itens.reduce(
-    (acc, item) => acc + (item.new_valordeservico ?? 0) * (item.new_quantidade ?? 1),
+    (acc, item) => acc + (item.new_valordeservico ?? 0),
     0
   );
 
@@ -69,6 +69,10 @@ export function calcularResumoOrcamento(
  * Extrai as seções únicas dos itens
  */
 export function extrairSecoes(itens: ItemOrcamento[]): OrcamentoSecao[] {
+  console.log('[extrairSecoes] Iniciando cálculo de seções', {
+    totalItens: itens.length
+  });
+
   const secoesMap = new Map<string, OrcamentoSecao>();
 
   itens.forEach((item) => {
@@ -85,12 +89,35 @@ export function extrairSecoes(itens: ItemOrcamento[]): OrcamentoSecao[] {
     }
 
     const secao = secoesMap.get(sectionName)!;
+    const valorAnterior = secao.valorTotal;
+    // Calcular valor total corretamente ao invés de usar new_valortotal do banco
+    const valorItem = (item.new_valordeproduto ?? 0) + (item.new_valordeservico ?? 0);
     secao.itemCount++;
-    secao.valorTotal += item.new_valortotal ?? 0;
+    secao.valorTotal += valorItem;
+
+    console.log(`[Seção: ${sectionName}] Adicionando item`, {
+      ref: item.new_ref,
+      new_valortotal: item.new_valortotal,
+      new_quantidade: item.new_quantidade,
+      new_valordeproduto: item.new_valordeproduto,
+      new_valordeservico: item.new_valordeservico,
+      valorCalculado: valorItem,
+      valorAnterior,
+      valorNovo: secao.valorTotal
+    });
   });
 
-  // Ordenar seções
-  return ordenarSecoes(Array.from(secoesMap.values()));
+  const resultado = ordenarSecoes(Array.from(secoesMap.values()));
+
+  console.log('[extrairSecoes] Resultado final:', {
+    secoes: resultado.map(s => ({
+      name: s.name,
+      itemCount: s.itemCount,
+      valorTotal: s.valorTotal
+    }))
+  });
+
+  return resultado;
 }
 
 /**
