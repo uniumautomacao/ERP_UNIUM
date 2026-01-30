@@ -25,7 +25,6 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -71,16 +70,25 @@ const useStyles = makeStyles({
     transition: 'all 0.2s ease',
     '&:hover': {
       backgroundColor: tokens.colorNeutralBackground1Hover,
-      borderColor: tokens.colorNeutralStroke1Hover,
+      borderTopColor: tokens.colorNeutralStroke1Hover,
+      borderRightColor: tokens.colorNeutralStroke1Hover,
+      borderBottomColor: tokens.colorNeutralStroke1Hover,
+      borderLeftColor: tokens.colorNeutralStroke1Hover,
     },
   },
   tabItemSelected: {
     backgroundColor: tokens.colorBrandBackground,
-    borderColor: tokens.colorBrandStroke1,
+    borderTopColor: tokens.colorBrandStroke1,
+    borderRightColor: tokens.colorBrandStroke1,
+    borderBottomColor: tokens.colorBrandStroke1,
+    borderLeftColor: tokens.colorBrandStroke1,
     color: tokens.colorNeutralForegroundOnBrand,
     '&:hover': {
       backgroundColor: tokens.colorBrandBackgroundHover,
-      borderColor: tokens.colorBrandStroke1Hover,
+      borderTopColor: tokens.colorBrandStroke2Hover,
+      borderRightColor: tokens.colorBrandStroke2Hover,
+      borderBottomColor: tokens.colorBrandStroke2Hover,
+      borderLeftColor: tokens.colorBrandStroke2Hover,
     },
   },
   tabItemDragging: {
