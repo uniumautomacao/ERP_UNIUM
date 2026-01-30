@@ -26,6 +26,7 @@ import { ProductList } from '../../components/domain/orcamentos/ProductList';
 import { OrcamentoCommandBar } from '../../components/domain/orcamentos/OrcamentoCommandBar';
 import { AIChatPlaceholder } from '../../components/domain/orcamentos/AIChatPlaceholder';
 import { CreditsDisplay } from '../../components/domain/orcamentos/CreditsDisplay';
+import { EditItemSidebar } from '../../components/domain/orcamentos/EditItemSidebar';
 import { useOrcamentoTabs } from '../../hooks/orcamentos/useOrcamentoTabs';
 import { useOrcamentoItems } from '../../hooks/orcamentos/useOrcamentoItems';
 import { useOrcamentoData } from '../../hooks/orcamentos/useOrcamentoData';
@@ -47,6 +48,10 @@ export function OrcamentosPage() {
   const [newDialogOpen, setNewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newItemDialogOpen, setNewItemDialogOpen] = useState(false);
+
+  // Estado da sidebar de edição de item
+  const [editItemSidebarOpen, setEditItemSidebarOpen] = useState(false);
+  const [itemBeingEdited, setItemBeingEdited] = useState<ItemOrcamento | null>(null);
 
   // Hook de dados do Dataverse
   const {
@@ -209,7 +214,42 @@ export function OrcamentosPage() {
   };
 
   const handleEditSelected = () => {
-    // TODO: Implement EditItemDialog
+    // Editar o primeiro item selecionado
+    if (selectedItems.size === 0) return;
+    const firstItemId = Array.from(selectedItems)[0];
+    const item = items.find((i) => i.new_itemdeorcamentoid === firstItemId);
+    if (item) {
+      handleItemDoubleClick(item);
+    }
+  };
+
+  const handleItemDoubleClick = (item: ItemOrcamento) => {
+    setItemBeingEdited(item);
+    setEditItemSidebarOpen(true);
+  };
+
+  const handleSaveItem = async (itemId: string, updates: Partial<ItemOrcamento>) => {
+    try {
+      await ItemOrcamentoService.updateItem(itemId, updates);
+      await refreshItems();
+      showSuccess('Item atualizado com sucesso');
+    } catch (err) {
+      showError('Erro ao atualizar item');
+      throw err;
+    }
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    try {
+      await ItemOrcamentoService.updateItem(itemId, {
+        new_removido: true,
+      });
+      await refreshItems();
+      showSuccess('Item removido com sucesso');
+    } catch (err) {
+      showError('Erro ao remover item');
+      throw err;
+    }
   };
 
   const handleDeleteSelected = async () => {
@@ -398,6 +438,7 @@ export function OrcamentosPage() {
                     servicos={filteredServicos}
                     selectedItems={selectedItems}
                     onSelectionChange={handleSelectionChange}
+                    onItemDoubleClick={handleItemDoubleClick}
                   />
                 </div>
 
@@ -525,6 +566,18 @@ export function OrcamentosPage() {
           setNewItemDialogOpen(false);
           handleRefresh();
         }}
+      />
+
+      <EditItemSidebar
+        open={editItemSidebarOpen}
+        item={itemBeingEdited}
+        sections={tabs}
+        onClose={() => {
+          setEditItemSidebarOpen(false);
+          setItemBeingEdited(null);
+        }}
+        onSave={handleSaveItem}
+        onRemove={handleRemoveItem}
       />
     </PageContainer>
   );

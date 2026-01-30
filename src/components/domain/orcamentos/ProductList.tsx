@@ -164,17 +164,38 @@ export function ProductList({
     return items.filter((item) => selectedItems.has(item.new_itemdeorcamentoid));
   }, [items, selectedItems]);
 
+  const handleRowDoubleClick = (row: TableRow) => {
+    // Só permite double-click em produtos, não em serviços
+    if (!isServico(row) && onItemDoubleClick) {
+      onItemDoubleClick(row);
+    }
+  };
+
+  const getRowStyle = (row: TableRow) => {
+    if (isServico(row)) {
+      return {
+        backgroundColor: tokens.colorNeutralBackground1Hover,
+      };
+    }
+    return undefined;
+  };
+
+  const handleSelectionChange = (selectedRows: TableRow[]) => {
+    // Filtrar apenas itens (não serviços) antes de passar para o callback
+    const selectedItems = selectedRows.filter((row): row is ItemOrcamento => !isServico(row));
+    onSelectionChange(selectedItems);
+  };
+
   return (
     <DataGrid
       items={allRows}
       columns={columns}
       selectionMode="multiselect"
       selectedItems={selectedItemsArray}
-      onSelectionChange={onSelectionChange}
+      onSelectionChange={handleSelectionChange}
+      onRowDoubleClick={handleRowDoubleClick}
       getRowId={(row) => isServico(row) ? row.id : row.new_itemdeorcamentoid}
-      getRowStyle={(row) => isServico(row) ? {
-        backgroundColor: tokens.colorNeutralBackground1Hover,
-      } : undefined}
+      getRowStyle={getRowStyle}
       emptyState={
         <div
           style={{

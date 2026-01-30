@@ -135,6 +135,16 @@ export class ItemOrcamentoService {
       changedFields['new_parent@odata.bind'] = `/new_itemdeorcamentos(${data.new_parent})`;
       delete changedFields.new_parent;
     }
+    if (data._new_precodeproduto_value) {
+      changedFields['new_precodeproduto@odata.bind'] = `/new_precodeprodutos(${data._new_precodeproduto_value})`;
+      delete changedFields._new_precodeproduto_value;
+    }
+    // Remove campos indefinidos para evitar erro no update
+    Object.keys(changedFields).forEach((key) => {
+      if (changedFields[key] === undefined) {
+        delete changedFields[key];
+      }
+    });
 
     const result = await ItemOrcamentoService.client.updateRecordAsync(
       ItemOrcamentoService.dataSourceName,
@@ -146,6 +156,7 @@ export class ItemOrcamentoService {
     const success = (result as any).isSuccess ?? (result as any).success;
 
     if (!success) {
+      console.error('Falha ao atualizar item de orçamento', result);
       throw new Error('Falha ao atualizar item de orçamento');
     }
   }

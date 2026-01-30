@@ -72,6 +72,7 @@ export interface ItemOrcamento {
   new_orcamento?: string | null; // ID do orçamento
   new_produto?: string | null; // ID do produto
   new_parent?: string | null; // ID do item pai (para hierarquia)
+  _new_precodeproduto_value?: string | null; // ID do preço de produto (lookup)
 
   // Informações do produto
   new_ref?: string | null;

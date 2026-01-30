@@ -17,7 +17,9 @@ interface DataGridProps<T> {
   selectionMode?: 'single' | 'multiselect';
   selectedItems?: T[];
   onSelectionChange?: (selectedItems: T[]) => void;
+  onRowDoubleClick?: (item: T) => void;
   getRowId?: (item: T) => string;
+  getRowStyle?: (item: T) => React.CSSProperties | undefined;
   emptyState?: ReactNode;
 }
 
@@ -27,7 +29,9 @@ export function DataGrid<T>({
   selectionMode,
   selectedItems,
   onSelectionChange,
+  onRowDoubleClick,
   getRowId,
+  getRowStyle,
   emptyState,
 }: DataGridProps<T>) {
   if (items.length === 0 && emptyState) {
@@ -115,6 +119,11 @@ export function DataGrid<T>({
                     }
                   : undefined
               }
+              onDoubleClick={() => onRowDoubleClick?.(item)}
+              style={{
+                ...getRowStyle?.(item),
+                cursor: onRowDoubleClick ? 'pointer' : undefined,
+              }}
             >
               {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
             </DataGridRow>
