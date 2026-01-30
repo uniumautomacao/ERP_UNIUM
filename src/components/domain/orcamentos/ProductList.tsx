@@ -134,13 +134,13 @@ export function ProductList({
       createTableColumn<TableRow>({
         columnId: 'valorTotal',
         compare: (a, b) => {
-          const aVal = isServico(a) ? a.valorTotal : (a.new_valortotal || 0);
-          const bVal = isServico(b) ? b.valorTotal : (b.new_valortotal || 0);
+          const aVal = isServico(a) ? a.valorTotal : (a.new_valordeproduto || 0);
+          const bVal = isServico(b) ? b.valorTotal : (b.new_valordeproduto || 0);
           return aVal - bVal;
         },
         renderHeaderCell: () => 'Valor Total',
         renderCell: (row) => {
-          const valor = isServico(row) ? row.valorTotal : row.new_valortotal;
+          const valor = isServico(row) ? row.valorTotal : row.new_valordeproduto;
           return (
             <span
               style={{

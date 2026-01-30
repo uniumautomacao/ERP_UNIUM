@@ -403,9 +403,9 @@ export function calcularServicosAgrupados(
       let valor = 0;
       const isVariavel = tipo.taxaPercentual > 0;
 
-      // Serviço variável (percentual sobre new_valordeservico)
+      // Serviço variável (percentual sobre new_valordeproduto)
       if (isVariavel) {
-        valor = (item.new_valordeservico || 0) * tipo.taxaPercentual * (item.new_quantidade || 1);
+        valor = (item.new_valordeproduto || 0) * tipo.taxaPercentual * (item.new_quantidade || 1);
       }
       // Serviço fixo
       else if (tipo.taxaFixa > 0) {
