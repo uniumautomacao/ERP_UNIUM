@@ -4,7 +4,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ItemOrcamento } from '../../features/orcamentos/types';
-import { calcularItemStatus, calcularValorTotalItem } from '../../features/orcamentos/utils';
+import { calcularItemStatus, calcularTotaisItens } from '../../features/orcamentos/utils';
 
 export function useOrcamentoItems(initialItems: ItemOrcamento[] = []) {
   const [items, setItems] = useState<ItemOrcamento[]>(initialItems);
@@ -104,18 +104,7 @@ export function useOrcamentoItems(initialItems: ItemOrcamento[] = []) {
    * Calcula totais dos itens
    */
   const totals = useMemo(() => {
-    return items.reduce(
-      (acc, item) => {
-        const valorTotal = calcularValorTotalItem(item);
-        return {
-          totalItems: acc.totalItems + 1,
-          totalValue: acc.totalValue + valorTotal,
-          totalProducts: acc.totalProducts + (item.new_valordeproduto ?? 0),
-          totalServices: acc.totalServices + (item.new_valordeservico ?? 0),
-        };
-      },
-      { totalItems: 0, totalValue: 0, totalProducts: 0, totalServices: 0 }
-    );
+    return calcularTotaisItens(items);
   }, [items]);
 
   /**

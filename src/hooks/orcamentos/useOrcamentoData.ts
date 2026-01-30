@@ -7,7 +7,7 @@ import { OrcamentoService } from '../../services/orcamentos/OrcamentoService';
 import { ItemOrcamentoService } from '../../services/orcamentos/ItemOrcamentoService';
 import { CreditoService } from '../../services/orcamentos/CreditoService';
 import { PagamentoService } from '../../services/orcamentos/PagamentoService';
-import { calcularValorTotalItem } from '../../features/orcamentos/utils';
+import { calcularTotaisItens, extrairSecoes } from '../../features/orcamentos/utils';
 import type {
   Orcamento,
   ItemOrcamento,
@@ -230,48 +230,14 @@ export function useOrcamentoData(orcamentoId: string | null): UseOrcamentoDataRe
    * Calcular seções com base nos itens
    */
   const sections = useMemo((): OrcamentoSecao[] => {
-    const sectionMap = new Map<string, OrcamentoSecao>();
-
-    items.forEach(item => {
-      const sectionName = item.new_section || 'Sem seção';
-      const existing = sectionMap.get(sectionName);
-      const valorItem = calcularValorTotalItem(item);
-
-      if (existing) {
-        existing.itemCount++;
-        existing.valorTotal += valorItem;
-      } else {
-        sectionMap.set(sectionName, {
-          name: sectionName,
-          orderIndex: item.new_sectionorderindex || 0,
-          itemCount: 1,
-          valorTotal: valorItem,
-        });
-      }
-    });
-
-    return Array.from(sectionMap.values()).sort((a, b) => a.orderIndex - b.orderIndex);
+    return extrairSecoes(items);
   }, [items]);
 
   /**
    * Calcular totais
    */
   const totals = useMemo((): OrcamentoTotals => {
-    return items.reduce(
-      (acc, item) => {
-        const valorProduto = item.new_valordeproduto || 0;
-        const valorServico = item.new_valordeservico || 0;
-        const valorTotal = calcularValorTotalItem(item);
-
-        return {
-          totalItems: acc.totalItems + 1,
-          totalProducts: acc.totalProducts + valorProduto,
-          totalServices: acc.totalServices + valorServico,
-          totalValue: acc.totalValue + valorTotal,
-        };
-      },
-      { totalItems: 0, totalProducts: 0, totalServices: 0, totalValue: 0 }
-    );
+    return calcularTotaisItens(items);
   }, [items]);
 
   /**

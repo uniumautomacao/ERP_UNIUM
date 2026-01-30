@@ -36,7 +36,7 @@ import { NewOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/N
 import { EditOrcamentoDialog } from '../../components/domain/orcamentos/dialogs/EditOrcamentoDialog';
 import { NewItemDialog } from '../../components/domain/orcamentos/dialogs/NewItemDialog';
 import type { ItemOrcamento } from '../../features/orcamentos/types';
-import { formatarMoeda, calcularValorTotalItem } from '../../features/orcamentos/utils';
+import { formatarMoeda, somarValorTotalItens } from '../../features/orcamentos/utils';
 
 export function OrcamentosPage() {
   // Estado do orçamento atual
@@ -350,9 +350,7 @@ export function OrcamentosPage() {
                       Subtotal da seção
                     </div>
                     <div style={{ fontSize: '18px', fontWeight: 600 }}>
-                      {formatarMoeda(
-                        filteredItems.reduce((sum, item) => sum + calcularValorTotalItem(item), 0)
-                      )}
+                      {formatarMoeda(somarValorTotalItens(filteredItems))}
                     </div>
                   </div>
                 </div>
