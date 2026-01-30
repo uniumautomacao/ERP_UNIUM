@@ -27,6 +27,7 @@ import {
 } from '@fluentui/react-components';
 import { Search24Regular } from '@fluentui/react-icons';
 import { OrcamentoService } from '../../../../services/orcamentos/OrcamentoService';
+import type { IGetAllOptions } from '../../../../generated/models/CommonModels';
 import type { Orcamento } from '../../../../features/orcamentos/types';
 import { formatarMoeda, formatarData } from '../../../../features/orcamentos/utils';
 
@@ -121,22 +122,24 @@ export function OpenOrcamentoDialog({
           'new_name',
           'new_valortotal',
           'createdon',
-          'new_publicado',
-          'new_nomecliente',
+          '_new_cliente_value', // Lookup ID do cliente
         ],
       });
 
-      // Mapear o nome do cliente do expand
-      const mappedData = data.map(orc => ({
-        ...orc,
-        new_nomecliente: orc.new_nomecliente || 'Cliente não identificado',
-      }));
+      // Mapear o nome do cliente usando o lookup formatado
+      const mappedData = data.map(orc => {
+        const clienteFormatado = (orc as any)['_new_cliente_value@OData.Community.Display.V1.FormattedValue'];
+        
+        return {
+          ...orc,
+          new_nomecliente: clienteFormatado || 'Cliente não identificado',
+        };
+      });
 
-      console.log('Orçamentos carregados:', mappedData.length, mappedData);
       setOrcamentos(mappedData);
       setFilteredOrcamentos(mappedData);
     } catch (err) {
-      console.error('Erro ao carregar orçamentos:', err);
+      console.error('[OpenOrcamentoDialog] erro ao carregar orçamentos:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar orçamentos');
     } finally {
       setIsLoading(false);
@@ -204,23 +207,6 @@ export function OpenOrcamentoDialog({
       renderHeaderCell: () => 'Data',
       renderCell: (item) => (
         <TableCellLayout>{formatarData(item.createdon)}</TableCellLayout>
-      ),
-    }),
-    createTableColumn<Orcamento>({
-      columnId: 'status',
-      renderHeaderCell: () => 'Status',
-      renderCell: (item) => (
-        <TableCellLayout>
-          <span
-            style={{
-              color: item.new_publicado
-                ? tokens.colorPaletteGreenForeground1
-                : tokens.colorNeutralForeground3,
-            }}
-          >
-            {item.new_publicado ? 'Publicado' : 'Rascunho'}
-          </span>
-        </TableCellLayout>
       ),
     }),
   ];

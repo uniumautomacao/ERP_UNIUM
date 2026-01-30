@@ -210,8 +210,15 @@ export class OrcamentoService {
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as Orcamento[];
+    if (result.success && result.data) {
+      return result.data as Orcamento[];
+    }
+
+    if (result.error) {
+      console.error('[OrcamentoService.fetchAll] erro na query', {
+        error: result.error,
+        options,
+      });
     }
 
     return [];
