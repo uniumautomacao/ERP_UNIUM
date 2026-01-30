@@ -42,6 +42,7 @@ import { DevPage } from '../pages/section3-dev/DevPage';
 import { QrCodeScannerPage } from '../pages/section3-dev/QrCodeScannerPage';
 import { MermaidPrototypePage } from '../pages/section3-dev/MermaidPrototypePage';
 import { InteligenciaComercialPage } from '../pages/section5-comercial/InteligenciaComercialPage';
+import { OrcamentosPage } from '../pages/section5-comercial/OrcamentosPage';
 
 export const navigation: NavSection[] = [
   {
@@ -167,6 +168,13 @@ export const navigation: NavSection[] = [
         icon: <ChartMultiple24Regular />,
         path: '/comercial/inteligencia',
         component: InteligenciaComercialPage,
+      },
+      {
+        id: 'orcamentos',
+        label: 'Orçamentos',
+        icon: <DocumentBulletList24Regular />,
+        path: '/comercial/orcamentos',
+        component: OrcamentosPage,
       },
     ],
   },
