@@ -2,7 +2,7 @@
  * Dialog para selecionar e abrir um orçamento existente
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog,
   DialogSurface,
@@ -24,12 +24,15 @@ import {
   TableColumnDefinition,
   createTableColumn,
   TableCellLayout,
+  Dropdown,
+  Option,
 } from '@fluentui/react-components';
 import { Search24Regular } from '@fluentui/react-icons';
 import { OrcamentoService } from '../../../../services/orcamentos/OrcamentoService';
 import type { IGetAllOptions } from '../../../../generated/models/CommonModels';
 import type { Orcamento } from '../../../../features/orcamentos/types';
 import { formatarMoeda, formatarData } from '../../../../features/orcamentos/utils';
+import { escapeODataValue } from '../../../../utils/guia-conexoes/odata';
 
 const useStyles = makeStyles({
   surface: {
@@ -44,9 +47,13 @@ const useStyles = makeStyles({
   searchContainer: {
     display: 'flex',
     gap: tokens.spacingHorizontalS,
+    alignItems: 'center',
   },
   searchInput: {
     flex: 1,
+  },
+  consultorFilter: {
+    minWidth: '200px',
   },
   gridContainer: {
     height: '400px',
@@ -80,42 +87,30 @@ export function OpenOrcamentoDialog({
   const styles = useStyles();
   const [searchText, setSearchText] = useState('');
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
-  const [filteredOrcamentos, setFilteredOrcamentos] = useState<Orcamento[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [consultorFilter, setConsultorFilter] = useState<string>('todos');
 
-  // Carregar orçamentos quando abrir
-  useEffect(() => {
-    if (open) {
-      loadOrcamentos();
-      setSearchText('');
-      setSelectedId(null);
-    }
-  }, [open]);
-
-  // Filtrar orçamentos quando o texto de busca mudar
-  useEffect(() => {
-    if (!searchText.trim()) {
-      setFilteredOrcamentos(orcamentos);
-    } else {
-      const searchLower = searchText.toLowerCase();
-      const filtered = orcamentos.filter(
-        (orc) =>
-          orc.new_name?.toLowerCase().includes(searchLower) ||
-          orc.new_nomecliente?.toLowerCase().includes(searchLower) ||
-          orc.new_nomeconsultor?.toLowerCase().includes(searchLower)
-      );
-      setFilteredOrcamentos(filtered);
-    }
-  }, [searchText, orcamentos]);
-
-  const loadOrcamentos = async () => {
+  const loadOrcamentos = useCallback(async (searchTerm?: string) => {
     setIsLoading(true);
     setError(null);
     try {
+      // Construir filtro base
+      let filter = 'statecode eq 0';
+
+      // Adicionar busca delegável com contains() se houver termo
+      if (searchTerm?.trim()) {
+        const escaped = escapeODataValue(searchTerm.trim());
+        const searchFilters = [
+          `(contains(new_name, '${escaped}') or contains(new_nomedocliente, '${escaped}'))`,
+          // Não podemos buscar diretamente em lookups formatados, apenas no nome do orçamento
+        ];
+        filter += ` and (${searchFilters.join(' or ')})`;
+      }
+
       const data = await OrcamentoService.fetchAll({
-        filter: 'statecode eq 0',
+        filter,
         orderBy: ['createdon desc'],
         top: 100,
         select: [
@@ -141,18 +136,42 @@ export function OpenOrcamentoDialog({
       });
 
       setOrcamentos(mappedData);
-      setFilteredOrcamentos(mappedData);
     } catch (err) {
       console.error('[OpenOrcamentoDialog] erro ao carregar orçamentos:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar orçamentos');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Carregar orçamentos quando abrir
+  useEffect(() => {
+    if (open) {
+      loadOrcamentos();
+      setSearchText('');
+      setSelectedId(null);
+      setConsultorFilter('todos');
+    }
+  }, [open, loadOrcamentos]);
+
+  // Busca delegável ao Dataverse com debounce
+  useEffect(() => {
+    if (!open) return;
+
+    const timeoutId = setTimeout(() => {
+      loadOrcamentos(searchText);
+    }, 400); // Debounce de 400ms
+
+    return () => clearTimeout(timeoutId);
+  }, [searchText, open, loadOrcamentos]);
 
   const handleSelect = useCallback((orcamentoId: string) => {
     setSelectedId(orcamentoId);
   }, []);
+
+  const handleRefresh = useCallback(() => {
+    loadOrcamentos(searchText);
+  }, [loadOrcamentos, searchText]);
 
   const handleConfirm = () => {
     if (selectedId) {
@@ -173,6 +192,30 @@ export function OpenOrcamentoDialog({
       onClose();
     }
   };
+
+  // Obter lista de consultores únicos
+  const consultores = useMemo(() => {
+    const consultoresMap = new Map<string, string>();
+    orcamentos.forEach(orc => {
+      const consultorId = (orc as any)._new_consultor_value;
+      const consultorNome = orc.new_nomeconsultor || '-';
+      if (consultorId && !consultoresMap.has(consultorId)) {
+        consultoresMap.set(consultorId, consultorNome);
+      }
+    });
+    return Array.from(consultoresMap.entries()).map(([id, nome]) => ({ id, nome }));
+  }, [orcamentos]);
+
+  // Filtrar orçamentos por consultor selecionado
+  const orcamentosFiltrados = useMemo(() => {
+    if (consultorFilter === 'todos') {
+      return orcamentos;
+    }
+    return orcamentos.filter(orc => {
+      const consultorId = (orc as any)._new_consultor_value;
+      return consultorId === consultorFilter;
+    });
+  }, [orcamentos, consultorFilter]);
 
   const columns: TableColumnDefinition<Orcamento>[] = [
     createTableColumn<Orcamento>({
@@ -238,7 +281,23 @@ export function OpenOrcamentoDialog({
                 contentBefore={<Search24Regular />}
                 autoFocus
               />
-              <Button onClick={loadOrcamentos} disabled={isLoading}>
+              <Dropdown
+                className={styles.consultorFilter}
+                placeholder="Filtrar por consultor"
+                value={consultorFilter === 'todos' ? 'Todos' : consultores.find(c => c.id === consultorFilter)?.nome || 'Todos'}
+                selectedOptions={[consultorFilter]}
+                onOptionSelect={(_, data) => setConsultorFilter(data.optionValue || 'todos')}
+              >
+                <Option key="todos" value="todos">
+                  Todos
+                </Option>
+                {consultores.map(consultor => (
+                  <Option key={consultor.id} value={consultor.id}>
+                    {consultor.nome}
+                  </Option>
+                ))}
+              </Dropdown>
+              <Button onClick={handleRefresh} disabled={isLoading}>
                 Atualizar
               </Button>
             </div>
@@ -252,18 +311,18 @@ export function OpenOrcamentoDialog({
                 <div className={styles.emptyState}>
                   <span style={{ color: tokens.colorPaletteRedForeground1 }}>{error}</span>
                 </div>
-              ) : filteredOrcamentos.length === 0 ? (
+              ) : orcamentosFiltrados.length === 0 ? (
                 <div className={styles.emptyState}>
                   <div>
                     <div style={{ marginBottom: tokens.spacingVerticalS }}>
                       <span>Nenhum orçamento encontrado</span>
                     </div>
-                    {searchText && (
+                    {(searchText || consultorFilter !== 'todos') && (
                       <div style={{ fontSize: '12px' }}>
-                        Tente ajustar os termos de busca
+                        Tente ajustar os filtros de busca
                       </div>
                     )}
-                    {!searchText && orcamentos.length === 0 && (
+                    {!searchText && consultorFilter === 'todos' && (
                       <div style={{ fontSize: '12px' }}>
                         Não há orçamentos cadastrados no sistema
                       </div>
@@ -272,7 +331,7 @@ export function OpenOrcamentoDialog({
                 </div>
               ) : (
                 <DataGrid
-                  items={filteredOrcamentos}
+                  items={orcamentosFiltrados}
                   columns={columns}
                   getRowId={(item) => item.new_orcamentoid}
                   selectionMode="single"
