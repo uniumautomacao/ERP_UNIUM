@@ -56,6 +56,8 @@ export class OrcamentoService {
    * Buscar orçamento por ID com relacionamentos expandidos
    */
   public static async fetchOrcamentoById(orcamentoId: string): Promise<Orcamento | null> {
+    console.log('[OrcamentoService.fetchOrcamentoById] Buscando orçamento:', orcamentoId);
+
     const options: IGetOptions = {
       expand: [
         {
@@ -69,14 +71,30 @@ export class OrcamentoService {
       ],
     };
 
+    console.log('[OrcamentoService.fetchOrcamentoById] Options:', options);
+
     const result = await OrcamentoService.client.retrieveRecordAsync(
       OrcamentoService.dataSourceName,
       orcamentoId,
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as Orcamento;
+    console.log('[OrcamentoService.fetchOrcamentoById] Resultado:', {
+      isSuccess: result.isSuccess,
+      success: (result as any).success,
+      hasValue: !!result.value,
+      hasData: !!(result as any).data,
+      error: result.error,
+      value: result.value,
+      data: (result as any).data,
+    });
+
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = result.isSuccess ?? (result as any).success;
+    const value = result.value ?? (result as any).data;
+
+    if (success && value) {
+      return value as Orcamento;
     }
 
     return null;

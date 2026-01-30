@@ -98,12 +98,16 @@ export function OpenOrcamentoDialog({
     setIsLoading(true);
     setError(null);
     try {
+      console.log('[OpenOrcamentoDialog] Iniciando busca de orçamentos', { searchTerm });
+
       // Construir filtro base
       let filter = 'statecode eq 0';
 
       // Adicionar busca delegável com contains() se houver termo
       if (searchTerm?.trim()) {
         const escaped = escapeODataValue(searchTerm.trim());
+        console.log('[OpenOrcamentoDialog] Termo escapado:', escaped);
+
         const searchFilters = [];
 
         // Busca no nome do orçamento e nome do cliente
@@ -111,6 +115,7 @@ export function OpenOrcamentoDialog({
 
         // Buscar projetos que contenham o termo para incluir no filtro
         try {
+          console.log('[OpenOrcamentoDialog] Buscando projetos com termo:', escaped);
           const client = getClient(dataSourcesInfo);
           const projetosResult = await client.retrieveMultipleRecordsAsync(
             'cr22f_projetos',
@@ -121,9 +126,17 @@ export function OpenOrcamentoDialog({
             } as IGetAllOptions
           );
 
+          console.log('[OpenOrcamentoDialog] Resultado da busca de projetos:', {
+            success: projetosResult.success,
+            dataLength: projetosResult.data?.length || 0,
+            data: projetosResult.data,
+          });
+
           if (projetosResult.success && projetosResult.data && projetosResult.data.length > 0) {
             // Criar filtro com os IDs dos projetos encontrados
             const projetoIds = projetosResult.data.map((p: any) => p.cr22f_projetoid);
+            console.log('[OpenOrcamentoDialog] IDs de projetos encontrados:', projetoIds);
+
             const projetoFilters = projetoIds.map((id: string) => `_new_projeto_value eq '${id}'`);
             searchFilters.push(`(${projetoFilters.join(' or ')})`);
           }
@@ -134,6 +147,8 @@ export function OpenOrcamentoDialog({
 
         filter += ` and (${searchFilters.join(' or ')})`;
       }
+
+      console.log('[OpenOrcamentoDialog] Filtro OData final:', filter);
 
       const data = await OrcamentoService.fetchAll({
         filter,
@@ -150,11 +165,33 @@ export function OpenOrcamentoDialog({
         ],
       } as IGetAllOptions);
 
+      console.log('[OpenOrcamentoDialog] Orçamentos retornados:', {
+        count: data.length,
+        orcamentos: data.map(o => ({
+          id: o.new_orcamentoid,
+          name: o.new_name,
+          clienteId: (o as any)._new_cliente_value,
+          consultorId: (o as any)._new_consultor_value,
+          projetoId: (o as any)._new_projeto_value,
+        })),
+      });
+
       // Mapear o nome do cliente, consultor e projeto usando os lookups formatados
       const mappedData = data.map(orc => {
         const clienteFormatado = (orc as any)['_new_cliente_value@OData.Community.Display.V1.FormattedValue'];
         const consultorFormatado = (orc as any)['_new_consultor_value@OData.Community.Display.V1.FormattedValue'];
         const projetoFormatado = (orc as any)['_new_projeto_value@OData.Community.Display.V1.FormattedValue'];
+
+        console.log('[OpenOrcamentoDialog] Mapeando orçamento:', {
+          id: orc.new_orcamentoid,
+          name: orc.new_name,
+          clienteId: (orc as any)._new_cliente_value,
+          clienteFormatado,
+          consultorId: (orc as any)._new_consultor_value,
+          consultorFormatado,
+          projetoId: (orc as any)._new_projeto_value,
+          projetoFormatado,
+        });
 
         return {
           ...orc,
@@ -164,6 +201,7 @@ export function OpenOrcamentoDialog({
         };
       });
 
+      console.log('[OpenOrcamentoDialog] Dados mapeados completos:', mappedData);
       setOrcamentos(mappedData);
     } catch (err) {
       console.error('[OpenOrcamentoDialog] erro ao carregar orçamentos:', err);
@@ -176,10 +214,13 @@ export function OpenOrcamentoDialog({
   // Carregar orçamentos quando abrir
   useEffect(() => {
     if (open) {
+      console.log('[OpenOrcamentoDialog] Dialog aberto, carregando orçamentos');
       loadOrcamentos();
       setSearchText('');
       setSelectedId(null);
       setConsultorFilter('todos');
+    } else {
+      console.log('[OpenOrcamentoDialog] Dialog fechado');
     }
   }, [open, loadOrcamentos]);
 
@@ -195,21 +236,25 @@ export function OpenOrcamentoDialog({
   }, [searchText, open, loadOrcamentos]);
 
   const handleSelect = useCallback((orcamentoId: string) => {
+    console.log('[OpenOrcamentoDialog] Orçamento selecionado:', orcamentoId);
     setSelectedId(orcamentoId);
   }, []);
 
   const handleRefresh = useCallback(() => {
+    console.log('[OpenOrcamentoDialog] Atualizando lista de orçamentos');
     loadOrcamentos(searchText);
   }, [loadOrcamentos, searchText]);
 
   const handleConfirm = () => {
     if (selectedId) {
+      console.log('[OpenOrcamentoDialog] Confirmando abertura do orçamento:', selectedId);
       onSelectOrcamento(selectedId);
       onClose();
     }
   };
 
   const handleDoubleClick = (orcamentoId: string) => {
+    console.log('[OpenOrcamentoDialog] Duplo clique no orçamento:', orcamentoId);
     onSelectOrcamento(orcamentoId);
     onClose();
   };
@@ -238,12 +283,19 @@ export function OpenOrcamentoDialog({
   // Filtrar orçamentos por consultor selecionado
   const orcamentosFiltrados = useMemo(() => {
     if (consultorFilter === 'todos') {
+      console.log('[OpenOrcamentoDialog] Sem filtro de consultor, mostrando todos:', orcamentos.length);
       return orcamentos;
     }
-    return orcamentos.filter(orc => {
+    const filtered = orcamentos.filter(orc => {
       const consultorId = (orc as any)._new_consultor_value;
       return consultorId === consultorFilter;
     });
+    console.log('[OpenOrcamentoDialog] Filtrados por consultor:', {
+      consultorFilter,
+      totalOrcamentos: orcamentos.length,
+      orcamentosFiltrados: filtered.length,
+    });
+    return filtered;
   }, [orcamentos, consultorFilter]);
 
   const columns: TableColumnDefinition<Orcamento>[] = [

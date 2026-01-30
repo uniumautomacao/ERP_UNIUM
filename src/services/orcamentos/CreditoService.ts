@@ -22,7 +22,7 @@ export class CreditoService {
 
     const options: IGetAllOptions = {
       filter,
-      orderBy: 'new_dataexpiracao',
+      orderBy: ['new_dataexpiracao'],
       select: [
         'new_creditosdoclienteid',
         'new_name',
@@ -39,8 +39,12 @@ export class CreditoService {
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as CreditoCliente[];
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = result.isSuccess ?? (result as any).success;
+    const value = result.value ?? (result as any).data;
+
+    if (success && value) {
+      return value as CreditoCliente[];
     }
 
     return [];
@@ -69,8 +73,12 @@ export class CreditoService {
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as UtilizacaoCredito[];
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = result.isSuccess ?? (result as any).success;
+    const value = result.value ?? (result as any).data;
+
+    if (success && value) {
+      return value as UtilizacaoCredito[];
     }
 
     return [];

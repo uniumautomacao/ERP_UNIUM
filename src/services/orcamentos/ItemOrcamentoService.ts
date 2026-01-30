@@ -22,24 +22,46 @@ export class ItemOrcamentoService {
     orcamentoId: string,
     includeInactive: boolean = false
   ): Promise<ItemOrcamento[]> {
+    console.log('[ItemOrcamentoService.fetchItemsByOrcamento] Buscando itens do orçamento:', orcamentoId);
+
     const filter = includeInactive
       ? `_new_orcamento_value eq '${orcamentoId}'`
       : `_new_orcamento_value eq '${orcamentoId}' and statecode eq 0`;
 
     const options: IGetAllOptions = {
       filter,
-      orderBy: 'new_sectionorderindex,new_position',
+      orderBy: ['new_sectionorderindex', 'new_position'],
     };
+
+    console.log('[ItemOrcamentoService.fetchItemsByOrcamento] Filtro OData:', filter);
 
     const result = await ItemOrcamentoService.client.retrieveMultipleRecordsAsync(
       ItemOrcamentoService.dataSourceName,
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as ItemOrcamento[];
+    console.log('[ItemOrcamentoService.fetchItemsByOrcamento] Resultado:', {
+      isSuccess: result.isSuccess,
+      success: (result as any).success,
+      hasValue: !!result.value,
+      hasData: !!(result as any).data,
+      valueLength: result.value?.length,
+      dataLength: (result as any).data?.length,
+      error: result.error,
+      errorMessage: (result as any).error?.message,
+      fullResult: result,
+    });
+
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = result.isSuccess ?? (result as any).success;
+    const value = result.value ?? (result as any).data;
+
+    if (success && value) {
+      console.log('[ItemOrcamentoService.fetchItemsByOrcamento] Retornando', value.length, 'itens');
+      return value as ItemOrcamento[];
     }
 
+    console.log('[ItemOrcamentoService.fetchItemsByOrcamento] Nenhum item encontrado ou erro na query');
     return [];
   }
 
@@ -54,7 +76,7 @@ export class ItemOrcamentoService {
 
     const options: IGetAllOptions = {
       filter,
-      orderBy: 'new_position',
+      orderBy: ['new_position'],
     };
 
     const result = await ItemOrcamentoService.client.retrieveMultipleRecordsAsync(
@@ -62,8 +84,12 @@ export class ItemOrcamentoService {
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as ItemOrcamento[];
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = result.isSuccess ?? (result as any).success;
+    const value = result.value ?? (result as any).data;
+
+    if (success && value) {
+      return value as ItemOrcamento[];
     }
 
     return [];

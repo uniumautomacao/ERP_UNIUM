@@ -281,6 +281,69 @@ export const listSolutions = async () => {
   });
 };
 
+const toGuidLiteral = (value: string) => value;
+
+const getSolutionIdByUniqueName = async (solutionUniqueName: string) => {
+  const result = await dataverseRequest<{ value?: Array<{ solutionid?: string }> }>({
+    method: 'GET',
+    path: `solutions?$select=solutionid&$filter=uniquename eq '${solutionUniqueName}'`,
+  });
+  const solutionId = result?.value?.[0]?.solutionid;
+  if (!solutionId) {
+    throw new Error(`Solution '${solutionUniqueName}' nao encontrada no Dataverse.`);
+  }
+  return solutionId;
+};
+
+type SolutionComponent = {
+  solutioncomponentid?: string;
+  componenttype?: number;
+  objectid?: string;
+  solutionid?: string;
+};
+
+export const cleanupSolutionComponentsByObjectId = async (input: {
+  solutionUniqueName: string;
+  objectId: string;
+  componentType?: number;
+  dryRun?: boolean;
+}) => {
+  const solutionId = await getSolutionIdByUniqueName(input.solutionUniqueName);
+  const filters = [
+    `_solutionid_value eq ${toGuidLiteral(solutionId)}`,
+    `objectid eq ${toGuidLiteral(input.objectId)}`,
+  ];
+  if (typeof input.componentType === 'number') {
+    filters.push(`componenttype eq ${input.componentType}`);
+  }
+  const filter = filters.join(' and ');
+
+  const result = await dataverseRequest<{ value?: SolutionComponent[] }>({
+    method: 'GET',
+    path: `solutioncomponents?$select=solutioncomponentid,componenttype,objectid,solutionid&$filter=${filter}`,
+  });
+  const matches = result?.value ?? [];
+  const dryRun = input.dryRun !== false;
+
+  if (dryRun) {
+    return { dryRun, matches };
+  }
+
+  const deleted: string[] = [];
+  for (const component of matches) {
+    if (!component.solutioncomponentid) {
+      continue;
+    }
+    await dataverseRequest({
+      method: 'DELETE',
+      path: `solutioncomponents(${component.solutioncomponentid})`,
+    });
+    deleted.push(component.solutioncomponentid);
+  }
+
+  return { dryRun, matches, deleted };
+};
+
 const getEntityMetadataId = async (logicalName: string) => {
   const entity = await dataverseRequest<{ MetadataId?: string }>({
     method: 'GET',

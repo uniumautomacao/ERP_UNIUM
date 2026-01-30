@@ -21,7 +21,7 @@ export class PagamentoService {
 
     const options: IGetAllOptions = {
       filter,
-      orderBy: 'createdon',
+      orderBy: ['createdon'],
     };
 
     const result = await PagamentoService.client.retrieveMultipleRecordsAsync(
@@ -29,8 +29,12 @@ export class PagamentoService {
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as OpcaoPagamento[];
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = result.isSuccess ?? (result as any).success;
+    const value = result.value ?? (result as any).data;
+
+    if (success && value) {
+      return value as OpcaoPagamento[];
     }
 
     return [];
@@ -44,7 +48,7 @@ export class PagamentoService {
 
     const options: IGetAllOptions = {
       filter,
-      orderBy: 'new_numero',
+      orderBy: ['new_numero'],
     };
 
     const result = await PagamentoService.client.retrieveMultipleRecordsAsync(
@@ -52,8 +56,12 @@ export class PagamentoService {
       options
     );
 
-    if (result.isSuccess && result.value) {
-      return result.value as ParcelaPagamento[];
+    // A API pode retornar 'success' ou 'isSuccess' dependendo do método
+    const success = result.isSuccess ?? (result as any).success;
+    const value = result.value ?? (result as any).data;
+
+    if (success && value) {
+      return value as ParcelaPagamento[];
     }
 
     return [];

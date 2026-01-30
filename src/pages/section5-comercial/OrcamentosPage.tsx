@@ -244,6 +244,15 @@ export function OrcamentosPage() {
   // Determine what to show
   const hasOrcamento = orcamentoId && orcamento;
 
+  console.log('[OrcamentosPage] Estado de renderização:', {
+    orcamentoId,
+    hasOrcamento: !!orcamento,
+    orcamentoName: orcamento?.new_name,
+    isLoading,
+    error,
+    itemsCount: items.length,
+  });
+
   return (
     <PageContainer>
       <PageHeader

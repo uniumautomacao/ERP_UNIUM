@@ -8,6 +8,7 @@ import {
   createGlobalOptionSet,
   createTable,
   addEntityToSolution,
+  cleanupSolutionComponentsByObjectId,
   globalOptionSetExists,
   listEntities,
   listSolutions,
@@ -122,6 +123,26 @@ server.tool(
   async (input) => {
     await addEntityToSolution(input.logicalName, input.solutionUniqueName);
     return { content: [{ type: 'text', text: 'Entidade adicionada a solucao.' }] };
+  }
+);
+
+server.tool(
+  'dataverse_schema_cleanup_solution_components_by_objectid',
+  'Lista/remove componentes de solucao por objectId (ex.: AttributeId).',
+  {
+    solutionUniqueName: z.string().min(1),
+    objectId: z.string().min(1),
+    componentType: z.number().int().optional(),
+    dryRun: z.boolean().optional(),
+  },
+  async (input) => {
+    const result = await cleanupSolutionComponentsByObjectId({
+      solutionUniqueName: input.solutionUniqueName,
+      objectId: input.objectId,
+      componentType: input.componentType,
+      dryRun: input.dryRun,
+    });
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
 

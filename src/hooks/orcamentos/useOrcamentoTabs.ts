@@ -2,7 +2,7 @@
  * Hook para gerenciar as seções/abas do orçamento
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { OrcamentoSecao } from '../../features/orcamentos/types';
 import { ordenarSecoes, recalcularOrderIndex } from '../../features/orcamentos/utils';
 import { DEFAULTS, SECAO_ESPECIAL } from '../../features/orcamentos/constants';
@@ -12,6 +12,28 @@ export function useOrcamentoTabs(initialTabs: OrcamentoSecao[] = []) {
   const [selectedTab, setSelectedTab] = useState<string | null>(
     initialTabs.length > 0 ? initialTabs[0].name : null
   );
+
+  // Sync internal state with external data changes
+  useEffect(() => {
+    const sortedTabs = ordenarSecoes(initialTabs);
+    setTabs(sortedTabs);
+
+    // Update selected tab if needed
+    setSelectedTab((currentTab) => {
+      // If no tabs, clear selection
+      if (sortedTabs.length === 0) {
+        return null;
+      }
+
+      // If no tab selected, or current selection doesn't exist in new tabs, select first
+      if (!currentTab || !sortedTabs.some((tab) => tab.name === currentTab)) {
+        return sortedTabs[0].name;
+      }
+
+      // Keep current selection
+      return currentTab;
+    });
+  }, [initialTabs]);
 
   /**
    * Adiciona uma nova aba

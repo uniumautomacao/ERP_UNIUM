@@ -2,13 +2,18 @@
  * Hook para gerenciar os itens do orçamento
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ItemOrcamento } from '../../features/orcamentos/types';
 import { calcularValorTotalItem, calcularItemStatus } from '../../features/orcamentos/utils';
 
 export function useOrcamentoItems(initialItems: ItemOrcamento[] = []) {
   const [items, setItems] = useState<ItemOrcamento[]>(initialItems);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+
+  // Sync internal state with external data changes
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
 
   /**
    * Filtra itens por seção/aba
