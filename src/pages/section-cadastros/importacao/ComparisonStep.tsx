@@ -297,7 +297,7 @@ export function ComparisonStep({
             size="small"
             value={item.categoria}
             onChange={(e, data) => handleUpdateNovo(item.codigo, 'categoria', data.value)}
-            style={{ width: '100%' }}
+            style={{ width: '100%', maxWidth: '190px', boxSizing: 'border-box' }}
           />
         ),
       }),
@@ -309,7 +309,7 @@ export function ComparisonStep({
             size="small"
             value={item.horasAgregadas}
             onChange={(e, data) => handleUpdateNovo(item.codigo, 'horasAgregadas', data.value)}
-            style={{ width: '100%' }}
+            style={{ width: '100%', maxWidth: '110px', boxSizing: 'border-box' }}
           />
         ),
       }),
@@ -322,7 +322,7 @@ export function ComparisonStep({
             value={TIPOS_SISTEMA.find(t => t.value === item.tipoSistema)?.label || ''}
             selectedOptions={item.tipoSistema ? [String(item.tipoSistema)] : []}
             onOptionSelect={(e, data) => handleUpdateNovo(item.codigo, 'tipoSistema', Number(data.optionValue))}
-            style={{ width: '100%' }}
+            style={{ width: '100%', maxWidth: '210px', boxSizing: 'border-box' }}
           >
             {TIPOS_SISTEMA.map(tipo => (
               <Option key={tipo.value} value={String(tipo.value)}>
@@ -341,7 +341,7 @@ export function ComparisonStep({
             value={TIPOS_OS.find(t => t.value === item.tipodeOSPadrao)?.label || ''}
             selectedOptions={item.tipodeOSPadrao ? [String(item.tipodeOSPadrao)] : []}
             onOptionSelect={(e, data) => handleUpdateNovo(item.codigo, 'tipodeOSPadrao', Number(data.optionValue))}
-            style={{ width: '100%' }}
+            style={{ width: '100%', maxWidth: '270px', boxSizing: 'border-box' }}
           >
             {TIPOS_OS.map(tipo => (
               <Option key={tipo.value} value={String(tipo.value)}>
@@ -767,17 +767,17 @@ export function ComparisonStep({
                 <>
                   <style>{`
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(1),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(1) { width: 300px !important; min-width: 300px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(1) { width: 150px !important; min-width: 150px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(2),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(2) { width: 500px !important; min-width: 500px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(2) { width: 250px !important; min-width: 250px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(3),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(3) { width: 400px !important; min-width: 400px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(3) { width: 200px !important; min-width: 200px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(4),
                     .novos-produtos-table .fui-DataGridCell:nth-child(4) { width: 120px !important; min-width: 120px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(5),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(5) { width: 440px !important; min-width: 440px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(5) { width: 220px !important; min-width: 220px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(6),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(6) { width: 560px !important; min-width: 560px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(6) { width: 280px !important; min-width: 280px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(7),
                     .novos-produtos-table .fui-DataGridCell:nth-child(7) { width: 130px !important; min-width: 130px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(8),
@@ -796,7 +796,7 @@ export function ComparisonStep({
                     .novos-produtos-table .fui-DataGridCell:nth-child(14) { width: 90px !important; min-width: 90px !important; }
                   `}</style>
                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                    <div className="novos-produtos-table" style={{ minWidth: 3500 }}>
+                    <div className="novos-produtos-table" style={{ minWidth: 2350 }}>
                       <DataGrid
                         items={editableNovos}
                         columns={novosColumns}
