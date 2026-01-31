@@ -70,11 +70,13 @@ export function ExecutionStep({ comparisonResults, fabricanteId, onExecutionComp
             new_descricao: item.descricao,
             cr22f_querycategoria: item.categoria,
             new_tipodesistemapadrao: item.tipoSistema,
+            new_tipodeospadrao: item.tipoOS,
             new_controlasn: item.controlaSN,
             new_controlaetiqueta: item.controlaEtiqueta,
             new_requerconfiguracao: item.requerConfiguracao,
             new_requercabeamento: item.requerCabeamento,
             new_requerengraving: item.omitirGuia,
+            new_omitirdoguiadeconexoes: item.omitirGuiaConexoes,
             cr22f_horasagregadas: item.horasAgregadas,
             'new_Fabricante@odata.bind': `/cr22f_fabricantesfromsharpointlists(${fabricanteId})`,
           };
