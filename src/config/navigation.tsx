@@ -14,6 +14,7 @@ import {
   Board24Regular,
   QrCode24Regular,
   Edit24Regular,
+  DocumentTable24Regular,
 } from '@fluentui/react-icons';
 import { NavSection } from '../types';
 import { HomePage } from '../pages/HomePage';
@@ -24,6 +25,7 @@ import { CronogramaInstalacoesPage } from '../pages/section0-installations/Crono
 import { DispositivosIOPage } from '../pages/section-cadastros/DispositivosIOPage';
 import { CadastroRapidoProdutoPage } from '../pages/section-cadastros/CadastroRapidoProdutoPage';
 import { AjustesCadastroProdutosPage } from '../pages/section-cadastros/AjustesCadastroProdutosPage';
+import { ImportacaoTabelaPrecoPage } from '../pages/section-cadastros/ImportacaoTabelaPrecoPage';
 import { DashboardPage } from '../pages/section1-analytics/DashboardPage';
 import { AnalyticsPage } from '../pages/section1-analytics/AnalyticsPage';
 import { ReportsPage } from '../pages/section1-analytics/ReportsPage';
@@ -203,6 +205,13 @@ export const navigation: NavSection[] = [
         icon: <Edit24Regular />,
         path: '/cadastros/ajustes-produto',
         component: AjustesCadastroProdutosPage,
+      },
+      {
+        id: 'importacao-tabela-preco',
+        label: 'Importação de Tabela de Preços',
+        icon: <DocumentTable24Regular />,
+        path: '/cadastros/importacao-tabela-preco',
+        component: ImportacaoTabelaPrecoPage,
       },
     ],
   },
