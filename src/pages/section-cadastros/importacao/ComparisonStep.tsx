@@ -1,11 +1,42 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Card, Tab, TabList, Text, tokens } from '@fluentui/react-components';
+import { Badge, Button, Card, Tab, TabList, Text, tokens, Input, Checkbox, Dropdown, Option } from '@fluentui/react-components';
 import { LoadingState } from '../../../components/shared/LoadingState';
 import { EmptyState } from '../../../components/shared/EmptyState';
 import { DataGrid, createTableColumn } from '../../../components/shared/DataGrid';
-import { ParsedExcelData, ColumnMapping, ComparisonResults, ProductoNovo, ProductoExistente, ProductoDescontinuado } from './importacaoTypes';
+import { ParsedExcelData, ColumnMapping, ComparisonResults, ProductoNovo, ProductoExistente, ProductoDescontinuado, ProductoSemAlteracao } from './importacaoTypes';
 import { parseMonetaryValue, inferirValoresModelo, inferirValoresPreco } from './importacaoUtils';
 import { Cr22fModelosdeProdutoFromSharepointListService, NewPrecodeProdutoService } from '../../../generated';
+
+const TIPOS_SISTEMA = [
+  { value: 100000000, label: 'Automação' },
+  { value: 100000001, label: 'Áudio' },
+  { value: 100000002, label: 'Vídeo' },
+  { value: 100000003, label: 'Aspiração Central' },
+  { value: 100000004, label: 'Redes' },
+  { value: 100000005, label: 'CFTV' },
+  { value: 100000006, label: 'Acústica' },
+  { value: 100000007, label: 'Cabos' },
+  { value: 100000008, label: 'Controle de Acesso' },
+  { value: 100000009, label: 'Acabamentos Elétricos' },
+  { value: 100000010, label: 'Eletrodomésticos' },
+  { value: 100000011, label: 'Infraestrutura' },
+];
+
+const TIPOS_OS = [
+  { value: 100000000, label: 'Cabeamento' },
+  { value: 100000001, label: 'Instalação' },
+  { value: 100000002, label: 'Manutenção' },
+  { value: 100000003, label: 'Conferência de infraestrutura' },
+  { value: 100000004, label: 'Entrega' },
+  { value: 100000005, label: 'Desenho de PTI' },
+  { value: 100000006, label: 'Ajuste de PTI' },
+  { value: 100000007, label: 'Instalação placa de obra' },
+  { value: 100000008, label: 'Remoção de placa de obra' },
+  { value: 100000009, label: 'Montagem de Quadro' },
+  { value: 100000010, label: 'Serviço Interno' },
+  { value: 100000011, label: 'Lista de Conferência' },
+  { value: 100000012, label: 'Configuração' },
+];
 
 interface ComparisonStepProps {
   excelData: ParsedExcelData;
@@ -17,7 +48,7 @@ interface ComparisonStepProps {
   onComparisonComplete: (results: ComparisonResults) => void;
 }
 
-type TabValue = 'novos' | 'existentes' | 'descontinuados';
+type TabValue = 'novos' | 'existentes' | 'semAlteracao' | 'descontinuados';
 
 export function ComparisonStep({
   excelData,
@@ -31,6 +62,7 @@ export function ComparisonStep({
   const [selectedTab, setSelectedTab] = useState<TabValue>('novos');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ComparisonResults | null>(null);
+  const [editableNovos, setEditableNovos] = useState<ProductoNovo[]>([]);
 
   const compareData = useCallback(async () => {
     if (!columnMapping.codigoColumn || !columnMapping.precoBaseColumn || !fabricanteId) {
@@ -60,7 +92,7 @@ export function ComparisonStep({
       const modelosIds = Array.from(systemModels.values()).map((m: any) => m.cr22f_modelosdeprodutofromsharepointlistid);
       const precosResult = modelosIds.length > 0 ? await NewPrecodeProdutoService.getAll({
         filter: `statecode eq 0 and _new_modelodeproduto_value ne null`,
-        select: ['new_precodeprodutoid', 'new_precobase', '_new_modelodeproduto_value'],
+        select: ['new_precodeprodutoid', 'new_precobase', 'new_markup', 'new_descontopercentualdecompra', '_new_modelodeproduto_value'],
       }) : { success: true, data: [] };
 
       const pricesByModel = new Map<string, any[]>();
@@ -75,6 +107,7 @@ export function ComparisonStep({
       // 4. Categorizar produtos
       const toCreate: ProductoNovo[] = [];
       const toUpdate: ProductoExistente[] = [];
+      const unchanged: ProductoSemAlteracao[] = [];
       const excelCodigos = new Set<string>();
 
       excelData.rows.forEach((row) => {
@@ -109,21 +142,44 @@ export function ComparisonStep({
           const model = systemModels.get(codigo)!;
           const existingPrices = pricesByModel.get(model.cr22f_modelosdeprodutofromsharepointlistid) || [];
 
-          toUpdate.push({
-            codigo,
-            modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
-            descricao: model.new_descricao || '',
-            precoBase,
-            precoAtual: existingPrices[0]?.new_precobase || 0,
-            descricaoPreco: descricao,
-            fornecedorId: valoresPreco.fornecedorId?.[0] || '',
-            desconto,
-            markup,
-            requerInstalacao: valoresPreco.requerInstalacao?.[0] || false,
-            servicosIds: valoresPreco.servicosIds?.map(s => s.servicoId) || [],
-            existingPrices,
-            action: 'update',
-          });
+          // Verificar se houve mudança nos valores principais
+          const precoAtual = existingPrices[0]?.new_precobase || 0;
+          const markupAtual = existingPrices[0]?.new_markup || 0;
+          const descontoAtual = existingPrices[0]?.new_descontopercentualdecompra || 0;
+
+          // Comparar com tolerância de 0.01 para evitar problemas de precisão
+          const precoMudou = Math.abs(precoBase - precoAtual) > 0.01;
+          const markupMudou = Math.abs(markup - markupAtual) > 0.01;
+          const descontoMudou = Math.abs(desconto - descontoAtual) > 0.01;
+
+          if (precoMudou || markupMudou || descontoMudou) {
+            // Produto com alteração
+            toUpdate.push({
+              codigo,
+              modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
+              descricao: model.new_descricao || '',
+              precoBase,
+              precoAtual,
+              descricaoPreco: descricao,
+              fornecedorId: valoresPreco.fornecedorId?.[0] || '',
+              desconto,
+              markup,
+              requerInstalacao: valoresPreco.requerInstalacao?.[0] || false,
+              servicosIds: valoresPreco.servicosIds?.map(s => s.servicoId) || [],
+              existingPrices,
+              action: 'update',
+            });
+          } else {
+            // Produto sem alteração
+            unchanged.push({
+              codigo,
+              modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
+              descricao: model.new_descricao || '',
+              precoBase,
+              desconto,
+              markup,
+            });
+          }
         } else {
           // Produto novo
           toCreate.push({
@@ -132,6 +188,7 @@ export function ComparisonStep({
             precoBase,
             categoria: valoresModelo.categoria?.[0] || '',
             tipoSistema: valoresModelo.tipoSistema?.[0] || null,
+            tipodeOSPadrao: valoresModelo.tipodeOSPadrao?.[0] || null,
             controlaSN: valoresModelo.controlaSN?.[0] || false,
             controlaEtiqueta: valoresModelo.controlaEtiqueta?.[0] || false,
             requerConfiguracao: valoresModelo.requerConfiguracao?.[0] || false,
@@ -164,8 +221,9 @@ export function ComparisonStep({
         }
       });
 
-      const comparisonResults = { toCreate, toUpdate, toDeactivate };
+      const comparisonResults = { toCreate, toUpdate, unchanged, toDeactivate };
       setResults(comparisonResults);
+      setEditableNovos(toCreate);
       onComparisonComplete(comparisonResults);
     } catch (error) {
       console.error('Erro ao comparar dados:', error);
@@ -173,6 +231,44 @@ export function ComparisonStep({
       setLoading(false);
     }
   }, [excelData, columnMapping, fabricanteId, markupSource, defaultMarkup, defaultDesconto]);
+
+  // Handler para atualizar campos de produtos novos
+  const handleUpdateNovo = useCallback((codigo: string, field: keyof ProductoNovo, value: any) => {
+    setEditableNovos((prev) => {
+      const updated = prev.map((item) =>
+        item.codigo === codigo ? { ...item, [field]: value } : item
+      );
+      
+      // Atualizar também os resultados para refletir nas próximas etapas
+      if (results) {
+        const updatedResults = {
+          ...results,
+          toCreate: updated,
+        };
+        onComparisonComplete(updatedResults);
+      }
+      
+      return updated;
+    });
+  }, [results, onComparisonComplete]);
+
+  // Handler para aplicar valor a todos os produtos novos
+  const handleBulkUpdate = useCallback((field: keyof ProductoNovo, value: any) => {
+    setEditableNovos((prev) => {
+      const updated = prev.map((item) => ({ ...item, [field]: value }));
+      
+      // Atualizar também os resultados
+      if (results) {
+        const updatedResults = {
+          ...results,
+          toCreate: updated,
+        };
+        onComparisonComplete(updatedResults);
+      }
+      
+      return updated;
+    });
+  }, [results, onComparisonComplete]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
 
@@ -193,19 +289,131 @@ export function ComparisonStep({
         renderCell: (item) => item.descricao || '-',
       }),
       createTableColumn<ProductoNovo>({
+        columnId: 'categoria',
+        renderHeaderCell: () => 'Categoria',
+        renderCell: (item) => (
+          <Input
+            size="small"
+            value={item.categoria}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'categoria', data.value)}
+            style={{ width: '100%' }}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'horasAgregadas',
+        renderHeaderCell: () => 'Horas Agregadas',
+        renderCell: (item) => (
+          <Input
+            size="small"
+            value={item.horasAgregadas}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'horasAgregadas', data.value)}
+            style={{ width: '100%' }}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'tipoSistema',
+        renderHeaderCell: () => 'Tipo Sistema',
+        renderCell: (item) => (
+          <Dropdown
+            size="small"
+            value={TIPOS_SISTEMA.find(t => t.value === item.tipoSistema)?.label || ''}
+            selectedOptions={item.tipoSistema ? [String(item.tipoSistema)] : []}
+            onOptionSelect={(e, data) => handleUpdateNovo(item.codigo, 'tipoSistema', Number(data.optionValue))}
+            style={{ minWidth: 150 }}
+          >
+            {TIPOS_SISTEMA.map(tipo => (
+              <Option key={tipo.value} value={String(tipo.value)}>
+                {tipo.label}
+              </Option>
+            ))}
+          </Dropdown>
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'tipodeOSPadrao',
+        renderHeaderCell: () => 'Tipo OS',
+        renderCell: (item) => (
+          <Dropdown
+            size="small"
+            value={TIPOS_OS.find(t => t.value === item.tipodeOSPadrao)?.label || ''}
+            selectedOptions={item.tipodeOSPadrao ? [String(item.tipodeOSPadrao)] : []}
+            onOptionSelect={(e, data) => handleUpdateNovo(item.codigo, 'tipodeOSPadrao', Number(data.optionValue))}
+            style={{ minWidth: 150 }}
+          >
+            {TIPOS_OS.map(tipo => (
+              <Option key={tipo.value} value={String(tipo.value)}>
+                {tipo.label}
+              </Option>
+            ))}
+          </Dropdown>
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'controlaSN',
+        renderHeaderCell: () => 'Controla S/N',
+        renderCell: (item) => (
+          <Checkbox
+            checked={item.controlaSN}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'controlaSN', data.checked)}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'controlaEtiqueta',
+        renderHeaderCell: () => 'Controla Etiqueta',
+        renderCell: (item) => (
+          <Checkbox
+            checked={item.controlaEtiqueta}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'controlaEtiqueta', data.checked)}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'requerCabeamento',
+        renderHeaderCell: () => 'Requer Cabeamento',
+        renderCell: (item) => (
+          <Checkbox
+            checked={item.requerCabeamento}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerCabeamento', data.checked)}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'requerConfiguracao',
+        renderHeaderCell: () => 'Requer Config.',
+        renderCell: (item) => (
+          <Checkbox
+            checked={item.requerConfiguracao}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerConfiguracao', data.checked)}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'omitirGuia',
+        renderHeaderCell: () => 'Omitir Guia',
+        renderCell: (item) => (
+          <Checkbox
+            checked={item.omitirGuia}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'omitirGuia', data.checked)}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'requerInstalacao',
+        renderHeaderCell: () => 'Requer Instalação',
+        renderCell: (item) => (
+          <Checkbox
+            checked={item.requerInstalacao}
+            onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerInstalacao', data.checked)}
+          />
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
         columnId: 'preco',
         renderHeaderCell: () => 'Preço Base',
         renderCell: (item) => `R$ ${item.precoBase.toFixed(2)}`,
-      }),
-      createTableColumn<ProductoNovo>({
-        columnId: 'desconto',
-        renderHeaderCell: () => 'Desconto',
-        renderCell: (item) => `${item.desconto.toFixed(2)}%`,
-      }),
-      createTableColumn<ProductoNovo>({
-        columnId: 'markup',
-        renderHeaderCell: () => 'Markup',
-        renderCell: (item) => `${item.markup.toFixed(2)}x`,
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'status',
@@ -213,7 +421,7 @@ export function ComparisonStep({
         renderCell: () => <Badge appearance="tint" color="success">Novo</Badge>,
       }),
     ],
-    []
+    [handleUpdateNovo]
   );
 
   const existentesColumns = useMemo(
@@ -252,6 +460,42 @@ export function ComparisonStep({
         columnId: 'status',
         renderHeaderCell: () => 'Status',
         renderCell: () => <Badge appearance="tint" color="informative">Atualizar</Badge>,
+      }),
+    ],
+    []
+  );
+
+  const semAlteracaoColumns = useMemo(
+    () => [
+      createTableColumn<ProductoSemAlteracao>({
+        columnId: 'codigo',
+        renderHeaderCell: () => 'Código',
+        renderCell: (item) => item.codigo,
+      }),
+      createTableColumn<ProductoSemAlteracao>({
+        columnId: 'descricao',
+        renderHeaderCell: () => 'Descrição',
+        renderCell: (item) => item.descricao || '-',
+      }),
+      createTableColumn<ProductoSemAlteracao>({
+        columnId: 'precoBase',
+        renderHeaderCell: () => 'Preço Base',
+        renderCell: (item) => `R$ ${item.precoBase.toFixed(2)}`,
+      }),
+      createTableColumn<ProductoSemAlteracao>({
+        columnId: 'desconto',
+        renderHeaderCell: () => 'Desconto',
+        renderCell: (item) => `${item.desconto.toFixed(2)}%`,
+      }),
+      createTableColumn<ProductoSemAlteracao>({
+        columnId: 'markup',
+        renderHeaderCell: () => 'Markup',
+        renderCell: (item) => `${item.markup.toFixed(2)}x`,
+      }),
+      createTableColumn<ProductoSemAlteracao>({
+        columnId: 'status',
+        renderHeaderCell: () => 'Status',
+        renderCell: () => <Badge appearance="tint" color="subtle">Sem Alteração</Badge>,
       }),
     ],
     []
@@ -366,6 +610,9 @@ export function ComparisonStep({
             <Tab value="existentes">
               Atualizar Preços ({results.toUpdate.length})
             </Tab>
+            <Tab value="semAlteracao">
+              Sem Alteração ({results.unchanged.length})
+            </Tab>
             <Tab value="descontinuados">
               Descontinuados ({results.toDeactivate.length})
             </Tab>
@@ -376,11 +623,136 @@ export function ComparisonStep({
           {selectedTab === 'novos' && (
             <>
               <Text size={400} weight="semibold" block style={{ marginBottom: 12 }}>
-                Produtos que não existem no sistema
+                Produtos que não existem no sistema - Preencha os campos obrigatórios
               </Text>
-              {results.toCreate.length > 0 ? (
+              
+              {editableNovos.length > 0 && (
+                <Card style={{ padding: 12, marginBottom: 12, backgroundColor: tokens.colorNeutralBackground2 }}>
+                  <Text size={300} weight="semibold" block style={{ marginBottom: 8 }}>
+                    Aplicar valor a todos os produtos:
+                  </Text>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('controlaSN', true)}
+                    >
+                      Controla S/N: Sim
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('controlaSN', false)}
+                    >
+                      Controla S/N: Não
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('controlaEtiqueta', true)}
+                    >
+                      Controla Etiqueta: Sim
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('controlaEtiqueta', false)}
+                    >
+                      Controla Etiqueta: Não
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('requerCabeamento', true)}
+                    >
+                      Requer Cabeamento: Sim
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('requerCabeamento', false)}
+                    >
+                      Requer Cabeamento: Não
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('requerConfiguracao', true)}
+                    >
+                      Requer Config.: Sim
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('requerConfiguracao', false)}
+                    >
+                      Requer Config.: Não
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('omitirGuia', true)}
+                    >
+                      Omitir Guia: Sim
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('omitirGuia', false)}
+                    >
+                      Omitir Guia: Não
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('requerInstalacao', true)}
+                    >
+                      Requer Instalação: Sim
+                    </Button>
+                    <Button
+                      size="small"
+                      appearance="secondary"
+                      onClick={() => handleBulkUpdate('requerInstalacao', false)}
+                    >
+                      Requer Instalação: Não
+                    </Button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Text size={200}>Tipo Sistema:</Text>
+                      <Dropdown
+                        size="small"
+                        placeholder="Aplicar a todos"
+                        onOptionSelect={(e, data) => handleBulkUpdate('tipoSistema', Number(data.optionValue))}
+                        style={{ minWidth: 150 }}
+                      >
+                        {TIPOS_SISTEMA.map(tipo => (
+                          <Option key={tipo.value} value={String(tipo.value)}>
+                            {tipo.label}
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Text size={200}>Tipo OS:</Text>
+                      <Dropdown
+                        size="small"
+                        placeholder="Aplicar a todos"
+                        onOptionSelect={(e, data) => handleBulkUpdate('tipodeOSPadrao', Number(data.optionValue))}
+                        style={{ minWidth: 150 }}
+                      >
+                        {TIPOS_OS.map(tipo => (
+                          <Option key={tipo.value} value={String(tipo.value)}>
+                            {tipo.label}
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {editableNovos.length > 0 ? (
                 <DataGrid
-                  items={results.toCreate}
+                  items={editableNovos}
                   columns={novosColumns}
                   getRowId={(item: ProductoNovo, index?: number) => `novo-${item.codigo}-${index ?? 0}`}
                 />
@@ -408,6 +780,26 @@ export function ComparisonStep({
                 <EmptyState
                   title="Nenhum produto para atualizar"
                   description="Nenhum produto existente foi encontrado."
+                />
+              )}
+            </>
+          )}
+
+          {selectedTab === 'semAlteracao' && (
+            <>
+              <Text size={400} weight="semibold" block style={{ marginBottom: 12 }}>
+                Produtos sem alteração de preço, markup ou desconto
+              </Text>
+              {results.unchanged.length > 0 ? (
+                <DataGrid
+                  items={results.unchanged}
+                  columns={semAlteracaoColumns}
+                  getRowId={(item: ProductoSemAlteracao, index?: number) => `sem-alteracao-${item.codigo}-${index ?? 0}`}
+                />
+              ) : (
+                <EmptyState
+                  title="Nenhum produto sem alteração"
+                  description="Todos os produtos existentes têm alterações de preço, markup ou desconto."
                 />
               )}
             </>

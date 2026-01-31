@@ -70,11 +70,13 @@ export function ExecutionStep({ comparisonResults, fabricanteId, onExecutionComp
             new_descricao: item.descricao,
             cr22f_querycategoria: item.categoria,
             new_tipodesistemapadrao: item.tipoSistema,
+            new_tipodeospadrao: item.tipodeOSPadrao,
             new_controlasn: item.controlaSN,
             new_controlaetiqueta: item.controlaEtiqueta,
             new_requerconfiguracao: item.requerConfiguracao,
             new_requercabeamento: item.requerCabeamento,
             new_requerengraving: item.omitirGuia,
+            new_omitirdoguiadeconexoes: item.omitirGuia,
             cr22f_horasagregadas: item.horasAgregadas,
             'new_Fabricante@odata.bind': `/cr22f_fabricantesfromsharpointlists(${fabricanteId})`,
           };
@@ -229,6 +231,7 @@ export function ExecutionStep({ comparisonResults, fabricanteId, onExecutionComp
   const summary = {
     toCreate: comparisonResults.toCreate.filter((i) => i.action === 'create').length,
     toUpdate: comparisonResults.toUpdate.filter((i) => i.action === 'update').length,
+    unchanged: comparisonResults.unchanged.length,
     toDeactivate: comparisonResults.toDeactivate.filter((i) => i.action === 'deactivate').length,
   };
 
@@ -241,7 +244,7 @@ export function ExecutionStep({ comparisonResults, fabricanteId, onExecutionComp
           Resumo da Importação
         </Text>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="p-4 bg-green-50 rounded-lg">
             <Text size={600} weight="bold" block>
               {summary.toCreate}
@@ -253,6 +256,12 @@ export function ExecutionStep({ comparisonResults, fabricanteId, onExecutionComp
               {summary.toUpdate}
             </Text>
             <Text size={300}>Atualizar</Text>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <Text size={600} weight="bold" block>
+              {summary.unchanged}
+            </Text>
+            <Text size={300}>Sem Alteração</Text>
           </div>
           <div className="p-4 bg-orange-50 rounded-lg">
             <Text size={600} weight="bold" block>
