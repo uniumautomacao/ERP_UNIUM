@@ -12,6 +12,7 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { UploadStep } from './importacao/UploadStep';
 import { MappingStep } from './importacao/MappingStep';
 import { ComparisonStep } from './importacao/ComparisonStep';
+import { ReportStep } from './importacao/ReportStep';
 import { ExecutionStep } from './importacao/ExecutionStep';
 import { ImportacaoState, WizardStep, ParsedExcelData, ColumnMapping, ComparisonResults, ExecutionResults } from './importacao/importacaoTypes';
 
@@ -82,6 +83,8 @@ export function ImportacaoTabelaPrecoPage() {
       case 3:
         return state.comparisonResults !== null;
       case 4:
+        return state.comparisonResults !== null;
+      case 5:
         return false; // No next from execution step
       default:
         return false;
@@ -89,7 +92,7 @@ export function ImportacaoTabelaPrecoPage() {
   }, [state]);
 
   const handleNext = () => {
-    if (canGoNext && state.currentStep < 4) {
+    if (canGoNext && state.currentStep < 5) {
       setState((prev) => ({ ...prev, currentStep: (prev.currentStep + 1) as WizardStep }));
     }
   };
@@ -104,7 +107,8 @@ export function ImportacaoTabelaPrecoPage() {
     1: 'Upload de Arquivo',
     2: 'Mapeamento de Colunas',
     3: 'Comparação e Revisão',
-    4: 'Execução',
+    4: 'Relatório de Análise',
+    5: 'Execução',
   };
 
   const primaryActions = useMemo(
@@ -130,7 +134,7 @@ export function ImportacaoTabelaPrecoPage() {
         {/* Progress Indicator */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            {[1, 2, 3, 4].map((step) => (
+            {[1, 2, 3, 4, 5].map((step) => (
               <div key={step} className="flex-1 flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
@@ -144,7 +148,7 @@ export function ImportacaoTabelaPrecoPage() {
                   {step}
                 </div>
                 <div className="flex-1">
-                  {step < 4 && (
+                  {step < 5 && (
                     <div
                       className={`h-1 ${
                         step < state.currentStep ? 'bg-green-600' : 'bg-gray-300'
@@ -195,6 +199,13 @@ export function ImportacaoTabelaPrecoPage() {
         )}
 
         {state.currentStep === 4 && state.comparisonResults && (
+          <ReportStep
+            comparisonResults={state.comparisonResults}
+            fabricanteLabel={state.fabricanteLabel}
+          />
+        )}
+
+        {state.currentStep === 5 && state.comparisonResults && (
           <ExecutionStep
             comparisonResults={state.comparisonResults}
             fabricanteId={state.fabricanteId}
@@ -212,7 +223,7 @@ export function ImportacaoTabelaPrecoPage() {
           >
             Voltar
           </Button>
-          {state.currentStep < 4 && (
+          {state.currentStep < 5 && (
             <Button
               appearance="primary"
               icon={<ArrowRight24Regular />}
@@ -223,7 +234,7 @@ export function ImportacaoTabelaPrecoPage() {
               Próximo
             </Button>
           )}
-          {state.currentStep === 4 && state.executionResults && (
+          {state.currentStep === 5 && state.executionResults && (
             <Button
               appearance="primary"
               icon={<DocumentTable24Regular />}

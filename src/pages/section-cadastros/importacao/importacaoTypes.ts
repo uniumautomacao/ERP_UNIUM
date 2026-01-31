@@ -118,6 +118,28 @@ export interface ComparisonResults {
   toDeactivate: ProductoDescontinuado[];
 }
 
+export interface ReportInsights {
+  variacaoMedia: number;
+  ticketMedioAntes: number;
+  ticketMedioDepois: number;
+  variacaoTicketMedio: number;
+  variacaoMin: number;
+  variacaoMax: number;
+  totalAumentos: number;
+  totalReducoes: number;
+  impactoTotalValor: number;
+  taxaRenovacao: number;
+  taxaDescontinuacao: number;
+  taxaEstabilidade: number;
+  alertasExtremos: Array<{
+    codigo: string;
+    descricao: string;
+    precoAtual: number;
+    precoNovo: number;
+    variacaoPercentual: number;
+  }>;
+}
+
 export interface ExecutionResults {
   created: number;
   updated: number;
@@ -141,7 +163,7 @@ export interface ImportacaoState {
   markupSugeridoColumn: string | null;
 }
 
-export type WizardStep = 1 | 2 | 3 | 4;
+export type WizardStep = 1 | 2 | 3 | 4 | 5;
 
 export interface MonetaryColumn {
   columnName: string;
