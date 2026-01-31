@@ -4,7 +4,7 @@ import { LoadingState } from '../../../components/shared/LoadingState';
 import { EmptyState } from '../../../components/shared/EmptyState';
 import { DataGrid, createTableColumn } from '../../../components/shared/DataGrid';
 import { ParsedExcelData, ColumnMapping, ComparisonResults, ProductoNovo, ProductoExistente, ProductoDescontinuado, ProductoSemAlteracao } from './importacaoTypes';
-import { parseMonetaryValue, inferirValoresModelo, inferirValoresPreco } from './importacaoUtils';
+import { parseMonetaryValue, inferirValoresModelo, inferirValoresPreco, detectarVoltagem, Voltagem } from './importacaoUtils';
 import { Cr22fModelosdeProdutoFromSharepointListService, NewPrecodeProdutoService, Cr22fFornecedoresFromSharepointListService } from '../../../generated';
 
 const TIPOS_SISTEMA = [
@@ -38,6 +38,13 @@ const TIPOS_OS = [
   { value: 100000012, label: 'Configuração' },
 ];
 
+const VOLTAGEM_OPTIONS: Array<{ value: Voltagem; label: string }> = [
+  { value: 'todos', label: 'Todos' },
+  { value: '127v', label: '127V / 110V' },
+  { value: '220v', label: '220V' },
+  { value: 'bivolt', label: 'Bivolt' },
+];
+
 interface ComparisonStepProps {
   excelData: ParsedExcelData;
   columnMapping: ColumnMapping;
@@ -60,10 +67,12 @@ export function ComparisonStep({
   onComparisonComplete,
 }: ComparisonStepProps) {
   const [selectedTab, setSelectedTab] = useState<TabValue>('novos');
+  const [filtroVoltagem, setFiltroVoltagem] = useState<Voltagem>('todos');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ComparisonResults | null>(null);
   const [editableNovos, setEditableNovos] = useState<ProductoNovo[]>([]);
   const [fornecedores, setFornecedores] = useState<Array<{ id: string; label: string }>>([]);
+  const voltagemLabel = VOLTAGEM_OPTIONS.find((opt) => opt.value === filtroVoltagem)?.label ?? '';
 
   const compareData = useCallback(async () => {
     if (!columnMapping.codigoColumn || !columnMapping.precoBaseColumn || !fabricanteId) {
@@ -647,6 +656,37 @@ export function ComparisonStep({
     [handleToggleDescontinuar]
   );
 
+  const filtrarPorVoltagem = useCallback(
+    (codigo: string, descricao: string) => {
+      if (filtroVoltagem === 'todos') return true;
+      return detectarVoltagem(codigo, descricao) === filtroVoltagem;
+    },
+    [filtroVoltagem]
+  );
+
+  const novosFiltrados = useMemo(
+    () => editableNovos.filter((item) => filtrarPorVoltagem(item.codigo, item.descricao)),
+    [editableNovos, filtrarPorVoltagem]
+  );
+
+  const existentesFiltrados = useMemo(
+    () =>
+      (results?.toUpdate ?? []).filter((item) => filtrarPorVoltagem(item.codigo, item.descricao)),
+    [results, filtrarPorVoltagem]
+  );
+
+  const semAlteracaoFiltrados = useMemo(
+    () =>
+      (results?.unchanged ?? []).filter((item) => filtrarPorVoltagem(item.codigo, item.descricao)),
+    [results, filtrarPorVoltagem]
+  );
+
+  const descontinuadosFiltrados = useMemo(
+    () =>
+      (results?.toDeactivate ?? []).filter((item) => filtrarPorVoltagem(item.codigo, item.descricao)),
+    [results, filtrarPorVoltagem]
+  );
+
   if (loading) {
     return <LoadingState label="Comparando dados com o sistema..." />;
   }
@@ -658,24 +698,37 @@ export function ComparisonStep({
   return (
     <div className="grid grid-cols-1 gap-6">
       <Card style={{ padding: 20 }}>
-        <div className="mb-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <TabList
             selectedValue={selectedTab}
             onTabSelect={(_, data) => setSelectedTab(data.value as TabValue)}
           >
             <Tab value="novos">
-              Produtos Novos ({results.toCreate.length})
+              Produtos Novos ({novosFiltrados.length})
             </Tab>
             <Tab value="existentes">
-              Atualizar Preços ({results.toUpdate.length})
+              Atualizar Preços ({existentesFiltrados.length})
             </Tab>
             <Tab value="semAlteracao">
-              Sem Alteração ({results.unchanged.length})
+              Sem Alteração ({semAlteracaoFiltrados.length})
             </Tab>
             <Tab value="descontinuados">
-              Descontinuados ({results.toDeactivate.length})
+              Descontinuados ({descontinuadosFiltrados.length})
             </Tab>
           </TabList>
+          <Dropdown
+            size="small"
+            placeholder="Filtrar por Voltagem"
+            value={voltagemLabel}
+            selectedOptions={[filtroVoltagem]}
+            onOptionSelect={(_, data) => setFiltroVoltagem(data.optionValue as Voltagem)}
+          >
+            {VOLTAGEM_OPTIONS.map((option) => (
+              <Option key={option.value} value={option.value}>
+                {option.label}
+              </Option>
+            ))}
+          </Dropdown>
         </div>
 
         <div className="mt-6">
@@ -685,7 +738,7 @@ export function ComparisonStep({
                 Produtos que não existem no sistema - Preencha os campos obrigatórios
               </Text>
               
-              {editableNovos.length > 0 && (
+              {novosFiltrados.length > 0 && (
                 <Card style={{ padding: 12, marginBottom: 12, backgroundColor: tokens.colorNeutralBackground2 }}>
                   <Text size={300} weight="semibold" block style={{ marginBottom: 8 }}>
                     Aplicar valor a todos os produtos:
@@ -824,7 +877,7 @@ export function ComparisonStep({
                 </Card>
               )}
 
-              {editableNovos.length > 0 ? (
+              {novosFiltrados.length > 0 ? (
                 <>
                   <style>{`
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(1),
@@ -866,7 +919,7 @@ export function ComparisonStep({
                   <div style={{ overflowX: 'auto', width: '100%' }}>
                     <div className="novos-produtos-table" style={{ minWidth: 2550 }}>
                       <DataGrid
-                        items={editableNovos}
+                        items={novosFiltrados}
                         columns={novosColumns}
                         getRowId={(item: ProductoNovo, index?: number) => `novo-${item.codigo}-${index ?? 0}`}
                       />
@@ -887,9 +940,9 @@ export function ComparisonStep({
               <Text size={400} weight="semibold" block style={{ marginBottom: 12 }}>
                 Produtos que serão atualizados
               </Text>
-              {results.toUpdate.length > 0 ? (
+              {existentesFiltrados.length > 0 ? (
                 <DataGrid
-                  items={results.toUpdate}
+                  items={existentesFiltrados}
                   columns={existentesColumns}
                   getRowId={(item: ProductoExistente, index?: number) => `existente-${item.codigo}-${index ?? 0}`}
                 />
@@ -907,9 +960,9 @@ export function ComparisonStep({
               <Text size={400} weight="semibold" block style={{ marginBottom: 12 }}>
                 Produtos sem alteração de preço, markup ou desconto
               </Text>
-              {results.unchanged.length > 0 ? (
+              {semAlteracaoFiltrados.length > 0 ? (
                 <DataGrid
-                  items={results.unchanged}
+                  items={semAlteracaoFiltrados}
                   columns={semAlteracaoColumns}
                   getRowId={(item: ProductoSemAlteracao, index?: number) => `sem-alteracao-${item.codigo}-${index ?? 0}`}
                 />
@@ -947,9 +1000,9 @@ export function ComparisonStep({
                   </div>
                 )}
               </div>
-              {results.toDeactivate.length > 0 ? (
+              {descontinuadosFiltrados.length > 0 ? (
                 <DataGrid
-                  items={results.toDeactivate}
+                  items={descontinuadosFiltrados}
                   columns={descontinuadosColumns}
                   getRowId={(item: ProductoDescontinuado, index?: number) => `descontinuado-${item.codigo}-${index ?? 0}`}
                 />

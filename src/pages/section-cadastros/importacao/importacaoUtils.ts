@@ -57,6 +57,37 @@ export const parseMonetaryValue = (value: any): number | null => {
   return !isNaN(parsed) && parsed >= 0 ? parsed : null;
 };
 
+export type Voltagem = 'todos' | '127v' | '220v' | 'bivolt';
+
+/**
+ * Detecta voltagem em texto livre (codigo/descricao).
+ * Aceita formatos como: 127V, 110V, 220V, bivolt, bi-volt, bv, 127/220.
+ */
+export const detectarVoltagem = (codigo: string, descricao: string): Voltagem | null => {
+  const texto = `${codigo} ${descricao}`.toLowerCase();
+
+  if (/bivolt|bi[\s-]?volt|\bbv\b/.test(texto)) {
+    return 'bivolt';
+  }
+
+  const tem127ou110 = /\b(127|110)\s*(v|vac|volts)?\b/.test(texto);
+  const tem220 = /\b220\s*(v|vac|volts)?\b/.test(texto);
+
+  if (tem127ou110 && tem220) {
+    return 'bivolt';
+  }
+
+  if (tem127ou110) {
+    return '127v';
+  }
+
+  if (tem220) {
+    return '220v';
+  }
+
+  return null;
+};
+
 /**
  * Detecta a linha de cabeçalho no Excel
  * Procura por keywords específicas em até 200 linhas
