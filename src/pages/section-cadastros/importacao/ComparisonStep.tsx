@@ -209,16 +209,22 @@ export function ComparisonStep({
         }
       });
 
-      // 5. Produtos descontinuados
+      // 5. Produtos descontinuados (apenas ativos que não estão no Excel)
       const toDeactivate: ProductoDescontinuado[] = [];
       systemModels.forEach((model, codigo) => {
         if (!excelCodigos.has(codigo)) {
-          toDeactivate.push({
-            codigo,
-            modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
-            descricao: model.new_descricao || '',
-            action: 'deactivate', // Default: marcar para descontinuar
-          });
+          // Verificar se o modelo tem pelo menos um preço ativo
+          const precosAtivos = pricesByModel.get(model.cr22f_modelosdeprodutofromsharepointlistid) || [];
+          
+          // Só adicionar à lista se houver preços ativos
+          if (precosAtivos.length > 0) {
+            toDeactivate.push({
+              codigo,
+              modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
+              descricao: model.new_descricao || '',
+              action: 'deactivate', // Default: marcar para descontinuar
+            });
+          }
         }
       });
 

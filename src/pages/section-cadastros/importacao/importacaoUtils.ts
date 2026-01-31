@@ -13,6 +13,7 @@ import {
   Cr22fModelosdeProdutoFromSharepointListService,
   NewPrecodeProdutoService,
   NewTiposervicoprecodeprodutoService,
+  Cr22fFabricantesFromSharpointListService,
 } from '../../../generated';
 
 /**
@@ -284,14 +285,27 @@ export const inferirValoresModelo = async (fabricanteId: string): Promise<Partia
  * Infere valores para preço de produto baseado em preços do fabricante
  */
 export const inferirValoresPreco = async (fabricanteId: string): Promise<Partial<ValoresInferidos>> => {
-  // Primeiro, buscar IDs dos modelos do fabricante
+  // Primeiro, buscar o fornecedor principal do fabricante como fallback
+  let fornecedorPrincipalId: string | undefined;
+  
+  const fabricanteResult = await Cr22fFabricantesFromSharpointListService.getAll({
+    filter: `cr22f_fabricantesfromsharpointlistid eq '${fabricanteId}'`,
+    select: ['_new_fornecedorprincipal_value'],
+  });
+  
+  if (fabricanteResult.success && fabricanteResult.data && fabricanteResult.data.length > 0) {
+    fornecedorPrincipalId = (fabricanteResult.data[0] as any)._new_fornecedorprincipal_value;
+  }
+
+  // Buscar IDs dos modelos do fabricante
   const modelosResult = await Cr22fModelosdeProdutoFromSharepointListService.getAll({
     filter: `statecode eq 0 and _new_fabricante_value eq '${fabricanteId}'`,
     select: ['cr22f_modelosdeprodutofromsharepointlistid'],
   });
 
   if (!modelosResult.success || !modelosResult.data || modelosResult.data.length === 0) {
-    return {};
+    // Retornar apenas o fornecedor principal se não houver modelos
+    return fornecedorPrincipalId ? { fornecedorId: [fornecedorPrincipalId] } : {};
   }
 
   const modelosIds = modelosResult.data.map((m: any) => m.cr22f_modelosdeprodutofromsharepointlistid);
@@ -310,7 +324,7 @@ export const inferirValoresPreco = async (fabricanteId: string): Promise<Partial
   });
 
   if (!precosResult.success || !precosResult.data) {
-    return {};
+    return fornecedorPrincipalId ? { fornecedorId: [fornecedorPrincipalId] } : {};
   }
 
   // Filtrar apenas preços de modelos do fabricante
@@ -319,7 +333,7 @@ export const inferirValoresPreco = async (fabricanteId: string): Promise<Partial
   );
 
   if (precosFabricante.length === 0) {
-    return {};
+    return fornecedorPrincipalId ? { fornecedorId: [fornecedorPrincipalId] } : {};
   }
 
   const calcularModaCampo = (campo: string) => {
@@ -331,8 +345,12 @@ export const inferirValoresPreco = async (fabricanteId: string): Promise<Partial
   const precosIds = precosFabricante.map((p: any) => p.new_precodeprodutoid);
   const servicosMaisComuns = await buscarServicosMaisComuns(precosIds);
 
+  // Calcular fornecedor inferido dos preços, com fallback para fornecedor principal
+  const fornecedorInferido = calcularModaCampo('_new_fornecedor_value');
+  const fornecedorFinal = fornecedorInferido.length > 0 ? fornecedorInferido : (fornecedorPrincipalId ? [fornecedorPrincipalId] : []);
+
   return {
-    fornecedorId: calcularModaCampo('_new_fornecedor_value'),
+    fornecedorId: fornecedorFinal,
     desconto: calcularModaCampo('new_descontopercentualdecompra'),
     markup: calcularModaCampo('new_markup'),
     requerInstalacao: calcularModaCampo('new_requerinstalacao'),
