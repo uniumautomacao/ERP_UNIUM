@@ -30,6 +30,9 @@ const formatPercent = (value: number) => `${value.toFixed(2)}%`;
 
 const formatPercentSigned = (value: number) => `${value >= 0 ? '+' : ''}${formatPercent(value)}`;
 
+const calcularValorVenda = (precoBase: number, descontoPercentual: number, markup: number) =>
+  precoBase * descontoPercentual * markup;
+
 export function ReportStep({ comparisonResults, fabricanteLabel }: ReportStepProps) {
   const updates = useMemo(
     () => comparisonResults.toUpdate.filter((item) => item.action === 'update'),
@@ -52,17 +55,22 @@ export function ReportStep({ comparisonResults, fabricanteLabel }: ReportStepPro
 
   const ticketMedioAntes = useMemo(() => {
     const valores = [
-      ...updates.map((item) => item.precoAtual),
-      ...unchanged.map((item) => item.precoBase),
+      ...updates.map((item) => {
+        const precoAtual = item.precoAtual;
+        const descontoAtual = item.existingPrices?.[0]?.new_descontopercentualdecompra ?? item.desconto;
+        const markupAtual = item.existingPrices?.[0]?.new_markup ?? item.markup;
+        return calcularValorVenda(precoAtual, descontoAtual, markupAtual);
+      }),
+      ...unchanged.map((item) => calcularValorVenda(item.precoBase, item.desconto, item.markup)),
     ];
     return calcularTicketMedio(valores);
   }, [updates, unchanged]);
 
   const ticketMedioDepois = useMemo(() => {
     const valores = [
-      ...updates.map((item) => item.precoBase),
-      ...unchanged.map((item) => item.precoBase),
-      ...creates.map((item) => item.precoBase),
+      ...updates.map((item) => calcularValorVenda(item.precoBase, item.desconto, item.markup)),
+      ...unchanged.map((item) => calcularValorVenda(item.precoBase, item.desconto, item.markup)),
+      ...creates.map((item) => calcularValorVenda(item.precoBase, item.desconto, item.markup)),
     ];
     return calcularTicketMedio(valores);
   }, [updates, unchanged, creates]);
