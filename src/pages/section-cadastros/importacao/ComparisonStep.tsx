@@ -282,6 +282,7 @@ export function ComparisonStep({
         columnId: 'codigo',
         renderHeaderCell: () => 'Código',
         renderCell: (item) => item.codigo,
+        compare: (a, b) => a.codigo.localeCompare(b.codigo),
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'descricao',
@@ -321,7 +322,7 @@ export function ComparisonStep({
             value={TIPOS_SISTEMA.find(t => t.value === item.tipoSistema)?.label || ''}
             selectedOptions={item.tipoSistema ? [String(item.tipoSistema)] : []}
             onOptionSelect={(e, data) => handleUpdateNovo(item.codigo, 'tipoSistema', Number(data.optionValue))}
-            style={{ minWidth: 150 }}
+            style={{ width: '100%' }}
           >
             {TIPOS_SISTEMA.map(tipo => (
               <Option key={tipo.value} value={String(tipo.value)}>
@@ -340,7 +341,7 @@ export function ComparisonStep({
             value={TIPOS_OS.find(t => t.value === item.tipodeOSPadrao)?.label || ''}
             selectedOptions={item.tipodeOSPadrao ? [String(item.tipodeOSPadrao)] : []}
             onOptionSelect={(e, data) => handleUpdateNovo(item.codigo, 'tipodeOSPadrao', Number(data.optionValue))}
-            style={{ minWidth: 150 }}
+            style={{ width: '100%' }}
           >
             {TIPOS_OS.map(tipo => (
               <Option key={tipo.value} value={String(tipo.value)}>
@@ -354,60 +355,72 @@ export function ComparisonStep({
         columnId: 'controlaSN',
         renderHeaderCell: () => 'Controla S/N',
         renderCell: (item) => (
-          <Checkbox
-            checked={item.controlaSN}
-            onChange={(e, data) => handleUpdateNovo(item.codigo, 'controlaSN', data.checked)}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Checkbox
+              checked={item.controlaSN}
+              onChange={(e, data) => handleUpdateNovo(item.codigo, 'controlaSN', data.checked)}
+            />
+          </div>
         ),
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'controlaEtiqueta',
         renderHeaderCell: () => 'Controla Etiqueta',
         renderCell: (item) => (
-          <Checkbox
-            checked={item.controlaEtiqueta}
-            onChange={(e, data) => handleUpdateNovo(item.codigo, 'controlaEtiqueta', data.checked)}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Checkbox
+              checked={item.controlaEtiqueta}
+              onChange={(e, data) => handleUpdateNovo(item.codigo, 'controlaEtiqueta', data.checked)}
+            />
+          </div>
         ),
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'requerCabeamento',
         renderHeaderCell: () => 'Requer Cabeamento',
         renderCell: (item) => (
-          <Checkbox
-            checked={item.requerCabeamento}
-            onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerCabeamento', data.checked)}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Checkbox
+              checked={item.requerCabeamento}
+              onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerCabeamento', data.checked)}
+            />
+          </div>
         ),
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'requerConfiguracao',
-        renderHeaderCell: () => 'Requer Config.',
+        renderHeaderCell: () => 'Requer Configuração',
         renderCell: (item) => (
-          <Checkbox
-            checked={item.requerConfiguracao}
-            onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerConfiguracao', data.checked)}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Checkbox
+              checked={item.requerConfiguracao}
+              onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerConfiguracao', data.checked)}
+            />
+          </div>
         ),
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'omitirGuia',
         renderHeaderCell: () => 'Omitir Guia',
         renderCell: (item) => (
-          <Checkbox
-            checked={item.omitirGuia}
-            onChange={(e, data) => handleUpdateNovo(item.codigo, 'omitirGuia', data.checked)}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Checkbox
+              checked={item.omitirGuia}
+              onChange={(e, data) => handleUpdateNovo(item.codigo, 'omitirGuia', data.checked)}
+            />
+          </div>
         ),
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'requerInstalacao',
         renderHeaderCell: () => 'Requer Instalação',
         renderCell: (item) => (
-          <Checkbox
-            checked={item.requerInstalacao}
-            onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerInstalacao', data.checked)}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Checkbox
+              checked={item.requerInstalacao}
+              onChange={(e, data) => handleUpdateNovo(item.codigo, 'requerInstalacao', data.checked)}
+            />
+          </div>
         ),
       }),
       createTableColumn<ProductoNovo>({
@@ -751,11 +764,47 @@ export function ComparisonStep({
               )}
 
               {editableNovos.length > 0 ? (
-                <DataGrid
-                  items={editableNovos}
-                  columns={novosColumns}
-                  getRowId={(item: ProductoNovo, index?: number) => `novo-${item.codigo}-${index ?? 0}`}
-                />
+                <>
+                  <style>{`
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(1),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(1) { width: 300px !important; min-width: 300px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(2),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(2) { width: 500px !important; min-width: 500px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(3),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(3) { width: 400px !important; min-width: 400px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(4),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(4) { width: 120px !important; min-width: 120px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(5),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(5) { width: 440px !important; min-width: 440px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(6),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(6) { width: 560px !important; min-width: 560px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(7),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(7) { width: 130px !important; min-width: 130px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(8),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(8) { width: 150px !important; min-width: 150px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(9),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(9) { width: 160px !important; min-width: 160px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(10),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(10) { width: 170px !important; min-width: 170px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(11),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(11) { width: 120px !important; min-width: 120px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(12),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(12) { width: 150px !important; min-width: 150px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(13),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(13) { width: 130px !important; min-width: 130px !important; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(14),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(14) { width: 90px !important; min-width: 90px !important; }
+                  `}</style>
+                  <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <div className="novos-produtos-table" style={{ minWidth: 3500 }}>
+                      <DataGrid
+                        items={editableNovos}
+                        columns={novosColumns}
+                        getRowId={(item: ProductoNovo, index?: number) => `novo-${item.codigo}-${index ?? 0}`}
+                      />
+                    </div>
+                  </div>
+                </>
               ) : (
                 <EmptyState
                   title="Nenhum produto novo"
