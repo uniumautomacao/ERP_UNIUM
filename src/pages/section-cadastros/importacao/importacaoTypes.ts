@@ -22,13 +22,11 @@ export interface ValoresInferidos {
   // Modelo
   categoria: string[];
   tipoSistema: number[];
-  tipoOS: number[];
   controlaSN: boolean[];
   controlaEtiqueta: boolean[];
   requerConfiguracao: boolean[];
   requerCabeamento: boolean[];
   omitirGuia: boolean[];
-  omitirGuiaConexoes: boolean[];
   horasAgregadas: string[];
 
   // Preço
@@ -47,13 +45,11 @@ export interface ProductoNovo {
   // Campos inferidos do modelo (editáveis)
   categoria: string;
   tipoSistema: number | null;
-  tipoOS: number | null;
   controlaSN: boolean;
   controlaEtiqueta: boolean;
   requerConfiguracao: boolean;
   requerCabeamento: boolean;
   omitirGuia: boolean;
-  omitirGuiaConexoes: boolean;
   horasAgregadas: string;
 
   // Campos inferidos do preço (editáveis)
@@ -76,8 +72,6 @@ export interface ProductoExistente {
   descricao: string;
   precoBase: number;
   precoAtual: number;
-  descontoAtual: number;
-  markupAtual: number;
 
   // Campos para atualização
   descricaoPreco: string;
@@ -90,15 +84,6 @@ export interface ProductoExistente {
   // Estado
   existingPrices: any[];
   action: 'update' | 'create_new' | 'ignore';
-}
-
-export interface ProductoSemAlteracao {
-  codigo: string;
-  modeloId: string;
-  descricao: string;
-  precoBase: number;
-  desconto: number;
-  markup: number;
 }
 
 export interface ProductoDescontinuado {
@@ -118,7 +103,6 @@ export interface CampoComOpcoes {
 export interface ComparisonResults {
   toCreate: ProductoNovo[];
   toUpdate: ProductoExistente[];
-  toKeep: ProductoSemAlteracao[];
   toDeactivate: ProductoDescontinuado[];
 }
 

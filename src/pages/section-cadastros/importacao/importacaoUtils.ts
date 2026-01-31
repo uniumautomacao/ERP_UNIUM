@@ -248,13 +248,11 @@ export const inferirValoresModelo = async (fabricanteId: string): Promise<Partia
     select: [
       'cr22f_querycategoria',
       'new_tipodesistemapadrao',
-      'new_tipodeospadrao',
       'new_controlasn',
       'new_controlaetiqueta',
       'new_requerconfiguracao',
       'new_requercabeamento',
       'new_requerengraving',
-      'new_omitirdoguiadeconexoes',
       'cr22f_horasagregadas',
     ],
   });
@@ -271,13 +269,11 @@ export const inferirValoresModelo = async (fabricanteId: string): Promise<Partia
   return {
     categoria: calcularModaCampo('cr22f_querycategoria'),
     tipoSistema: calcularModaCampo('new_tipodesistemapadrao'),
-    tipoOS: calcularModaCampo('new_tipodeospadrao'),
     controlaSN: calcularModaCampo('new_controlasn'),
     controlaEtiqueta: calcularModaCampo('new_controlaetiqueta'),
     requerConfiguracao: calcularModaCampo('new_requerconfiguracao'),
     requerCabeamento: calcularModaCampo('new_requercabeamento'),
     omitirGuia: calcularModaCampo('new_requerengraving'),
-    omitirGuiaConexoes: calcularModaCampo('new_omitirdoguiadeconexoes'),
     horasAgregadas: calcularModaCampo('cr22f_horasagregadas'),
   };
 };

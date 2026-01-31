@@ -3,7 +3,7 @@ import { Badge, Button, Card, Tab, TabList, Text, tokens } from '@fluentui/react
 import { LoadingState } from '../../../components/shared/LoadingState';
 import { EmptyState } from '../../../components/shared/EmptyState';
 import { DataGrid, createTableColumn } from '../../../components/shared/DataGrid';
-import { ParsedExcelData, ColumnMapping, ComparisonResults, ProductoNovo, ProductoExistente, ProductoDescontinuado, ProductoSemAlteracao } from './importacaoTypes';
+import { ParsedExcelData, ColumnMapping, ComparisonResults, ProductoNovo, ProductoExistente, ProductoDescontinuado } from './importacaoTypes';
 import { parseMonetaryValue, inferirValoresModelo, inferirValoresPreco } from './importacaoUtils';
 import { Cr22fModelosdeProdutoFromSharepointListService, NewPrecodeProdutoService } from '../../../generated';
 
@@ -17,7 +17,7 @@ interface ComparisonStepProps {
   onComparisonComplete: (results: ComparisonResults) => void;
 }
 
-type TabValue = 'novos' | 'existentes' | 'semAlteracao' | 'descontinuados';
+type TabValue = 'novos' | 'existentes' | 'descontinuados';
 
 export function ComparisonStep({
   excelData,
@@ -75,7 +75,6 @@ export function ComparisonStep({
       // 4. Categorizar produtos
       const toCreate: ProductoNovo[] = [];
       const toUpdate: ProductoExistente[] = [];
-      const toKeep: ProductoSemAlteracao[] = [];
       const excelCodigos = new Set<string>();
 
       excelData.rows.forEach((row) => {
@@ -110,45 +109,21 @@ export function ComparisonStep({
           const model = systemModels.get(codigo)!;
           const existingPrices = pricesByModel.get(model.cr22f_modelosdeprodutofromsharepointlistid) || [];
 
-          const precoAtual = existingPrices[0]?.new_precobase || 0;
-          const descontoAtual = existingPrices[0]?.new_descontopercentualdecompra || 0;
-          const markupAtual = existingPrices[0]?.new_markup || 0;
-
-          // Verificar se houve mudança nos valores (com tolerância de 0.01 para evitar problemas de arredondamento)
-          const mudouPreco = Math.abs(precoBase - precoAtual) > 0.01;
-          const mudouDesconto = Math.abs(desconto - descontoAtual) > 0.01;
-          const mudouMarkup = Math.abs(markup - markupAtual) > 0.01;
-
-          if (mudouPreco || mudouDesconto || mudouMarkup) {
-            // Produto com alteração
-            toUpdate.push({
-              codigo,
-              modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
-              descricao: model.new_descricao || '',
-              precoBase,
-              precoAtual,
-              descontoAtual,
-              markupAtual,
-              descricaoPreco: descricao,
-              fornecedorId: valoresPreco.fornecedorId?.[0] || '',
-              desconto,
-              markup,
-              requerInstalacao: valoresPreco.requerInstalacao?.[0] || false,
-              servicosIds: valoresPreco.servicosIds?.map(s => s.servicoId) || [],
-              existingPrices,
-              action: 'update',
-            });
-          } else {
-            // Produto sem alteração
-            toKeep.push({
-              codigo,
-              modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
-              descricao: model.new_descricao || '',
-              precoBase,
-              desconto,
-              markup,
-            });
-          }
+          toUpdate.push({
+            codigo,
+            modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
+            descricao: model.new_descricao || '',
+            precoBase,
+            precoAtual: existingPrices[0]?.new_precobase || 0,
+            descricaoPreco: descricao,
+            fornecedorId: valoresPreco.fornecedorId?.[0] || '',
+            desconto,
+            markup,
+            requerInstalacao: valoresPreco.requerInstalacao?.[0] || false,
+            servicosIds: valoresPreco.servicosIds?.map(s => s.servicoId) || [],
+            existingPrices,
+            action: 'update',
+          });
         } else {
           // Produto novo
           toCreate.push({
@@ -157,13 +132,11 @@ export function ComparisonStep({
             precoBase,
             categoria: valoresModelo.categoria?.[0] || '',
             tipoSistema: valoresModelo.tipoSistema?.[0] || null,
-            tipoOS: valoresModelo.tipoOS?.[0] || null,
             controlaSN: valoresModelo.controlaSN?.[0] || false,
             controlaEtiqueta: valoresModelo.controlaEtiqueta?.[0] || false,
             requerConfiguracao: valoresModelo.requerConfiguracao?.[0] || false,
             requerCabeamento: valoresModelo.requerCabeamento?.[0] || false,
             omitirGuia: valoresModelo.omitirGuia?.[0] || false,
-            omitirGuiaConexoes: valoresModelo.omitirGuiaConexoes?.[0] || false,
             horasAgregadas: valoresModelo.horasAgregadas?.[0] || '',
             descricaoPreco: descricao,
             fornecedorId: valoresPreco.fornecedorId?.[0] || '',
@@ -191,7 +164,7 @@ export function ComparisonStep({
         }
       });
 
-      const comparisonResults = { toCreate, toUpdate, toKeep, toDeactivate };
+      const comparisonResults = { toCreate, toUpdate, toDeactivate };
       setResults(comparisonResults);
       onComparisonComplete(comparisonResults);
     } catch (error) {
@@ -331,42 +304,6 @@ export function ComparisonStep({
     });
   }, [onComparisonComplete]);
 
-  const semAlteracaoColumns = useMemo(
-    () => [
-      createTableColumn<ProductoSemAlteracao>({
-        columnId: 'codigo',
-        renderHeaderCell: () => 'Código',
-        renderCell: (item) => item.codigo,
-      }),
-      createTableColumn<ProductoSemAlteracao>({
-        columnId: 'descricao',
-        renderHeaderCell: () => 'Descrição',
-        renderCell: (item) => item.descricao || '-',
-      }),
-      createTableColumn<ProductoSemAlteracao>({
-        columnId: 'preco',
-        renderHeaderCell: () => 'Preço Base',
-        renderCell: (item) => `R$ ${item.precoBase.toFixed(2)}`,
-      }),
-      createTableColumn<ProductoSemAlteracao>({
-        columnId: 'desconto',
-        renderHeaderCell: () => 'Desconto',
-        renderCell: (item) => `${item.desconto.toFixed(2)}%`,
-      }),
-      createTableColumn<ProductoSemAlteracao>({
-        columnId: 'markup',
-        renderHeaderCell: () => 'Markup',
-        renderCell: (item) => `${item.markup.toFixed(2)}x`,
-      }),
-      createTableColumn<ProductoSemAlteracao>({
-        columnId: 'status',
-        renderHeaderCell: () => 'Status',
-        renderCell: () => <Badge appearance="tint" color="subtle">Sem Alteração</Badge>,
-      }),
-    ],
-    []
-  );
-
   const descontinuadosColumns = useMemo(
     () => [
       createTableColumn<ProductoDescontinuado>({
@@ -429,9 +366,6 @@ export function ComparisonStep({
             <Tab value="existentes">
               Atualizar Preços ({results.toUpdate.length})
             </Tab>
-            <Tab value="semAlteracao">
-              Sem Alteração ({results.toKeep.length})
-            </Tab>
             <Tab value="descontinuados">
               Descontinuados ({results.toDeactivate.length})
             </Tab>
@@ -474,26 +408,6 @@ export function ComparisonStep({
                 <EmptyState
                   title="Nenhum produto para atualizar"
                   description="Nenhum produto existente foi encontrado."
-                />
-              )}
-            </>
-          )}
-
-          {selectedTab === 'semAlteracao' && (
-            <>
-              <Text size={400} weight="semibold" block style={{ marginBottom: 12 }}>
-                Produtos sem alteração de valores
-              </Text>
-              {results.toKeep.length > 0 ? (
-                <DataGrid
-                  items={results.toKeep}
-                  columns={semAlteracaoColumns}
-                  getRowId={(item: ProductoSemAlteracao, index?: number) => `sem-alteracao-${item.codigo}-${index ?? 0}`}
-                />
-              ) : (
-                <EmptyState
-                  title="Nenhum produto sem alteração"
-                  description="Todos os produtos terão alguma alteração."
                 />
               )}
             </>
