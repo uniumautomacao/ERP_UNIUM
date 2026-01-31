@@ -159,7 +159,7 @@ export function ComparisonStep({
             codigo,
             modeloId: model.cr22f_modelosdeprodutofromsharepointlistid,
             descricao: model.new_descricao || '',
-            action: 'keep',
+            action: 'deactivate', // Default: marcar para descontinuar
           });
         }
       });
@@ -257,8 +257,67 @@ export function ComparisonStep({
     []
   );
 
+  const handleToggleDescontinuar = useCallback((codigo: string) => {
+    setResults((prev) => {
+      if (!prev) return prev;
+
+      const updated = {
+        ...prev,
+        toDeactivate: prev.toDeactivate.map((item) =>
+          item.codigo === codigo
+            ? { ...item, action: item.action === 'deactivate' ? 'keep' : 'deactivate' }
+            : item
+        ),
+      };
+
+      // Atualizar resultados no componente pai
+      onComparisonComplete(updated);
+      return updated;
+    });
+  }, [onComparisonComplete]);
+
+  const handleDescontinuarTodos = useCallback(() => {
+    setResults((prev) => {
+      if (!prev) return prev;
+
+      const updated = {
+        ...prev,
+        toDeactivate: prev.toDeactivate.map((item) => ({ ...item, action: 'deactivate' as const })),
+      };
+
+      onComparisonComplete(updated);
+      return updated;
+    });
+  }, [onComparisonComplete]);
+
+  const handleManterTodos = useCallback(() => {
+    setResults((prev) => {
+      if (!prev) return prev;
+
+      const updated = {
+        ...prev,
+        toDeactivate: prev.toDeactivate.map((item) => ({ ...item, action: 'keep' as const })),
+      };
+
+      onComparisonComplete(updated);
+      return updated;
+    });
+  }, [onComparisonComplete]);
+
   const descontinuadosColumns = useMemo(
     () => [
+      createTableColumn<ProductoDescontinuado>({
+        columnId: 'descontinuar',
+        renderHeaderCell: () => 'Descontinuar',
+        renderCell: (item) => (
+          <input
+            type="checkbox"
+            checked={item.action === 'deactivate'}
+            onChange={() => handleToggleDescontinuar(item.codigo)}
+            style={{ cursor: 'pointer', width: 16, height: 16 }}
+          />
+        ),
+      }),
       createTableColumn<ProductoDescontinuado>({
         columnId: 'codigo',
         renderHeaderCell: () => 'Código',
@@ -272,10 +331,17 @@ export function ComparisonStep({
       createTableColumn<ProductoDescontinuado>({
         columnId: 'status',
         renderHeaderCell: () => 'Status',
-        renderCell: () => <Badge appearance="tint" color="warning">Descontinuado?</Badge>,
+        renderCell: (item) => (
+          <Badge
+            appearance="tint"
+            color={item.action === 'deactivate' ? 'danger' : 'success'}
+          >
+            {item.action === 'deactivate' ? 'Será Descontinuado' : 'Manter Ativo'}
+          </Badge>
+        ),
       }),
     ],
-    []
+    [handleToggleDescontinuar]
   );
 
   if (loading) {
@@ -349,9 +415,29 @@ export function ComparisonStep({
 
           {selectedTab === 'descontinuados' && (
             <>
-              <Text size={400} weight="semibold" block style={{ marginBottom: 12 }}>
-                Produtos no sistema mas não no Excel
-              </Text>
+              <div className="flex items-center justify-between mb-4">
+                <Text size={400} weight="semibold">
+                  Produtos no sistema mas não no Excel
+                </Text>
+                {results.toDeactivate.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button
+                      appearance="secondary"
+                      size="small"
+                      onClick={handleDescontinuarTodos}
+                    >
+                      Descontinuar Todos
+                    </Button>
+                    <Button
+                      appearance="secondary"
+                      size="small"
+                      onClick={handleManterTodos}
+                    >
+                      Manter Todos
+                    </Button>
+                  </div>
+                )}
+              </div>
               {results.toDeactivate.length > 0 ? (
                 <DataGrid
                   items={results.toDeactivate}
