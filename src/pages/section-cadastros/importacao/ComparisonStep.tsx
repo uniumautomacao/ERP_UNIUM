@@ -5,7 +5,7 @@ import { EmptyState } from '../../../components/shared/EmptyState';
 import { DataGrid, createTableColumn } from '../../../components/shared/DataGrid';
 import { ParsedExcelData, ColumnMapping, ComparisonResults, ProductoNovo, ProductoExistente, ProductoDescontinuado, ProductoSemAlteracao } from './importacaoTypes';
 import { parseMonetaryValue, inferirValoresModelo, inferirValoresPreco } from './importacaoUtils';
-import { Cr22fModelosdeProdutoFromSharepointListService, NewPrecodeProdutoService } from '../../../generated';
+import { Cr22fModelosdeProdutoFromSharepointListService, NewPrecodeProdutoService, Cr22fFornecedoresFromSharepointListService } from '../../../generated';
 
 const TIPOS_SISTEMA = [
   { value: 100000000, label: 'Automação' },
@@ -63,6 +63,7 @@ export function ComparisonStep({
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ComparisonResults | null>(null);
   const [editableNovos, setEditableNovos] = useState<ProductoNovo[]>([]);
+  const [fornecedores, setFornecedores] = useState<Array<{ id: string; label: string }>>([]);
 
   const compareData = useCallback(async () => {
     if (!columnMapping.codigoColumn || !columnMapping.precoBaseColumn || !fabricanteId) {
@@ -270,6 +271,26 @@ export function ComparisonStep({
     });
   }, [results, onComparisonComplete]);
 
+  // Carregar fornecedores
+  useEffect(() => {
+    const loadFornecedores = async () => {
+      const result = await Cr22fFornecedoresFromSharepointListService.getAll({
+        select: ['cr22f_fornecedoresfromsharepointlistid', 'cr22f_title', 'cr22f_nomefantasia'],
+        filter: 'statecode eq 0',
+        orderBy: ['cr22f_title asc'],
+      });
+      
+      if (result.success && result.data) {
+        setFornecedores(result.data.map((item: any) => ({
+          id: item.cr22f_fornecedoresfromsharepointlistid,
+          label: item.cr22f_title || item.cr22f_nomefantasia || 'Fornecedor',
+        })));
+      }
+    };
+    
+    void loadFornecedores();
+  }, []);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -346,6 +367,25 @@ export function ComparisonStep({
             {TIPOS_OS.map(tipo => (
               <Option key={tipo.value} value={String(tipo.value)}>
                 {tipo.label}
+              </Option>
+            ))}
+          </Dropdown>
+        ),
+      }),
+      createTableColumn<ProductoNovo>({
+        columnId: 'fornecedor',
+        renderHeaderCell: () => 'Fornecedor',
+        renderCell: (item) => (
+          <Dropdown
+            size="small"
+            value={fornecedores.find(f => f.id === item.fornecedorId)?.label || ''}
+            selectedOptions={item.fornecedorId ? [item.fornecedorId] : []}
+            onOptionSelect={(e, data) => handleUpdateNovo(item.codigo, 'fornecedorId', data.optionValue as string)}
+            style={{ width: '100%', maxWidth: '190px', boxSizing: 'border-box' }}
+          >
+            {fornecedores.map(fornecedor => (
+              <Option key={fornecedor.id} value={fornecedor.id}>
+                {fornecedor.label}
               </Option>
             ))}
           </Dropdown>
@@ -759,6 +799,21 @@ export function ComparisonStep({
                         ))}
                       </Dropdown>
                     </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Text size={200}>Fornecedor:</Text>
+                      <Dropdown
+                        size="small"
+                        placeholder="Aplicar a todos"
+                        onOptionSelect={(e, data) => handleBulkUpdate('fornecedorId', data.optionValue)}
+                        style={{ minWidth: 200 }}
+                      >
+                        {fornecedores.map(fornecedor => (
+                          <Option key={fornecedor.id} value={fornecedor.id}>
+                            {fornecedor.label}
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </div>
                   </div>
                 </Card>
               )}
@@ -783,24 +838,27 @@ export function ComparisonStep({
                     .novos-produtos-table .fui-DataGridCell:nth-child(6) { width: 280px !important; min-width: 280px !important; max-width: 280px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridCell:nth-child(6) button { max-width: 270px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(7),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(7) { width: 130px !important; min-width: 130px !important; max-width: 130px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(7) { width: 200px !important; min-width: 200px !important; max-width: 200px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(7) button { max-width: 190px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(8),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(8) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(8) { width: 130px !important; min-width: 130px !important; max-width: 130px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(9),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(9) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(9) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(10),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(10) { width: 170px !important; min-width: 170px !important; max-width: 170px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(10) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(11),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(11) { width: 120px !important; min-width: 120px !important; max-width: 120px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(11) { width: 170px !important; min-width: 170px !important; max-width: 170px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(12),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(12) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(12) { width: 120px !important; min-width: 120px !important; max-width: 120px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(13),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(13) { width: 130px !important; min-width: 130px !important; max-width: 130px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(13) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(14),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(14) { width: 90px !important; min-width: 90px !important; max-width: 90px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(14) { width: 130px !important; min-width: 130px !important; max-width: 130px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridHeaderCell:nth-child(15),
+                    .novos-produtos-table .fui-DataGridCell:nth-child(15) { width: 90px !important; min-width: 90px !important; max-width: 90px !important; overflow: hidden; }
                   `}</style>
                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                    <div className="novos-produtos-table" style={{ minWidth: 2350 }}>
+                    <div className="novos-produtos-table" style={{ minWidth: 2550 }}>
                       <DataGrid
                         items={editableNovos}
                         columns={novosColumns}
