@@ -767,33 +767,37 @@ export function ComparisonStep({
                 <>
                   <style>{`
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(1),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(1) { width: 150px !important; min-width: 150px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(1) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(2),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(2) { width: 250px !important; min-width: 250px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(2) { width: 250px !important; min-width: 250px !important; max-width: 250px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(3),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(3) { width: 200px !important; min-width: 200px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(3) { width: 200px !important; min-width: 200px !important; max-width: 200px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(3) input { max-width: 190px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(4),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(4) { width: 120px !important; min-width: 120px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(4) { width: 120px !important; min-width: 120px !important; max-width: 120px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(4) input { max-width: 110px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(5),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(5) { width: 220px !important; min-width: 220px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(5) { width: 220px !important; min-width: 220px !important; max-width: 220px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(5) button { max-width: 210px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(6),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(6) { width: 280px !important; min-width: 280px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(6) { width: 280px !important; min-width: 280px !important; max-width: 280px !important; overflow: hidden; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(6) button { max-width: 270px !important; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(7),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(7) { width: 130px !important; min-width: 130px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(7) { width: 130px !important; min-width: 130px !important; max-width: 130px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(8),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(8) { width: 150px !important; min-width: 150px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(8) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(9),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(9) { width: 160px !important; min-width: 160px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(9) { width: 160px !important; min-width: 160px !important; max-width: 160px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(10),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(10) { width: 170px !important; min-width: 170px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(10) { width: 170px !important; min-width: 170px !important; max-width: 170px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(11),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(11) { width: 120px !important; min-width: 120px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(11) { width: 120px !important; min-width: 120px !important; max-width: 120px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(12),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(12) { width: 150px !important; min-width: 150px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(12) { width: 150px !important; min-width: 150px !important; max-width: 150px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(13),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(13) { width: 130px !important; min-width: 130px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(13) { width: 130px !important; min-width: 130px !important; max-width: 130px !important; overflow: hidden; }
                     .novos-produtos-table .fui-DataGridHeaderCell:nth-child(14),
-                    .novos-produtos-table .fui-DataGridCell:nth-child(14) { width: 90px !important; min-width: 90px !important; }
+                    .novos-produtos-table .fui-DataGridCell:nth-child(14) { width: 90px !important; min-width: 90px !important; max-width: 90px !important; overflow: hidden; }
                   `}</style>
                   <div style={{ overflowX: 'auto', width: '100%' }}>
                     <div className="novos-produtos-table" style={{ minWidth: 2350 }}>
