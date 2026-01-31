@@ -238,13 +238,16 @@ export function MappingStep({
             {markupSource === 'inferred' && (
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="default-markup">Markup Padrão (%)</Label>
+                  <Label htmlFor="default-markup">Markup Padrão (multiplicador)</Label>
                   <Input
                     id="default-markup"
                     type="number"
                     value={String(defaultMarkup)}
                     onChange={(_, data) => onMarkupChange(Number(data.value) || 0)}
                   />
+                  <Text size={100} style={{ color: tokens.colorNeutralForeground3 }}>
+                    Ex: 1 = 100%, 2 = 200%
+                  </Text>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="default-desconto">Desconto Padrão (%)</Label>
@@ -261,7 +264,7 @@ export function MappingStep({
             <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
               {markupSource === 'inferred'
                 ? 'Valores serão inferidos dos produtos existentes. Os valores acima serão usados como fallback.'
-                : 'Markup será calculado automaticamente: (Sugerido - Base) / Base * 100'}
+                : 'Markup será calculado automaticamente: Preço Sugerido / (Preço Base × (1 - Desconto/100))'}
             </Text>
           </div>
         </Card>

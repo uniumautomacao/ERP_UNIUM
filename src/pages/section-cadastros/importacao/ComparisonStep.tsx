@@ -98,8 +98,9 @@ export function ComparisonStep({
           if (precoSugerido && precoSugerido > 0) {
             // Calcular preço de compra (preço base com desconto aplicado)
             const precoCompra = precoBase * (1 - desconto / 100);
-            // Calcular markup: (PreçoSugerido - PreçoCompra) / PreçoCompra * 100
-            markup = ((precoSugerido - precoCompra) / precoCompra) * 100;
+            // Calcular markup: PreçoSugerido / PreçoCompra (multiplicador decimal)
+            // Exemplo: se preço compra = 10 e sugerido = 20, markup = 2 (200%)
+            markup = precoSugerido / precoCompra;
           }
         }
 
@@ -171,7 +172,9 @@ export function ComparisonStep({
     } finally {
       setLoading(false);
     }
-  }, [excelData, columnMapping, fabricanteId, markupSource, defaultMarkup, defaultDesconto, onComparisonComplete]);
+  }, [excelData, columnMapping, fabricanteId, markupSource, defaultMarkup, defaultDesconto]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     void compareData();
@@ -202,7 +205,7 @@ export function ComparisonStep({
       createTableColumn<ProductoNovo>({
         columnId: 'markup',
         renderHeaderCell: () => 'Markup',
-        renderCell: (item) => `${item.markup.toFixed(2)}%`,
+        renderCell: (item) => `${item.markup.toFixed(2)}x`,
       }),
       createTableColumn<ProductoNovo>({
         columnId: 'status',
@@ -243,7 +246,7 @@ export function ComparisonStep({
       createTableColumn<ProductoExistente>({
         columnId: 'markup',
         renderHeaderCell: () => 'Markup',
-        renderCell: (item) => `${item.markup.toFixed(2)}%`,
+        renderCell: (item) => `${item.markup.toFixed(2)}x`,
       }),
       createTableColumn<ProductoExistente>({
         columnId: 'status',
